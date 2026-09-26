@@ -1,0 +1,1704 @@
+// NOVA — AI Growth Team
+// Multi-tenant schema. Every tenant-owned row carries `organizationId`
+// (and `workspaceId` where the data belongs to a workspace). Tenant scoping is
+// enforced server-side by the tenant Prisma extension in src/server/db/tenant.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  MAGIC_LINK
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ANALYZING
+  COMPLETED
+}
+
+enum PlanTier {
+  STARTER
+  GROWTH
+  SCALE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum KnowledgeSourceType {
+  WEBSITE
+  DOCUMENT
+  MANUAL
+  FAQ
+  PRODUCT
+  SERVICE
+  PRICING
+  POLICY
+  CASE_STUDY
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum OfferingType {
+  PRODUCT
+  SERVICE
+}
+
+enum AssetKind {
+  LOGO
+  IMAGE
+  VIDEO
+  FONT
+  TEMPLATE
+  DOCUMENT
+  OTHER
+}
+
+enum DesignFormat {
+  SQUARE
+  PORTRAIT
+  STORY
+  CAROUSEL
+  LINKEDIN
+}
+
+enum AgentKey {
+  SOCIAL_MANAGER
+  CONTENT_STRATEGIST
+  DESIGNER
+  PERFORMANCE_ANALYST
+  SALES_AGENT
+  SALES_ASSISTANT
+}
+
+enum AgentStatus {
+  WORKING
+  WAITING_APPROVAL
+  MONITORING
+  IDLE
+  PAUSED
+}
+
+enum RunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum Provider {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TIKTOK
+  X
+  YOUTUBE
+  PINTEREST
+  EMAIL
+  WHATSAPP
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  ACTION_REQUIRED
+  EXPIRED
+  ERROR
+  DISCONNECTED
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TIKTOK
+  X
+  YOUTUBE
+  PINTEREST
+}
+
+enum ContentFormat {
+  POST
+  CAROUSEL
+  STORY
+  REEL
+  SHORT_VIDEO
+  LINKEDIN_POST
+}
+
+enum ContentStatus {
+  IDEA
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  REJECTED
+}
+
+enum ApprovalAction {
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  COMMENTED
+  SUBMITTED
+}
+
+enum PublicationStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum LeadStage {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum LeadTemperature {
+  HOT
+  WARM
+  COLD
+}
+
+enum LeadEventType {
+  CREATED
+  FORM_SUBMITTED
+  MESSAGE_RECEIVED
+  MESSAGE_SENT
+  AI_ANALYSIS
+  HUMAN_REPLY
+  FOLLOW_UP
+  MEETING
+  PROPOSAL
+  STATUS_CHANGE
+  SCORE_CHANGE
+  NOTE
+}
+
+enum ActorType {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum Channel {
+  WEBSITE
+  EMAIL
+  INSTAGRAM_DM
+  FACEBOOK_DM
+  LINKEDIN
+  WHATSAPP
+  PHONE
+  MANUAL
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageStatus {
+  DRAFT
+  PENDING_APPROVAL
+  SENT
+  FAILED
+  RECEIVED
+}
+
+enum OpportunityStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum SalesActivityType {
+  FOLLOW_UP
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  PROPOSAL
+}
+
+enum SalesAutonomy {
+  ASSIST
+  COPILOT
+  AUTOPILOT
+}
+
+enum ApprovalCategory {
+  CONTENT
+  PUBLISHING
+  SALES
+  PRICING
+  CAMPAIGNS
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum NotificationType {
+  APPROVAL_NEEDED
+  POST_PUBLISHED
+  PUBLISHING_FAILED
+  LEAD_QUALIFIED
+  HOT_OPPORTUNITY
+  FOLLOW_UP_DUE
+  MEETING_BOOKED
+  INTEGRATION_DISCONNECTED
+  AI_RECOMMENDATION
+  REPORT_READY
+  USAGE_LIMIT
+}
+
+enum AiTaskType {
+  COPYWRITING
+  ANALYSIS
+  CLASSIFICATION
+  SUMMARIZATION
+  STRATEGY
+  SALES
+  EXTRACTION
+  VISION
+  STRUCTURED
+  EMBEDDING
+}
+
+enum AiRunStatus {
+  SUCCESS
+  ERROR
+  BLOCKED
+}
+
+enum InsightScope {
+  POST
+  CAMPAIGN
+  ACCOUNT
+  CONTENT_CATEGORY
+  FORMAT
+  LEADS
+  PIPELINE
+  WORKSPACE
+}
+
+enum InsightStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ReportKind {
+  DAILY_BRIEF
+  WEEKLY_REPORT
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  RETRYING
+  DEAD
+}
+
+enum AuditCategory {
+  BUSINESS
+  SECURITY
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+  EXPIRED
+}
+
+// ───────────────────────────── Identity ─────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  passwordHash    String?
+  emailVerifiedAt DateTime?
+  locale          String    @default("en")
+  avatarUrl       String?
+  isPlatformAdmin Boolean   @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions      Session[]
+  memberships   OrganizationMember[]
+  oauthAccounts OAuthAccount[]
+  tokens        VerificationToken[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Session {
+  id                   String   @id @default(cuid())
+  tokenHash            String   @unique
+  userId               String
+  activeOrganizationId String?
+  userAgent            String?
+  ip                   String?
+  expiresAt            DateTime
+  lastSeenAt           DateTime @default(now())
+  createdAt            DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String       @id @default(cuid())
+  userId     String?
+  email      String
+  purpose    TokenPurpose
+  tokenHash  String       @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email, purpose])
+  @@map("verification_tokens")
+}
+
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+model RateLimitBucket {
+  key       String   @id
+  count     Int
+  windowEnd DateTime
+
+  @@index([windowEnd])
+  @@map("rate_limit_buckets")
+}
+
+// ───────────────────────────── Tenancy ─────────────────────────────
+
+model Organization {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  locale           String           @default("en")
+  timezone         String           @default("UTC")
+  industry         String?
+  website          String?
+  onboardingStatus OnboardingStatus @default(NOT_STARTED)
+  onboardingData   Json             @default("{}")
+  isDemo           Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  members      OrganizationMember[]
+  invitations  Invitation[]
+  workspaces   Workspace[]
+  subscription Subscription?
+  aiBudget     AiBudget?
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role     @default(MEMBER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+model Invitation {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  role           Role      @default(MEMBER)
+  tokenHash      String    @unique
+  invitedById    String?
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitations")
+}
+
+model Workspace {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  settings     WorkspaceSettings?
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("workspaces")
+}
+
+model WorkspaceSettings {
+  id                     String        @id @default(cuid())
+  organizationId         String
+  workspaceId            String        @unique
+  salesAutonomy          SalesAutonomy @default(COPILOT)
+  autopilotAllowedTasks  String[]      @default([])
+  requireContentApproval Boolean       @default(true)
+  timezone               String        @default("UTC")
+  dailyBriefHour         Int           @default(8)
+  weeklyReportDay        Int           @default(1)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("workspace_settings")
+}
+
+// ───────────────────────────── Billing & usage ─────────────────────────────
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  organizationId         String             @unique
+  plan                   PlanTier           @default(STARTER)
+  status                 SubscriptionStatus @default(TRIALING)
+  billingProvider        String?
+  providerCustomerId     String?
+  providerSubscriptionId String?            @unique
+  trialEndsAt            DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model UsageRecord {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String?
+  metric         String
+  quantity       Int
+  periodStart    DateTime
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, metric, periodStart])
+  @@map("usage_records")
+}
+
+model AiBudget {
+  id                    String   @id @default(cuid())
+  organizationId        String   @unique
+  monthlyAllowanceMicro BigInt   @default(20000000) // micro-USD (default $20)
+  softLimitPercent      Int      @default(80)
+  hardLimitEnabled      Boolean  @default(true)
+  softLimitNotifiedFor  String? // "YYYY-MM" of last soft-limit notification
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("ai_budgets")
+}
+
+// ───────────────────────────── Company Brain ─────────────────────────────
+
+model CompanyProfile {
+  id               String   @id @default(cuid())
+  organizationId   String
+  workspaceId      String   @unique
+  name             String
+  tagline          String?
+  description      String?
+  website          String?
+  industry         String?
+  markets          String[] @default([])
+  languages        String[] @default([])
+  audience         Json     @default("[]") // [{ name, description, pains[], motivations[] }]
+  valueProps       String[] @default([])
+  differentiators  String[] @default([])
+  competitors      String[] @default([])
+  goals            String[] @default([])
+  primaryGoal      String?
+  contentPillars   String[] @default([])
+  strategy         Json? // initial strategy produced after onboarding
+  discoveries      Json? // onboarding "magic moment" results
+  summary          String?
+  completeness     Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("company_profiles")
+}
+
+model Offering {
+  id             String       @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  type           OfferingType @default(SERVICE)
+  name           String
+  description    String?
+  priceText      String?
+  priceCents     Int?
+  currency       String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("offerings")
+}
+
+model BrandKit {
+  id              String   @id @default(cuid())
+  organizationId  String
+  workspaceId     String   @unique
+  logoAssetId     String?
+  primaryColors   String[] @default([])
+  secondaryColors String[] @default([])
+  headingFont     String?
+  bodyFont        String?
+  tone            String?
+  voiceTraits     String[] @default([])
+  doSay           String[] @default([])
+  dontSay         String[] @default([])
+  imageStyle      String?
+  layoutRules     String[] @default([])
+  forbiddenStyles String[] @default([])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("brand_kits")
+}
+
+model FileObject {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String?
+  storageKey     String    @unique
+  fileName       String
+  mimeType       String
+  sizeBytes      Int
+  sha256         String
+  purpose        String
+  uploadedById   String?
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@map("file_objects")
+}
+
+model BrandAsset {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  kind           AssetKind
+  name           String
+  fileId         String?
+  url            String?
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+
+  @@index([organizationId, workspaceId])
+  @@map("brand_assets")
+}
+
+model DesignTemplate {
+  id             String       @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  name           String
+  format         DesignFormat
+  spec           Json // layout spec: canvas size, zones, typography slots
+  isDefault      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("design_templates")
+}
+
+model KnowledgeSource {
+  id             String              @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  type           KnowledgeSourceType
+  title          String
+  status         ProcessingStatus    @default(PENDING)
+  url            String?
+  fileId         String?
+  rawText        String?
+  metadata       Json                @default("{}")
+  error          String?
+  lastSyncedAt   DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  documents KnowledgeDocument[]
+
+  @@index([organizationId, workspaceId, type])
+  @@map("knowledge_sources")
+}
+
+model KnowledgeDocument {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  sourceId       String
+  title          String
+  url            String?
+  content        String
+  contentHash    String
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  source KnowledgeSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  chunks KnowledgeChunk[]
+
+  @@unique([sourceId, contentHash])
+  @@index([organizationId, workspaceId])
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id             String                       @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  documentId     String
+  sourceId       String
+  index          Int
+  content        String
+  tokenCount     Int
+  embedding      Unsupported("vector(1536)")?
+  embeddingModel String?
+  metadata       Json                         @default("{}")
+  createdAt      DateTime                     @default(now())
+
+  document KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, index])
+  @@index([organizationId, workspaceId])
+  @@index([sourceId])
+  @@map("knowledge_chunks")
+}
+
+// ───────────────────────────── Agents ─────────────────────────────
+
+model Agent {
+  id             String      @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  key            AgentKey
+  name           String
+  status         AgentStatus @default(IDLE)
+  currentTask    String?
+  enabled        Boolean     @default(true)
+  settings       Json        @default("{}")
+  lastActiveAt   DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  runs  AgentRun[]
+  tasks AgentTask[]
+
+  @@unique([workspaceId, key])
+  @@index([organizationId])
+  @@map("agents")
+}
+
+model AgentRun {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  agentId        String?
+  kind           String // e.g. "command", "weekly_plan", "campaign", "website_analysis"
+  input          String?
+  status         RunStatus @default(QUEUED)
+  steps          Json      @default("[]") // [{ key, label, status }] — high level only
+  result         Json?
+  error          String?
+  requestedById  String?
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  agent Agent?      @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  tasks AgentTask[]
+
+  @@index([organizationId, workspaceId, createdAt])
+  @@map("agent_runs")
+}
+
+model AgentTask {
+  id             String     @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  agentId        String
+  runId          String?
+  title          String
+  status         TaskStatus @default(OPEN)
+  entityType     String?
+  entityId       String?
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+
+  agent Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  run   AgentRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, workspaceId, agentId, createdAt])
+  @@map("agent_tasks")
+}
+
+// ───────────────────────────── Integrations ─────────────────────────────
+
+model Integration {
+  id             String            @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  provider       Provider
+  status         IntegrationStatus @default(DISCONNECTED)
+  statusMessage  String?
+  scopes         String[]          @default([])
+  lastSyncAt     DateTime?
+  lastErrorAt    DateTime?
+  connectedById  String?
+  connectedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  accounts    IntegrationAccount[]
+  credentials IntegrationCredential[]
+
+  @@unique([workspaceId, provider])
+  @@index([organizationId])
+  @@map("integrations")
+}
+
+model IntegrationAccount {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  integrationId  String
+  platform       SocialPlatform?
+  externalId     String
+  name           String
+  handle         String?
+  avatarUrl      String?
+  accountType    String?
+  isActive       Boolean  @default(true)
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationId, externalId])
+  @@index([organizationId, workspaceId])
+  @@map("integration_accounts")
+}
+
+/// Encrypted provider credentials. Never select these outside src/server/integrations.
+model IntegrationCredential {
+  id               String    @id @default(cuid())
+  organizationId   String
+  workspaceId      String
+  integrationId    String
+  accountId        String?
+  accessTokenEnc   String
+  refreshTokenEnc  String?
+  tokenType        String?
+  expiresAt        DateTime?
+  refreshExpiresAt DateTime?
+  keyVersion       Int       @default(1)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationId, accountId])
+  @@index([organizationId])
+  @@index([expiresAt])
+  @@map("integration_credentials")
+}
+
+model OAuthState {
+  id              String    @id @default(cuid())
+  stateHash       String    @unique
+  organizationId  String
+  workspaceId     String
+  userId          String
+  provider        String
+  codeVerifierEnc String?
+  redirectTo      String?
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([expiresAt])
+  @@map("oauth_states")
+}
+
+// ───────────────────────────── Content ─────────────────────────────
+
+model Campaign {
+  id             String         @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  name           String
+  objective      String
+  audience       String?
+  offer          String?
+  channels       SocialPlatform[] @default([])
+  startDate      DateTime?
+  endDate        DateTime?
+  budgetCents    Int?
+  currency       String?
+  status         CampaignStatus @default(DRAFT)
+  plan           Json? // { concept, message, creativeDirection, cta, kpis[], schedule[] }
+  createdByAgent AgentKey?
+  createdById    String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  content ContentItem[]
+  leads   Lead[]
+
+  @@index([organizationId, workspaceId, status])
+  @@map("campaigns")
+}
+
+model ContentItem {
+  id             String         @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  campaignId     String?
+  platform       SocialPlatform
+  format         ContentFormat  @default(POST)
+  status         ContentStatus  @default(DRAFT)
+  title          String
+  pillar         String?
+  hook           String?
+  caption        String
+  cta            String?
+  hashtags       String[]       @default([])
+  designBrief    Json?
+  aiRationale    String?
+  scheduledAt    DateTime?
+  publishedAt    DateTime?
+  authorAgent    AgentKey?
+  authorUserId   String?
+  currentVersion Int            @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  campaign     Campaign?           @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  versions     ContentVersion[]
+  assets       ContentAsset[]
+  approvals    ContentApproval[]
+  publications SocialPublication[]
+  socialPosts  SocialPost[]
+
+  @@index([organizationId, workspaceId, status])
+  @@index([workspaceId, scheduledAt])
+  @@index([campaignId])
+  @@map("content_items")
+}
+
+model ContentVersion {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  contentItemId  String
+  version        Int
+  hook           String?
+  caption        String
+  cta            String?
+  hashtags       String[]  @default([])
+  designBrief    Json?
+  changeNote     String?
+  createdByAgent AgentKey?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@unique([contentItemId, version])
+  @@index([organizationId])
+  @@map("content_versions")
+}
+
+model ContentAsset {
+  id             String      @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  contentItemId  String
+  kind           AssetKind   @default(IMAGE)
+  fileId         String?
+  url            String?
+  altText        String?
+  position       Int         @default(0)
+  generatedBy    String? // provider name when AI generated
+  prompt         String?
+  createdAt      DateTime    @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, contentItemId])
+  @@map("content_assets")
+}
+
+model ContentApproval {
+  id             String         @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  contentItemId  String
+  action         ApprovalAction
+  comment        String?
+  userId         String?
+  version        Int?
+  createdAt      DateTime       @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, contentItemId])
+  @@map("content_approvals")
+}
+
+// ───────────────────────────── Social ─────────────────────────────
+
+model SocialPost {
+  id                   String         @id @default(cuid())
+  organizationId       String
+  workspaceId          String
+  integrationAccountId String?
+  contentItemId        String?
+  platform             SocialPlatform
+  externalId           String
+  permalink            String?
+  format               ContentFormat?
+  caption              String?
+  mediaUrl             String?
+  pillar               String?
+  publishedAt          DateTime
+  isDemo               Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  contentItem ContentItem?           @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  metric      SocialMetric?
+  snapshots   SocialMetricSnapshot[]
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([organizationId, workspaceId, publishedAt])
+  @@map("social_posts")
+}
+
+model SocialPublication {
+  id                   String            @id @default(cuid())
+  organizationId       String
+  workspaceId          String
+  contentItemId        String
+  integrationAccountId String?
+  platform             SocialPlatform
+  status               PublicationStatus @default(PENDING)
+  scheduledFor         DateTime
+  attempts             Int               @default(0)
+  error                String?
+  socialPostId         String?
+  jobId                String?
+  publishedAt          DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@index([scheduledFor])
+  @@map("social_publications")
+}
+
+/// Latest normalized metrics for a post. Nullable = not provided by the platform.
+model SocialMetric {
+  id              String   @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  socialPostId    String   @unique
+  reach           Int?
+  impressions     Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  saves           Int?
+  clicks          Int?
+  videoViews      Int?
+  followersGained Int?
+  leads           Int?
+  conversions     Int?
+  engagementRate  Float?
+  raw             Json     @default("{}")
+  collectedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  socialPost SocialPost @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId])
+  @@map("social_metrics")
+}
+
+/// Immutable history of metric collections.
+model SocialMetricSnapshot {
+  id              String   @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  socialPostId    String
+  reach           Int?
+  impressions     Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  saves           Int?
+  clicks          Int?
+  videoViews      Int?
+  followersGained Int?
+  leads           Int?
+  conversions     Int?
+  engagementRate  Float?
+  raw             Json     @default("{}")
+  capturedAt      DateTime @default(now())
+
+  socialPost SocialPost @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
+
+  @@index([socialPostId, capturedAt])
+  @@index([organizationId])
+  @@map("social_metric_snapshots")
+}
+
+model AccountMetricSnapshot {
+  id                   String   @id @default(cuid())
+  organizationId       String
+  workspaceId          String
+  integrationAccountId String?
+  platform             SocialPlatform
+  date                 DateTime @db.Date
+  followers            Int?
+  reach                Int?
+  impressions          Int?
+  profileViews         Int?
+  raw                  Json     @default("{}")
+  isDemo               Boolean  @default(false)
+  createdAt            DateTime @default(now())
+
+  @@unique([workspaceId, platform, date])
+  @@index([organizationId])
+  @@map("account_metric_snapshots")
+}
+
+// ───────────────────────────── Leads & Sales ─────────────────────────────
+
+model Lead {
+  id                  String           @id @default(cuid())
+  organizationId      String
+  workspaceId         String
+  name                String
+  company             String?
+  email               String?
+  phone               String?
+  channel             Channel          @default(MANUAL)
+  source              String?
+  campaignId          String?
+  interests           String[]         @default([])
+  stage               LeadStage        @default(NEW)
+  score               Int              @default(0)
+  temperature         LeadTemperature  @default(COLD)
+  estimatedValueCents Int?
+  currency            String           @default("USD")
+  ownerId             String?
+  lastContactAt       DateTime?
+  nextAction          String?
+  nextActionAt        DateTime?
+  tags                String[]         @default([])
+  summary             String?
+  intent              String?
+  objections          String[]         @default([])
+  aiInsight           String?
+  stageChangedAt      DateTime         @default(now())
+  isDemo              Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  campaign      Campaign?          @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  events        LeadEvent[]
+  scores        LeadScore[]
+  notes         LeadNote[]
+  conversations Conversation[]
+  opportunities SalesOpportunity[]
+  activities    SalesActivity[]
+
+  @@index([organizationId, workspaceId, stage])
+  @@index([workspaceId, temperature])
+  @@index([workspaceId, email])
+  @@map("leads")
+}
+
+/// Immutable lead timeline.
+model LeadEvent {
+  id             String        @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  leadId         String
+  type           LeadEventType
+  title          String
+  body           String?
+  data           Json          @default("{}")
+  actorType      ActorType     @default(SYSTEM)
+  actorId        String?
+  createdAt      DateTime      @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([organizationId])
+  @@map("lead_events")
+}
+
+model LeadScore {
+  id             String          @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  leadId         String
+  score          Int
+  temperature    LeadTemperature
+  reasons        Json            @default("[]")
+  method         String // "rules" | "ai:<model>"
+  createdAt      DateTime        @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([organizationId])
+  @@map("lead_scores")
+}
+
+model LeadNote {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  leadId         String
+  authorId       String?
+  body           String
+  createdAt      DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([organizationId])
+  @@map("lead_notes")
+}
+
+model LeadCaptureForm {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  publicKey      String   @unique
+  name           String
+  fields         Json // [{ key, label, type, required }]
+  allowedOrigins String[] @default([])
+  successMessage String?
+  campaignId     String?
+  isActive       Boolean  @default(true)
+  submissions    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("lead_capture_forms")
+}
+
+model Conversation {
+  id               String             @id @default(cuid())
+  organizationId   String
+  workspaceId      String
+  leadId           String?
+  channel          Channel
+  subject          String?
+  status           ConversationStatus @default(OPEN)
+  externalThreadId String?
+  summary          String?
+  lastMessageAt    DateTime           @default(now())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  lead         Lead?                     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([organizationId, workspaceId, lastMessageAt])
+  @@index([leadId])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String    @id @default(cuid())
+  organizationId String
+  conversationId String
+  kind           ActorType
+  name           String?
+  handle         String?
+  userId         String?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  conversationId String
+  direction      MessageDirection
+  authorType     ActorType
+  authorId       String?
+  body           String
+  status         MessageStatus
+  aiDrafted      Boolean          @default(false)
+  externalId     String?
+  sentAt         DateTime?
+  createdAt      DateTime         @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([organizationId])
+  @@map("messages")
+}
+
+model PipelineStage {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  stage          LeadStage
+  label          String
+  position       Int
+  probability    Int // 0-100, used for weighted pipeline value
+  createdAt      DateTime  @default(now())
+
+  @@unique([workspaceId, stage])
+  @@index([organizationId])
+  @@map("pipeline_stages")
+}
+
+model SalesOpportunity {
+  id              String            @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  leadId          String
+  title           String
+  valueCents      Int
+  currency        String            @default("USD")
+  status          OpportunityStatus @default(OPEN)
+  expectedCloseAt DateTime?
+  proposal        Json?
+  closedAt        DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@map("sales_opportunities")
+}
+
+model SalesActivity {
+  id             String            @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  leadId         String
+  type           SalesActivityType
+  title          String
+  body           String?
+  dueAt          DateTime?
+  completedAt    DateTime?
+  assignedToId   String?
+  createdByAgent AgentKey?
+  createdById    String?
+  createdAt      DateTime          @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, dueAt])
+  @@index([leadId])
+  @@map("sales_activities")
+}
+
+// ───────────────────────────── Approvals & notifications ─────────────────────────────
+
+model Approval {
+  id               String           @id @default(cuid())
+  organizationId   String
+  workspaceId      String
+  category         ApprovalCategory
+  action           String // e.g. "publish_content", "send_message", "offer_discount"
+  status           ApprovalStatus   @default(PENDING)
+  title            String
+  summary          String // what the AI wants to do
+  reason           String? // why
+  impact           String? // potential impact
+  entityType       String?
+  entityId         String?
+  payload          Json             @default("{}")
+  requestedByAgent AgentKey?
+  requestedById    String?
+  decidedById      String?
+  decidedAt        DateTime?
+  decisionNote     String?
+  expiresAt        DateTime?
+  createdAt        DateTime         @default(now())
+
+  @@index([organizationId, workspaceId, status, category])
+  @@index([entityType, entityId])
+  @@map("approvals")
+}
+
+model ApprovalPolicy {
+  id               String   @id @default(cuid())
+  organizationId   String
+  workspaceId      String
+  action           String // discount | custom_pricing | contract_promise | refund | legal_commitment | unusual_delivery | send_message | publish_content
+  requiresApproval Boolean  @default(true)
+  config           Json     @default("{}")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([workspaceId, action])
+  @@index([organizationId])
+  @@map("approval_policies")
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  organizationId String
+  workspaceId    String?
+  userId         String
+  type           NotificationType
+  title          String
+  body           String?
+  link           String?
+  data           Json             @default("{}")
+  readAt         DateTime?
+  emailedAt      DateTime?
+  createdAt      DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, organizationId, readAt])
+  @@index([organizationId])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id             String           @id @default(cuid())
+  organizationId String
+  userId         String
+  type           NotificationType
+  inApp          Boolean          @default(true)
+  email          Boolean          @default(false)
+
+  @@unique([organizationId, userId, type])
+  @@map("notification_preferences")
+}
+
+// ───────────────────────────── AI ─────────────────────────────
+
+model AiRun {
+  id             String      @id @default(cuid())
+  organizationId String
+  workspaceId    String?
+  agentKey       AgentKey?
+  agentRunId     String?
+  task           AiTaskType
+  provider       String
+  model          String
+  inputTokens    Int         @default(0)
+  outputTokens   Int         @default(0)
+  costMicro      BigInt      @default(0)
+  latencyMs      Int         @default(0)
+  status         AiRunStatus
+  fallbackUsed   Boolean     @default(false)
+  error          String?
+  createdAt      DateTime    @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, agentKey])
+  @@map("ai_runs")
+}
+
+/// Monthly rollup per organization/agent for fast budget checks.
+model AiUsage {
+  id             String   @id @default(cuid())
+  organizationId String
+  period         String // YYYY-MM
+  agentKey       String   @default("none")
+  requests       Int      @default(0)
+  inputTokens    BigInt   @default(0)
+  outputTokens   BigInt   @default(0)
+  costMicro      BigInt   @default(0)
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, period, agentKey])
+  @@map("ai_usage")
+}
+
+/// Structured, append-only AI insights. New analysis archives older insights instead of overwriting.
+model AiInsight {
+  id             String        @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  scope          InsightScope
+  subjectType    String?
+  subjectId      String?
+  kind           String // performance_comparison | recommendation | learning | anomaly
+  title          String
+  body           String
+  evidence       Json          @default("{}") // the data that backs every claim
+  confidence     Float?
+  status         InsightStatus @default(ACTIVE)
+  supersededById String?
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  generatedBy    String // "rules" | "ai:<model>"
+  isDemo         Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, workspaceId, scope, status])
+  @@index([subjectType, subjectId])
+  @@map("ai_insights")
+}
+
+model Report {
+  id             String     @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  kind           ReportKind
+  periodStart    DateTime
+  periodEnd      DateTime
+  data           Json
+  narrative      String?
+  generatedBy    String
+  createdAt      DateTime   @default(now())
+
+  @@unique([workspaceId, kind, periodStart])
+  @@index([organizationId])
+  @@map("reports")
+}
+
+// ───────────────────────────── Jobs ─────────────────────────────
+
+model Job {
+  id             String    @id @default(cuid())
+  type           String
+  payload        Json      @default("{}")
+  status         JobStatus @default(QUEUED)
+  priority       Int       @default(0)
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(3)
+  runAt          DateTime  @default(now())
+  lockedAt       DateTime?
+  lockedBy       String?
+  lastError      String?
+  result         Json?
+  dedupeKey      String?   @unique
+  organizationId String?
+  workspaceId    String?
+  createdAt      DateTime  @default(now())
+  finishedAt     DateTime?
+
+  runs JobRun[]
+
+  @@index([status, runAt, priority])
+  @@index([organizationId, createdAt])
+  @@map("jobs")
+}
+
+model JobRun {
+  id         String    @id @default(cuid())
+  jobId      String
+  attempt    Int
+  status     JobStatus
+  error      String?
+  durationMs Int?
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("job_runs")
+}
+
+model ScheduledJob {
+  id              String    @id @default(cuid())
+  key             String    @unique
+  type            String
+  intervalSeconds Int
+  payload         Json      @default("{}")
+  enabled         Boolean   @default(true)
+  nextRunAt       DateTime
+  lastRunAt       DateTime?
+  organizationId  String?
+  workspaceId     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([enabled, nextRunAt])
+  @@map("scheduled_jobs")
+}
+
+// ───────────────────────────── Audit & privacy ─────────────────────────────
+
+/// Append-only. Updates are blocked by a database trigger (see migration).
+model AuditLog {
+  id             String        @id @default(cuid())
+  organizationId String?
+  workspaceId    String?
+  category       AuditCategory @default(BUSINESS)
+  actorType      ActorType
+  actorId        String?
+  actorLabel     String?
+  action         String
+  entityType     String?
+  entityId       String?
+  summary        String
+  metadata       Json          @default("{}")
+  ip             String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([category, createdAt])
+  @@map("audit_logs")
+}
+
+model DataExport {
+  id             String       @id @default(cuid())
+  organizationId String
+  requestedById  String
+  status         ExportStatus @default(PENDING)
+  fileId         String?
+  error          String?
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+  completedAt    DateTime?
+
+  @@index([organizationId])
+  @@map("data_exports")
+}
