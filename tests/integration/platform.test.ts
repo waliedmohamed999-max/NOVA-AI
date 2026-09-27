@@ -15,8 +15,11 @@ import { hashToken } from "@/server/crypto";
 import { offlinePost } from "@/server/agents/offline-content";
 import { loadBrain } from "@/server/agents/brain";
 
-const original = SOCIAL_PROVIDERS.meta;
-afterEach(() => setSocialProvider("meta", original));
+const original = { meta: SOCIAL_PROVIDERS.meta, instagram: SOCIAL_PROVIDERS.instagram };
+afterEach(() => {
+  setSocialProvider("meta", original.meta);
+  setSocialProvider("instagram", original.instagram);
+});
 
 function fakeMeta(overrides: Partial<SocialProvider> = {}): SocialProvider {
   return {
@@ -69,7 +72,9 @@ describe("OAuth connect flow", () => {
 describe("publishing", () => {
   it("publishes approved content through the provider exactly once", async () => {
     let published = 0;
-    setSocialProvider("meta", fakeMeta({ publishPost: async () => ({ externalId: `remote-${++published}`, permalink: null }) }));
+    const fake = fakeMeta({ publishPost: async () => ({ externalId: `remote-${++published}`, permalink: null }) });
+    setSocialProvider("meta", fake);
+    setSocialProvider("instagram", fake); // the INSTAGRAM platform is served by the Instagram provider
     const t = await makeTenant();
     const url = await startConnect(t.scope, t.user.id, "meta");
     await completeConnect("meta", { code: "c", state: new URL(url).searchParams.get("state")! });

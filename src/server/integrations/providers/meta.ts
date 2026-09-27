@@ -52,7 +52,8 @@ function sumInsight(data: { name: string; values?: { value: number }[]; total_va
 
 export class MetaProvider implements SocialProvider {
   readonly id = "meta" as const;
-  readonly platforms: SocialProvider["platforms"] = ["FACEBOOK", "INSTAGRAM"];
+  /** Facebook Pages only. Instagram is its own provider (Instagram API with Instagram Login). */
+  readonly platforms: SocialProvider["platforms"] = ["FACEBOOK"];
   /** Configured, never hardcoded: see meta-scopes.ts (META_PERMISSION_MODE / META_OAUTH_SCOPES). */
   get scopes() {
     return metaScopeConfig().requested;
@@ -139,37 +140,16 @@ export class MetaProvider implements SocialProvider {
     };
   }
 
+  /** Facebook Pages the user manages. (Instagram is connected directly by InstagramProvider.) */
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {
     // Page discovery needs pages_show_list; without it Meta returns nothing useful, so don't ask.
     if (token.scopes && !token.scopes.includes("pages_show_list")) return [];
-    const withInstagram = !token.scopes || token.scopes.includes("instagram_basic");
-    const pages = await get<{ data: { id: string; name: string; access_token: string; tasks?: string[]; picture?: { data?: { url?: string } }; instagram_business_account?: { id: string; username?: string; profile_picture_url?: string } }[] }>(
-      "/me/accounts",
-      token.accessToken,
-      // Instagram professional accounts linked to a Page are only readable with instagram_basic; don't ask otherwise.
-      { fields: `id,name,access_token,tasks,picture{url}${withInstagram ? ",instagram_business_account{id,username,profile_picture_url}" : ""}`, limit: "50" },
-    );
-    const out: ConnectedAccount[] = [];
-    for (const p of pages.data) {
-      // Page tokens derived from a long-lived user token do not expire.
-      const pageToken: TokenSet = { accessToken: p.access_token, expiresAt: null };
-      out.push({ externalId: p.id, platform: "FACEBOOK", name: p.name, avatarUrl: p.picture?.data?.url ?? null, accountType: "facebook_page", token: pageToken, metadata: p.tasks ? { tasks: p.tasks } : {} });
-      // Not every Page has an Instagram professional account linked — only add one when Meta returns it.
-      if (withInstagram && p.instagram_business_account) {
-        const ig = p.instagram_business_account;
-        out.push({
-          externalId: ig.id,
-          platform: "INSTAGRAM",
-          name: ig.username ?? p.name,
-          handle: ig.username ? `@${ig.username}` : null,
-          avatarUrl: ig.profile_picture_url ?? null,
-          accountType: "instagram_business",
-          token: pageToken,
-          metadata: { pageId: p.id },
-        });
-      }
-    }
-    return out;
+    const pages = await get<{ data: { id: string; name: string; access_token: string; tasks?: string[]; picture?: { data?: { url?: string } } }[] }>("/me/accounts", token.accessToken, {
+      fields: "id,name,access_token,tasks,picture{url}",
+      limit: "50",
+    });
+    // Page tokens derived from a long-lived user token do not expire.
+    return pages.data.map((p) => ({ externalId: p.id, platform: "FACEBOOK" as const, name: p.name, avatarUrl: p.picture?.data?.url ?? null, accountType: "facebook_page", token: { accessToken: p.access_token, expiresAt: null }, metadata: p.tasks ? { tasks: p.tasks } : {} }));
   }
 
   async refreshToken(token: TokenSet): Promise<TokenSet | null> {

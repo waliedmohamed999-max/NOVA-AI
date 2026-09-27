@@ -23,14 +23,14 @@ export type ConnectionCard = {
   healthKey: string | null;
   /**
    * Meta step-by-step access: the permission request that unlocks this channel next
-   * (e.g. "FACEBOOK:discovery" = Page access, "INSTAGRAM:discovery" = linked Instagram professional accounts).
+   * (e.g. "FACEBOOK:discovery" = access to the Facebook Pages the user manages).
    * null when nothing more can be requested (not enabled for the app, or not needed).
    */
-  nextStep: { upgrade: string; kind: "pages" | "instagram" } | null;
+  nextStep: { upgrade: string; kind: "pages" } | null;
   /** Identity state detail: Page access granted but the account manages no Page. */
   noManagedPages: boolean;
-  /** Instagram permission granted, but no Instagram professional account is linked to the chosen Pages. */
-  instagramNotFound: boolean;
+  /** Instagram Direct: the connected Professional account type (Business or Creator). */
+  professionalType: "BUSINESS" | "CREATOR" | null;
 };
 
 export type ConnectionsView = {
@@ -55,7 +55,7 @@ export async function loadConnections(scope: TenantScope, isDemo: boolean): Prom
   ]);
   const fbRow = rows.find((r) => r.provider === "FACEBOOK" && r.status !== "DISCONNECTED") ?? null;
   const metaIdentity = fbRow?.statusMessage === "identity_only" ? fbRow : null;
-  const metaGranted = [...new Set(rows.filter((r) => (r.provider === "FACEBOOK" || r.provider === "INSTAGRAM") && r.status !== "DISCONNECTED").flatMap((r) => r.scopes))];
+  const metaGranted = fbRow?.scopes ?? [];
 
   const cards = INTEGRATION_CATALOG.filter((c) => PRIMARY.includes(c.provider) && c.oauth).map<ConnectionCard>((c) => {
     const row = rows.find((r) => r.provider === c.provider);
@@ -68,30 +68,27 @@ export async function loadConnections(scope: TenantScope, isDemo: boolean): Prom
     else if (identityOnly) state = "identity";
     else if (live && accounts.length > 0 && !accounts.some((a) => a.isActive)) state = "choose";
     else if (live) state = "connected";
-    else if (c.oauth === "meta" && metaIdentity) state = "identity";
+    else if (c.provider === "FACEBOOK" && metaIdentity) state = "identity";
     else if (!available) state = "unavailable";
 
     // What to ask Meta for next — only when the operator enabled it for the app.
     let nextStep: ConnectionCard["nextStep"] = null;
-    if (c.oauth === "meta" && available && (state === "identity" || (state === "idle" && fbRow))) {
-      const pagesGranted = metaGranted.includes("pages_show_list");
-      const want = !pagesGranted ? { platform: "FACEBOOK", kind: "pages" as const } : c.provider === "INSTAGRAM" && !metaGranted.includes("instagram_basic") ? { platform: "INSTAGRAM", kind: "instagram" as const } : null;
-      if (want && upgradeScopes(want.platform, "discovery", metaGranted)) nextStep = { upgrade: `${want.platform}:discovery`, kind: want.kind };
+    // Facebook Pages: after the Meta login, Page access (pages_show_list) is requested only on the customer's click.
+    if (c.provider === "FACEBOOK" && available && state === "identity" && !metaGranted.includes("pages_show_list") && upgradeScopes("FACEBOOK", "discovery", metaGranted)) {
+      nextStep = { upgrade: "FACEBOOK:discovery", kind: "pages" };
     }
-    // Instagram through Facebook Login needs instagram_basic; if the app can't request it, say "not available yet".
-    if (c.provider === "INSTAGRAM" && state === "idle" && fbRow && !nextStep && !metaGranted.includes("instagram_basic")) state = "unavailable";
-    const instagramNotFound = c.provider === "INSTAGRAM" && Boolean(fbRow) && metaGranted.includes("instagram_basic") && (state === "idle" || state === "identity");
+    const igType = c.provider === "INSTAGRAM" ? ((row?.accounts.find((a) => a.isActive)?.metadata as { professionalType?: string } | null)?.professionalType ?? null) : null;
     return {
       platform: c.provider,
       oauth: c.oauth!,
       available,
       state,
-      integrationId: live ? row.id : c.oauth === "meta" && metaIdentity ? metaIdentity.id : null,
+      integrationId: live ? row.id : null,
       accounts,
       healthKey: state === "reconnect" ? (row?.statusMessage ?? "unknown") : null,
       nextStep,
       noManagedPages: state === "identity" && metaGranted.includes("pages_show_list") && c.provider === "FACEBOOK",
-      instagramNotFound,
+      professionalType: igType === "BUSINESS" || igType === "CREATOR" ? igType : null,
     };
   });
   return {

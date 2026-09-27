@@ -95,8 +95,8 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
             <p className="font-semibold">{t("upgradeTitle")}</p>
             <p className="text-sm text-ink-3">{t("upgradeBody", { platform: platformName(upgrade.platform), capability: upgradeCapability ?? "" })}</p>
           </div>
-          {upgradeCard && canManage && upgradeCard.oauth === "meta" ? (
-            <a href={`/api/integrations/meta/start?from=${from}&upgrade=${upgrade.platform}:${upgrade.capability}`} className={buttonClass("primary", "md", "shrink-0")}>{t("upgradeCta")}</a>
+          {upgradeCard && canManage && (upgradeCard.oauth === "meta" || upgradeCard.oauth === "instagram") ? (
+            <a href={`/api/integrations/${upgradeCard.oauth}/start?from=${from}&upgrade=${upgrade.platform}:${upgrade.capability}`} className={buttonClass("primary", "md", "shrink-0")}>{t("upgradeCta")}</a>
           ) : (
             <p className="text-sm text-ink-3">{t("upgradeUnavailable")}</p>
           )}
@@ -290,6 +290,7 @@ function SocialCard(props: {
             <li key={a.id} className="flex min-w-0 items-center gap-2">
               <Check className="size-3.5 shrink-0 text-success" />
               <span className="truncate font-medium" dir="auto">{a.handle ?? a.name}</span>
+              {c.platform === "INSTAGRAM" && c.professionalType && <Badge tone="outline" className="shrink-0">{c.professionalType === "BUSINESS" ? "Business" : "Creator"}</Badge>}
             </li>
           ))}
         </ul>
@@ -297,14 +298,13 @@ function SocialCard(props: {
       {c.state === "reconnect" && props.healthText && <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">{props.healthText}</p>}
       {c.state === "identity" && (
         <p className="rounded-xl bg-surface-2 px-3 py-2 text-xs text-ink-2">
-          {c.noManagedPages ? t("identityNoPages") : c.instagramNotFound ? t("instagramNotFound") : t("identityBody")}
+          {c.noManagedPages ? t("identityNoPages") : t("identityBody")}
         </p>
       )}
-      {c.state !== "identity" && c.instagramNotFound && <p className="rounded-xl bg-surface-2 px-3 py-2 text-xs text-ink-2">{t("instagramNotFound")}</p>}
       {canManage && c.state !== "unavailable" && (
         <div className="mt-auto flex flex-wrap gap-2">
-          {c.state === "idle" && link(c.nextStep ? t(c.nextStep.kind === "pages" ? "actions.grantPages" : "actions.grantInstagram") : t("actions.connect"))}
-          {c.state === "identity" && c.nextStep && link(t(c.nextStep.kind === "pages" ? "actions.grantPages" : "actions.grantInstagram"))}
+          {c.state === "idle" && link(t("actions.connect"))}
+          {c.state === "identity" && c.nextStep && link(t("actions.grantPages"))}
           {c.state === "reconnect" && link(t("actions.reconnect"))}
           {c.state === "choose" && <Button size="sm" onClick={props.onChoose}>{t("actions.choose")}</Button>}
           {c.state === "connected" &&

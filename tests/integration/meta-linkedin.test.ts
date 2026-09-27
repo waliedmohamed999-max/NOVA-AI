@@ -32,7 +32,7 @@ const ENV = {
   META_APP_SECRET: "fedcba9876543210fedcba9876543210",
   META_REDIRECT_URI: "https://nova.example/api/integrations/meta/callback",
   META_PERMISSION_MODE: "configured",
-  META_OAUTH_SCOPES: "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights,instagram_basic,instagram_content_publish,instagram_manage_insights,business_management",
+  META_OAUTH_SCOPES: "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights,business_management",
   META_OPTIONAL_SCOPES: "",
   META_LOGIN_CONFIG_ID: "",
   LINKEDIN_CLIENT_ID: "li-client",
@@ -54,12 +54,12 @@ afterAll(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
-const META_GRANTED = ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "read_insights", "instagram_basic", "instagram_content_publish", "instagram_manage_insights", "business_management"];
+const META_GRANTED = ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "read_insights", "business_management"];
 
 function metaRoutes(opts: { granted?: string[]; pages?: unknown[]; debugValid?: boolean } = {}): Route[] {
   const pages = opts.pages ?? [
-    { id: "page-1", name: "Luma Skin Studio", access_token: "page-token-1", tasks: ["MANAGE", "CREATE_CONTENT", "ANALYZE"], instagram_business_account: { id: "ig-1", username: "lumaskin", profile_picture_url: "https://cdn.example/ig.jpg" } },
-    { id: "page-2", name: "Luma Clinic Offers", access_token: "page-token-2", tasks: ["ANALYZE"] }, // no Instagram linked, no posting role
+    { id: "page-1", name: "Luma Skin Studio", access_token: "page-token-1", tasks: ["MANAGE", "CREATE_CONTENT", "ANALYZE"] },
+    { id: "page-2", name: "Luma Clinic Offers", access_token: "page-token-2", tasks: ["ANALYZE"] }, // no posting role
   ];
   return [
     [/oauth\/access_token\?.*code=/, () => ({ body: { access_token: "short-user-token" } })],
@@ -78,8 +78,8 @@ async function connectMeta(t: Awaited<ReturnType<typeof makeTenant>>, from: "onb
   return { url, res: await completeConnect("meta", { code: "auth-code", state: url.searchParams.get("state") }, t.user.id) };
 }
 
-describe("Meta — OAuth", () => {
-  it("start: authorization URL uses the configured redirect URI, a fresh state and only approved scopes", async () => {
+describe("Facebook Pages (Meta) — OAuth", () => {
+  it("start: authorization URL uses the configured redirect URI, a fresh state and only configured scopes", async () => {
     const t = await makeTenant();
     const url = new URL(await startConnect(t.scope, t.user.id, "meta", "onboarding"));
     expect(url.origin + url.pathname).toMatch(/^https:\/\/www\.facebook\.com\/v[\d.]+\/dialog\/oauth$/);
@@ -87,30 +87,28 @@ describe("Meta — OAuth", () => {
     expect(url.searchParams.get("redirect_uri")).toBe(ENV.META_REDIRECT_URI);
     expect(url.searchParams.get("state")?.length).toBeGreaterThan(20);
     const scopes = url.searchParams.get("scope")!.split(",");
-    expect(scopes).toContain("instagram_content_publish");
-    // Not requested without Meta approval:
-    for (const s of ["pages_messaging", "instagram_manage_messages", "leads_retrieval"]) expect(scopes).not.toContain(s);
+    expect(scopes).toContain("pages_manage_posts");
+    for (const s of ["pages_messaging", "leads_retrieval"]) expect(scopes).not.toContain(s);
     expect(url.toString()).not.toContain("fedcba9876543210fedcba9876543210");
   });
 
-  it("callback: exchanges server-side, stores encrypted tokens, handles a Page without Instagram, and asks which Pages to manage", async () => {
+  it("callback: exchanges server-side, stores encrypted tokens, returns Pages only (no Instagram children), selects none", async () => {
     mockFetch(metaRoutes());
     const t = await makeTenant();
     const { res } = await connectMeta(t);
     expect(res.redirectTo).toBe("/onboarding/connect");
-    expect(res.connected).toEqual(expect.arrayContaining(["FACEBOOK", "INSTAGRAM"]));
-    expect(res.needsSelection).toEqual(["FACEBOOK", "INSTAGRAM"]); // Pages and Instagram are never auto-selected
-    // The code exchange carried the app secret server-side, never through the browser.
+    expect(res.connected).toEqual(["FACEBOOK"]);
+    expect(res.needsSelection).toEqual(["FACEBOOK"]);
     expect(calls.some((c) => c.url.includes("oauth/access_token") && c.url.includes("client_secret=fedcba9876543210fedcba9876543210"))).toBe(true);
+    // Instagram is not discovered through Pages anymore.
+    expect(decodeURIComponent(calls.find((c) => c.url.includes("/me/accounts"))!.url)).not.toContain("instagram_business_account");
 
     const view = await loadConnections(t.scope, false);
     const fb = view.cards.find((c) => c.platform === "FACEBOOK")!;
-    const ig = view.cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(fb.state).toBe("choose");
     expect(fb.accounts.map((a) => a.name)).toEqual(["Luma Skin Studio", "Luma Clinic Offers"]);
-    expect(ig.state).toBe("choose");
-    expect(ig.accounts).toHaveLength(1); // only the Page that has Instagram produced one
-    expect(ig.accounts[0].handle).toBe("@lumaskin");
+    expect(view.cards.find((c) => c.platform === "INSTAGRAM")!.state).toBe("idle");
+    expect(await db.integration.count({ where: { ...t.scope, provider: "INSTAGRAM" } })).toBe(0);
 
     const creds = await db.integrationCredential.findMany({ where: { organizationId: t.organization.id }, omit: { accessTokenEnc: false } });
     expect(creds.length).toBeGreaterThan(0);
@@ -120,15 +118,14 @@ describe("Meta — OAuth", () => {
     expect(integration.scopes).not.toContain("pages_messaging"); // declined ≠ granted
   });
 
-  it("capabilities come from granted permissions and Page roles — never assumed", async () => {
-    mockFetch(metaRoutes({ granted: META_GRANTED.filter((p) => p !== "instagram_content_publish") }));
+  it("Page capabilities come from granted permissions and Page roles — never assumed", async () => {
+    mockFetch(metaRoutes());
     const t = await makeTenant();
     await connectMeta(t);
-    const view = await loadConnections(t.scope, false);
-    const caps = (platform: string, name: string) => Object.fromEntries(view.cards.find((c) => c.platform === platform)!.accounts.find((a) => a.name === name)!.capabilities!.map((c) => [c.key, c.available]));
-    expect(caps("INSTAGRAM", "lumaskin")).toMatchObject({ identity: true, instagram_publishing: false, metrics: true, messages: false });
-    expect(caps("FACEBOOK", "Luma Skin Studio")).toMatchObject({ identity: true, publish: true, metrics: true, messages: false, leads: false });
-    expect(caps("FACEBOOK", "Luma Clinic Offers")).toMatchObject({ publish: false }); // ANALYZE-only role
+    const fb = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!;
+    const caps = (name: string) => Object.fromEntries(fb.accounts.find((a) => a.name === name)!.capabilities!.map((c) => [c.key, c.available]));
+    expect(caps("Luma Skin Studio")).toMatchObject({ identity: true, publish: true, metrics: true, messages: false, leads: false });
+    expect(caps("Luma Clinic Offers")).toMatchObject({ publish: false }); // ANALYZE-only role
   });
 
   it("state validation: forged, replayed and another user's state are rejected", async () => {
@@ -144,29 +141,18 @@ describe("Meta — OAuth", () => {
   });
 });
 
-describe("Meta — account picker", () => {
-  it("activates exactly the chosen Page + Instagram account and releases what is not chosen", async () => {
+describe("Facebook Pages — picker", () => {
+  it("activates exactly the chosen Page; choosing none is rejected", async () => {
     mockFetch(metaRoutes());
     const t = await makeTenant();
     await connectMeta(t);
-    const view = await loadConnections(t.scope, false);
-    const fb = view.cards.find((c) => c.platform === "FACEBOOK")!;
-    const ig = view.cards.find((c) => c.platform === "INSTAGRAM")!;
-    await expect(selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [] }, { integrationId: ig.integrationId!, accountIds: [] }])).rejects.toMatchObject({ code: "validation" });
-
+    const fb = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!;
+    await expect(selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [] }])).rejects.toMatchObject({ code: "validation" });
     const page1 = fb.accounts.find((a) => a.name === "Luma Skin Studio")!.id;
-    await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [page1] }, { integrationId: ig.integrationId!, accountIds: [ig.accounts[0].id] }]);
-    const after = await loadConnections(t.scope, false);
-    expect(after.cards.find((c) => c.platform === "FACEBOOK")!.accounts.filter((a) => a.isActive).map((a) => a.name)).toEqual(["Luma Skin Studio"]);
-    expect(after.cards.find((c) => c.platform === "INSTAGRAM")!.state).toBe("connected");
-
-    // Instagram only: Facebook is released, and the shared Meta grant is NOT revoked (Instagram still uses it).
-    calls = [];
-    await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [] }, { integrationId: ig.integrationId!, accountIds: [ig.accounts[0].id] }]);
-    expect(calls.some((c) => c.method === "DELETE")).toBe(false);
-    const final = await loadConnections(t.scope, false);
-    expect(final.cards.find((c) => c.platform === "FACEBOOK")!.state).toBe("idle");
-    expect(final.cards.find((c) => c.platform === "INSTAGRAM")!.state).toBe("connected");
+    await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [page1] }]);
+    const after = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!;
+    expect(after.state).toBe("connected");
+    expect(after.accounts.filter((a) => a.isActive).map((a) => a.name)).toEqual(["Luma Skin Studio"]);
   });
 
   it("rejects selections across tenants", async () => {
@@ -179,20 +165,18 @@ describe("Meta — account picker", () => {
   });
 });
 
-describe("Meta — disconnect, health, missing credentials", () => {
-  it("disconnect keeps history, revokes only when no sibling uses the grant", async () => {
+describe("Facebook Pages — disconnect, health, missing credentials", () => {
+  it("disconnect revokes the Meta grant, deletes credentials and keeps history", async () => {
     mockFetch(metaRoutes());
     const t = await makeTenant();
     await connectMeta(t);
-    const ids = Object.fromEntries((await loadConnections(t.scope, false)).cards.filter((c) => c.integrationId).map((c) => [c.platform, c.integrationId!]));
+    const id = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!.integrationId!;
     calls = [];
-    await disconnectIntegration(t.scope, ids.INSTAGRAM, t.user.id);
-    expect(calls.filter((c) => c.method === "DELETE")).toHaveLength(0);
-    await disconnectIntegration(t.scope, ids.FACEBOOK, t.user.id);
+    await disconnectIntegration(t.scope, id, t.user.id);
     expect(calls.filter((c) => c.method === "DELETE" && c.url.includes("/me/permissions"))).toHaveLength(1);
     expect(await db.integrationCredential.count({ where: { organizationId: t.organization.id } })).toBe(0);
     expect(await db.integrationAccount.count({ where: { organizationId: t.organization.id } })).toBeGreaterThan(0); // history kept
-    expect(await db.auditLog.count({ where: { organizationId: t.organization.id, action: "integration.disconnected" } })).toBe(2);
+    expect(await db.auditLog.count({ where: { organizationId: t.organization.id, action: "integration.disconnected" } })).toBe(1);
   });
 
   it("health check marks an invalid token as expired and notifies the customer", async () => {
@@ -204,7 +188,7 @@ describe("Meta — disconnect, health, missing credentials", () => {
     const res = await checkConnectionsHealth(1000);
     expect(res.unhealthy).toBeGreaterThan(0);
     const view = await loadConnections(t.scope, false);
-    expect(view.cards.find((c) => c.platform === "INSTAGRAM")!.state).toBe("reconnect");
+    expect(view.cards.find((c) => c.platform === "FACEBOOK")!.state).toBe("reconnect");
     const n = await db.notification.findFirst({ where: { organizationId: t.organization.id, type: "INTEGRATION_DISCONNECTED" } });
     expect(n?.link).toBe(CONNECTED_ACCOUNTS_PATH);
     expect(n?.body).not.toMatch(/OAuthException|invalid_grant|401|token_expired/);
@@ -228,15 +212,15 @@ describe("Meta — disconnect, health, missing credentials", () => {
   });
 });
 
-describe("Meta — admin dev test", () => {
-  it("validates the token, lists Pages and linked Instagram accounts with capabilities, and never returns tokens", async () => {
+describe("Facebook Pages — admin dev test", () => {
+  it("validates the token, lists Pages with capabilities, and never returns tokens", async () => {
     mockFetch(metaRoutes());
     const t = await makeTenant();
     await connectMeta(t);
     const fbId = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!.integrationId!;
     const res = await testConnection(t.scope, fbId);
     expect(res.valid).toBe(true);
-    expect(res.accounts.map((a) => `${a.platform}:${a.name}`)).toEqual(["FACEBOOK:Luma Skin Studio", "INSTAGRAM:lumaskin", "FACEBOOK:Luma Clinic Offers"]);
+    expect(res.accounts.map((a) => `${a.platform}:${a.name}`)).toEqual(["FACEBOOK:Luma Skin Studio", "FACEBOOK:Luma Clinic Offers"]);
     expect(res.scopes).toContain("pages_manage_posts");
     expect(JSON.stringify(res)).not.toMatch(/page-token|long-user-token|fedcba9876543210fedcba9876543210/);
     expect(calls.every((c) => c.method === "GET")).toBe(true); // testing never publishes
@@ -246,15 +230,10 @@ describe("Meta — admin dev test", () => {
     mockFetch(metaRoutes());
     const t = await makeTenant();
     await connectMeta(t);
-    const view = await loadConnections(t.scope, false);
-    const fb = view.cards.find((c) => c.platform === "FACEBOOK")!;
+    const fb = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!;
     const page1 = fb.accounts.find((a) => a.name === "Luma Skin Studio")!;
     await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [page1.id] }]);
     await expect(publishTestPost(t.scope, t.user.id, page1.id, "yes")).rejects.toMatchObject({ code: "validation" });
-    const igCard = view.cards.find((c) => c.platform === "INSTAGRAM")!;
-    const igAcc = igCard.accounts[0];
-    await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: igCard.integrationId!, accountIds: [igAcc.id] }]);
-    await expect(publishTestPost(t.scope, t.user.id, igAcc.id, "PUBLISH")).rejects.toMatchObject({ code: "test_post_needs_media" });
 
     const res = await publishTestPost(t.scope, t.user.id, page1.id, "PUBLISH");
     expect(res.externalId).toBe("page-1_post-77");

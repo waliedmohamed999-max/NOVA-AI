@@ -573,21 +573,25 @@
         "error": "خطأ"
       },
       "names": {
-        "meta": "Meta (إنستغرام + فيسبوك)",
+        "meta": "صفحات Facebook (Meta)",
         "linkedin": "لينكدإن",
         "tiktok": "تيك توك",
         "openai": "OpenAI",
         "anthropic": "Anthropic",
         "email": "البريد (SMTP)",
         "storage": "تخزين الملفات",
-        "payments": "المدفوعات"
+        "payments": "المدفوعات",
+        "instagram": "Instagram المباشر"
       },
       "notes": {
         "local": "تخزين على القرص المحلي — مناسب لخادم واحد؛ استخدم S3/R2 عند تشغيل أكثر من نسخة.",
         "stripe_not_implemented": "محوّل Stripe والـwebhook غير مُنفَّذين بعد. ضبط هذه المفاتيح لا يفعّل الدفع؛ تغيير الخطة يبقى متوقفًا.",
         "meta_secret_is_access_token": "قيمة META_APP_SECRET هي access token (تبدأ بـ EAA) وليست App Secret. استخدم App settings ← Basic ← App secret (32 حرفًا ست عشريًا) لنفس تطبيق META_APP_ID. إذا شُورك هذا التوكن في أي مكان فقم بإلغائه.",
         "meta_secret_format": "قيمة META_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا من App settings ← Basic).",
-        "meta_app_id_format": "يجب أن يكون META_APP_ID هو رقم التطبيق (App ID)."
+        "meta_app_id_format": "يجب أن يكون META_APP_ID هو رقم التطبيق (App ID).",
+        "instagram_secret_is_access_token": "قيمة INSTAGRAM_APP_SECRET هي access token وليست Instagram App Secret. استخدم Instagram ← API setup with Instagram login ← Instagram app secret.",
+        "instagram_secret_format": "قيمة INSTAGRAM_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا).",
+        "instagram_app_id_format": "يجب أن يكون INSTAGRAM_APP_ID رقم تطبيق Instagram."
       }
     },
     "tests": {
@@ -659,7 +663,8 @@
         "available": "متاحة ({count})",
         "noneFound": "لا توجد صفحات مُدارة",
         "notFound": "غير موجود",
-        "selected": "المختارة"
+        "selected": "المختارة",
+        "notSelected": "لم يُختر بعد"
       }
     }
   },
@@ -704,7 +709,7 @@
       "YOUTUBE": "الفيديوهات وتحليلات القناة.",
       "X": "المنشورات والردود."
     },
-    "metaNote": "يُربط Instagram وFacebook معًا عبر تسجيل دخول آمن واحد من Meta.",
+    "metaNote": "يُربط Instagram مباشرة بتسجيل دخول Instagram، وتُربط صفحات Facebook بتسجيل دخول Meta.",
     "oauthNote": "تسجّل الدخول على المنصة نفسها — NOVA لا يرى كلمة مرورك ولا يحفظها.",
     "emailNote": "تسجيل الدخول عبر Google وMicrosoft قريبًا. لن يطلب NOVA كلمة مرور بريدك أبدًا.",
     "success": "تم ربط {platform}",
@@ -744,7 +749,8 @@
       "messages": "الرسائل",
       "leads": "نماذج العملاء",
       "member_publishing": "النشر باسمك",
-      "organization_publishing": "النشر على صفحة الشركة"
+      "organization_publishing": "النشر على صفحة الشركة",
+      "comments": "التعليقات"
     },
     "capabilityReasons": {
       "permission_missing": "لم يتم منح الصلاحية — أعد الربط واسمح بها",
@@ -761,12 +767,12 @@
     "identityNoPages": "تم تسجيل الدخول، لكن هذا الحساب لا يدير أي صفحة Facebook حاليًا. ينشر NOVA على الصفحات وليس على الحسابات الشخصية.",
     "instagramNotFound": "لا يوجد حساب Instagram احترافي (Business أو Creator) مرتبط بصفحاتك. النشر التلقائي يتطلب حسابًا احترافيًا.",
     "profileNote": "حساب Facebook الشخصي يُستخدم لتسجيل الدخول فقط — Meta لا تسمح بالنشر التلقائي على الحسابات الشخصية. يدير NOVA صفحات Facebook التي تختارها.",
-    "instagramNote": "يتطلب النشر التلقائي حساب Instagram احترافيًا (Business أو Creator) مرتبطًا بإحدى صفحاتك.",
+    "instagramNote": "يتطلب النشر التلقائي حساب Instagram احترافيًا (Business أو Creator). لا يمكن ربط حسابات Instagram الشخصية.",
     "pickerPages": "صفحات Facebook",
     "pickerPagesHint": "يمكن لـ NOVA إدارة ونشر المحتوى عليها",
     "pickerPageOk": "قابل للربط",
     "pickerInstagram": "Instagram Professional",
-    "pickerInstagramHint": "حسابات Business أو Creator المرتبطة بصفحاتك",
+    "pickerInstagramHint": "حسابات Business أو Creator",
     "pickerInstagramOk": "Business / Creator"
   }
 }

@@ -9,6 +9,7 @@ import { logger } from "../logger";
 import { UserFacingError } from "../errors";
 import { assertWithinLimit } from "../billing/entitlements";
 import { upgradeScopes } from "./providers/meta-scopes";
+import { instagramUpgradeScopes } from "./providers/instagram-scopes";
 import { SOCIAL_PROVIDERS, redirectUriFor } from "./registry";
 import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } from "./types";
 
@@ -54,10 +55,10 @@ export async function startConnect(
   if (!already) await assertWithinLimit(scope.organizationId, "socialChannels");
   let scopes: string[] | undefined;
   if (upgrade) {
-    if (providerId !== "meta" || !provider.platforms.includes(upgrade.platform as SocialPlatform)) throw new UserFacingError("capability_unavailable");
+    if ((providerId !== "meta" && providerId !== "instagram") || !provider.platforms.includes(upgrade.platform as SocialPlatform)) throw new UserFacingError("capability_unavailable");
     const current = await db.integration.findFirst({ where: { ...scope, provider: upgrade.platform as Provider } });
-    // Only permissions the operator enabled for the app (META_OAUTH_SCOPES / META_OPTIONAL_SCOPES) can be requested.
-    scopes = upgradeScopes(upgrade.platform, upgrade.capability, current?.scopes ?? []) ?? undefined;
+    // Only permissions the operator enabled for the app (…_OAUTH_SCOPES / …_OPTIONAL_SCOPES) can be requested.
+    scopes = (providerId === "instagram" ? instagramUpgradeScopes(upgrade.capability, current?.scopes ?? []) : upgradeScopes(upgrade.platform, upgrade.capability, current?.scopes ?? [])) ?? undefined;
     if (!scopes) throw new UserFacingError("capability_unavailable");
   }
   const state = randomToken(24);
@@ -90,7 +91,7 @@ export type ConnectResult = {
   limited?: string[];
   /** Meta sign-in worked but returned no manageable Page yet (Facebook profile = login only). */
   identity?: boolean;
-  error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope";
+  error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope" | "instagram_invalid_scope" | "instagram_personal_account";
 };
 
 /** Step 2 of OAuth (backend callback): verify state, exchange code, store encrypted tokens and accounts. */
@@ -114,7 +115,7 @@ export async function completeConnect(
     if (invalidScope) {
       logger.warn({ provider: providerId, error_type: "invalid_scope", requested_scopes: stored.requestedScopes, provider_error: params.error, provider_description: params.errorDescription?.slice(0, 300) }, "oauth rejected requested scopes");
       await finish("invalid_scope");
-      return { redirectTo, error: providerId === "linkedin" ? "linkedin_invalid_scope" : "meta_invalid_scope" };
+      return { redirectTo, error: providerId === "linkedin" ? "linkedin_invalid_scope" : providerId === "instagram" ? "instagram_invalid_scope" : "meta_invalid_scope" };
     }
     await finish("denied");
     return { redirectTo, error: "oauth_denied" };
@@ -129,6 +130,11 @@ export async function completeConnect(
     accounts = await provider.listAccounts(tokens);
   } catch (err) {
     logger.warn({ provider: providerId, detail: err instanceof ProviderError ? err.detail : err instanceof Error ? err.message : String(err) }, "oauth exchange failed");
+    // Instagram Direct only supports professional (Business/Creator) accounts — say so plainly.
+    if (err instanceof ProviderError && err.detail === "personal_account") {
+      await finish("personal_account");
+      return { redirectTo, error: "instagram_personal_account" };
+    }
     await finish("exchange_failed");
     return { redirectTo, error: "integration_error" };
   }
@@ -142,7 +148,7 @@ export async function completeConnect(
   const needsSelection: string[] = [];
   const limited: string[] = [];
   for (const [platform, list] of byPlatform) {
-    if (list.length === 0 && provider.platforms.length > 1) continue; // e.g. no Instagram account linked to the Page
+    if (list.length === 0) continue; // nothing manageable on this platform (e.g. a Meta login with no Page yet)
     const existing = await db.integration.findUnique({
       where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: platform as Provider } },
       include: { accounts: { where: { isActive: true }, select: { externalId: true } } },
@@ -287,7 +293,7 @@ export async function disconnectIntegration(scope: TenantScope, integrationId: s
 }
 
 export function providerIdFor(p: Provider): SocialProvider["id"] {
-  return p === "LINKEDIN" ? "linkedin" : p === "TIKTOK" ? "tiktok" : "meta";
+  return p === "LINKEDIN" ? "linkedin" : p === "TIKTOK" ? "tiktok" : p === "INSTAGRAM" ? "instagram" : "meta";
 }
 
 const STATUS_FOR_ERROR: Partial<Record<ProviderError["kind"], IntegrationStatus>> = { expired: "EXPIRED", permission: "ACTION_REQUIRED" };

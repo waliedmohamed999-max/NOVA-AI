@@ -47,5 +47,7 @@
   "meta_invalid_scope": "We couldn't finish connecting Meta because a permission isn't enabled in the app yet.",
   "linkedin_invalid_scope": "We couldn't finish connecting LinkedIn because a permission isn't enabled in the app yet.",
   "no_page_permission": "Meta is connected, but no Page access was granted yet, so there are no Pages or Instagram accounts to manage.",
-  "capability_unavailable": "This feature isn't available for this account yet."
+  "capability_unavailable": "This feature isn't available for this account yet.",
+  "instagram_personal_account": "Automatic publishing requires an Instagram professional account (Business or Creator). Switch the account to Business or Creator in the Instagram app, then connect again.",
+  "instagram_invalid_scope": "We couldn't finish connecting Instagram because a permission isn't enabled in the app yet."
 }

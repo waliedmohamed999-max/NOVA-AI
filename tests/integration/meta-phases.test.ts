@@ -12,7 +12,7 @@ import { getUsage } from "@/server/billing/entitlements";
  * Meta, step by step, as the platform actually works:
  *   A. login (public_profile) → identity connected (a Facebook profile is login-only)
  *   B. "Grant access to Pages" → pages_show_list only → Pages picker (nothing auto-selected)
- *   C. Instagram professional accounts linked to Pages (instagram_basic) → picker
+ * Instagram is a separate provider (Instagram Direct) — see instagram-direct.test.ts.
  */
 let calls: { url: string; method: string }[] = [];
 function mockMeta(granted: string[], pages: unknown[] = []) {
@@ -50,7 +50,7 @@ async function login(t: Awaited<ReturnType<typeof makeTenant>>, upgrade?: { plat
 }
 
 const PAGES = [
-  { id: "page-1", name: "Luma Skin Studio", access_token: "pt1", tasks: ["MANAGE", "CREATE_CONTENT", "ANALYZE"], instagram_business_account: { id: "ig-1", username: "lumaskin" } },
+  { id: "page-1", name: "Luma Skin Studio", access_token: "pt1", tasks: ["MANAGE", "CREATE_CONTENT", "ANALYZE"] },
   { id: "page-2", name: "Luma Offers", access_token: "pt2", tasks: ["ANALYZE"] },
 ];
 
@@ -67,11 +67,11 @@ describe("Phase A — Meta login = identity", () => {
     const fb = view.cards.find((c) => c.platform === "FACEBOOK")!;
     const ig = view.cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(fb).toMatchObject({ state: "identity", nextStep: { upgrade: "FACEBOOK:discovery", kind: "pages" }, accounts: [] });
-    expect(ig).toMatchObject({ state: "identity", nextStep: { upgrade: "FACEBOOK:discovery", kind: "pages" } });
+    expect(ig).toMatchObject({ state: "idle", nextStep: null }); // Instagram is independent of the Meta login
     expect((await getUsage(t.organization.id)).socialChannels.used).toBe(0);
 
     const diag = (await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!;
-    expect(diag.assets).toMatchObject({ identity: true, pages: null, instagram: null, granted: ["public_profile"] });
+    expect(diag.assets).toMatchObject({ identity: true, pages: null, granted: ["public_profile"] });
   });
 });
 
@@ -84,7 +84,7 @@ describe("Phase B — Page discovery on request", () => {
     const { url, res } = await login(t, { platform: "FACEBOOK", capability: "discovery" });
     expect(url.searchParams.get("scope")!.split(",").sort()).toEqual(["pages_show_list", "public_profile"]);
     expect(url.searchParams.get("auth_type")).toBe("rerequest");
-    // Without instagram_basic, NOVA doesn't even ask for the Instagram field.
+    // Meta is Pages-only: NOVA never asks Pages for Instagram children.
     const pagesCall = calls.find((c) => c.url.includes("/me/accounts"))!;
     expect(decodeURIComponent(pagesCall.url)).not.toContain("instagram_business_account");
 
@@ -99,10 +99,7 @@ describe("Phase B — Page discovery on request", () => {
     await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [fb.accounts[0].id] }]);
     expect((await getUsage(t.organization.id)).socialChannels.used).toBe(1);
     const diag = (await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!;
-    expect(diag.assets).toMatchObject({ identity: true, pages: 2, instagram: null, selectedPages: ["Luma Skin Studio"] });
-    // Instagram needs instagram_basic, which this app config doesn't enable → honest "not available yet".
-    const ig = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
-    expect(ig).toMatchObject({ state: "unavailable", nextStep: null });
+    expect(diag.assets).toMatchObject({ identity: true, pages: 2, selectedPages: ["Luma Skin Studio"] });
   });
 
   it("Page access granted but the account manages no Page → identity, with a clear reason", async () => {
@@ -124,37 +121,6 @@ describe("Phase B — Page discovery on request", () => {
     const cap = (name: string) => Object.fromEntries(fb.accounts.find((a) => a.name === name)!.capabilities!.map((c) => [c.key, c.available]));
     expect(cap("Luma Skin Studio").publish).toBe(true);
     expect(cap("Luma Offers").publish).toBe(false); // ANALYZE-only role on that Page
-  });
-});
-
-describe("Phase C — Instagram professional accounts", () => {
-  it("with instagram_basic enabled, the linked professional account is discovered and offered — never auto-selected", async () => {
-    const t = await makeTenant();
-    env({ META_OAUTH_SCOPES: "pages_show_list", META_OPTIONAL_SCOPES: "instagram_basic" });
-    mockMeta(["public_profile", "pages_show_list"], PAGES);
-    await login(t);
-    const before = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
-    expect(before).toMatchObject({ state: "idle", nextStep: { upgrade: "INSTAGRAM:discovery", kind: "instagram" } });
-
-    mockMeta(["public_profile", "pages_show_list", "instagram_basic"], PAGES);
-    const { url, res } = await login(t, { platform: "INSTAGRAM", capability: "discovery" });
-    expect(url.searchParams.get("scope")!.split(",")).toContain("instagram_basic");
-    expect(res.needsSelection).toEqual(expect.arrayContaining(["INSTAGRAM"]));
-    const ig = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
-    expect(ig.state).toBe("choose");
-    expect(ig.accounts.map((a) => [a.handle, a.isActive])).toEqual([["@lumaskin", false]]);
-    const diag = (await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!;
-    expect(diag.assets).toMatchObject({ pages: 2, instagram: 1 });
-  });
-
-  it("instagram_basic granted but no professional account linked → 'not found', not a fake account", async () => {
-    const t = await makeTenant();
-    env({ META_OAUTH_SCOPES: "pages_show_list,instagram_basic" });
-    mockMeta(["public_profile", "pages_show_list", "instagram_basic"], [PAGES[1]]);
-    await login(t);
-    const ig = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
-    expect(ig).toMatchObject({ instagramNotFound: true, accounts: [] });
-    expect((await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!.assets).toMatchObject({ instagram: 0 });
   });
 });
 

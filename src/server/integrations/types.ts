@@ -66,6 +66,7 @@ export type CapabilityKey =
   | "page_management"
   | "instagram_publishing"
   | "messages"
+  | "comments"
   | "leads"
   | "member_publishing"
   | "organization_publishing";
@@ -79,7 +80,7 @@ export type ConnectionCheck = { valid: boolean; expiresAt?: Date | null; scopes:
  * only — never scraping or password automation.
  */
 export interface SocialProvider {
-  readonly id: "meta" | "linkedin" | "tiktok";
+  readonly id: "meta" | "instagram" | "linkedin" | "tiktok";
   readonly platforms: SocialPlatform[];
   readonly scopes: string[];
   isConfigured(): boolean;

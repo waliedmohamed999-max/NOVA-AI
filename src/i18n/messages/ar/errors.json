@@ -47,5 +47,7 @@
   "meta_invalid_scope": "تعذر إكمال ربط Meta بسبب صلاحية غير مفعّلة في التطبيق.",
   "linkedin_invalid_scope": "تعذر إكمال ربط LinkedIn بسبب صلاحية غير مفعّلة في التطبيق.",
   "no_page_permission": "تم الاتصال بـ Meta، لكن لم يُمنح الوصول إلى أي صفحة بعد، لذلك لا توجد صفحات أو حسابات إنستغرام لإدارتها.",
-  "capability_unavailable": "هذه الميزة غير متاحة لهذا الحساب حاليًا."
+  "capability_unavailable": "هذه الميزة غير متاحة لهذا الحساب حاليًا.",
+  "instagram_personal_account": "يتطلب النشر التلقائي حساب Instagram احترافيًا (Business أو Creator). حوّل الحساب إلى Business أو Creator من تطبيق Instagram ثم أعد الربط.",
+  "instagram_invalid_scope": "تعذر إكمال ربط Instagram بسبب صلاحية غير مفعّلة في التطبيق."
 }

@@ -118,7 +118,7 @@ describe("Meta configured scopes", () => {
     const diag = (await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!;
     expect(diag.requested).toEqual(["public_profile", "pages_show_list"]);
     expect(diag.lastAttempt).toMatchObject({ outcome: "identity_connected", granted: ["public_profile", "pages_show_list"], missing: [] });
-    expect(diag.assets).toMatchObject({ identity: true, pages: 0, instagram: null });
+    expect(diag.assets).toMatchObject({ identity: true, pages: 0 });
     const fbPublish = diag.capabilities.find((c) => c.platform === "FACEBOOK" && c.capability === "publish")!;
     expect(fbPublish.status).toBe("not_enabled");
     expect(diag.capabilities.find((c) => c.platform === "FACEBOOK" && c.capability === "discovery")!.status).toBe("available");

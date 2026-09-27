@@ -573,21 +573,25 @@
         "error": "Error"
       },
       "names": {
-        "meta": "Meta (Instagram + Facebook)",
+        "meta": "Facebook Pages (Meta)",
         "linkedin": "LinkedIn",
         "tiktok": "TikTok",
         "openai": "OpenAI",
         "anthropic": "Anthropic",
         "email": "Email (SMTP)",
         "storage": "File storage",
-        "payments": "Payments"
+        "payments": "Payments",
+        "instagram": "Instagram Direct"
       },
       "notes": {
         "local": "Local disk storage — fine for one server; use S3/R2 when running several instances.",
         "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked.",
         "meta_secret_is_access_token": "META_APP_SECRET contains an access token (starts with EAA), not the App Secret. Use App settings → Basic → App secret (32 hex characters) of the same app as META_APP_ID. If that token was shared anywhere, revoke it.",
         "meta_secret_format": "META_APP_SECRET doesn't look like an App Secret (32 hex characters from App settings → Basic).",
-        "meta_app_id_format": "META_APP_ID must be the numeric App ID."
+        "meta_app_id_format": "META_APP_ID must be the numeric App ID.",
+        "instagram_secret_is_access_token": "INSTAGRAM_APP_SECRET contains an access token, not the Instagram App Secret. Use Instagram → API setup with Instagram login → Instagram app secret.",
+        "instagram_secret_format": "INSTAGRAM_APP_SECRET doesn't look like an App Secret (32 hex characters).",
+        "instagram_app_id_format": "INSTAGRAM_APP_ID must be the numeric Instagram app ID (not the Facebook App ID field name)."
       }
     },
     "tests": {
@@ -659,7 +663,8 @@
         "available": "Available ({count})",
         "noneFound": "None managed",
         "notFound": "Not found",
-        "selected": "Selected"
+        "selected": "Selected",
+        "notSelected": "not selected yet"
       }
     }
   },
@@ -704,7 +709,7 @@
       "YOUTUBE": "Videos and channel analytics.",
       "X": "Posts and replies."
     },
-    "metaNote": "Instagram and Facebook connect together through one secure Meta sign-in.",
+    "metaNote": "Instagram connects directly with Instagram sign-in; Facebook Pages connect with Meta sign-in.",
     "oauthNote": "You sign in on the platform itself — NOVA never sees or stores your password.",
     "emailNote": "Google and Microsoft sign-in are coming soon. NOVA will never ask for your email password.",
     "success": "{platform} connected",
@@ -744,7 +749,8 @@
       "messages": "Messages",
       "leads": "Lead forms",
       "member_publishing": "Posting as you",
-      "organization_publishing": "Company page posting"
+      "organization_publishing": "Company page posting",
+      "comments": "Comments"
     },
     "capabilityReasons": {
       "permission_missing": "Permission not granted — reconnect and allow it",
@@ -761,12 +767,12 @@
     "identityNoPages": "Signed in, but this account doesn't manage any Facebook Page yet. NOVA publishes to Pages, not to personal profiles.",
     "instagramNotFound": "No Instagram professional account (Business or Creator) is linked to your Pages. Automatic publishing requires one.",
     "profileNote": "Your personal Facebook profile is used for sign-in only — Meta doesn't allow automatic publishing to profiles. NOVA manages the Facebook Pages you choose.",
-    "instagramNote": "Automatic publishing requires an Instagram professional account (Business or Creator) linked to one of your Pages.",
+    "instagramNote": "Automatic publishing requires an Instagram professional account (Business or Creator). Personal Instagram accounts can't be connected.",
     "pickerPages": "Facebook Pages",
     "pickerPagesHint": "NOVA can manage and publish content on these",
     "pickerPageOk": "Can be connected",
     "pickerInstagram": "Instagram Professional",
-    "pickerInstagramHint": "Business or Creator accounts linked to your Pages",
+    "pickerInstagramHint": "Business or Creator accounts",
     "pickerInstagramOk": "Business / Creator"
   }
 }

@@ -24,14 +24,27 @@ export async function OAuthDiagnostics({ rows }: { rows: ProviderDiagnostics[] }
       {rows.map((r) => (
         <article key={r.id} className="space-y-4 rounded-2xl border border-line bg-surface p-5 text-sm" data-oauth={r.id}>
           <header className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-semibold">{r.id === "meta" ? "Meta" : "LinkedIn"}</h3>
+            <h3 className="text-base font-semibold">{r.id === "meta" ? "Facebook Pages (Meta)" : r.id === "instagram" ? "Instagram Direct" : "LinkedIn"}</h3>
             <Badge tone={r.configured && !r.redirectProblem ? "success" : "danger"}>{r.configured ? (r.redirectProblem ? t("redirectInvalid") : t("configured")) : t("missing")}</Badge>
           </header>
           {r.credentialProblem && r.credentialProblem !== "missing" && (
             <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-xs text-danger">{t(`credential.${r.credentialProblem}` as "credential.secret_format")}</p>
           )}
+          {r.instagramAccount && (
+            <p className="rounded-xl bg-surface-2 p-3 text-xs">
+              <span className="text-ink-3">{t("assets.instagram")}: </span>
+              {r.instagramAccount.connected ? (
+                <span className="font-semibold text-success" dir="auto">
+                  {r.instagramAccount.handle} · {r.instagramAccount.type === "BUSINESS" ? "Business" : r.instagramAccount.type === "CREATOR" ? "Creator" : "—"}
+                  {!r.instagramAccount.selected && ` (${t("assets.notSelected")})`}
+                </span>
+              ) : (
+                <span className="text-ink-3">{t("assets.notConnected")}</span>
+              )}
+            </p>
+          )}
           {r.assets && (
-            <ul className="grid gap-1.5 rounded-xl bg-surface-2 p-3 text-xs sm:grid-cols-3">
+            <ul className="grid gap-1.5 rounded-xl bg-surface-2 p-3 text-xs sm:grid-cols-2">
               <li>
                 <span className="block text-ink-3">{t("assets.identity")}</span>
                 <span className={r.assets.identity ? "font-semibold text-success" : "text-ink-3"}>{r.assets.identity ? t("assets.connected") : t("assets.notConnected")}</span>
@@ -40,14 +53,10 @@ export async function OAuthDiagnostics({ rows }: { rows: ProviderDiagnostics[] }
                 <span className="block text-ink-3">{t("assets.pages")}</span>
                 <span className={r.assets.pages ? "font-semibold text-success" : "text-ink-3"}>{r.assets.pages === null ? t("assets.permissionRequired") : r.assets.pages > 0 ? t("assets.available", { count: r.assets.pages }) : t("assets.noneFound")}</span>
               </li>
-              <li>
-                <span className="block text-ink-3">{t("assets.instagram")}</span>
-                <span className={r.assets.instagram ? "font-semibold text-success" : "text-ink-3"}>{r.assets.instagram === null ? t("assets.permissionRequired") : r.assets.instagram > 0 ? t("assets.available", { count: r.assets.instagram }) : t("assets.notFound")}</span>
-              </li>
-              {(r.assets.selectedPages.length > 0 || r.assets.selectedInstagram.length > 0) && (
-                <li className="sm:col-span-3">
+              {r.assets.selectedPages.length > 0 && (
+                <li className="sm:col-span-2">
                   <span className="text-ink-3">{t("assets.selected")}: </span>
-                  <span dir="auto">{[...r.assets.selectedPages, ...r.assets.selectedInstagram].join(" · ")}</span>
+                  <span dir="auto">{r.assets.selectedPages.join(" · ")}</span>
                 </li>
               )}
             </ul>

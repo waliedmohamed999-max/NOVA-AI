@@ -1,4 +1,5 @@
 import { metaCredentialProblem } from "../integrations/providers/meta";
+import { instagramCredentialProblem } from "../integrations/providers/instagram";
 
 /**
  * Platform-admin view of provider configuration. Reads environment variables only —
@@ -28,6 +29,13 @@ function row(key: string, required: ProviderField[], optional: ProviderField[] =
   return { key, status: judge(required), fields: [...required, ...optional], note };
 }
 
+function instagramRow(): ProviderRow {
+  const r = row("instagram", [field("INSTAGRAM_APP_ID", "id"), field("INSTAGRAM_APP_SECRET", "secret")], [field("INSTAGRAM_REDIRECT_URI", "setting"), field("INSTAGRAM_OAUTH_SCOPES", "setting")]);
+  const problem = instagramCredentialProblem();
+  if (problem && problem !== "missing") return { ...r, status: "error", note: `instagram_${problem}` };
+  return r;
+}
+
 function metaRow(): ProviderRow {
   const r = row("meta", [field("META_APP_ID", "id"), field("META_APP_SECRET", "secret")], [field("META_REDIRECT_URI", "setting"), field("META_PERMISSION_MODE", "setting"), field("META_OAUTH_SCOPES", "setting"), field("META_GRAPH_VERSION", "setting")]);
   const problem = metaCredentialProblem();
@@ -42,6 +50,7 @@ export function providerConfigStatus(): ProviderRow[] {
   const stripeSet = stripe.some((f) => f.value);
   return [
     metaRow(),
+    instagramRow(),
     row("linkedin", [field("LINKEDIN_CLIENT_ID", "id"), field("LINKEDIN_CLIENT_SECRET", "secret")], [field("LINKEDIN_REDIRECT_URI", "setting"), field("LINKEDIN_API_VERSION", "setting"), field("LINKEDIN_ORGANIZATION_ACCESS", "setting")]),
     row("tiktok", [field("TIKTOK_CLIENT_KEY", "id"), field("TIKTOK_CLIENT_SECRET", "secret")]),
     row("openai", [field("OPENAI_API_KEY", "secret")], [field("OPENAI_MODEL_BEST", "setting"), field("OPENAI_MODEL_FAST", "setting")]),

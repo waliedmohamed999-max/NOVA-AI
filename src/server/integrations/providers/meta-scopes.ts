@@ -23,13 +23,6 @@ export const META_CAPABILITY_SCOPES: Record<string, Partial<Record<CapabilityKey
     leads: ["leads_retrieval"],
     business_assets: ["business_management"],
   },
-  INSTAGRAM: {
-    discovery: ["pages_show_list", "instagram_basic"],
-    identity: ["pages_show_list", "instagram_basic"],
-    instagram_publishing: ["pages_show_list", "instagram_basic", "instagram_content_publish"],
-    metrics: ["pages_show_list", "instagram_basic", "instagram_manage_insights"],
-    messages: ["instagram_manage_messages"],
-  },
 };
 
 /** Known Meta permission names; anything else (typos, retired names like manage_pages) is dropped with a warning. */

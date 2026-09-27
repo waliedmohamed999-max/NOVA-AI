@@ -67,7 +67,7 @@ export function ConnectionTests({ rows, testText, confirmWord }: { rows: Row[]; 
                 <Badge tone={row.status === "CONNECTED" ? "success" : "danger"}>{row.status}</Badge>
               </div>
               <Button size="sm" variant="secondary" loading={busy === row.id} onClick={() => run(row.id)}>
-                {t("run", { provider: row.provider === "LINKEDIN" ? "LinkedIn" : "Meta" })}
+                {t("run", { provider: row.provider === "LINKEDIN" ? "LinkedIn" : row.provider === "INSTAGRAM" ? "Instagram" : "Meta" })}
               </Button>
             </div>
             {res && (

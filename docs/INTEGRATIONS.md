@@ -6,27 +6,57 @@ All social integrations use official APIs through the `SocialProvider` interface
 
 Customers never see app IDs, secrets, environment variable names or "admin setup" messages. They see channels, states and human-readable errors.
 
-### Meta, as the platform actually works
+### Providers per channel
+
+| Card | Provider | Sign-in |
+| --- | --- | --- |
+| Facebook | `meta` (Facebook Pages only) | Facebook Login |
+| Instagram | `instagram` (Instagram Direct) | Instagram Login — no Facebook Page, no `pages_show_list` |
+| LinkedIn | `linkedin` | LinkedIn OpenID Connect |
+
+### Facebook Pages (Meta), as the platform actually works
 
 | Asset | What NOVA does |
 | --- | --- |
 | Facebook **personal profile** | Sign-in and authorization **only**. Meta doesn't allow automatic publishing to profiles, so a profile is never offered as a destination. |
 | Facebook **Pages** the user manages | Discovered with `pages_show_list`, chosen in the picker ("NOVA can manage and publish content on these"). Publishing and analytics attach to Pages only. |
-| Instagram **Professional** (Business or Creator) | Discovered through the Page it is linked to (Instagram API with Facebook Login, `instagram_basic`). Personal Instagram accounts are not publishable, and Meta doesn't return them here. |
 
 The flow runs in steps, and each permission is requested only when the customer asks for that step:
 1. **Login** (`public_profile`). The card shows **Meta identity connected ✓** with "No manageable channel found yet", plus **[Grant access to Pages]**. This is a success state, not an error, and it doesn't count as a plan channel.
 2. **Grant access to Pages.** This re-runs OAuth with `auth_type=rerequest` for `pages_show_list` only.
    - NOVA lists the managed Pages. Nothing is pre-selected, not even a single Page.
    - If the account manages no Page, the card says so.
-3. **Instagram.** When `instagram_basic` is enabled (`META_OAUTH_SCOPES` / `META_OPTIONAL_SCOPES`), **[Grant Instagram access]** discovers the Professional accounts linked to the Pages and offers them in the picker ("Business / Creator").
-   - If none is linked: "Automatic publishing requires an Instagram professional account (Business or Creator)".
-   - If the permission isn't enabled for the app, the Instagram card says "Not available yet".
-4. **Publishing, analytics and other capabilities** light up only from **granted** permissions, e.g. `pages_manage_posts` for Page publishing. Page roles (tasks) are also respected.
+3. **Publishing, analytics and other capabilities** light up only from **granted** permissions, e.g. `pages_manage_posts` for Page publishing. Page roles (tasks) are also respected.
 
-**Instagram Login** (Instagram API with Instagram Login, connecting a Professional account without a Facebook Page) is **not implemented**.
-- The architecture has one provider per platform, and the Instagram channel is served by the Meta Graph provider.
-- Supporting it needs a second Instagram provider on `graph.instagram.com` with `instagram_business_*` permissions, and per-integration provider routing.
+### Instagram Direct (Instagram API with Instagram Login)
+
+`src/server/integrations/providers/instagram.ts` — its own provider. It is not a child of a Facebook Page.
+
+- **Credentials:** `INSTAGRAM_APP_ID` / `INSTAGRAM_APP_SECRET`. These are *different* from the Facebook App ID/secret; find them in the Meta dashboard under Instagram → API setup with Instagram login.
+- **Redirect URI:** `INSTAGRAM_REDIRECT_URI`, or `{APP_URL}/api/integrations/instagram/callback`. Register it under Business login settings.
+- **Flow:**
+  1. `https://www.instagram.com/oauth/authorize` (`enable_fb_login=0`).
+  2. `POST https://api.instagram.com/oauth/access_token`, server-side, which returns a short-lived token and the granted `permissions`.
+  3. `graph.instagram.com/access_token?grant_type=ig_exchange_token` for a long-lived (~60 day) token, which is then encrypted.
+  4. `/me` returns `user_id`, `username`, `account_type`.
+- **Account types:** only **Business** or **Creator** (`MEDIA_CREATOR`) accounts are accepted. A personal account gets "Automatic publishing requires an Instagram professional account (Business or Creator)" and nothing is stored. The single account that signed in is used directly.
+- **Permissions:** current names only.
+  - `INSTAGRAM_OAUTH_SCOPES`: requested at login. `instagram_business_basic` is always included.
+  - `INSTAGRAM_OPTIONAL_SCOPES`: requested on demand.
+  - Retired names are ignored.
+
+  | Capability | Permission |
+  | --- | --- |
+  | Identity | `instagram_business_basic` |
+  | Publishing | `instagram_business_content_publish` |
+  | Analytics | `instagram_business_manage_insights` |
+  | Comments | `instagram_business_manage_comments` |
+  | Messages | `instagram_business_manage_messages` |
+
+- **Publishing:** `graph.instagram.com/{ig-user-id}/media` → `media_publish` (image, carousel, reels, stories). Instagram needs media: no text-only posts.
+- **Refresh:** `ig_refresh_token`.
+- **Health:** a `/me` read, because Instagram Login has no `debug_token`.
+- **Disconnect:** deletes the stored token. Instagram Login has no revoke endpoint. The Facebook connection is not affected.
 
 **Credential check.** `META_APP_SECRET` must be the 32-hex App Secret (App settings → Basic) of the app in `META_APP_ID`. An access token (`EAA…`) there is detected and treated as "not configured":
 - The login dialog would still open, because it needs only the App ID.
@@ -181,7 +211,7 @@ Capabilities are computed from **granted** scopes, never from requested ones. Fo
 | Integration | Implemented | Locally tested | Integration-tested (mocked) | Real-provider tested |
 | --- | --- | --- | --- | --- |
 | Meta: Facebook Pages | OAuth, long-lived tokens, granted-scope detection, Page tasks → capabilities, account picker, publish (feed/photo), native schedule (text), posts, insights, debug_token health check, admin test + confirmed test post | ✓ UI/flow (picker rendered with temporary rows) | ✓ OAuth start/callback/state/picker/capabilities/disconnect/expiry/missing credentials with mocked Graph API | ✗ **not tested with a real Meta app or account** (no credentials in this environment) |
-| Meta: Instagram professional | via Page (only when a Page has one linked); publish image/carousel/reels/stories, insights, followers | ✓ | ✓ | ✗ not tested with a real account |
+| Instagram Direct (Instagram Login) | OAuth (instagram.com) + long-lived token, Business/Creator only, profile, capability-gated publishing/insights, refresh, health | ✓ | ✓ start/callback/personal-account refusal/upgrade/publish/health/disconnect with mocked API | ✗ **pending: INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET not configured** |
 | LinkedIn | OIDC (`openid profile email w_member_social`), profile, member posting, image upload, introspection health check, admin test + confirmed test post; org pages only when `LINKEDIN_ORGANIZATION_ACCESS=true` | ✓ | ✓ OAuth start/callback/profile/scopes/capabilities/disconnect/expiry/missing credentials with mocked API | ✗ **not tested with a real LinkedIn app or account** |
 | TikTok | Login Kit v2 + PKCE, refresh, Content Posting (PULL_FROM_URL), video list/query | ✓ | ✓ | ✗ pending |
 | X / YouTube / Pinterest | listed as "coming soon" | — | — | — |

@@ -21,8 +21,16 @@ import { ProviderError, type SocialProvider } from "@/server/integrations/types"
 import { hashToken } from "@/server/crypto";
 import { maskId, providerConfigStatus } from "@/server/admin/providers";
 
-const original = SOCIAL_PROVIDERS.meta;
-afterEach(() => setSocialProvider("meta", original));
+// These are broker tests: one fake serves every platform so the broker logic is tested on its own.
+const original = { meta: SOCIAL_PROVIDERS.meta, instagram: SOCIAL_PROVIDERS.instagram };
+afterEach(() => {
+  setSocialProvider("meta", original.meta);
+  setSocialProvider("instagram", original.instagram);
+});
+function useFake(p: SocialProvider) {
+  setSocialProvider("meta", p);
+  setSocialProvider("instagram", p);
+}
 
 type Acc = Awaited<ReturnType<SocialProvider["listAccounts"]>>[number];
 const ig = (id: string, handle = `@${id}`): Acc => ({ externalId: id, platform: "INSTAGRAM", name: id, handle, accountType: "instagram_business", token: { accessToken: `tok-${id}` } });
@@ -57,7 +65,7 @@ async function connect(t: Awaited<ReturnType<typeof makeTenant>>, from: "onboard
 
 describe("return context", () => {
   it("returns to onboarding when started from onboarding, settings otherwise", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     expect((await connect(t, "onboarding")).redirectTo).toBe(ONBOARDING_CONNECT_PATH);
     expect((await connect(t, "settings")).redirectTo).toBe(CONNECTED_ACCOUNTS_PATH);
@@ -66,7 +74,7 @@ describe("return context", () => {
   it("never turns a return value into an open redirect", async () => {
     expect(returnPathFor("https://evil.example")).toBe(CONNECTED_ACCOUNTS_PATH);
     expect(returnPathFor("//evil.example")).toBe(CONNECTED_ACCOUNTS_PATH);
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     const url = await startConnect(t.scope, t.user.id, "meta", "https://evil.example" as never);
     const state = new URL(url).searchParams.get("state")!;
@@ -78,7 +86,7 @@ describe("return context", () => {
 
 describe("state validation", () => {
   it("rejects forged, expired, wrong-provider and replayed states", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     await expect(completeConnect("meta", { code: "c", state: "forged" })).rejects.toMatchObject({ code: "oauth_state" });
     await expect(completeConnect("meta", { code: "c", state: null })).rejects.toMatchObject({ code: "oauth_state" });
@@ -96,7 +104,7 @@ describe("state validation", () => {
   });
 
   it("maps a cancelled consent and a failed exchange to human errors on the right page", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")], { exchangeCode: async () => { throw new ProviderError("unknown", "boom secret-ish detail"); } }));
+    useFake(fakeMeta([ig("luma")], { exchangeCode: async () => { throw new ProviderError("unknown", "boom secret-ish detail"); } }));
     const t = await makeTenant();
     const s1 = new URL(await startConnect(t.scope, t.user.id, "meta", "onboarding")).searchParams.get("state")!;
     expect(await completeConnect("meta", { code: null, state: s1, error: "access_denied" })).toMatchObject({ redirectTo: ONBOARDING_CONNECT_PATH, error: "oauth_denied" });
@@ -106,7 +114,7 @@ describe("state validation", () => {
   });
 
   it("a Meta sign-in without any Page is an identity connection, not a failure", async () => {
-    setSocialProvider("meta", fakeMeta([]));
+    useFake(fakeMeta([]));
     const t = await makeTenant();
     const res = await connect(t);
     expect(res.error).toBeUndefined();
@@ -116,7 +124,7 @@ describe("state validation", () => {
 
 describe("account selection", () => {
   it("never auto-selects when several accounts come back, and activates only the chosen ones", async () => {
-    setSocialProvider("meta", fakeMeta([ig("brand_a"), ig("brand_b"), fb("p1")]));
+    useFake(fakeMeta([ig("brand_a"), ig("brand_b"), fb("p1")]));
     const t = await makeTenant();
     const res = await connect(t, "onboarding");
     expect(res.needsSelection).toEqual(["INSTAGRAM", "FACEBOOK"]); // Meta assets are never auto-selected
@@ -142,7 +150,7 @@ describe("account selection", () => {
   });
 
   it("rejects empty selections and accounts from another integration", async () => {
-    setSocialProvider("meta", fakeMeta([ig("a1"), ig("a2"), fb("p1")]));
+    useFake(fakeMeta([ig("a1"), ig("a2"), fb("p1")]));
     const t = await makeTenant();
     await connect(t);
     const view = await loadConnections(t.scope, false);
@@ -155,7 +163,7 @@ describe("account selection", () => {
 
 describe("tenant isolation", () => {
   it("one workspace cannot select, see or disconnect another workspace's accounts", async () => {
-    setSocialProvider("meta", fakeMeta([ig("a1"), ig("a2")]));
+    useFake(fakeMeta([ig("a1"), ig("a2")]));
     const a = await makeTenant("Tenant A");
     const b = await makeTenant("Tenant B");
     await connect(a);
@@ -169,7 +177,7 @@ describe("tenant isolation", () => {
 
 describe("disconnect, expiry and reconnect", () => {
   it("disconnect revokes, deletes credentials and frees the channel", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     await connect(t);
     const card = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
@@ -183,7 +191,7 @@ describe("disconnect, expiry and reconnect", () => {
   });
 
   it("an expired connection shows 'needs reconnecting' and a reconnect restores it", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     await connect(t);
     const card0 = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
@@ -202,7 +210,7 @@ describe("disconnect, expiry and reconnect", () => {
 
 describe("plan channel limit and missing credentials", () => {
   it("adds channels up to the plan limit and reports the rest as limited", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma"), fb("p1")]));
+    useFake(fakeMeta([ig("luma"), fb("p1")]));
     const t = await makeTenant();
     await db.subscription.update({ where: { organizationId: t.organization.id }, data: { plan: "STARTER" } });
     await db.integration.create({ data: { ...t.scope, provider: "LINKEDIN", status: "CONNECTED" } }); // 1 of 2 used
@@ -213,7 +221,7 @@ describe("plan channel limit and missing credentials", () => {
   });
 
   it("refuses to start when the channel limit is already reached", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")]));
+    useFake(fakeMeta([ig("luma")]));
     const t = await makeTenant();
     await db.subscription.update({ where: { organizationId: t.organization.id }, data: { plan: "STARTER" } });
     await db.integration.createMany({ data: [{ ...t.scope, provider: "LINKEDIN", status: "CONNECTED" }, { ...t.scope, provider: "TIKTOK", status: "CONNECTED" }] });
@@ -221,7 +229,7 @@ describe("plan channel limit and missing credentials", () => {
   });
 
   it("shows unavailable (not env names) when the platform app isn't configured", async () => {
-    setSocialProvider("meta", fakeMeta([ig("luma")], { isConfigured: () => false }));
+    useFake(fakeMeta([ig("luma")], { isConfigured: () => false }));
     const t = await makeTenant();
     await expect(startConnect(t.scope, t.user.id, "meta")).rejects.toMatchObject({ code: "integration_not_configured" });
     const view = await loadConnections(t.scope, false);
@@ -257,7 +265,7 @@ describe("helpers", () => {
 
 describe("callback route", () => {
   it("redirects to the return page with platform names only — no code, state or token in the URL", async () => {
-    setSocialProvider("meta", fakeMeta([ig("a1"), ig("a2"), fb("p1")]));
+    useFake(fakeMeta([ig("a1"), ig("a2"), fb("p1")]));
     const t = await makeTenant();
     const { NextRequest } = await import("next/server");
     const { GET } = await import("@/app/api/integrations/[provider]/callback/route");
@@ -277,7 +285,7 @@ describe("callback route", () => {
 
 describe("callback route — session binding", () => {
   it("rejects a callback finished by a different signed-in user", async () => {
-    setSocialProvider("meta", fakeMeta([ig("a1")]));
+    useFake(fakeMeta([ig("a1")]));
     const t = await makeTenant();
     const attacker = await makeTenant("Attacker");
     const { NextRequest } = await import("next/server");

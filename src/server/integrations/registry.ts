@@ -1,14 +1,16 @@
 import type { Provider } from "@/generated/prisma/enums";
 import { MetaProvider } from "./providers/meta";
+import { InstagramProvider } from "./providers/instagram";
 import { LinkedInProvider } from "./providers/linkedin";
 import { TikTokProvider } from "./providers/tiktok";
 import type { SocialProvider } from "./types";
 
 const meta = new MetaProvider();
+const instagram = new InstagramProvider();
 const linkedin = new LinkedInProvider();
 const tiktok = new TikTokProvider();
 
-export const SOCIAL_PROVIDERS: Record<SocialProvider["id"], SocialProvider> = { meta, linkedin, tiktok };
+export const SOCIAL_PROVIDERS: Record<SocialProvider["id"], SocialProvider> = { meta, instagram, linkedin, tiktok };
 
 /** Test hook. */
 export function setSocialProvider(id: SocialProvider["id"], p: SocialProvider) {
@@ -19,7 +21,8 @@ export type CatalogEntry = { provider: Provider; oauth: SocialProvider["id"] | n
 
 /** What the Integration Center shows. Future connectors are listed but not connectable. */
 export const INTEGRATION_CATALOG: CatalogEntry[] = [
-  { provider: "INSTAGRAM", oauth: "meta", stage: "available", docs: "META_APP_ID / META_APP_SECRET" },
+  // Instagram Direct (Instagram API with Instagram Login) — its own provider, not a child of a Facebook Page.
+  { provider: "INSTAGRAM", oauth: "instagram", stage: "available", docs: "INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET" },
   { provider: "FACEBOOK", oauth: "meta", stage: "available", docs: "META_APP_ID / META_APP_SECRET" },
   { provider: "LINKEDIN", oauth: "linkedin", stage: "available", docs: "LINKEDIN_CLIENT_ID / LINKEDIN_CLIENT_SECRET" },
   { provider: "TIKTOK", oauth: "tiktok", stage: "available", docs: "TIKTOK_CLIENT_KEY / TIKTOK_CLIENT_SECRET" },
@@ -37,7 +40,7 @@ export function providerForPlatform(platform: string): SocialProvider | null {
   return providerFor(platform as Provider);
 }
 
-const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIRECT_URI", linkedin: "LINKEDIN_REDIRECT_URI", tiktok: "TIKTOK_REDIRECT_URI" };
+const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIRECT_URI", instagram: "INSTAGRAM_REDIRECT_URI", linkedin: "LINKEDIN_REDIRECT_URI", tiktok: "TIKTOK_REDIRECT_URI" };
 
 /**
  * The exact callback URL registered with the provider. `<PROVIDER>_REDIRECT_URI` wins (it must match
@@ -73,7 +76,8 @@ export type RegistryEntry = {
  */
 export function providerRegistry(): RegistryEntry[] {
   return [
-    { id: "meta", label: "Meta", stage: "live", platforms: ["FACEBOOK", "INSTAGRAM"], provider: SOCIAL_PROVIDERS.meta },
+    { id: "meta", label: "Facebook Pages (Meta)", stage: "live", platforms: ["FACEBOOK"], provider: SOCIAL_PROVIDERS.meta },
+    { id: "instagram", label: "Instagram Direct", stage: "live", platforms: ["INSTAGRAM"], provider: SOCIAL_PROVIDERS.instagram },
     { id: "linkedin", label: "LinkedIn", stage: "live", platforms: ["LINKEDIN"], provider: SOCIAL_PROVIDERS.linkedin },
     { id: "tiktok", label: "TikTok", stage: "live", platforms: ["TIKTOK"], provider: SOCIAL_PROVIDERS.tiktok },
     { id: "google", label: "Google", stage: "planned", platforms: ["EMAIL"], provider: null },
@@ -83,7 +87,7 @@ export function providerRegistry(): RegistryEntry[] {
 
 /** Non-secret OAuth setup summary for logs and admin diagnostics. Never includes secrets or tokens. */
 export function oauthSetupSummary() {
-  return (["linkedin", "meta"] as const).map((id) => {
+  return (["linkedin", "meta", "instagram"] as const).map((id) => {
     let redirectUri: string | null = null;
     let problem: string | null = null;
     try {

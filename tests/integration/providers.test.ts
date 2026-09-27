@@ -39,7 +39,7 @@ describe("Meta adapter (mocked Graph API)", () => {
     expect(url.searchParams.get("state")).toBe("s1");
     expect(url.searchParams.get("scope")).toContain("instagram_content_publish");
   });
-  it("exchanges the code for a long-lived token and lists pages + instagram accounts", async () => {
+  it("exchanges the code for a long-lived token and lists Facebook Pages only", async () => {
     mockFetch([
       [/oauth\/access_token\?.*code=/, () => ({ body: { access_token: "short" } })],
       [/oauth\/access_token\?.*fb_exchange_token/, () => ({ body: { access_token: "long", expires_in: 5_000_000 } })],
@@ -50,8 +50,9 @@ describe("Meta adapter (mocked Graph API)", () => {
     expect(token.accessToken).toBe("long");
     expect(token.scopes).toEqual(["pages_show_list", "instagram_basic"]); // granted only, not what was requested
     const accounts = await meta.listAccounts(token);
-    expect(accounts.map((a) => a.platform)).toEqual(["FACEBOOK", "INSTAGRAM"]);
-    expect(accounts[1].token?.accessToken).toBe("page-token");
+    // Instagram is its own provider now; Meta never turns a Page's Instagram child into an account.
+    expect(accounts.map((a) => a.platform)).toEqual(["FACEBOOK"]);
+    expect(accounts[0].token?.accessToken).toBe("page-token");
   });
   it("publishes to Instagram via container + media_publish", async () => {
     mockFetch([
