@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { requireTenant } from "@/server/context";
 import { ContentEditor } from "@/features/content/editor";
 import type { StudioItem } from "@/features/content/studio";
+import { signedFileUrl } from "@/server/storage";
+import { imageProvider } from "@/server/design/image-provider";
 
 export const metadata: Metadata = { title: "Post" };
 
@@ -17,6 +19,7 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
       approvals: { orderBy: { createdAt: "desc" }, take: 30 },
       socialPosts: { select: { id: true, permalink: true } },
       publications: { orderBy: { createdAt: "desc" }, take: 5 },
+      assets: { orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
   if (!item) notFound();
@@ -41,6 +44,7 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
     campaign: item.campaign?.name ?? null,
     authorAgent: item.authorAgent,
     rationale: item.aiRationale,
+    imageUrl: item.assets[0]?.fileId ? signedFileUrl(item.assets[0].fileId) : item.assets[0]?.url ?? null,
   };
 
   return (
@@ -54,6 +58,7 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
       versions={item.versions.map((v) => ({ version: v.version, caption: v.caption, hook: v.hook, note: v.changeNote, by: v.createdByAgent ?? nameOf(v.createdById), at: v.createdAt.toISOString() }))}
       history={item.approvals.map((a) => ({ id: a.id, action: a.action, comment: a.comment, by: nameOf(a.userId), at: a.createdAt.toISOString() }))}
       can={{ approve: ctx.can("content:approve"), edit: ctx.can("content:create"), publish: ctx.can("content:publish") }}
+      imagesEnabled={imageProvider().isConfigured()}
     />
   );
 }

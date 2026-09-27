@@ -54,12 +54,15 @@ export function registerAllJobs() {
   // Sales
   registerJob("sales.followups_due", async () => {
     const now = new Date();
+    // Each reminder fires once (remindedAt), no matter how late the scheduler runs.
     const due = await db.salesActivity.findMany({
-      where: { completedAt: null, dueAt: { lte: now, gt: new Date(now.getTime() - 15 * 60_000) } },
+      where: { completedAt: null, remindedAt: null, dueAt: { lte: now } },
       include: { lead: true },
       take: 500,
     });
     for (const a of due) {
+      const claimed = await db.salesActivity.updateMany({ where: { id: a.id, remindedAt: null }, data: { remindedAt: now } });
+      if (claimed.count !== 1) continue;
       await notify({
         organizationId: a.organizationId,
         workspaceId: a.workspaceId,

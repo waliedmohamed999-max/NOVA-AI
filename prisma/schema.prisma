@@ -1428,6 +1428,7 @@ model SalesActivity {
   body           String?
   dueAt          DateTime?
   completedAt    DateTime?
+  remindedAt     DateTime?
   assignedToId   String?
   createdByAgent AgentKey?
   createdById    String?

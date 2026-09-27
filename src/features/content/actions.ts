@@ -89,3 +89,20 @@ export const planWeek = tenantAction({ name: "content.plan_week", permission: "c
   });
   return { runId: run.id };
 });
+
+/** Designer: renders the post's design brief into an image using the Brand Kit (needs an image provider key). */
+export const generateVisual = tenantAction({ name: "content.visual", permission: "content:create", rateLimit: 6 }, z.object({ id: z.string() }), async ({ id }, ctx) => {
+  const { imageProvider, buildImagePrompt, sizeForFormat } = await import("@/server/design/image-provider");
+  const { saveUpload } = await import("@/server/storage");
+  const provider = imageProvider();
+  if (!provider.isConfigured()) throw new UserFacingError("integration_not_configured");
+  const item = await ctx.db.contentItem.findUnique({ where: { id } });
+  if (!item?.designBrief) throw new UserFacingError("content_not_found");
+  const kit = await ctx.db.brandKit.findFirst();
+  const prompt = buildImagePrompt(item.designBrief as never, { primaryColors: kit?.primaryColors ?? [], secondaryColors: kit?.secondaryColors ?? [], imageStyle: kit?.imageStyle ?? null, forbiddenStyles: kit?.forbiddenStyles ?? [], layoutRules: kit?.layoutRules ?? [] }, item.format);
+  const image = await provider.generate({ prompt, size: sizeForFormat(item.format) });
+  const file = await saveUpload({ organizationId: ctx.organization.id, workspaceId: ctx.workspace.id, userId: ctx.user.id, fileName: `${item.id}.png`, data: image.data, purpose: "generated_visual" });
+  await ctx.db.contentAsset.create({ data: { organizationId: "", workspaceId: "", contentItemId: id, kind: "IMAGE", fileId: file.id, generatedBy: provider.name, prompt, position: 0 } });
+  revalidatePath(`/content/${id}`);
+  return { fileId: file.id };
+});

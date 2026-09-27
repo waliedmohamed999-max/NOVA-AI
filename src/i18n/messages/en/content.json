@@ -1,7 +1,13 @@
 {
   "title": "Content Studio",
   "description": "Everything your AI team writes — from idea to published post.",
-  "views": { "ideas": "Ideas", "drafts": "Drafts", "approval": "Approval", "scheduled": "Scheduled", "published": "Published" },
+  "views": {
+    "ideas": "Ideas",
+    "drafts": "Drafts",
+    "approval": "Approval",
+    "scheduled": "Scheduled",
+    "published": "Published"
+  },
   "status": {
     "IDEA": "Idea",
     "DRAFT": "Draft",
@@ -25,11 +31,26 @@
   "unscheduled": "Not scheduled",
   "why": "Why this post:",
   "empty": {
-    "ideas": { "title": "No ideas saved yet", "body": "Ask your AI team for ideas any time — they'll appear here." },
-    "drafts": { "title": "Let's create your first week of content.", "body": "Your AI team will plan, write and design a full week based on your business." },
-    "approval": { "title": "Nothing waiting for approval", "body": "When your AI team prepares new posts, you'll review them here." },
-    "scheduled": { "title": "Nothing scheduled yet", "body": "Approved posts appear here with their publishing time." },
-    "published": { "title": "No published posts yet", "body": "Once posts go live, their performance will show up here." }
+    "ideas": {
+      "title": "No ideas saved yet",
+      "body": "Ask your AI team for ideas any time — they'll appear here."
+    },
+    "drafts": {
+      "title": "Let's create your first week of content.",
+      "body": "Your AI team will plan, write and design a full week based on your business."
+    },
+    "approval": {
+      "title": "Nothing waiting for approval",
+      "body": "When your AI team prepares new posts, you'll review them here."
+    },
+    "scheduled": {
+      "title": "Nothing scheduled yet",
+      "body": "Approved posts appear here with their publishing time."
+    },
+    "published": {
+      "title": "No published posts yet",
+      "body": "Once posts go live, their performance will show up here."
+    }
   },
   "regenerate": "Regenerate",
   "retry": "Retry publishing",
@@ -39,7 +60,12 @@
   "mobile": "Mobile",
   "desktop": "Desktop",
   "copy": "Copy",
-  "fields": { "hook": "Hook", "caption": "Caption", "cta": "Call to action", "hashtags": "Hashtags" },
+  "fields": {
+    "hook": "Hook",
+    "caption": "Caption",
+    "cta": "Call to action",
+    "hashtags": "Hashtags"
+  },
   "saveVersion": "Save as new version",
   "saved": "New version saved",
   "schedule": "Schedule",
@@ -76,5 +102,8 @@
     "empty": "Nothing planned yet.",
     "openPost": "Open post",
     "dragHint": "Drag a post to another day to reschedule it. Posts still need approval before publishing."
-  }
+  },
+  "generateVisual": "Generate visual",
+  "visualReady": "Visual generated from your brand kit",
+  "visualUnavailable": "Needs an image provider (OPENAI_API_KEY). Until then the Designer delivers the brief above."
 }

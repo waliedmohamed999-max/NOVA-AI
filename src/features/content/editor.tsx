@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toast";
 import { PostPreview, PlatformDot } from "@/components/content/post-preview";
 import { RunView } from "@/features/agents/run-view";
 import type { StudioItem } from "./studio";
-import { approveItems, commentItem, editItem, regenerateItem, rejectItem, retryItem, scheduleItem } from "./actions";
+import { approveItems, commentItem, editItem, generateVisual, regenerateItem, rejectItem, retryItem, scheduleItem } from "./actions";
 
 type Version = { version: number; caption: string; hook: string | null; note: string | null; by: string | null; at: string };
 type History = { id: string; action: string; comment: string | null; by: string | null; at: string };
@@ -37,6 +37,7 @@ export function ContentEditor({
   versions,
   history,
   can,
+  imagesEnabled,
 }: {
   item: StudioItem;
   brandName: string;
@@ -47,6 +48,7 @@ export function ContentEditor({
   versions: Version[];
   history: History[];
   can: { approve: boolean; edit: boolean; publish: boolean };
+  imagesEnabled: boolean;
 }) {
   const t = useTranslations("content");
   const tc = useTranslations("common");
@@ -183,6 +185,12 @@ export function ContentEditor({
               <p className="text-sm text-ink-2">{item.designBrief.concept}</p>
               {item.designBrief.layout && <p className="text-sm text-ink-3">{item.designBrief.layout}</p>}
               <div className="flex gap-1.5 pt-1">{item.designBrief.palette?.map((c) => <span key={c} className="size-6 rounded-md ring-1 ring-line" style={{ background: c }} title={c} />)}</div>
+              {can.edit && !locked && (
+                <div className="pt-2">
+                  <Button size="sm" variant="secondary" disabled={!imagesEnabled} loading={pending} onClick={() => act(() => generateVisual({ id: item.id }), t("visualReady"))}>{t("generateVisual")}</Button>
+                  {!imagesEnabled && <p className="mt-1.5 text-xs text-ink-4">{t("visualUnavailable")}</p>}
+                </div>
+              )}
             </Card>
           )}
 
