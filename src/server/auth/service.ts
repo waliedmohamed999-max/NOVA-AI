@@ -163,9 +163,18 @@ export async function requestMagicLink(emailInput: string, locale: "en" | "ar" =
     heading: ar ? `تسجيل الدخول إلى ${brand.name}` : `Sign in to ${brand.name}`,
     body: ar ? "اضغط الزر لتسجيل الدخول. ينتهي الرابط خلال 15 دقيقة." : "Click the button to sign in. This link expires in 15 minutes.",
     ctaLabel: ar ? "تسجيل الدخول" : "Sign in",
-    ctaUrl: `${appUrl()}/api/auth/magic?token=${encodeURIComponent(token)}`,
+    // Opens a confirmation page; the token is only consumed by the POST from that page (email scanners only GET).
+    ctaUrl: `${appUrl()}/magic?token=${encodeURIComponent(token)}`,
   });
   await getMailer().send({ to: email.data, subject: ar ? "رابط تسجيل الدخول" : "Your sign-in link", html, text });
+}
+
+/** Read-only check for the confirmation page: never consumes the token (safe against link scanners/prefetch). */
+export async function peekMagicLink(raw: string) {
+  const t = await db.verificationToken.findUnique({ where: { tokenHash: hashToken(raw) } });
+  if (!t || t.purpose !== "MAGIC_LINK" || t.consumedAt || t.expiresAt <= new Date()) return null;
+  const [name, domain] = t.email.split("@");
+  return { email: `${name.slice(0, 2)}•••@${domain}` };
 }
 
 export async function consumeMagicLink(raw: string) {
