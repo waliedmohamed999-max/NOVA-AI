@@ -25,13 +25,13 @@ export default async function SocialPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title={t("title")} description={t("description")} actions={<Link href="/integrations" className={buttonClass("secondary", "md")}><Plug className="size-4" />{tc("nav.integrations")}</Link>} />
+      <PageHeader title={t("title")} description={t("description")} actions={<Link href="/settings/connected-accounts" className={buttonClass("secondary", "md")}><Plug className="size-4" />{tc("nav.integrations")}</Link>} />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("accounts")}</h2>
         {accounts.length === 0 ? (
           <div className="rounded-[26px] border border-dashed border-line-strong bg-surface-2">
-            <EmptyState compact icon={<Share2 />} title={t("noAccounts")} description={t("noAccountsBody")} action={<Link href="/integrations" className={buttonClass("primary", "md")}>{tc("actions.connect")}</Link>} />
+            <EmptyState compact icon={<Share2 />} title={t("noAccounts")} description={t("noAccountsBody")} action={<Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}>{tc("actions.connect")}</Link>} />
           </div>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

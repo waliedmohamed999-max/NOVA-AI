@@ -9,7 +9,6 @@ import {
   LayoutGrid,
   Megaphone,
   PenSquare,
-  Plug,
   Settings,
   Share2,
   Users,
@@ -41,7 +40,6 @@ export const SECONDARY_NAV: NavItem[] = [
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-  { href: "/integrations", key: "integrations", icon: Plug },
   { href: "/settings", key: "settings", icon: Settings },
   { href: "/help", key: "help", icon: HelpCircle },
 ];

@@ -1,7 +1,7 @@
 {
   "unexpected": "Something went wrong on our side. Please try again in a moment.",
   "unauthenticated": "Please sign in to continue.",
-  "forbidden": "You don't have permission to do that. Ask an admin on your team for access.",
+  "forbidden": "You don't have permission to do that.",
   "rate_limited": "You're going a little fast. Please wait a moment and try again.",
   "validation": "Please check the highlighted fields.",
   "no_organization": "Finish setting up your company first.",
@@ -17,7 +17,7 @@
   "ai_not_configured": "Your AI team needs an AI provider. An admin can add one under Settings → AI Team.",
   "ai_budget_exceeded": "Your AI allowance for this month is used up. Upgrade your plan or raise the limit in Settings → Billing.",
   "ai_failed": "Your AI team couldn't finish this request. Please try again.",
-  "integration_not_configured": "This connection isn't available yet — your administrator needs to add the app credentials.",
+  "integration_not_configured": "This connection isn't available yet. We'll let you know as soon as it is.",
   "integration_expired": "Your connection expired. Reconnect it to continue publishing.",
   "integration_error": "We couldn't reach the platform. We'll retry automatically — or reconnect now.",
   "oauth_denied": "The connection was cancelled. You can try again whenever you're ready.",
@@ -41,5 +41,6 @@
     "forbiddenTitle": "You don't have access here",
     "forbiddenBody": "Ask an admin on your team if you need access.",
     "home": "Go home"
-  }
+  },
+  "no_accounts": "We didn't find a business account on that sign-in. Make sure you manage the page or profile, then try again."
 }

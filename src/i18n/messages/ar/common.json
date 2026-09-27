@@ -46,7 +46,7 @@
     "inbox": "صندوق الرسائل",
     "reports": "التقارير",
     "activity": "سجل النشاط",
-    "integrations": "الربط والتكامل",
+    "integrations": "الحسابات المرتبطة",
     "settings": "الإعدادات",
     "help": "المساعدة",
     "notifications": "الإشعارات",
@@ -110,7 +110,8 @@
     "YOUTUBE": "يوتيوب",
     "PINTEREST": "بنترست",
     "EMAIL": "البريد الإلكتروني",
-    "WHATSAPP": "واتساب"
+    "WHATSAPP": "واتساب",
+    "WEBSITE": "الموقع الإلكتروني"
   },
   "formats": {
     "POST": "منشور",

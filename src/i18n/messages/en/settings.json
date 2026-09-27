@@ -14,7 +14,8 @@
     "notifications": "Notifications",
     "billing": "Billing",
     "security": "Security",
-    "data": "Data & privacy"
+    "data": "Data & privacy",
+    "connectedAccounts": "Connected accounts"
   },
   "organization": {
     "title": "Organization",
@@ -54,7 +55,11 @@
     "pending": "Invitations",
     "pendingHint": "Invitations expire after 7 days.",
     "noPending": "No invitations.",
-    "inviteStates": { "pending": "Pending", "expired": "Expired", "revoked": "Revoked" },
+    "inviteStates": {
+      "pending": "Pending",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
     "revoke": "Revoke invitation",
     "revoked": "Invitation revoked",
     "rbacNote": "Owners manage billing and can delete the organization. Admins manage team, integrations and settings. Managers approve content and sales actions. Members create content and manage leads. Viewers can only view."
@@ -89,12 +94,25 @@
     "saved": "AI settings saved",
     "default": "Default",
     "modes": {
-      "ASSIST": { "title": "Assist", "body": "AI drafts every message. You send them." },
-      "COPILOT": { "title": "Copilot", "body": "AI handles safe, routine replies. Anything important needs your approval." },
-      "AUTOPILOT": { "title": "Autopilot", "body": "AI performs only the tasks you explicitly allow below." }
+      "ASSIST": {
+        "title": "Assist",
+        "body": "AI drafts every message. You send them."
+      },
+      "COPILOT": {
+        "title": "Copilot",
+        "body": "AI handles safe, routine replies. Anything important needs your approval."
+      },
+      "AUTOPILOT": {
+        "title": "Autopilot",
+        "body": "AI performs only the tasks you explicitly allow below."
+      }
     },
     "allowedTasks": "Allowed on autopilot",
-    "tasks": { "send_follow_up": "Send routine follow-ups", "send_first_reply": "Send the first reply to new inquiries", "schedule_reminder": "Schedule reminders" },
+    "tasks": {
+      "send_follow_up": "Send routine follow-ups",
+      "send_first_reply": "Send the first reply to new inquiries",
+      "schedule_reminder": "Schedule reminders"
+    },
     "sensitiveNote": "Discounts, custom pricing, refunds, contract and legal commitments always follow your approval rules.",
     "contentApproval": "Require approval before publishing",
     "contentApprovalHint": "Recommended. Nothing is posted without a human OK.",
@@ -107,14 +125,38 @@
     "description": "Actions your AI team must ask about first.",
     "saved": "Rule updated",
     "actions": {
-      "discount": { "title": "Discounts", "body": "Offering any discount to a lead." },
-      "custom_pricing": { "title": "Custom pricing", "body": "Prices that aren't in your Company Brain." },
-      "contract_promise": { "title": "Contract promises", "body": "Commitments about contract terms." },
-      "refund": { "title": "Refunds", "body": "Any mention of refunds or returns." },
-      "legal_commitment": { "title": "Legal commitments", "body": "Guarantees, liability or legal statements." },
-      "unusual_delivery": { "title": "Unusual delivery promises", "body": "Timelines or delivery outside your normal terms." },
-      "send_message": { "title": "Every outgoing message", "body": "Turn on to review every AI reply, even routine ones." },
-      "publish_content": { "title": "Publishing content", "body": "Posts wait for approval before going live." }
+      "discount": {
+        "title": "Discounts",
+        "body": "Offering any discount to a lead."
+      },
+      "custom_pricing": {
+        "title": "Custom pricing",
+        "body": "Prices that aren't in your Company Brain."
+      },
+      "contract_promise": {
+        "title": "Contract promises",
+        "body": "Commitments about contract terms."
+      },
+      "refund": {
+        "title": "Refunds",
+        "body": "Any mention of refunds or returns."
+      },
+      "legal_commitment": {
+        "title": "Legal commitments",
+        "body": "Guarantees, liability or legal statements."
+      },
+      "unusual_delivery": {
+        "title": "Unusual delivery promises",
+        "body": "Timelines or delivery outside your normal terms."
+      },
+      "send_message": {
+        "title": "Every outgoing message",
+        "body": "Turn on to review every AI reply, even routine ones."
+      },
+      "publish_content": {
+        "title": "Publishing content",
+        "body": "Posts wait for approval before going live."
+      }
     }
   },
   "notifications": {
@@ -141,8 +183,18 @@
     "plan": "Your plan",
     "planHint": "Upgrade or change plans at any time.",
     "paymentsOff": "Online payments aren't set up for this installation yet. Plan changes are handled by our team.",
-    "plans": { "STARTER": "Starter", "GROWTH": "Growth", "SCALE": "Scale" },
-    "status": { "TRIALING": "Free trial", "ACTIVE": "Active", "PAST_DUE": "Payment due", "CANCELED": "Cancelled", "INCOMPLETE": "Incomplete" },
+    "plans": {
+      "STARTER": "Starter",
+      "GROWTH": "Growth",
+      "SCALE": "Scale"
+    },
+    "status": {
+      "TRIALING": "Free trial",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Payment due",
+      "CANCELED": "Cancelled",
+      "INCOMPLETE": "Incomplete"
+    },
     "trialEnds": "Trial ends {date}",
     "seats": "Team seats",
     "channels": "Social channels",
@@ -178,7 +230,13 @@
     "ownershipBody": "Your company data belongs to you. Export everything at any time — connection tokens are never included.",
     "export": "Export all data",
     "exportQueued": "Export started. We'll notify you when it's ready.",
-    "exportStatus": { "PENDING": "Queued", "PROCESSING": "Preparing", "READY": "Ready", "FAILED": "Failed", "EXPIRED": "Expired" },
+    "exportStatus": {
+      "PENDING": "Queued",
+      "PROCESSING": "Preparing",
+      "READY": "Ready",
+      "FAILED": "Failed",
+      "EXPIRED": "Expired"
+    },
     "download": "Download",
     "disconnectHint": "To disconnect social accounts, go to Integrations.",
     "deleteOrg": "Delete organization",
@@ -208,7 +266,13 @@
     "connectedToast": "Connected. We're importing your recent posts.",
     "social": "Social channels",
     "comingSoon": "Coming soon",
-    "status": { "CONNECTED": "Connected", "ACTION_REQUIRED": "Action required", "EXPIRED": "Expired", "ERROR": "Error", "DISCONNECTED": "Not connected" },
+    "status": {
+      "CONNECTED": "Connected",
+      "ACTION_REQUIRED": "Action required",
+      "EXPIRED": "Expired",
+      "ERROR": "Error",
+      "DISCONNECTED": "Not connected"
+    },
     "health": {
       "expired": "The connection expired. Reconnect to keep publishing.",
       "permission": "A permission was removed. Reconnect and approve all permissions.",
@@ -241,7 +305,12 @@
     "emailOff": "Email sending isn't configured",
     "websiteDetail": "Embed a form on your website",
     "whatsappDetail": "Adapter ready — needs WhatsApp Business credentials",
-    "systems": { "ai": "AI provider", "email": "Email", "website": "Website forms", "whatsapp": "WhatsApp" },
+    "systems": {
+      "ai": "AI provider",
+      "email": "Email",
+      "website": "Website forms",
+      "whatsapp": "WhatsApp"
+    },
     "setup": "Set up"
   },
   "social": {
@@ -253,7 +322,11 @@
     "synced": "Synced {time}",
     "queue": "Publishing queue",
     "queueEmpty": "Nothing waiting to publish.",
-    "pub": { "PENDING": "Scheduled", "PUBLISHING": "Publishing", "FAILED": "Failed" },
+    "pub": {
+      "PENDING": "Scheduled",
+      "PUBLISHING": "Publishing",
+      "FAILED": "Failed"
+    },
     "queueNote": "Only approved posts enter the queue.",
     "recent": "Recent posts",
     "recentEmpty": "Posts appear here once published or synced."
@@ -284,7 +357,12 @@
       "CASE_STUDY": "Case study"
     },
     "chunks": "{count, plural, one {# passage} other {# passages}}",
-    "status": { "PENDING": "Queued", "PROCESSING": "Reading", "READY": "Ready", "FAILED": "Failed" },
+    "status": {
+      "PENDING": "Queued",
+      "PROCESSING": "Reading",
+      "READY": "Ready",
+      "FAILED": "Failed"
+    },
     "resync": "Read again",
     "ragNote": "Before answering, your AI team retrieves only the most relevant passages from your own knowledge — never other companies' data.",
     "offerings": "Products & services",
@@ -341,7 +419,10 @@
     },
     "active": "active",
     "notConnected": "not connected",
-    "empty": { "title": "No conversations yet", "body": "Messages from your website form and connected channels will appear here." },
+    "empty": {
+      "title": "No conversations yet",
+      "body": "Messages from your website form and connected channels will appear here."
+    },
     "unknown": "Unknown contact",
     "needsReply": "Needs reply"
   },
@@ -349,8 +430,14 @@
     "title": "Reports",
     "description": "Daily briefs and weekly growth reports, generated from your real data.",
     "generate": "Generate weekly report",
-    "empty": { "title": "Your first report is on its way", "body": "Daily briefs arrive every morning and weekly reports every week. You can also generate one now." },
-    "kinds": { "DAILY_BRIEF": "Daily brief", "WEEKLY_REPORT": "Weekly growth report" },
+    "empty": {
+      "title": "Your first report is on its way",
+      "body": "Daily briefs arrive every morning and weekly reports every week. You can also generate one now."
+    },
+    "kinds": {
+      "DAILY_BRIEF": "Daily brief",
+      "WEEKLY_REPORT": "Weekly growth report"
+    },
     "posts": "Posts",
     "reach": "Reach",
     "engagement": "Engagement",
@@ -373,7 +460,11 @@
     "description": "A permanent record of what people and AI did in your workspace.",
     "all": "All",
     "security": "Security",
-    "actors": { "USER": "Team member", "AGENT": "AI team", "SYSTEM": "System" },
+    "actors": {
+      "USER": "Team member",
+      "AGENT": "AI team",
+      "SYSTEM": "System"
+    },
     "empty": "No activity yet.",
     "immutable": "This log can't be edited or deleted."
   },
@@ -387,17 +478,42 @@
     "contact": "Contact us",
     "faqTitle": "Common questions",
     "faqs": [
-      { "q": "Will anything be published without my approval?", "a": "No. By default every post waits for approval, and sensitive sales messages (discounts, pricing, refunds, legal) always need your OK. You can adjust this under Settings → Approval rules." },
-      { "q": "Where do the analytics numbers come from?", "a": "Only from the platforms you connect, through their official APIs. If an account isn't connected, we show a connect prompt instead of estimates." },
-      { "q": "How does the AI know about my business?", "a": "From your onboarding answers, your website and anything you add to the Company Brain. It retrieves only your own company's knowledge before answering." },
-      { "q": "How do I get leads from my website?", "a": "Go to Settings → Website forms, copy the embed code and paste it on your site. Every submission becomes a lead that the Sales Agent qualifies." },
-      { "q": "Can I control AI costs?", "a": "Yes. Settings → Billing shows this month's usage and lets you set a monthly allowance, a warning level and a hard stop." }
+      {
+        "q": "Will anything be published without my approval?",
+        "a": "No. By default every post waits for approval, and sensitive sales messages (discounts, pricing, refunds, legal) always need your OK. You can adjust this under Settings → Approval rules."
+      },
+      {
+        "q": "Where do the analytics numbers come from?",
+        "a": "Only from the platforms you connect, through their official APIs. If an account isn't connected, we show a connect prompt instead of estimates."
+      },
+      {
+        "q": "How does the AI know about my business?",
+        "a": "From your onboarding answers, your website and anything you add to the Company Brain. It retrieves only your own company's knowledge before answering."
+      },
+      {
+        "q": "How do I get leads from my website?",
+        "a": "Go to Settings → Website forms, copy the embed code and paste it on your site. Every submission becomes a lead that the Sales Agent qualifies."
+      },
+      {
+        "q": "Can I control AI costs?",
+        "a": "Yes. Settings → Billing shows this month's usage and lets you set a monthly allowance, a warning level and a hard stop."
+      }
     ]
   },
   "admin": {
     "badge": "Platform admin",
     "back": "Back to app",
-    "tabs": { "label": "Admin sections", "overview": "Overview", "organizations": "Organizations", "users": "Users", "ai": "AI usage", "integrations": "Integrations", "jobs": "Jobs", "incidents": "Incidents" },
+    "tabs": {
+      "label": "Admin sections",
+      "overview": "Overview",
+      "organizations": "Organizations",
+      "users": "Users",
+      "ai": "AI usage",
+      "integrations": "Integrations",
+      "jobs": "Jobs",
+      "incidents": "Incidents",
+      "providers": "Providers"
+    },
     "orgs": "Organizations",
     "users": "Users",
     "aiSpend": "AI spend this month",
@@ -441,6 +557,101 @@
     "requeued": "Job re-queued",
     "incidentsWindow": "Last 7 days.",
     "noIncidents": "No incidents. Everything is running smoothly.",
-    "kinds": { "job": "Job", "ai": "AI", "publishing": "Publishing", "integration": "Integration" }
+    "kinds": {
+      "job": "Job",
+      "ai": "AI",
+      "publishing": "Publishing",
+      "integration": "Integration"
+    },
+    "providers": {
+      "intro": "Provider configuration read from environment variables. Values are masked; secrets are never stored in the database or shown in full. Change them in your deployment's environment and restart.",
+      "footer": "Customers never see this page or any of these variable names.",
+      "unset": "not set",
+      "status": {
+        "configured": "Configured",
+        "missing": "Missing",
+        "error": "Error"
+      },
+      "names": {
+        "meta": "Meta (Instagram + Facebook)",
+        "linkedin": "LinkedIn",
+        "tiktok": "TikTok",
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "email": "Email (SMTP)",
+        "storage": "File storage",
+        "payments": "Payments"
+      },
+      "notes": {
+        "local": "Local disk storage — fine for one server; use S3/R2 when running several instances.",
+        "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked."
+      }
+    }
+  },
+  "connect": {
+    "title": "Connect your company's accounts",
+    "description": "Connect the channels you use and NOVA will run content, publishing and analysis from one place.",
+    "settingsTitle": "Connected accounts",
+    "settingsDescription": "The channels NOVA manages for you. Reconnect or disconnect any time.",
+    "social": "Social accounts",
+    "more": "More connections",
+    "later": "Coming later",
+    "skip": "Skip for now",
+    "skipHint": "You can connect more accounts later.",
+    "continue": "Continue",
+    "state": {
+      "idle": "Not connected",
+      "connected": "Connected",
+      "reconnect": "Needs reconnecting",
+      "connecting": "Connecting…",
+      "choose": "Choose an account",
+      "unavailable": "Not available yet",
+      "soon": "Coming soon"
+    },
+    "actions": {
+      "connect": "Connect",
+      "change": "Change account",
+      "disconnect": "Disconnect",
+      "reconnect": "Reconnect",
+      "choose": "Choose accounts"
+    },
+    "why": {
+      "INSTAGRAM": "Posts, reels and real performance.",
+      "FACEBOOK": "Your Page's posts, reach and messages.",
+      "LINKEDIN": "Your profile or company page.",
+      "TIKTOK": "Short videos and views.",
+      "EMAIL": "Reply to leads from your own inbox.",
+      "WEBSITE": "NOVA reads your site to learn your business.",
+      "WHATSAPP": "Customer conversations.",
+      "YOUTUBE": "Videos and channel analytics.",
+      "X": "Posts and replies."
+    },
+    "metaNote": "Instagram and Facebook connect together through one secure Meta sign-in.",
+    "oauthNote": "You sign in on the platform itself — NOVA never sees or stores your password.",
+    "emailNote": "Google and Microsoft sign-in are coming soon. NOVA will never ask for your email password.",
+    "success": "{platform} connected",
+    "successBody": "Great — NOVA is ready to manage {account}.",
+    "successBodyNoHandle": "Great — NOVA is ready to manage this account.",
+    "limited": "Your plan's channel limit was reached, so {platforms} wasn't added. Upgrade to add more channels.",
+    "disconnectConfirm": "Disconnect {platform}? NOVA will stop publishing and collecting analytics for it.",
+    "disconnected": "{platform} disconnected",
+    "selected": "Accounts saved",
+    "demo": "Demo account",
+    "demoNote": "This is a demo workspace. The data you see is sample data — no real account is connected here.",
+    "chooseTitle": "Which account should NOVA manage?",
+    "chooseBody": "Choose the accounts you want NOVA to manage.",
+    "chooseSave": "Save selection",
+    "plan": "{used} of {limit} channels on your plan",
+    "website": {
+      "placeholder": "yourcompany.com",
+      "analyze": "Analyze my website",
+      "reanalyze": "Analyze again",
+      "steps": {
+        "PENDING": "Reading your website",
+        "PROCESSING": "Learning about your business",
+        "READY": "Done — NOVA learned from your site",
+        "FAILED": "We couldn't read this website"
+      }
+    }
   }
 }

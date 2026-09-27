@@ -12,7 +12,7 @@ export const SETTINGS_SECTIONS = [
   { href: "/brand", key: "brand" },
   { href: "/settings/ai", key: "ai" },
   { href: "/settings/approvals", key: "approvals" },
-  { href: "/integrations", key: "integrations" },
+  { href: "/settings/connected-accounts", key: "connectedAccounts" },
   { href: "/settings/lead-capture", key: "leadCapture" },
   { href: "/settings/notifications", key: "notifications" },
   { href: "/settings/billing", key: "billing" },

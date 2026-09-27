@@ -13,8 +13,27 @@ import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } fr
 
 const STATE_TTL_MS = 10 * 60_000;
 
+/** Where customers manage accounts after onboarding. */
+export const CONNECTED_ACCOUNTS_PATH = "/settings/connected-accounts";
+export const ONBOARDING_CONNECT_PATH = "/onboarding/connect";
+
+/**
+ * OAuth return context. Only these two in-app destinations are ever used after a callback,
+ * so a crafted `return` parameter can never become an open redirect.
+ */
+export type ConnectReturn = "onboarding" | "settings";
+const RETURN_PATHS: Record<ConnectReturn, string> = { onboarding: ONBOARDING_CONNECT_PATH, settings: CONNECTED_ACCOUNTS_PATH };
+
+export function returnPathFor(context: string | null | undefined): string {
+  return RETURN_PATHS[context as ConnectReturn] ?? CONNECTED_ACCOUNTS_PATH;
+}
+
+function safeStoredReturn(path: string | null | undefined) {
+  return path && Object.values(RETURN_PATHS).includes(path) ? path : CONNECTED_ACCOUNTS_PATH;
+}
+
 /** Step 1 of OAuth: store a one-time state (+ PKCE verifier, encrypted) and return the provider URL. */
-export async function startConnect(scope: TenantScope, userId: string, providerId: SocialProvider["id"], redirectTo = "/integrations") {
+export async function startConnect(scope: TenantScope, userId: string, providerId: SocialProvider["id"], returnTo: ConnectReturn = "settings") {
   const provider = SOCIAL_PROVIDERS[providerId];
   if (!provider?.isConfigured()) throw new UserFacingError("integration_not_configured");
   const already = await db.integration.count({ where: { ...scope, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
@@ -29,7 +48,7 @@ export async function startConnect(scope: TenantScope, userId: string, providerI
       userId,
       provider: providerId,
       codeVerifierEnc: encryptSecret(verifier),
-      redirectTo: redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : "/integrations",
+      redirectTo: returnPathFor(returnTo),
       expiresAt: new Date(Date.now() + STATE_TTL_MS),
     },
   });
@@ -37,41 +56,79 @@ export async function startConnect(scope: TenantScope, userId: string, providerI
   return provider.connect({ state, redirectUri: redirectUriFor(providerId), codeChallenge: challenge });
 }
 
+export type ConnectResult = {
+  redirectTo: string;
+  scope?: TenantScope;
+  connected?: string[];
+  /** Platforms where several accounts came back — the customer must choose; nothing is auto-selected. */
+  needsSelection?: string[];
+  /** Platforms skipped because the plan's channel limit was reached. */
+  limited?: string[];
+  error?: "oauth_denied" | "integration_error" | "no_accounts";
+};
+
 /** Step 2 of OAuth (backend callback): verify state, exchange code, store encrypted tokens and accounts. */
-export async function completeConnect(providerId: SocialProvider["id"], params: { code: string | null; state: string | null; error?: string | null }) {
+export async function completeConnect(providerId: SocialProvider["id"], params: { code: string | null; state: string | null; error?: string | null }): Promise<ConnectResult> {
   if (!params.state) throw new UserFacingError("oauth_state");
   const stored = await db.oAuthState.findUnique({ where: { stateHash: hashToken(params.state) }, omit: { codeVerifierEnc: false } });
   if (!stored || stored.consumedAt || stored.expiresAt < new Date() || stored.provider !== providerId) throw new UserFacingError("oauth_state");
   await db.oAuthState.update({ where: { id: stored.id }, data: { consumedAt: new Date() } });
-  const redirectTo = stored.redirectTo ?? "/integrations";
-  if (params.error || !params.code) return { redirectTo, error: "oauth_denied" as const };
+  const redirectTo = safeStoredReturn(stored.redirectTo);
+  if (params.error || !params.code) return { redirectTo, error: "oauth_denied" };
 
   const scope = { organizationId: stored.organizationId, workspaceId: stored.workspaceId };
   const provider = SOCIAL_PROVIDERS[providerId];
-  const tokens = await provider.exchangeCode({ code: params.code, redirectUri: redirectUriFor(providerId), codeVerifier: stored.codeVerifierEnc ? decryptSecret(stored.codeVerifierEnc) : undefined });
-  const accounts = await provider.listAccounts(tokens);
+  let tokens: TokenSet;
+  let accounts: Awaited<ReturnType<SocialProvider["listAccounts"]>>;
+  try {
+    tokens = await provider.exchangeCode({ code: params.code, redirectUri: redirectUriFor(providerId), codeVerifier: stored.codeVerifierEnc ? decryptSecret(stored.codeVerifierEnc) : undefined });
+    accounts = await provider.listAccounts(tokens);
+  } catch (err) {
+    logger.warn({ provider: providerId, detail: err instanceof ProviderError ? err.detail : err instanceof Error ? err.message : String(err) }, "oauth exchange failed");
+    return { redirectTo, error: "integration_error" };
+  }
 
   const byPlatform = new Map<SocialPlatform, typeof accounts>();
   for (const a of accounts) byPlatform.set(a.platform, [...(byPlatform.get(a.platform) ?? []), a]);
   for (const platform of provider.platforms) if (!byPlatform.has(platform)) byPlatform.set(platform, []);
 
   const connected: string[] = [];
+  const needsSelection: string[] = [];
+  const limited: string[] = [];
   for (const [platform, list] of byPlatform) {
     if (list.length === 0 && provider.platforms.length > 1) continue; // e.g. no Instagram account linked to the Page
+    const existing = await db.integration.findUnique({
+      where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: platform as Provider } },
+      include: { accounts: { where: { isActive: true }, select: { externalId: true } } },
+    });
+    if (!existing || existing.status === "DISCONNECTED") {
+      try {
+        await assertWithinLimit(scope.organizationId, "socialChannels");
+      } catch {
+        limited.push(platform);
+        continue;
+      }
+    }
     const integration = await db.integration.upsert({
       where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: platform as Provider } },
       create: { ...scope, provider: platform as Provider, status: "CONNECTED", scopes: tokens.scopes ?? provider.scopes, connectedById: stored.userId, connectedAt: new Date() },
       update: { status: "CONNECTED", statusMessage: null, scopes: tokens.scopes ?? provider.scopes, connectedById: stored.userId, connectedAt: new Date(), lastErrorAt: null },
     });
     await saveCredential(scope, integration.id, null, tokens);
+    // One account: use it. Several: keep what the customer chose before, otherwise ask — never guess.
+    const previous = new Set(existing?.status === "DISCONNECTED" ? [] : (existing?.accounts.map((a) => a.externalId) ?? []));
+    let active = 0;
     for (const a of list) {
+      const isActive = list.length === 1 || previous.has(a.externalId);
+      if (isActive) active++;
       const account = await db.integrationAccount.upsert({
         where: { integrationId_externalId: { integrationId: integration.id, externalId: a.externalId } },
-        create: { ...scope, integrationId: integration.id, platform, externalId: a.externalId, name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object },
-        update: { name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object, isActive: true },
+        create: { ...scope, integrationId: integration.id, platform, externalId: a.externalId, name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object, isActive },
+        update: { name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object, isActive },
       });
       if (a.token) await saveCredential(scope, integration.id, account.id, a.token);
     }
+    if (list.length > 1 && active === 0) needsSelection.push(platform);
     connected.push(platform);
     await audit({
       ...scope,
@@ -84,7 +141,21 @@ export async function completeConnect(providerId: SocialProvider["id"], params: 
       summary: `Connected ${platform} (${list.length} account${list.length === 1 ? "" : "s"})`,
     });
   }
-  return { redirectTo, connected, scope };
+  if (!connected.length && !limited.length) return { redirectTo, scope, error: "no_accounts" };
+  return { redirectTo, connected, needsSelection, limited, scope };
+}
+
+/** The customer picks which returned accounts NOVA manages. Strictly scoped to the caller's workspace. */
+export async function selectAccounts(scope: TenantScope, userId: string, integrationId: string, accountIds: string[]) {
+  const integration = await db.integration.findFirst({ where: { id: integrationId, ...scope, status: { not: "DISCONNECTED" } }, include: { accounts: { select: { id: true } } } });
+  if (!integration) throw new UserFacingError("item_not_found");
+  const owned = new Set(integration.accounts.map((a) => a.id));
+  const chosen = [...new Set(accountIds)];
+  if (!chosen.length || chosen.some((id) => !owned.has(id))) throw new UserFacingError("validation");
+  await db.integrationAccount.updateMany({ where: { integrationId, id: { in: chosen } }, data: { isActive: true } });
+  await db.integrationAccount.updateMany({ where: { integrationId, id: { notIn: chosen } }, data: { isActive: false } });
+  await audit({ ...scope, category: "SECURITY", actorType: "USER", actorId: userId, action: "integration.accounts_selected", entityType: "Integration", entityId: integrationId, summary: `Selected ${chosen.length} ${integration.provider} account(s)` });
+  return chosen.length;
 }
 
 async function saveCredential(scope: TenantScope, integrationId: string, accountId: string | null, t: TokenSet) {
@@ -152,7 +223,7 @@ export async function markIntegrationError(scope: TenantScope, integrationId: st
       type: "INTEGRATION_DISCONNECTED",
       title: ar ? `انتهت صلاحية ربط ${integration.provider}` : `Your ${integration.provider.charAt(0) + integration.provider.slice(1).toLowerCase()} connection needs attention`,
       body: ar ? "أعد الربط لمتابعة النشر وجمع التحليلات." : "Reconnect it to continue publishing and collecting analytics.",
-      link: "/integrations",
+      link: CONNECTED_ACCOUNTS_PATH,
       roles: ["OWNER", "ADMIN"],
     });
   }

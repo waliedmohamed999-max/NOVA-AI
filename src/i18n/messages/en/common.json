@@ -46,7 +46,7 @@
     "inbox": "Inbox",
     "reports": "Reports",
     "activity": "Activity",
-    "integrations": "Integrations",
+    "integrations": "Connected accounts",
     "settings": "Settings",
     "help": "Help",
     "notifications": "Notifications",
@@ -110,7 +110,8 @@
     "YOUTUBE": "YouTube",
     "PINTEREST": "Pinterest",
     "EMAIL": "Email",
-    "WHATSAPP": "WhatsApp"
+    "WHATSAPP": "WhatsApp",
+    "WEBSITE": "Website"
   },
   "formats": {
     "POST": "Post",

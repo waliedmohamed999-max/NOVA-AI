@@ -5,7 +5,10 @@
     "body": "Answer a few quick questions and we'll learn your business, build your brand profile and prepare your first strategy. It takes about two minutes.",
     "cta": "Let's go"
   },
-  "company": { "q": "What's your company called?", "placeholder": "e.g. Bloom Bakery" },
+  "company": {
+    "q": "What's your company called?",
+    "placeholder": "e.g. Bloom Bakery"
+  },
   "website": {
     "q": "Do you have a website?",
     "hint": "Paste it and I'll read it to understand what you do.",
@@ -22,14 +25,20 @@
     "q": "Who are your customers?",
     "placeholder": "e.g. Families and offices ordering for events",
     "markets": "Where are they? (city, country or region)",
-    "types": { "B2B": "Businesses", "B2C": "Consumers", "BOTH": "Both" }
+    "types": {
+      "B2B": "Businesses",
+      "B2C": "Consumers",
+      "BOTH": "Both"
+    }
   },
   "connect": {
-    "q": "Want to connect your social accounts?",
-    "hint": "Connecting lets your team publish and learn from real performance. You can do this later.",
+    "q": "Now let's connect your company's accounts.",
+    "hint": "NOVA publishes and learns from real performance on the channels you connect. You sign in on each platform — NOVA never sees your password.",
     "unavailable": "Coming soon",
-    "later": "I'll do this later",
-    "done": "Set up later in Integrations"
+    "later": "Skip for now",
+    "done": "Skipped for now — you can connect later in Settings",
+    "open": "Connect accounts",
+    "count": "{count, plural, one {# channel connected} other {# channels connected}}"
   },
   "brand": {
     "q": "How should your brand sound?",

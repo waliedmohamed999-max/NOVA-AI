@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 
-const TABS = ["", "organizations", "users", "ai", "integrations", "jobs", "incidents"] as const;
+const TABS = ["", "organizations", "users", "ai", "providers", "integrations", "jobs", "incidents"] as const;
 
 export function AdminNav() {
   const t = useTranslations("settings.admin.tabs");

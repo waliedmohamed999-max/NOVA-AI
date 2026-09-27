@@ -83,7 +83,7 @@
     "SUBMITTED": "submitted this for approval"
   },
   "publishErrors": {
-    "cannot_publish": "There's no connected account for this channel. Connect one in Integrations, then retry.",
+    "cannot_publish": "There's no connected account for this channel. Connect one in Settings → Connected accounts, then retry.",
     "integration_expired": "The connection expired. Reconnect it to continue publishing.",
     "integration_error": "The platform didn't accept the post. You can retry publishing.",
     "invalid_media": "The platform couldn't use the attached media. Check the image or video and retry.",

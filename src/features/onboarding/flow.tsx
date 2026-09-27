@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Check, Globe, Plus, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Progress } from "@/components/ui/misc";
 import { LocaleSwitch } from "@/components/shell/locale-switch";
@@ -15,7 +16,6 @@ import { useRun, RunSteps } from "@/features/agents/run-view";
 import type { OnboardingSnapshot } from "@/server/onboarding/service";
 import { saveAnswers, saveCompanyName, saveWebsite, startOnboardingAnalysis } from "./actions";
 
-type ProviderTile = { provider: string; oauth: string; configured: boolean };
 
 const TONES = ["friendly", "professional", "bold", "luxury", "playful", "warm", "expert", "calm"] as const;
 const GOALS = ["customers", "content", "awareness", "leads", "sales", "everything"] as const;
@@ -49,7 +49,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-export function OnboardingFlow({ userName, initial, providers }: { userName: string; initial: OnboardingSnapshot; providers: ProviderTile[] }) {
+export function OnboardingFlow({ userName, initial, connectedCount }: { userName: string; initial: OnboardingSnapshot; connectedCount: number }) {
   const t = useTranslations("onboarding");
   const te = useTranslations("errors");
   const tc = useTranslations("common");
@@ -241,34 +241,8 @@ export function OnboardingFlow({ userName, initial, providers }: { userName: str
 
         {step >= 5 && (
           <Bubble>
-            <p className="text-xl font-semibold tracking-tight">{t("connect.q")}</p>
-            <p className="text-sm text-ink-3">{t("connect.hint")}</p>
-            {step === 5 ? (
-              <div className="space-y-3 pt-2">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {providers.map((p) => (
-                    <div key={p.provider} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
-                      <span className="text-sm font-medium">{tc(`platforms.${p.provider}` as "platforms.INSTAGRAM")}</span>
-                      {p.configured ? (
-                        <a href={`/api/integrations/${p.oauth}/connect?return=/onboarding`} className="text-sm font-semibold text-accent-ink hover:underline">{tc("actions.connect")}</a>
-                      ) : (
-                        <span className="text-xs text-ink-4">{t("connect.unavailable")}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <Button loading={pending} onClick={() => go(() => saveAnswers({ step: 6 }), 6)}>{t("connect.later")}</Button>
-              </div>
-            ) : (
-              <Answer onEdit={() => setStep(5)}>{t("connect.done")}</Answer>
-            )}
-          </Bubble>
-        )}
-
-        {step >= 6 && (
-          <Bubble>
             <p className="text-xl font-semibold tracking-tight">{t("brand.q")}</p>
-            {step === 6 ? (
+            {step === 5 ? (
               <div className="space-y-4 pt-2">
                 <div className="flex flex-wrap gap-2">
                   {TONES.map((k) => (
@@ -290,10 +264,25 @@ export function OnboardingFlow({ userName, initial, providers }: { userName: str
                     )}
                   </div>
                 </div>
-                <Button loading={pending} disabled={tone.length === 0} onClick={() => go(() => saveAnswers({ tone, colors, step: 7 }), 7)}>{tc("actions.continue")}</Button>
+                <Button loading={pending} disabled={tone.length === 0} onClick={() => go(async () => { const r = await saveAnswers({ tone, colors, step: 6 }); if (r.ok) router.push("/onboarding/connect"); return r; }, 6)}>{tc("actions.continue")}</Button>
               </div>
             ) : (
-              <Answer onEdit={() => setStep(6)}>{tone.join(" · ")}</Answer>
+              <Answer onEdit={() => setStep(5)}>{tone.join(" · ")}</Answer>
+            )}
+          </Bubble>
+        )}
+
+        {step >= 6 && (
+          <Bubble>
+            <p className="text-xl font-semibold tracking-tight">{t("connect.q")}</p>
+            <p className="text-sm text-ink-3">{t("connect.hint")}</p>
+            {step === 6 ? (
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Link href="/onboarding/connect" className={buttonClass("primary", "md")}>{t("connect.open")}</Link>
+                <Button variant="ghost" loading={pending} onClick={() => go(() => saveAnswers({ step: 7 }), 7)}>{t("connect.later")}</Button>
+              </div>
+            ) : (
+              <Answer onEdit={() => router.push("/onboarding/connect")}>{connectedCount > 0 ? t("connect.count", { count: connectedCount }) : t("connect.done")}</Answer>
             )}
           </Bubble>
         )}

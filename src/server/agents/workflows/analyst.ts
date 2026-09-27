@@ -190,7 +190,7 @@ defineWorkflow("performance_review", {
           ? "لا توجد بيانات أداء حقيقية بعد. اربط حساباتك وانشر أول منشوراتك لتبدأ المقارنات."
           : "There's no real performance data yet. Connect your accounts and publish your first posts to start comparisons."),
       items: facts.map((f) => ({ title: f })),
-      actions: digest.hasData ? [{ label: "open_analytics", href: "/analytics", primary: true }] : [{ label: "connect_accounts", href: "/integrations", primary: true }],
+      actions: digest.hasData ? [{ label: "open_analytics", href: "/analytics", primary: true }] : [{ label: "connect_accounts", href: "/settings/connected-accounts", primary: true }],
       offline: narrative?.offline,
     };
   },

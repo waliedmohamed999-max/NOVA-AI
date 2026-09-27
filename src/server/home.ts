@@ -68,7 +68,7 @@ export async function loadCommandCenter(ctx: TenantContext) {
   const attention: RailRow[] = [
     ...approvals.map<RailRow>((a) => ({ id: a.id, kind: `approval:${a.category}`, title: a.title, href: approvalHref(a), tone: a.category === "PRICING" || a.category === "SALES" ? "danger" : "warning" })),
     ...failedPubs.map<RailRow>((p) => ({ id: p.id, kind: "publish_failed", title: p.contentItem.title, href: `/content/${p.contentItem.id}`, tone: "danger" })),
-    ...integrationIssues.map<RailRow>((i) => ({ id: i.id, kind: "integration", title: i.provider, href: "/integrations", tone: "danger" })),
+    ...integrationIssues.map<RailRow>((i) => ({ id: i.id, kind: "integration", title: i.provider, href: "/settings/connected-accounts", tone: "danger" })),
     ...overdue.map<RailRow>((a) => ({ id: a.id, kind: "overdue", title: a.lead.name, subtitle: a.title, href: `/leads/${a.lead.id}`, tone: "danger" })),
   ].slice(0, 3);
 

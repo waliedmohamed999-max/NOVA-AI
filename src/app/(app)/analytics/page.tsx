@@ -32,7 +32,7 @@ export default async function AnalyticsPage() {
             icon={<BarChart3 />}
             title={t("empty.title")}
             description={t("empty.body")}
-            action={<Link href="/integrations" className={buttonClass("primary", "md")}><Plug className="size-4" /> {t("empty.cta")}</Link>}
+            action={<Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}><Plug className="size-4" /> {t("empty.cta")}</Link>}
           />
         </div>
       </>

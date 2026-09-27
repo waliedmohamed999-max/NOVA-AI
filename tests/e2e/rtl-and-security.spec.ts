@@ -40,3 +40,30 @@ test("security: app routes require a session; admin is hidden from non-admins; p
   await page.goto("/admin");
   await expect(page.getByText("Platform admin")).toBeVisible();
 });
+
+test("connected accounts: no customer Integrations page, no config details, admin-only provider status", async ({ page, request }) => {
+  await signIn(page);
+  await page.goto("/home");
+  await expect(page.getByRole("link", { name: "Integrations" })).toHaveCount(0);
+
+  await page.goto("/integrations");
+  await page.waitForURL(/\/settings\/connected-accounts/);
+  await expect(page.getByRole("heading", { name: "Connected accounts" }).first()).toBeVisible();
+  await expect(page.getByText("Demo account")).toBeVisible();
+  const main = page.locator("main");
+  await expect(main).not.toContainText("META_APP");
+  await expect(main).not.toContainText("CLIENT_SECRET");
+  await expect(main).not.toContainText("Admin setup");
+  for (const name of ["Instagram", "Facebook", "LinkedIn", "TikTok"]) await expect(main.getByRole("heading", { name, exact: true })).toBeVisible();
+
+  // A crafted return value cannot redirect off-site.
+  const r = await page.request.get("/api/integrations/meta/connect?from=https://evil.example", { maxRedirects: 0 });
+  expect(r.headers().location ?? "").not.toContain("evil.example");
+
+  await page.goto("/admin/providers");
+  await expect(page.getByText("Meta (Instagram + Facebook)")).toBeVisible();
+  await expect(page.getByText("The Stripe adapter and webhook are not implemented yet", { exact: false })).toBeVisible();
+
+  const anon = await request.get("/settings/connected-accounts", { maxRedirects: 0 });
+  expect([302, 307]).toContain(anon.status());
+});

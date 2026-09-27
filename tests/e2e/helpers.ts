@@ -59,9 +59,13 @@ export async function completeOnboarding(page: Page, company: string) {
   await page.getByRole("button", { name: "Consumers" }).click();
   await page.getByPlaceholder("e.g. Families and offices ordering for events").fill("Home coffee lovers in Cairo");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "I'll do this later" }).click();
   await page.getByRole("button", { name: "Warm" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
+  // Brand → connect accounts (its own page) → skip → back to the conversation at goals.
+  await page.waitForURL(/\/onboarding\/connect/);
+  await expect(page.getByRole("heading", { name: "Connect your company's accounts" })).toBeVisible();
+  await page.getByRole("button", { name: "Skip for now" }).click();
+  await page.waitForURL(/\/onboarding$/);
   await page.getByRole("button", { name: "Get more customers" }).click();
   await page.getByRole("button", { name: "Build my AI team" }).click();
   await expect(page.getByText("Getting to know your business…").or(page.getByText("Your AI Growth Team is ready.")).first()).toBeVisible();
