@@ -1,5 +1,5 @@
 import { form, providerFetch } from "../http";
-import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type ConnectedAccount, type NormalizedMetrics, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
+import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
 
 /**
  * Meta Graph API: Facebook Pages + Instagram professional accounts linked to
@@ -67,20 +67,74 @@ export class MetaProvider implements SocialProvider {
       `${GRAPH()}/oauth/access_token?${new URLSearchParams({ grant_type: "fb_exchange_token", client_id: process.env.META_APP_ID!, client_secret: process.env.META_APP_SECRET!, fb_exchange_token: short.access_token })}`,
       { classify },
     );
-    return { accessToken: long.access_token, expiresAt: long.expires_in ? new Date(Date.now() + long.expires_in * 1000) : null, scopes: this.scopes };
+    const token: TokenSet = { accessToken: long.access_token, expiresAt: long.expires_in ? new Date(Date.now() + long.expires_in * 1000) : null };
+    // Store what the user actually granted — they can untick permissions in the Meta dialog.
+    token.scopes = await this.grantedScopes(token);
+    return token;
+  }
+
+  async grantedScopes(token: TokenSet): Promise<string[]> {
+    const res = await get<{ data: { permission: string; status: string }[] }>("/me/permissions", token.accessToken);
+    return res.data.filter((p) => p.status === "granted").map((p) => p.permission);
+  }
+
+  /**
+   * Derived from granted permissions and, for Pages, the user's tasks on that Page.
+   * Nothing is reported as available unless the permission was actually granted.
+   */
+  capabilities(account: { platform: string; accountType?: string | null; metadata?: Record<string, unknown> }, scopes: string[]): Capability[] {
+    const has = (...p: string[]) => p.every((x) => scopes.includes(x));
+    const cap = (key: Capability["key"], ok: boolean, reason = "permission_missing"): Capability => (ok ? { key, available: true } : { key, available: false, reason });
+    if (account.accountType === "instagram_business" || account.platform === "INSTAGRAM") {
+      return [
+        cap("identity", has("instagram_basic")),
+        cap("instagram_publishing", has("instagram_basic", "instagram_content_publish")),
+        cap("metrics", has("instagram_basic", "instagram_manage_insights")),
+        cap("messages", has("instagram_manage_messages"), "requires_approval"),
+      ];
+    }
+    const tasks = Array.isArray(account.metadata?.tasks) ? (account.metadata.tasks as string[]) : null;
+    const task = (t: string) => tasks === null || tasks.includes(t) || tasks.includes("MANAGE");
+    return [
+      cap("identity", has("pages_show_list")),
+      cap("publish", has("pages_manage_posts") && task("CREATE_CONTENT"), has("pages_manage_posts") ? "page_role" : "permission_missing"),
+      cap("metrics", (has("read_insights") || has("pages_read_engagement")) && task("ANALYZE")),
+      cap("page_management", has("pages_manage_metadata") && task("MANAGE"), "requires_approval"),
+      cap("messages", has("pages_messaging") && task("MESSAGING"), "requires_approval"),
+      cap("leads", has("leads_retrieval"), "requires_approval"),
+    ];
+  }
+
+  async getProfile(token: TokenSet): Promise<ProviderProfile> {
+    const me = await get<{ id: string; name?: string; picture?: { data?: { url?: string } } }>("/me", token.accessToken, { fields: "id,name,picture{url}" });
+    return { id: me.id, name: me.name ?? "Meta user", avatarUrl: me.picture?.data?.url ?? null };
+  }
+
+  /** Validates the token with Meta's debug_token (app access token, server-side only). */
+  async checkConnection(token: TokenSet): Promise<ConnectionCheck> {
+    const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
+    const res = await get<{ data: { is_valid: boolean; expires_at?: number; data_access_expires_at?: number; scopes?: string[]; error?: { message?: string } } }>("/debug_token", appToken, { input_token: token.accessToken });
+    const d = res.data;
+    return {
+      valid: Boolean(d.is_valid),
+      expiresAt: d.expires_at ? new Date(d.expires_at * 1000) : null,
+      scopes: d.scopes ?? [],
+      detail: d.is_valid ? undefined : "token_invalid",
+    };
   }
 
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {
-    const pages = await get<{ data: { id: string; name: string; access_token: string; picture?: { data?: { url?: string } }; instagram_business_account?: { id: string; username?: string; profile_picture_url?: string } }[] }>(
+    const pages = await get<{ data: { id: string; name: string; access_token: string; tasks?: string[]; picture?: { data?: { url?: string } }; instagram_business_account?: { id: string; username?: string; profile_picture_url?: string } }[] }>(
       "/me/accounts",
       token.accessToken,
-      { fields: "id,name,access_token,picture{url},instagram_business_account{id,username,profile_picture_url}", limit: "50" },
+      { fields: "id,name,access_token,tasks,picture{url},instagram_business_account{id,username,profile_picture_url}", limit: "50" },
     );
     const out: ConnectedAccount[] = [];
     for (const p of pages.data) {
       // Page tokens derived from a long-lived user token do not expire.
       const pageToken: TokenSet = { accessToken: p.access_token, expiresAt: null };
-      out.push({ externalId: p.id, platform: "FACEBOOK", name: p.name, avatarUrl: p.picture?.data?.url ?? null, accountType: "facebook_page", token: pageToken });
+      out.push({ externalId: p.id, platform: "FACEBOOK", name: p.name, avatarUrl: p.picture?.data?.url ?? null, accountType: "facebook_page", token: pageToken, metadata: p.tasks ? { tasks: p.tasks } : {} });
+      // Not every Page has an Instagram professional account linked — only add one when Meta returns it.
       if (p.instagram_business_account) {
         const ig = p.instagram_business_account;
         out.push({

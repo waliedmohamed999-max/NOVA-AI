@@ -868,6 +868,7 @@ model Integration {
   scopes         String[]          @default([])
   lastSyncAt     DateTime?
   lastErrorAt    DateTime?
+  lastCheckedAt  DateTime?
   connectedById  String?
   connectedAt    DateTime?
   createdAt      DateTime          @default(now())

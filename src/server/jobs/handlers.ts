@@ -4,7 +4,7 @@ import { ingestSource } from "../knowledge/service";
 import { registerAgentJobs } from "../agents/jobs";
 import { publishDue } from "../social/publishing";
 import { syncAll, syncIntegration, notifyInsight } from "../social/sync";
-import { refreshExpiringTokens } from "../integrations/service";
+import { checkConnectionsHealth, refreshExpiringTokens } from "../integrations/service";
 import { dueWorkspaces, generateDailyBrief, generateWeeklyReport } from "../reports/service";
 import { analyzePost } from "../agents/workflows/analyst";
 import { startRun } from "../agents/runtime";
@@ -29,6 +29,7 @@ export function registerAllJobs() {
   registerJob("social.sync_all", async () => syncAll());
   registerJob("social.sync_integration", async (p) => syncIntegration(String(p.integrationId)));
   registerJob("integrations.refresh_tokens", async () => refreshExpiringTokens());
+  registerJob("integrations.health_check", async () => checkConnectionsHealth());
   registerJob("analytics.analyze_post", async (p) => {
     const scope = scopeOf(p);
     const res = await analyzePost(scope, String(p.socialPostId), { ...scope, agentKey: "PERFORMANCE_ANALYST" });

@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import { startOAuth } from "@/server/integrations/start-handler";
 
-/** Kept for existing links; identical to /start. */
-export async function GET(req: NextRequest, ctx: RouteContext<"/api/integrations/[provider]/connect">) {
+export async function GET(req: NextRequest, ctx: RouteContext<"/api/integrations/[provider]/start">) {
   return startOAuth(req, (await ctx.params).provider);
 }

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { tenantAction } from "@/server/action";
-import { CONNECTED_ACCOUNTS_PATH, ONBOARDING_CONNECT_PATH, disconnectIntegration, selectAccounts } from "@/server/integrations/service";
+import { CONNECTED_ACCOUNTS_PATH, ONBOARDING_CONNECT_PATH, disconnectIntegration, selectAccountsBatch } from "@/server/integrations/service";
 import { setWebsite } from "@/server/onboarding/service";
 import { enqueue } from "@/server/jobs/queue";
 import { db } from "@/server/db/client";
@@ -20,13 +20,14 @@ export const disconnect = tenantAction({ name: "integrations.disconnect", permis
   return { ok: true };
 });
 
+/** Saves the account picker: one or more integrations (e.g. Facebook + Instagram from one Meta sign-in). */
 export const chooseAccounts = tenantAction(
   { name: "integrations.choose", permission: "integrations:manage", rateLimit: 20 },
-  z.object({ integrationId: z.string(), accountIds: z.array(z.string()).min(1).max(50) }),
-  async ({ integrationId, accountIds }, ctx) => {
+  z.object({ selections: z.array(z.object({ integrationId: z.string(), accountIds: z.array(z.string()).max(50) })).min(1).max(6) }),
+  async ({ selections }, ctx) => {
     const scope = { organizationId: ctx.organization.id, workspaceId: ctx.workspace.id };
-    const count = await selectAccounts(scope, ctx.user.id, integrationId, accountIds);
-    await enqueue("social.sync_integration", { integrationId, ...scope }, scope);
+    const count = await selectAccountsBatch(scope, ctx.user.id, selections);
+    for (const sel of selections.filter((x) => x.accountIds.length)) await enqueue("social.sync_integration", { integrationId: sel.integrationId, ...scope }, scope);
     refresh();
     return { count };
   },

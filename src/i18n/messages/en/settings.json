@@ -274,8 +274,8 @@
       "DISCONNECTED": "Not connected"
     },
     "health": {
-      "expired": "The connection expired. Reconnect to keep publishing.",
-      "permission": "A permission was removed. Reconnect and approve all permissions.",
+      "expired": "The connection expired. Reconnect to continue.",
+      "permission": "A permission was removed. Reconnect and allow all permissions to continue.",
       "rate_limited": "The platform is limiting requests. We'll retry automatically.",
       "invalid_media": "The platform rejected a media file.",
       "not_supported": "This action isn't supported by the platform.",
@@ -586,6 +586,26 @@
         "local": "Local disk storage — fine for one server; use S3/R2 when running several instances.",
         "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked."
       }
+    },
+    "tests": {
+      "title": "Connection tests",
+      "intro": "Runs against the connections in your own workspace only. Testing is read-only; publishing a test post is a separate step that needs explicit confirmation.",
+      "empty": "No Meta or LinkedIn connection in your workspace yet.",
+      "connectLink": "Connect one in Settings → Connected accounts",
+      "run": "Test {provider} connection",
+      "valid": "Token valid",
+      "invalid": "Not valid ({reason})",
+      "expires": "expires {date}",
+      "member": "Signed in as",
+      "scopes": "Granted scopes",
+      "notLinked": "(not selected in NOVA)",
+      "publish": "Publish test post",
+      "igNeedsMedia": "Instagram needs an image — test publishing via Facebook",
+      "confirmTitle": "Publish a real test post?",
+      "confirmBody": "This publishes the text above to the real account. Type {word} to confirm.",
+      "confirmLabel": "Type {word} to confirm",
+      "publishNow": "Publish test post",
+      "posted": "Published — external post id {id}"
     }
   },
   "connect": {
@@ -652,6 +672,27 @@
         "READY": "Done — NOVA learned from your site",
         "FAILED": "We couldn't read this website"
       }
+    },
+    "emailTitle": "Google / Email",
+    "pickerTitle": "Choose the accounts you want NOVA to manage",
+    "pickerBody": "Only the accounts you select will be used for content, publishing and analytics.",
+    "pickerContinue": "Continue",
+    "capabilities": {
+      "identity": "Account info",
+      "publish": "Publishing",
+      "metrics": "Analytics",
+      "page_management": "Page management",
+      "instagram_publishing": "Instagram publishing",
+      "messages": "Messages",
+      "leads": "Lead forms",
+      "member_publishing": "Posting as you",
+      "organization_publishing": "Company page posting"
+    },
+    "capabilityReasons": {
+      "permission_missing": "Permission not granted — reconnect and allow it",
+      "requires_approval": "Not available yet",
+      "page_role": "Your role on this Page doesn't allow it",
+      "not_applicable": "Not applicable"
     }
   }
 }

@@ -37,6 +37,41 @@ export function providerForPlatform(platform: string): SocialProvider | null {
   return providerFor(platform as Provider);
 }
 
+const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIRECT_URI", linkedin: "LINKEDIN_REDIRECT_URI", tiktok: "TIKTOK_REDIRECT_URI" };
+
+/**
+ * The exact callback URL registered with the provider. `<PROVIDER>_REDIRECT_URI` wins (it must match
+ * the provider console character-for-character); otherwise it is derived from APP_URL.
+ */
 export function redirectUriFor(id: SocialProvider["id"]) {
+  const explicit = process.env[REDIRECT_ENV[id]]?.trim();
+  if (explicit) {
+    const u = new URL(explicit);
+    if (!u.pathname.endsWith(`/api/integrations/${id}/callback`)) throw new Error(`${REDIRECT_ENV[id]} must point to /api/integrations/${id}/callback`);
+    return u.toString();
+  }
   return `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/${id}/callback`;
+}
+
+export type RegistryEntry = {
+  id: string;
+  label: string;
+  /** "live" = implemented against the official API; "planned" = listed, not connectable yet. */
+  stage: "live" | "planned";
+  platforms: string[];
+  provider: SocialProvider | null;
+};
+
+/**
+ * Central provider registry (the single place that knows every connector).
+ * Google and Microsoft are planned email/identity connectors — OAuth only, never passwords.
+ */
+export function providerRegistry(): RegistryEntry[] {
+  return [
+    { id: "meta", label: "Meta", stage: "live", platforms: ["FACEBOOK", "INSTAGRAM"], provider: SOCIAL_PROVIDERS.meta },
+    { id: "linkedin", label: "LinkedIn", stage: "live", platforms: ["LINKEDIN"], provider: SOCIAL_PROVIDERS.linkedin },
+    { id: "tiktok", label: "TikTok", stage: "live", platforms: ["TIKTOK"], provider: SOCIAL_PROVIDERS.tiktok },
+    { id: "google", label: "Google", stage: "planned", platforms: ["EMAIL"], provider: null },
+    { id: "microsoft", label: "Microsoft", stage: "planned", platforms: ["EMAIL"], provider: null },
+  ];
 }

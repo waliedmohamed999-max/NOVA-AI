@@ -14,6 +14,7 @@ export const SYSTEM_SCHEDULES = [
   { key: "system:followups_due", type: "sales.followups_due", intervalSeconds: 15 * 60 },
   { key: "system:analytics_sync", type: "social.sync_all", intervalSeconds: 6 * 3600 },
   { key: "system:token_refresh", type: "integrations.refresh_tokens", intervalSeconds: 3600 },
+  { key: "system:connection_health", type: "integrations.health_check", intervalSeconds: 6 * 3600 },
   { key: "system:daily_brief", type: "reports.daily_briefs", intervalSeconds: 3600 },
   { key: "system:weekly_report", type: "reports.weekly_reports", intervalSeconds: 3 * 3600 },
   { key: "system:cleanup", type: "system.cleanup", intervalSeconds: 24 * 3600 },

@@ -63,6 +63,13 @@ test("connected accounts: no customer Integrations page, no config details, admi
   await page.goto("/admin/providers");
   await expect(page.getByText("Meta (Instagram + Facebook)")).toBeVisible();
   await expect(page.getByText("The Stripe adapter and webhook are not implemented yet", { exact: false })).toBeVisible();
+  // Admin-only connection tests: scoped to the admin workspace (the demo has no real connection).
+  await expect(page.getByRole("heading", { name: "Connection tests" })).toBeVisible();
+  await expect(page.getByText("No Meta or LinkedIn connection in your workspace yet.")).toBeVisible();
+  // Onboarding and settings start OAuth through /start with a fixed return context.
+  await page.goto("/settings/connected-accounts");
+  const cross = await page.request.get("/api/integrations/meta/start?from=settings", { maxRedirects: 0, headers: { "sec-fetch-site": "cross-site" } });
+  expect(cross.headers().location).toContain("/settings/connected-accounts?error=forbidden");
 
   const anon = await request.get("/settings/connected-accounts", { maxRedirects: 0 });
   expect([302, 307]).toContain(anon.status());

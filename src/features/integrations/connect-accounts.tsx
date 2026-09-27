@@ -44,9 +44,11 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
     queueMicrotask(() => {
       if (error) toast.error(errorText(error));
       if (limited.length) toast.error(t("limited", { platforms: limited.map(platformName).join(" · ") }));
-      const pickers = view.cards.filter((c) => choose.includes(c.platform) && c.state === "choose").map((c) => c.platform);
+      // If any platform of a sign-in needs a choice, show everything that sign-in returned in one picker.
+      const needs = view.cards.filter((c) => choose.includes(c.platform) && c.state === "choose");
+      const pickers = needs.length ? view.cards.filter((c) => connected.includes(c.platform) && needs.some((n) => n.oauth === c.oauth)).map((c) => c.platform) : [];
       if (pickers.length) setChooseQueue(pickers);
-      const done = view.cards.find((c) => connected.includes(c.platform) && !choose.includes(c.platform) && c.state === "connected");
+      const done = pickers.length ? null : view.cards.find((c) => connected.includes(c.platform) && c.state === "connected");
       if (done) {
         const acc = done.accounts.find((a) => a.isActive);
         setSuccess({ platform: done.platform, account: acc ? (acc.handle ?? acc.name) : null });
@@ -62,10 +64,11 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
     return () => clearTimeout(id);
   }, [success]);
 
-  const connectHref = (c: ConnectionCard) => `/api/integrations/${c.oauth}/connect?from=${from}`;
+  const connectHref = (c: ConnectionCard) => `/api/integrations/${c.oauth}/start?from=${from}`;
   const startConnect = (c: ConnectionCard) => setConnecting(c.oauth);
 
-  const choosing = view.cards.find((c) => c.platform === chooseQueue[0]) ?? null;
+  // One picker for every platform the sign-in returned several accounts for (Meta: Pages + Instagram).
+  const choosing = view.cards.filter((c) => chooseQueue.includes(c.platform) && c.integrationId && c.accounts.length > 0);
 
   const doDisconnect = (c: ConnectionCard) =>
     start(async () => {
@@ -101,7 +104,7 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
               connecting={connecting === c.oauth}
               href={connectHref(c)}
               onConnect={() => startConnect(c)}
-              onChoose={() => setChooseQueue([c.platform])}
+              onChoose={() => setChooseQueue(view.cards.filter((x) => x.oauth === c.oauth && x.integrationId && x.accounts.length > 0).map((x) => x.platform))}
               onDisconnect={() => setConfirming(c)}
               healthText={c.healthKey ? th(c.healthKey as "expired") : null}
             />
@@ -117,7 +120,7 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
         <h2 className="text-sm font-semibold text-ink-2">{t("more")}</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
           <li className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-xs">
-            <CardHead channel="EMAIL" name={platformName("EMAIL")} why={t("why.EMAIL")} chip={<Badge tone="outline">{t("state.soon")}</Badge>} />
+            <CardHead channel="EMAIL" name={t("emailTitle")} why={t("why.EMAIL")} chip={<Badge tone="outline">{t("state.soon")}</Badge>} />
             <p className="text-xs text-ink-3">{t("emailNote")}</p>
           </li>
           <WebsiteCard initial={view.website} canManage={canManage} />
@@ -137,14 +140,13 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
         </ul>
       </section>
 
-      <ChooseDialog
-        key={choosing?.platform ?? "none"}
-        card={choosing}
-        name={choosing ? platformName(choosing.platform) : ""}
-        onClose={() => setChooseQueue((q) => q.slice(1))}
-        onSaved={(card, account) => {
-          setChooseQueue((q) => q.slice(1));
-          setSuccess({ platform: card.platform, account });
+      <AccountPicker
+        key={chooseQueue.join(",") || "none"}
+        cards={choosing}
+        onClose={() => setChooseQueue([])}
+        onSaved={(platform, account) => {
+          setChooseQueue([]);
+          setSuccess({ platform, account });
           router.refresh();
         }}
       />
@@ -282,45 +284,77 @@ function SocialCard(props: {
   );
 }
 
-function ChooseDialog({ card, name, onClose, onSaved }: { card: ConnectionCard | null; name: string; onClose: () => void; onSaved: (c: ConnectionCard, account: string | null) => void }) {
+function AccountPicker({ cards, onClose, onSaved }: { cards: ConnectionCard[]; onClose: () => void; onSaved: (platform: string, account: string | null) => void }) {
   const t = useTranslations("settings.connect");
+  const tc = useTranslations("common");
   const te = useTranslations("errors");
-  const [picked, setPicked] = useState<string[]>(() => card?.accounts.filter((a) => a.isActive).map((a) => a.id) ?? []);
+  // Nothing is pre-selected for a fresh multi-account sign-in; "change account" starts from the current choice.
+  const [picked, setPicked] = useState<string[]>(() => cards.flatMap((c) => c.accounts.filter((a) => a.isActive).map((a) => a.id)));
   const [pending, start] = useTransition();
-  if (!card) return null;
+  if (!cards.length) return null;
   const save = () =>
     start(async () => {
-      const r = await chooseAccounts({ integrationId: card.integrationId!, accountIds: picked });
+      const r = await chooseAccounts({ selections: cards.map((c) => ({ integrationId: c.integrationId!, accountIds: c.accounts.filter((a) => picked.includes(a.id)).map((a) => a.id) })) });
       if (!r.ok) return void toast.error(te.has(r.error as "unexpected") ? te(r.error as "unexpected") : te("unexpected"));
-      toast(t("selected"));
-      const first = card.accounts.find((a) => picked.includes(a.id));
-      onSaved(card, first ? (first.handle ?? first.name) : null);
+      const firstCard = cards.find((c) => c.accounts.some((a) => picked.includes(a.id)))!;
+      const first = firstCard.accounts.find((a) => picked.includes(a.id))!;
+      onSaved(firstCard.platform, first.handle ?? first.name);
     });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent title={t("chooseTitle")} description={`${name} · ${t("chooseBody")}`}>
-        <ul className="space-y-2">
-          {card.accounts.map((a) => {
-            const on = picked.includes(a.id);
-            return (
-              <li key={a.id}>
-                <label className={cn("flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition", on ? "border-ink bg-surface-2" : "border-line hover:border-line-strong")}>
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-[var(--ink)]"
-                    checked={on}
-                    onChange={() => setPicked((xs) => (on ? xs.filter((x) => x !== a.id) : [...xs, a.id]))}
-                  />
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium" dir="auto">{a.name}</span>
-                    {a.handle && <span className="block truncate text-xs text-ink-3" dir="ltr">{a.handle}</span>}
-                  </span>
-                </label>
-              </li>
-            );
-          })}
-        </ul>
-        <Button className="mt-4 w-full" disabled={picked.length === 0} loading={pending} onClick={save}>{t("chooseSave")}</Button>
+      <DialogContent title={t("pickerTitle")} description={t("pickerBody")} size="lg">
+        <div className="space-y-5">
+          {cards.map((c) => (
+            <section key={c.platform} className="space-y-2" aria-label={tc(`platforms.${c.platform}` as "platforms.INSTAGRAM")}>
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-2">
+                <ChannelIcon channel={c.platform} className="size-7 rounded-lg" />
+                {tc(`platforms.${c.platform}` as "platforms.INSTAGRAM")}
+              </h3>
+              <ul className="space-y-2">
+                {c.accounts.map((a) => {
+                  const on = picked.includes(a.id);
+                  return (
+                    <li key={a.id}>
+                      <label className={cn("flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 transition", on ? "border-ink bg-surface-2" : "border-line hover:border-line-strong")}>
+                        <input
+                          type="checkbox"
+                          className="mt-2.5 size-4 shrink-0 accent-[var(--ink)]"
+                          checked={on}
+                          onChange={() => setPicked((xs) => (on ? xs.filter((x) => x !== a.id) : [...xs, a.id]))}
+                          aria-label={a.name}
+                        />
+                        {a.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- remote platform avatar, sized small
+                          <img src={a.avatarUrl} alt="" className="size-10 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <ChannelIcon channel={c.platform} className="rounded-full" />
+                        )}
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-medium" dir="auto">{a.name}</span>
+                          {a.handle && <span className="block truncate text-xs text-ink-3" dir="ltr">{a.handle}</span>}
+                          {a.capabilities && (
+                            <span className="mt-1.5 flex flex-wrap gap-1">
+                              {a.capabilities.map((cap) => (
+                                <span
+                                  key={cap.key}
+                                  title={cap.available ? undefined : t(`capabilityReasons.${cap.reason ?? "permission_missing"}` as "capabilityReasons.permission_missing")}
+                                  className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]", cap.available ? "bg-success-soft text-success" : "bg-sunken text-ink-4")}
+                                >
+                                  {cap.available ? "✓" : "○"} {t(`capabilities.${cap.key}` as "capabilities.identity")}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+        <Button className="mt-5 w-full" disabled={picked.length === 0} loading={pending} onClick={save}>{t("pickerContinue")}</Button>
       </DialogContent>
     </Dialog>
   );

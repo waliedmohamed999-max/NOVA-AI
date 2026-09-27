@@ -58,6 +58,22 @@ export type RemotePost = {
 
 export type AccountMetrics = { followers: number | null; reach: number | null; impressions: number | null; profileViews: number | null; raw: Record<string, unknown> };
 
+/** What a connection can actually do, derived from granted permissions (never assumed). */
+export type CapabilityKey =
+  | "identity"
+  | "publish"
+  | "metrics"
+  | "page_management"
+  | "instagram_publishing"
+  | "messages"
+  | "leads"
+  | "member_publishing"
+  | "organization_publishing";
+export type Capability = { key: CapabilityKey; available: boolean; /** Why it is unavailable (i18n key suffix), e.g. "permission_missing", "requires_approval". */ reason?: string };
+
+export type ProviderProfile = { id: string; name: string; email?: string | null; avatarUrl?: string | null };
+export type ConnectionCheck = { valid: boolean; expiresAt?: Date | null; scopes: string[]; profile?: ProviderProfile | null; detail?: string };
+
 /**
  * Social provider abstraction. Implementations call official platform APIs
  * only — never scraping or password automation.
@@ -80,7 +96,26 @@ export interface SocialProvider {
   getPosts(account: AccountRef, token: TokenSet, opts: { since?: Date; limit?: number }): Promise<RemotePost[]>;
   getMetrics(account: AccountRef, token: TokenSet, externalId: string): Promise<NormalizedMetrics | null>;
   getAccountMetrics(account: AccountRef, token: TokenSet): Promise<AccountMetrics | null>;
+
+  // ── Optional capabilities: providers implement what their platform supports ──
+  /** The permissions the user actually granted (may be fewer than requested). */
+  grantedScopes?(token: TokenSet): Promise<string[]>;
+  /** Capabilities for one account given the granted scopes. */
+  capabilities?(account: { platform: string; accountType?: string | null; metadata?: Record<string, unknown> }, scopes: string[]): Capability[];
+  /** The signed-in identity behind the connection. */
+  getProfile?(token: TokenSet): Promise<ProviderProfile>;
+  /** Validates a stored token with the provider (health checks, admin connection test). */
+  checkConnection?(token: TokenSet): Promise<ConnectionCheck>;
 }
+
+/**
+ * The universal connection contract, mapped onto the existing provider methods:
+ *   getAuthorizationUrl → connect · handleCallback → exchangeCode + listAccounts (via the broker in service.ts)
+ *   refreshConnection → refreshToken · publishContent → publishPost · getMetrics → getMetrics/getAccountMetrics
+ *   listAccounts, disconnect, getProfile, getCapabilities (capabilities) are named the same.
+ * Optional members are capabilities; no provider is forced to implement all of them.
+ */
+export type IntegrationProvider = SocialProvider;
 
 export type ProviderErrorKind = "expired" | "permission" | "rate_limited" | "invalid_media" | "not_supported" | "unavailable" | "unknown";
 

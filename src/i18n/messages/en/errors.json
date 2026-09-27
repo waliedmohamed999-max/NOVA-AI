@@ -19,9 +19,9 @@
   "ai_failed": "Your AI team couldn't finish this request. Please try again.",
   "integration_not_configured": "This connection isn't available yet. We'll let you know as soon as it is.",
   "integration_expired": "Your connection expired. Reconnect it to continue publishing.",
-  "integration_error": "We couldn't reach the platform. We'll retry automatically — or reconnect now.",
+  "integration_error": "We couldn't complete the connection. Please try again.",
   "oauth_denied": "The connection was cancelled. You can try again whenever you're ready.",
-  "oauth_state": "That connection attempt expired. Please start again.",
+  "oauth_state": "The connection attempt timed out. Please try again.",
   "website_unreachable": "We couldn't open that website. Check the address and try again.",
   "file_too_large": "That file is too large.",
   "file_type": "That file type isn't supported.",
@@ -42,5 +42,6 @@
     "forbiddenBody": "Ask an admin on your team if you need access.",
     "home": "Go home"
   },
-  "no_accounts": "We didn't find a business account on that sign-in. Make sure you manage the page or profile, then try again."
+  "no_accounts": "We didn't find a business account on that sign-in. Make sure you manage the page or profile, then try again.",
+  "test_post_needs_media": "This platform needs an image or video to publish; test publishing on Facebook or LinkedIn."
 }

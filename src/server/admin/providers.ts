@@ -32,8 +32,8 @@ export function providerConfigStatus(): ProviderRow[] {
   const stripe = [field("STRIPE_SECRET_KEY", "secret"), field("STRIPE_WEBHOOK_SECRET", "secret")];
   const stripeSet = stripe.some((f) => f.value);
   return [
-    row("meta", [field("META_APP_ID", "id"), field("META_APP_SECRET", "secret")], [field("META_GRAPH_VERSION", "setting")]),
-    row("linkedin", [field("LINKEDIN_CLIENT_ID", "id"), field("LINKEDIN_CLIENT_SECRET", "secret")], [field("LINKEDIN_API_VERSION", "setting")]),
+    row("meta", [field("META_APP_ID", "id"), field("META_APP_SECRET", "secret")], [field("META_REDIRECT_URI", "setting"), field("META_GRAPH_VERSION", "setting")]),
+    row("linkedin", [field("LINKEDIN_CLIENT_ID", "id"), field("LINKEDIN_CLIENT_SECRET", "secret")], [field("LINKEDIN_REDIRECT_URI", "setting"), field("LINKEDIN_API_VERSION", "setting"), field("LINKEDIN_ORGANIZATION_ACCESS", "setting")]),
     row("tiktok", [field("TIKTOK_CLIENT_KEY", "id"), field("TIKTOK_CLIENT_SECRET", "secret")]),
     row("openai", [field("OPENAI_API_KEY", "secret")], [field("OPENAI_MODEL_BEST", "setting"), field("OPENAI_MODEL_FAST", "setting")]),
     row("anthropic", [field("ANTHROPIC_API_KEY", "secret")], [field("AI_PRIMARY_PROVIDER", "setting")]),

@@ -68,11 +68,18 @@ export type ConnectResult = {
 };
 
 /** Step 2 of OAuth (backend callback): verify state, exchange code, store encrypted tokens and accounts. */
-export async function completeConnect(providerId: SocialProvider["id"], params: { code: string | null; state: string | null; error?: string | null }): Promise<ConnectResult> {
+export async function completeConnect(
+  providerId: SocialProvider["id"],
+  params: { code: string | null; state: string | null; error?: string | null },
+  /** The signed-in user finishing the flow. When given, it must be the user who started it (login-CSRF guard). */
+  actorUserId?: string | null,
+): Promise<ConnectResult> {
   if (!params.state) throw new UserFacingError("oauth_state");
   const stored = await db.oAuthState.findUnique({ where: { stateHash: hashToken(params.state) }, omit: { codeVerifierEnc: false } });
   if (!stored || stored.consumedAt || stored.expiresAt < new Date() || stored.provider !== providerId) throw new UserFacingError("oauth_state");
+  // Consumed before any other check: a mismatched attempt burns the state too.
   await db.oAuthState.update({ where: { id: stored.id }, data: { consumedAt: new Date() } });
+  if (actorUserId !== undefined && actorUserId !== stored.userId) throw new UserFacingError("oauth_state");
   const redirectTo = safeStoredReturn(stored.redirectTo);
   if (params.error || !params.code) return { redirectTo, error: "oauth_denied" };
 
@@ -121,10 +128,11 @@ export async function completeConnect(providerId: SocialProvider["id"], params: 
     for (const a of list) {
       const isActive = list.length === 1 || previous.has(a.externalId);
       if (isActive) active++;
+      const metadata = { ...(a.metadata ?? {}), capabilities: provider.capabilities?.(a, tokens.scopes ?? []) ?? null } as object;
       const account = await db.integrationAccount.upsert({
         where: { integrationId_externalId: { integrationId: integration.id, externalId: a.externalId } },
-        create: { ...scope, integrationId: integration.id, platform, externalId: a.externalId, name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object, isActive },
-        update: { name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata: (a.metadata ?? {}) as object, isActive },
+        create: { ...scope, integrationId: integration.id, platform, externalId: a.externalId, name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata, isActive },
+        update: { name: a.name, handle: a.handle ?? null, avatarUrl: a.avatarUrl ?? null, accountType: a.accountType ?? null, metadata, isActive },
       });
       if (a.token) await saveCredential(scope, integration.id, account.id, a.token);
     }
@@ -143,6 +151,20 @@ export async function completeConnect(providerId: SocialProvider["id"], params: 
   }
   if (!connected.length && !limited.length) return { redirectTo, scope, error: "no_accounts" };
   return { redirectTo, connected, needsSelection, limited, scope };
+}
+
+/**
+ * One picker for everything a sign-in returned (e.g. Facebook Pages + Instagram accounts).
+ * A platform with nothing chosen is released (no provider revoke while a sibling still uses the grant).
+ */
+export async function selectAccountsBatch(scope: TenantScope, userId: string, selections: { integrationId: string; accountIds: string[] }[]) {
+  if (!selections.some((x) => x.accountIds.length > 0)) throw new UserFacingError("validation");
+  let chosen = 0;
+  for (const sel of selections) {
+    if (sel.accountIds.length) chosen += await selectAccounts(scope, userId, sel.integrationId, sel.accountIds);
+    else await disconnectIntegration(scope, sel.integrationId, userId);
+  }
+  return chosen;
 }
 
 /** The customer picks which returned accounts NOVA manages. Strictly scoped to the caller's workspace. */
@@ -193,9 +215,13 @@ export function accountRef(a: { externalId: string; accountType: string | null; 
 export async function disconnectIntegration(scope: TenantScope, integrationId: string, userId: string) {
   const integration = await db.integration.findFirst({ where: { id: integrationId, ...scope } });
   if (!integration) throw new UserFacingError("item_not_found");
-  const provider = SOCIAL_PROVIDERS[providerIdFor(integration.provider)];
+  const providerId = providerIdFor(integration.provider);
+  const provider = SOCIAL_PROVIDERS[providerId];
   const cred = await db.integrationCredential.findFirst({ where: { integrationId, accountId: null }, omit: { accessTokenEnc: false } });
-  if (provider && cred) await provider.disconnect({ accessToken: decryptSecret(cred.accessTokenEnc) }).catch((err) => logger.warn({ err }, "provider revoke failed"));
+  // Instagram and Facebook share one Meta grant: revoking it for one would silently break the other.
+  const siblings = await db.integration.count({ where: { ...scope, id: { not: integrationId }, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
+  if (provider && cred && siblings === 0) await provider.disconnect({ accessToken: decryptSecret(cred.accessTokenEnc) }).catch((err) => logger.warn({ provider: providerId, err: err instanceof Error ? err.message : String(err) }, "provider revoke failed"));
+  // Posts, metrics and audit history are kept; only credentials go and accounts are deactivated.
   await db.integrationCredential.deleteMany({ where: { integrationId } });
   await db.integrationAccount.updateMany({ where: { integrationId }, data: { isActive: false } });
   await db.integration.update({ where: { id: integrationId }, data: { status: "DISCONNECTED", statusMessage: null } });
@@ -257,4 +283,38 @@ export async function refreshExpiringTokens() {
     }
   }
   return { checked: creds.length, refreshed };
+}
+
+/**
+ * Scheduler job: validates live connections with the provider (Meta debug_token, LinkedIn introspection).
+ * Invalid ones become EXPIRED/ACTION_REQUIRED and the customer is notified; technical detail stays in logs.
+ */
+export async function checkConnectionsHealth(limit = 200) {
+  const rows = await db.integration.findMany({ where: { status: "CONNECTED" }, orderBy: { lastCheckedAt: { sort: "asc", nulls: "first" } }, take: limit });
+  let checked = 0;
+  let unhealthy = 0;
+  for (const i of rows) {
+    const provider = SOCIAL_PROVIDERS[providerIdFor(i.provider)];
+    if (!provider?.checkConnection || !provider.isConfigured()) continue;
+    const scope = { organizationId: i.organizationId, workspaceId: i.workspaceId };
+    const cred = await db.integrationCredential.findFirst({ where: { integrationId: i.id, accountId: null }, omit: { accessTokenEnc: false, refreshTokenEnc: false } });
+    if (!cred) continue;
+    checked++;
+    try {
+      const res = await provider.checkConnection({ accessToken: decryptSecret(cred.accessTokenEnc), refreshToken: cred.refreshTokenEnc ? decryptSecret(cred.refreshTokenEnc) : null, expiresAt: cred.expiresAt });
+      await db.integration.update({ where: { id: i.id }, data: { lastCheckedAt: new Date(), ...(res.scopes.length ? { scopes: res.scopes } : {}) } });
+      if (!res.valid) {
+        unhealthy++;
+        await markIntegrationError(scope, i.id, new ProviderError("expired", "Connection no longer valid", undefined, res.detail));
+      }
+    } catch (err) {
+      await db.integration.update({ where: { id: i.id }, data: { lastCheckedAt: new Date() } });
+      // Transient provider outages are not the customer's problem; only auth failures change status.
+      if (err instanceof ProviderError && (err.kind === "expired" || err.kind === "permission")) {
+        unhealthy++;
+        await markIntegrationError(scope, i.id, err);
+      } else logger.warn({ integrationId: i.id, err: err instanceof Error ? err.message : String(err) }, "connection health check failed");
+    }
+  }
+  return { checked, unhealthy };
 }

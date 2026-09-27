@@ -1,5 +1,5 @@
 import { form, providerFetch } from "../http";
-import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type ConnectedAccount, type NormalizedMetrics, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
+import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
 
 /**
  * LinkedIn: member posting via Sign In with LinkedIn (OpenID) + w_member_social.
@@ -48,6 +48,38 @@ export class LinkedInProvider implements SocialProvider {
       refreshExpiresAt: res.refresh_token_expires_in ? new Date(Date.now() + res.refresh_token_expires_in * 1000) : null,
       scopes: res.scope?.split(/[ ,]/) ?? this.scopes,
     };
+  }
+
+  /** LinkedIn returns the granted scopes with the token; nothing else to ask. */
+  async grantedScopes(token: TokenSet) {
+    return token.scopes ?? [];
+  }
+
+  capabilities(account: { accountType?: string | null }, scopes: string[]): Capability[] {
+    const has = (p: string) => scopes.includes(p);
+    const org = account.accountType === "linkedin_organization";
+    return [
+      has("openid") && has("profile") ? { key: "identity", available: true } : { key: "identity", available: false, reason: "permission_missing" },
+      !org && has("w_member_social") ? { key: "member_publishing", available: true } : { key: "member_publishing", available: false, reason: org ? "not_applicable" : "permission_missing" },
+      // Organization posting needs the Community Management API (LinkedIn approval) and an admin role on the page.
+      org && has("w_organization_social") ? { key: "organization_publishing", available: true } : { key: "organization_publishing", available: false, reason: "requires_approval" },
+    ];
+  }
+
+  async getProfile(token: TokenSet): Promise<ProviderProfile> {
+    const me = await providerFetch<{ sub: string; name?: string; picture?: string; email?: string }>(`${API}/v2/userinfo`, { headers: { authorization: `Bearer ${token.accessToken}` } });
+    return { id: `urn:li:person:${me.sub}`, name: me.name ?? "LinkedIn member", email: me.email ?? null, avatarUrl: me.picture ?? null };
+  }
+
+  /** Token introspection (client credentials, server-side) plus a profile read. */
+  async checkConnection(token: TokenSet): Promise<ConnectionCheck> {
+    const res = await providerFetch<{ active: boolean; scope?: string; expires_at?: number; status?: string }>(
+      "https://www.linkedin.com/oauth/v2/introspectToken",
+      form({ token: token.accessToken, client_id: process.env.LINKEDIN_CLIENT_ID!, client_secret: process.env.LINKEDIN_CLIENT_SECRET! }),
+    );
+    if (!res.active) return { valid: false, scopes: [], detail: res.status ?? "inactive" };
+    const profile = await this.getProfile(token);
+    return { valid: true, expiresAt: res.expires_at ? new Date(res.expires_at * 1000) : null, scopes: res.scope?.split(/[ ,]+/).filter(Boolean) ?? [], profile };
   }
 
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {

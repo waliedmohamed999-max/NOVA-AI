@@ -1,4 +1,8 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// The OAuth callback is bound to the signed-in user; tests set who that is.
+const session = vi.hoisted(() => ({ userId: null as string | null }));
+vi.mock("@/server/auth/session", () => ({ getSession: async () => (session.userId ? { userId: session.userId } : null) }));
 import { db } from "@/server/db/client";
 import { makeTenant } from "../support/factory";
 import {
@@ -255,6 +259,7 @@ describe("callback route", () => {
     const { GET } = await import("@/app/api/integrations/[provider]/callback/route");
     const url = await startConnect(t.scope, t.user.id, "meta", "onboarding");
     const state = new URL(url).searchParams.get("state")!;
+    session.userId = t.user.id;
     const res = await GET(new NextRequest(`http://localhost:3000/api/integrations/meta/callback?code=secret-code&state=${state}`), { params: Promise.resolve({ provider: "meta" }) });
     const location = new URL(res.headers.get("location")!);
     expect(location.pathname).toBe(ONBOARDING_CONNECT_PATH);
@@ -263,5 +268,20 @@ describe("callback route", () => {
     // Sync is only queued for accounts the customer has already chosen.
     const jobs = await db.job.findMany({ where: { organizationId: t.organization.id, type: "social.sync_integration" } });
     expect(jobs).toHaveLength(1);
+  });
+});
+
+describe("callback route — session binding", () => {
+  it("rejects a callback finished by a different signed-in user", async () => {
+    setSocialProvider("meta", fakeMeta([ig("a1")]));
+    const t = await makeTenant();
+    const attacker = await makeTenant("Attacker");
+    const { NextRequest } = await import("next/server");
+    const { GET } = await import("@/app/api/integrations/[provider]/callback/route");
+    const state = new URL(await startConnect(t.scope, t.user.id, "meta", "onboarding")).searchParams.get("state")!;
+    session.userId = attacker.user.id;
+    const res = await GET(new NextRequest(`http://localhost:3000/api/integrations/meta/callback?code=c&state=${state}`), { params: Promise.resolve({ provider: "meta" }) });
+    expect(new URL(res.headers.get("location")!).searchParams.get("error")).toBe("oauth_state");
+    expect(await db.integration.count({ where: { organizationId: t.organization.id } })).toBe(0);
   });
 });

@@ -5,6 +5,7 @@ import { UserFacingError } from "@/server/errors";
 import { enqueue } from "@/server/jobs/queue";
 import { db } from "@/server/db/client";
 import { logger } from "@/server/logger";
+import { getSession } from "@/server/auth/session";
 
 /**
  * OAuth redirect target. The code is exchanged and tokens are encrypted here, server-side only;
@@ -16,7 +17,9 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/integrations
   if (!(provider in SOCIAL_PROVIDERS)) return NextResponse.redirect(new URL(`${CONNECTED_ACCOUNTS_PATH}?error=not_found`, base));
   const sp = req.nextUrl.searchParams;
   try {
-    const res = await completeConnect(provider as keyof typeof SOCIAL_PROVIDERS, { code: sp.get("code"), state: sp.get("state"), error: sp.get("error") });
+    // Bound to the signed-in user who started the flow (a mismatched or missing session is rejected).
+    const session = await getSession().catch(() => null);
+    const res = await completeConnect(provider as keyof typeof SOCIAL_PROVIDERS, { code: sp.get("code"), state: sp.get("state"), error: sp.get("error") }, session?.userId ?? null);
     const out = new URL(res.redirectTo, base);
     if (res.error) {
       out.searchParams.set("error", res.error);

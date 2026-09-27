@@ -2,6 +2,12 @@ import { db } from "../db/client";
 import type { TenantScope } from "../db/tenant";
 import { getUsage } from "../billing/entitlements";
 import { INTEGRATION_CATALOG, SOCIAL_PROVIDERS } from "./registry";
+import type { Capability } from "./types";
+
+function capabilitiesOf(metadata: unknown): Capability[] | null {
+  const c = (metadata as { capabilities?: unknown } | null)?.capabilities;
+  return Array.isArray(c) ? (c as Capability[]) : null;
+}
 
 export type ConnectionState = "idle" | "connected" | "reconnect" | "choose" | "unavailable";
 
@@ -11,7 +17,7 @@ export type ConnectionCard = {
   available: boolean;
   state: ConnectionState;
   integrationId: string | null;
-  accounts: { id: string; name: string; handle: string | null; avatarUrl: string | null; isActive: boolean }[];
+  accounts: { id: string; name: string; handle: string | null; avatarUrl: string | null; isActive: boolean; capabilities: Capability[] | null }[];
   healthKey: string | null;
 };
 
@@ -39,7 +45,7 @@ export async function loadConnections(scope: TenantScope, isDemo: boolean): Prom
     const row = rows.find((r) => r.provider === c.provider);
     const available = SOCIAL_PROVIDERS[c.oauth!].isConfigured();
     const live = row && row.status !== "DISCONNECTED";
-    const accounts = live ? row.accounts.map((a) => ({ id: a.id, name: a.name, handle: a.handle, avatarUrl: a.avatarUrl, isActive: a.isActive })) : [];
+    const accounts = live ? row.accounts.map((a) => ({ id: a.id, name: a.name, handle: a.handle, avatarUrl: a.avatarUrl, isActive: a.isActive, capabilities: capabilitiesOf(a.metadata) })) : [];
     let state: ConnectionState = "idle";
     if (live && row.status !== "CONNECTED") state = "reconnect";
     else if (live && accounts.length > 0 && !accounts.some((a) => a.isActive)) state = "choose";
