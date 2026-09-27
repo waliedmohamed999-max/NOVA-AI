@@ -21,6 +21,17 @@ type Discoveries = {
   strategy?: { positioning?: string; firstMonthFocus?: string; postingCadence?: string; kpis?: string[] };
 };
 
+function Section({ icon: Icon, title, children, delay }: { icon: typeof Sparkles; title: string; children: React.ReactNode; delay: number }) {
+  return (
+    <section className="animate-fade-up rounded-[24px] border border-line bg-surface p-6 shadow-xs" style={{ animationDelay: `${delay}ms` }}>
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-ink-3">
+        <Icon className="size-4 text-accent" /> {title}
+      </h2>
+      <div className="space-y-2 text-[15px] text-ink-2">{children}</div>
+    </section>
+  );
+}
+
 export default async function ReadyPage() {
   const user = await requireUser();
   const member = await db.organizationMember.findFirst({ where: { userId: user.id }, include: { organization: true } });
@@ -30,14 +41,6 @@ export default async function ReadyPage() {
   const { profile, kit } = await loadDiscoveries(member.organizationId);
   const d = (profile?.discoveries ?? {}) as Discoveries;
 
-  const Section = ({ icon: Icon, title, children, delay }: { icon: typeof Sparkles; title: string; children: React.ReactNode; delay: number }) => (
-    <section className="animate-fade-up rounded-[24px] border border-line bg-surface p-6 shadow-xs" style={{ animationDelay: `${delay}ms` }}>
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-ink-3">
-        <Icon className="size-4 text-accent" /> {title}
-      </h2>
-      <div className="space-y-2 text-[15px] text-ink-2">{children}</div>
-    </section>
-  );
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-14 sm:py-20">

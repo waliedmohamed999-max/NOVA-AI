@@ -13,9 +13,10 @@ export interface StorageDriver {
 }
 
 class LocalDriver implements StorageDriver {
-  private root = path.resolve(process.env.STORAGE_LOCAL_DIR ?? ".storage");
+  // Runtime-configured directory; excluded from build tracing.
+  private root = path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.STORAGE_LOCAL_DIR ?? ".storage");
   private resolve(key: string) {
-    const full = path.resolve(this.root, key);
+    const full = path.resolve(/* turbopackIgnore: true */ this.root, key);
     if (!full.startsWith(this.root + path.sep)) throw new Error("Invalid storage key");
     return full;
   }

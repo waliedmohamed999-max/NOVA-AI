@@ -78,12 +78,20 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
   // Reset / prefill when opened
   useEffect(() => {
     if (!state.open) return;
-    setRunId(null);
-    setError(null);
-    setText(state.text);
-    void recentRuns({ limit: 4 }).then((r) => r.ok && setRecent(r.data));
-    if (state.autoSubmit && state.text) submit(state.text);
-    else setTimeout(() => inputRef.current?.focus(), 50);
+    let cancelled = false;
+    // Deferred so the reset doesn't cascade synchronously inside the effect.
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setRunId(null);
+      setError(null);
+      setText(state.text);
+      if (state.autoSubmit && state.text) submit(state.text);
+      else setTimeout(() => inputRef.current?.focus(), 50);
+    });
+    void recentRuns({ limit: 4 }).then((r) => !cancelled && r.ok && setRecent(r.data));
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.nonce]);
 

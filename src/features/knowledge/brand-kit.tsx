@@ -28,7 +28,6 @@ const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 
 export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
   const t = useTranslations("settings.brand");
-  const tc = useTranslations("common");
   const te = useTranslations("errors");
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -67,28 +66,6 @@ export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Ki
     setLogo({ id: json.id, url: json.url });
   }
 
-  const Colors = ({ field }: { field: "primaryColors" | "secondaryColors" }) => (
-    <div className="flex flex-wrap items-center gap-2">
-      {k[field].map((c, i) => (
-        <span key={i} className="group relative">
-          <label className="block size-12 cursor-pointer overflow-hidden rounded-xl ring-1 ring-line" style={{ background: c }}>
-            <input type="color" className="opacity-0" value={c.length === 7 ? c : "#000000"} disabled={!canManage} onChange={(e) => setK({ ...k, [field]: k[field].map((x, j) => (j === i ? e.target.value : x)) })} aria-label={`${t(field)} ${i + 1}`} />
-          </label>
-          {canManage && (
-            <button type="button" className="absolute -end-1.5 -top-1.5 hidden rounded-full bg-ink p-0.5 text-ink-inverse group-hover:block" onClick={() => setK({ ...k, [field]: k[field].filter((_, j) => j !== i) })} aria-label={tc("actions.remove")}>
-              <X className="size-3" />
-            </button>
-          )}
-          <span className="mt-1 block text-center text-[10px] uppercase text-ink-4" dir="ltr">{c}</span>
-        </span>
-      ))}
-      {canManage && k[field].length < 4 && (
-        <button type="button" onClick={() => setK({ ...k, [field]: [...k[field], "#888888"] })} className="flex size-12 items-center justify-center rounded-xl border border-dashed border-line-strong text-ink-3" aria-label={tc("actions.add")}>
-          <Plus className="size-4" />
-        </button>
-      )}
-    </div>
-  );
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -108,8 +85,8 @@ export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Ki
             )}
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2"><p className="text-[13px] font-medium text-ink-2">{t("primaryColors")}</p><Colors field="primaryColors" /></div>
-            <div className="space-y-2"><p className="text-[13px] font-medium text-ink-2">{t("secondaryColors")}</p><Colors field="secondaryColors" /></div>
+            <div className="space-y-2"><p className="text-[13px] font-medium text-ink-2">{t("primaryColors")}</p><ColorList colors={k.primaryColors} label={t("primaryColors")} canManage={canManage} onChange={(v) => setK({ ...k, primaryColors: v })} /></div>
+            <div className="space-y-2"><p className="text-[13px] font-medium text-ink-2">{t("secondaryColors")}</p><ColorList colors={k.secondaryColors} label={t("secondaryColors")} canManage={canManage} onChange={(v) => setK({ ...k, secondaryColors: v })} /></div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <Field label={t("headingFont")}>{(f) => <Input {...f} value={k.headingFont} disabled={!canManage} onChange={(e) => setK({ ...k, headingFont: e.target.value })} />}</Field>
@@ -154,6 +131,32 @@ export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Ki
         </Card>
         <p className="text-xs text-ink-4">{t("designNote")}</p>
       </aside>
+    </div>
+  );
+}
+
+function ColorList({ colors, label, canManage, onChange }: { colors: string[]; label: string; canManage: boolean; onChange: (v: string[]) => void }) {
+  const tc = useTranslations("common");
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {colors.map((c, i) => (
+        <span key={i} className="group relative">
+          <label className="block size-12 cursor-pointer overflow-hidden rounded-xl ring-1 ring-line" style={{ background: c }}>
+            <input type="color" className="opacity-0" value={c.length === 7 ? c : "#000000"} disabled={!canManage} onChange={(e) => onChange(colors.map((x, j) => (j === i ? e.target.value : x)))} aria-label={`${label} ${i + 1}`} />
+          </label>
+          {canManage && (
+            <button type="button" className="absolute -end-1.5 -top-1.5 hidden rounded-full bg-ink p-0.5 text-ink-inverse group-hover:block" onClick={() => onChange(colors.filter((_, j) => j !== i))} aria-label={tc("actions.remove")}>
+              <X className="size-3" />
+            </button>
+          )}
+          <span className="mt-1 block text-center text-[10px] uppercase text-ink-4" dir="ltr">{c}</span>
+        </span>
+      ))}
+      {canManage && colors.length < 4 && (
+        <button type="button" onClick={() => onChange([...colors, "#888888"])} className="flex size-12 items-center justify-center rounded-xl border border-dashed border-line-strong text-ink-3" aria-label={tc("actions.add")}>
+          <Plus className="size-4" />
+        </button>
+      )}
     </div>
   );
 }
