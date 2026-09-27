@@ -91,7 +91,7 @@ export function providerRegistry(): RegistryEntry[] {
 
 /** Non-secret OAuth setup summary for logs and admin diagnostics. Never includes secrets or tokens. */
 export function oauthSetupSummary() {
-  return (["linkedin", "meta", "instagram"] as const).map((id) => {
+  return (["linkedin", "meta", "instagram", "tiktok", "google", "microsoft"] as const).map((id) => {
     let redirectUri: string | null = null;
     let problem: string | null = null;
     try {
@@ -101,4 +101,48 @@ export function oauthSetupSummary() {
     }
     return { id, configured: SOCIAL_PROVIDERS[id].isConfigured(), redirectUri, explicit: Boolean(process.env[REDIRECT_ENV[id]]?.trim()), problem, scopes: SOCIAL_PROVIDERS[id].scopes };
   });
+}
+
+export type CallbackEntry = { kind: "oauth" | "webhook" | "auth" | "legal"; name: string; url: string; registerAt: string; problem: "not_https" | "localhost" | "invalid" | null };
+
+/**
+ * Every URL that must be registered with an external provider (or reviewed by one) for staging/production.
+ * Flags anything that is not public HTTPS — providers reject or silently break on localhost/http.
+ */
+export function callbackMatrix(appUrl = process.env.APP_URL ?? "http://localhost:3000"): CallbackEntry[] {
+  const base = appUrl.replace(/\/$/, "");
+  const judge = (u: string): CallbackEntry["problem"] => {
+    try {
+      const url = new URL(u);
+      if (/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(url.hostname) || url.hostname.endsWith(".local")) return "localhost";
+      return url.protocol === "https:" ? null : "not_https";
+    } catch {
+      return "invalid";
+    }
+  };
+  const oauth = (id: SocialProvider["id"], registerAt: string): CallbackEntry => {
+    let url: string;
+    try {
+      url = redirectUriFor(id);
+    } catch {
+      return { kind: "oauth", name: id, url: process.env[REDIRECT_ENV[id]] ?? "", registerAt, problem: "invalid" };
+    }
+    return { kind: "oauth", name: id, url, registerAt, problem: judge(url) };
+  };
+  const plain = (kind: CallbackEntry["kind"], name: string, path: string, registerAt: string): CallbackEntry => ({ kind, name, url: `${base}${path}`, registerAt, problem: judge(`${base}${path}`) });
+  return [
+    oauth("meta", "Meta App → Facebook Login for Business → Valid OAuth Redirect URIs"),
+    oauth("instagram", "Meta App → Instagram API with Instagram Login → Business login settings → OAuth redirect URIs"),
+    oauth("linkedin", "LinkedIn Developer App → Auth → Authorized redirect URLs"),
+    oauth("tiktok", "TikTok for Developers → Login Kit → Redirect URI"),
+    oauth("google", "Google Cloud → Credentials → OAuth client → Authorized redirect URIs"),
+    oauth("microsoft", "Microsoft Entra → App registrations → Authentication → Web redirect URIs"),
+    plain("auth", "google_sign_in", "/api/auth/google/callback", "Google Cloud → same OAuth client → Authorized redirect URIs"),
+    plain("auth", "magic_link", "/magic", "Email links (no registration; APP_URL must be the public HTTPS origin)"),
+    plain("webhook", "whatsapp", "/api/webhooks/whatsapp", "Meta App → WhatsApp → Configuration → Callback URL (+ WHATSAPP_VERIFY_TOKEN)"),
+    plain("webhook", "stripe", "/api/webhooks/stripe", "Stripe Dashboard → Developers → Webhooks → endpoint (copy whsec_ to STRIPE_WEBHOOK_SECRET)"),
+    plain("legal", "privacy", "/privacy", "Meta / LinkedIn / TikTok / Google app settings → Privacy policy URL"),
+    plain("legal", "terms", "/terms", "App settings → Terms of service URL"),
+    plain("legal", "data_deletion", "/data-deletion", "Meta App → Settings → Basic → Data deletion instructions URL"),
+  ];
 }

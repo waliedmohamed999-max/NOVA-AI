@@ -726,7 +726,9 @@
       "waTitle": "WhatsApp Business number",
       "waBody": "Link a Cloud API phone_number_id to your current workspace. It's verified with Meta first.",
       "waLink": "Link number",
-      "waLinked": "Linked {phone}"
+      "waLinked": "Linked {phone}",
+      "callbacksTitle": "Callback & URL matrix",
+      "callbacksIntro": "Every URL to register with providers for staging and production, derived from APP_URL and the *_REDIRECT_URI settings. See docs/STAGING.md."
     },
     "health": {
       "counts": {
@@ -745,6 +747,20 @@
       "none": "None",
       "sentryOn": "Errors are also sent to Sentry.",
       "sentryOff": "Sentry is not configured (set SENTRY_DSN). Errors go to structured logs."
+    },
+    "callbacks": {
+      "warning": "{count, plural, one {# URL is} other {# URLs are}} not public HTTPS. Providers reject localhost/http callbacks outside development — set APP_URL to the staging HTTPS origin.",
+      "cols": {
+        "kind": "Type",
+        "name": "Name",
+        "where": "Register at",
+        "status": "Status"
+      },
+      "problems": {
+        "not_https": "Not HTTPS",
+        "localhost": "Localhost — dev only",
+        "invalid": "Invalid setting"
+      }
     }
   },
   "connect": {

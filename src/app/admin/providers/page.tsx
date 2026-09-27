@@ -15,6 +15,8 @@ import { imageModels, imageProvider } from "@/server/design/image-provider";
 import { oauthDiagnostics } from "@/server/admin/oauth-diagnostics";
 import { providerReadiness } from "@/server/admin/readiness";
 import { ReadinessBoard } from "@/features/admin/readiness-board";
+import { CallbackMatrix } from "@/features/admin/callback-matrix";
+import { callbackMatrix } from "@/server/integrations/registry";
 
 export const metadata: Metadata = { title: "Admin · Providers" };
 
@@ -84,6 +86,13 @@ export default async function AdminProvidersPage() {
           <p className="max-w-2xl text-sm text-ink-3">{to("intro")}</p>
         </div>
         <OAuthDiagnostics rows={await oauthDiagnostics(tenant?.organization.id ?? null)} />
+      </section>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">{tr("callbacksTitle")}</h2>
+          <p className="max-w-3xl text-sm text-ink-3">{tr("callbacksIntro")}</p>
+        </div>
+        <CallbackMatrix rows={callbackMatrix()} />
       </section>
       <section className="space-y-3">
         <div>

@@ -726,7 +726,9 @@
       "waTitle": "رقم واتساب للأعمال",
       "waBody": "اربط phone_number_id من Cloud API بمساحة العمل الحالية. يتم التحقق منه لدى Meta أولًا.",
       "waLink": "ربط الرقم",
-      "waLinked": "تم ربط {phone}"
+      "waLinked": "تم ربط {phone}",
+      "callbacksTitle": "مصفوفة روابط الاستدعاء",
+      "callbacksIntro": "كل رابط يجب تسجيله لدى المزوّدين في بيئة staging والإنتاج، مشتق من APP_URL وإعدادات *_REDIRECT_URI. راجع docs/STAGING.md."
     },
     "health": {
       "counts": {
@@ -745,6 +747,20 @@
       "none": "لا يوجد",
       "sentryOn": "الأخطاء تُرسل أيضًا إلى Sentry.",
       "sentryOff": "Sentry غير مُعد (اضبط SENTRY_DSN). الأخطاء تُسجل في السجلات المنظمة."
+    },
+    "callbacks": {
+      "warning": "{count, plural, zero {لا روابط} one {رابط واحد ليس} two {رابطان ليسا} few {# روابط ليست} many {# رابطًا ليست} other {# رابط ليست}} HTTPS عامًا. المزوّدون يرفضون روابط localhost/http خارج التطوير — اضبط APP_URL على نطاق HTTPS الخاص بـ staging.",
+      "cols": {
+        "kind": "النوع",
+        "name": "الاسم",
+        "where": "مكان التسجيل",
+        "status": "الحالة"
+      },
+      "problems": {
+        "not_https": "ليس HTTPS",
+        "localhost": "localhost — للتطوير فقط",
+        "invalid": "إعداد غير صالح"
+      }
     }
   },
   "connect": {
