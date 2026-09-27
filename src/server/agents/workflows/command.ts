@@ -165,7 +165,7 @@ defineWorkflow("command", {
     if (kind) {
       const wf = getWorkflow(kind)!;
       await ctx.plan(wf.steps);
-      Object.assign(ctx.params, { count: intent.count ?? undefined, platform: intent.platform, topic: intent.topic, days: intent.days });
+      Object.assign(ctx.params, { count: intent.count ?? undefined, platform: intent.platform, topic: intent.topic, days: intent.days, withDesigns: kind === "content_plan" });
       return wf.run(ctx);
     }
     if (intent.intent === "pipeline_summary") {

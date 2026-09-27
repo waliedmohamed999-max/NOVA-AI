@@ -36,7 +36,8 @@
     "searching_knowledge": "Searching your Company Brain",
     "writing_answer": "Writing the answer",
     "reviewing_pipeline": "Reviewing your pipeline",
-    "finding_opportunities": "Looking for opportunities"
+    "finding_opportunities": "Looking for opportunities",
+    "creating_designs": "Creating designs"
   },
   "result": {
     "types": {
@@ -59,7 +60,8 @@
       "hot": "Hot leads",
       "stalled": "Stalled",
       "score": "Score",
-      "temperature": "Temperature"
+      "temperature": "Temperature",
+      "designs": "Designs in progress"
     },
     "fields": {
       "keyMessage": "Key message",

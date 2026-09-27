@@ -317,6 +317,8 @@ enum NotificationType {
 }
 
 enum AiTaskType {
+  IMAGE_GENERATION
+  IMAGE_EDIT
   COPYWRITING
   ANALYSIS
   CLASSIFICATION
@@ -327,6 +329,15 @@ enum AiTaskType {
   VISION
   STRUCTURED
   EMBEDDING
+}
+
+/// Lifecycle of an AI-generated visual (ai.image.generate job).
+enum AssetStatus {
+  QUEUED
+  GENERATING
+  UPLOADING
+  COMPLETED
+  FAILED
 }
 
 enum AiRunStatus {
@@ -546,6 +557,9 @@ model WorkspaceSettings {
   timezone               String        @default("UTC")
   dailyBriefHour         Int           @default(8)
   weeklyReportDay        Int           @default(1)
+  /// Content studio defaults: "fast" | "quality"; "brand_template" | "ai_creative".
+  imageQuality           String        @default("fast")
+  imageMode              String        @default("brand_template")
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
@@ -1000,6 +1014,8 @@ model ContentItem {
   authorAgent    AgentKey?
   authorUserId   String?
   currentVersion Int            @default(1)
+  /// Platform adaptation: the post this one was rewritten from for another platform.
+  derivedFromId  String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -1028,6 +1044,13 @@ model ContentVersion {
   hashtags       String[]  @default([])
   designBrief    Json?
   changeNote     String?
+  /// AI studio metadata: where the version came from and why it should be better (no chain-of-thought).
+  source          String?
+  reasons         String[]  @default([])
+  platformNotes   String?
+  visualDirection String?
+  qualityCheck    Json?
+  promptVersion   String?
   createdByAgent AgentKey?
   createdById    String?
   createdAt      DateTime  @default(now())
@@ -1051,11 +1074,32 @@ model ContentAsset {
   position       Int         @default(0)
   generatedBy    String? // provider name when AI generated
   prompt         String?
+  /// AI visuals: status, mode (brand_template | ai_creative | edit), model, prompt version, size, cost.
+  status         AssetStatus @default(COMPLETED)
+  mode           String?
+  provider       String?
+  model          String?
+  promptKey      String?
+  promptVersion  String?
+  quality        String?
+  preset         String?
+  width          Int?
+  height         Int?
+  parentAssetId  String?
+  variant        String?
+  instruction    String?
+  contentVersion Int?
+  errorCode      String?
+  costMicro      BigInt      @default(0)
+  isSelected     Boolean     @default(false)
+  createdById    String?
   createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now()) @updatedAt
 
   contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, contentItemId])
+  @@index([organizationId, createdAt])
   @@map("content_assets")
 }
 
@@ -1541,10 +1585,14 @@ model AiRun {
   status         AiRunStatus
   fallbackUsed   Boolean     @default(false)
   error          String?
+  /// Prompt registry key + version used for this call.
+  promptKey      String?
+  promptVersion  String?
   createdAt      DateTime    @default(now())
 
   @@index([organizationId, createdAt])
   @@index([organizationId, agentKey])
+  @@index([organizationId, task, createdAt])
   @@map("ai_runs")
 }
 

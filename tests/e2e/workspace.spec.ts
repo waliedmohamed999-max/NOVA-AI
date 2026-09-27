@@ -119,3 +119,25 @@ test.describe("demo workspace", () => {
     await expect(page.getByRole("dialog").getByText("Pipeline summary")).toBeVisible({ timeout: 60_000 });
   });
 });
+
+test.describe("content studio AI (no OpenAI key in this environment)", () => {
+  test("studio tools say 'not set up' honestly; settings and admin show status without keys", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/content?view=approval");
+    await page.locator("li").filter({ has: page.getByRole("button", { name: "Approve", exact: true }) }).first().getByRole("link", { name: "Edit" }).click();
+    await page.waitForURL(/\/content\/c/);
+    await expect(page.getByText("OpenAI generation isn't set up yet.")).toBeVisible();
+    await expect(page.getByText("Image generation isn't set up yet.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Improve content" })).toHaveCount(0);
+
+    await page.goto("/settings/ai");
+    await expect(page.getByRole("heading", { name: "Content AI" })).toBeVisible();
+    await expect(page.getByText("Designs this month")).toBeVisible();
+    await expect(page.locator("main")).not.toContainText("OPENAI_API_KEY");
+    await expect(page.locator("main")).not.toContainText("gpt-image");
+
+    await page.goto("/admin/providers");
+    await expect(page.getByRole("button", { name: "Test image" })).toBeDisabled();
+    await expect(page.locator("[data-openai-tests]")).toContainText("gpt-image"); // model names: admins only
+  });
+});

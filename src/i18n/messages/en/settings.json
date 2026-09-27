@@ -666,6 +666,18 @@
         "selected": "Selected",
         "notSelected": "not selected yet"
       }
+    },
+    "openai": {
+      "status": "Status",
+      "text": "Text",
+      "image": "Image",
+      "configured": "Configured",
+      "missing": "Missing",
+      "textModel": "Text model",
+      "imageModels": "Image models",
+      "testText": "Test text",
+      "testImage": "Test image",
+      "note": "Tests use the real API and cost a little. The test image is stored privately in your workspace and is never attached to a post or published."
     }
   },
   "connect": {
@@ -774,5 +786,24 @@
     "pickerInstagram": "Instagram Professional",
     "pickerInstagramHint": "Business or Creator accounts",
     "pickerInstagramOk": "Business / Creator"
+  },
+  "contentAi": {
+    "title": "Content AI",
+    "description": "What powers the Content Studio. Keys and models are managed by the platform — they are never shown here.",
+    "textAi": "Content AI (OpenAI)",
+    "imageAi": "Image generation (OpenAI Image)",
+    "on": "Active",
+    "off": "Not set up yet",
+    "defaultQuality": "Default design speed",
+    "fast": "Fast",
+    "quality": "Highest quality",
+    "defaultMode": "Default design style",
+    "brandTemplate": "Brand template",
+    "aiCreative": "AI creative",
+    "imagesUsed": "Designs this month",
+    "imageEdits": "Design edits",
+    "textRuns": "Text generations",
+    "estimatedCost": "Estimated AI cost",
+    "saved": "Content AI defaults saved"
   }
 }

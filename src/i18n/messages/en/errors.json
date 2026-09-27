@@ -49,5 +49,11 @@
   "no_page_permission": "Meta is connected, but no Page access was granted yet, so there are no Pages or Instagram accounts to manage.",
   "capability_unavailable": "This feature isn't available for this account yet.",
   "instagram_personal_account": "Automatic publishing requires an Instagram professional account (Business or Creator). Switch the account to Business or Creator in the Instagram app, then connect again.",
-  "instagram_invalid_scope": "We couldn't finish connecting Instagram because a permission isn't enabled in the app yet."
+  "instagram_invalid_scope": "We couldn't finish connecting Instagram because a permission isn't enabled in the app yet.",
+  "content_ai_not_configured": "OpenAI generation isn't set up yet.",
+  "image_not_configured": "Image generation isn't set up yet.",
+  "image_limit": "You've used this month's design generations for your plan. Upgrade or wait for next month.",
+  "image_failed": "We couldn't create the design. Your content is saved — you can try again.",
+  "image_refused": "This design request couldn't be created under the image provider's safety rules. Try describing it differently.",
+  "image_rate_limited": "The image service is busy. Try again in a minute."
 }

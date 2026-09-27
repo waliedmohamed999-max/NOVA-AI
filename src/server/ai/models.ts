@@ -17,7 +17,8 @@ export function modelCatalog(): ModelSpec[] {
     { provider: "anthropic", model: "claude-haiku-4-5", tier: "fast", contextTokens: 200_000, inputMicroPerMTok: 1 * M, outputMicroPerMTok: 5 * M, vision: true },
     {
       provider: "openai",
-      model: env.OPENAI_MODEL_BEST ?? "gpt-5",
+      // OPENAI_TEXT_MODEL is the content-studio model; OPENAI_MODEL_BEST kept for existing setups.
+      model: env.OPENAI_TEXT_MODEL || env.OPENAI_MODEL_BEST || "gpt-5",
       tier: "best",
       contextTokens: 400_000,
       inputMicroPerMTok: openaiPrice("OPENAI_PRICE_BEST_INPUT", 1.25),
@@ -39,6 +40,8 @@ export function modelCatalog(): ModelSpec[] {
 
 /** Default quality requirement per task type. */
 export const TASK_QUALITY: Record<AiTaskType, QualityTier> = {
+  IMAGE_GENERATION: "fast",
+  IMAGE_EDIT: "best",
   STRATEGY: "best",
   COPYWRITING: "best",
   SALES: "best",

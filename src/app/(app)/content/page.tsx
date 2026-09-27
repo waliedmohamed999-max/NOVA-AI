@@ -4,6 +4,9 @@ import { VIEWS, type ViewKey } from "@/features/content/views";
 import { requireTenant } from "@/server/context";
 import { PageHeader } from "@/components/ui/card";
 import { ContentStudio, type StudioItem } from "@/features/content/studio";
+import { signedFileUrl } from "@/server/storage";
+import { aiAvailability, contentAiConfigured } from "@/server/ai";
+import { imagesConfigured } from "@/server/studio/images";
 
 export const metadata: Metadata = { title: "Content" };
 
@@ -21,7 +24,11 @@ export default async function ContentPage(props: PageProps<"/content">) {
     where: { status: { in: [...VIEWS[view]] } },
     orderBy: view === "published" ? { publishedAt: "desc" } : [{ scheduledAt: "asc" }, { createdAt: "desc" }],
     take: 60,
-    include: { campaign: { select: { name: true } }, assets: { take: 1, orderBy: { position: "asc" } } },
+    include: {
+      campaign: { select: { name: true } },
+      assets: { where: { kind: "IMAGE", OR: [{ isSelected: true, status: "COMPLETED" }, { status: { in: ["QUEUED", "GENERATING", "UPLOADING"] } }] }, orderBy: { createdAt: "desc" }, take: 3 },
+      versions: { orderBy: { version: "desc" }, take: 1, select: { source: true } },
+    },
   });
 
   const data: StudioItem[] = items.map((i) => ({
@@ -41,7 +48,15 @@ export default async function ContentPage(props: PageProps<"/content">) {
     campaign: i.campaign?.name ?? null,
     authorAgent: i.authorAgent,
     rationale: i.aiRationale,
+    version: i.currentVersion,
+    ai: Boolean(i.authorAgent) || Boolean(i.versions[0]?.source && i.versions[0].source !== "manual"),
+    designing: i.assets.some((a) => a.status !== "COMPLETED"),
+    imageUrl: (() => {
+      const sel = i.assets.find((a) => a.isSelected && a.status === "COMPLETED");
+      return sel?.fileId ? signedFileUrl(sel.fileId) : (sel?.url ?? null);
+    })(),
   }));
+  const availability = aiAvailability();
 
   return (
     <>
@@ -54,6 +69,7 @@ export default async function ContentPage(props: PageProps<"/content">) {
         canApprove={ctx.can("content:approve")}
         canCreate={ctx.can("content:create")}
         autoStart={sp.start === "week"}
+        studio={{ text: contentAiConfigured(), image: imagesConfigured(), offlineDev: availability.offline }}
       />
     </>
   );

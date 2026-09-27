@@ -58,3 +58,56 @@ Sales guardrails:
 ## Design agent
 
 Design briefs are structured output on every planned post. `src/server/design/image-provider.ts` turns a brief plus the Brand Kit into a constrained image prompt (`buildImagePrompt`). The OpenAI image adapter is used when `OPENAI_API_KEY` is set. Without it, the "Generate visual" button is disabled and explains why.
+
+## Content Studio (OpenAI text + images)
+
+The studio is built on the existing layers rather than a separate AI stack. Text goes through the same router, budgets and `ai_runs`; images go through the `ImageProvider` boundary. Everything runs server-side, through the official OpenAI API.
+
+| Piece | Where |
+| --- | --- |
+| Prompt registry (versioned: `content_strategy`, `caption_generation`, `content_improvement`, `visual_direction`, `image_generation`, `image_edit`, `performance_analysis`, `content_quality`) | `src/server/ai/prompts.ts`. The version is stored on `ai_runs.promptVersion`, `content_versions.promptVersion` and `content_assets.promptVersion` |
+| Context: Company Brain, brand rules, campaign, real performance by pillar/format/platform (90 days, only with ≥3 posts), recent approved content, hooks to avoid | `src/server/studio/context.ts` |
+| Improve / merge / edit / platform versions / quality check / week proposal | `src/server/studio/content.ts` |
+| Images: queue, job, composition, storage, cost, limits | `src/server/studio/images.ts`, `src/server/design/{image-provider,compose}.ts` |
+
+**No fake generation.**
+- Studio calls pass `realOnly`, so they never use the offline development provider.
+- Without `OPENAI_API_KEY`, customers see "OpenAI generation isn't set up yet" / "Image generation isn't set up yet".
+
+**Text.** Structured outputs are validated with zod:
+- `improve` returns hook, caption, CTA, hashtags, visual direction, 2–3 "why this is better" reasons, platform notes, and a video concept / on-screen text for Reels and TikTok.
+- Nothing is overwritten. The Compare view offers "use", "merge" (per field), "edit" or "try again", and each choice becomes a new `content_versions` row with its source, reasons and quality check.
+- Platform versions are separate posts (`derivedFromId`), written with each platform's guide.
+- **Duplicate detection:** word-bigram Jaccard similarity (Arabic-normalised) against recent posts. If a hook is too similar, NOVA retries once with a different angle.
+- **Quality check:** each of brand fit, clarity, CTA, platform fit, repetition and claim safety is marked `good` or `needs_attention` with a reason. There is no numeric score.
+
+**Images.** The flow is `requestImage` → `ai.image.generate` job, and it never runs inside the HTTP request:
+1. The asset moves through the statuses `QUEUED → GENERATING → UPLOADING → COMPLETED | FAILED`.
+2. The creative direction is built from the post, the brand kit and recently approved visuals.
+3. OpenAI generates the image (`images.generate`), or edits it (`images.edit`) with the current design as the reference.
+4. The image is decoded on the server, resized and cropped (content-aware) from the closest supported size to the exact social size (1080×1080, 1080×1350, 1080×1920, 1200×627, 1200×630), then saved through the StorageProvider. The database stores only a `FileObject` reference; base64 is never stored.
+5. **Brand Template** (the default) composes the headline, CTA, logo, brand colours and footer with `sharp` + SVG. This gives exact Arabic typography, because the image model never draws text.
+
+Other image rules:
+- **History:** variants (another, different style, simpler, more professional, no text) and edits are separate assets. Nothing is deleted, and one asset is `isSelected`. Publishing uses only the selected, completed asset.
+- **Separation:** generating or editing an image never touches the caption, schedule or approval state, and improving the text never regenerates the image.
+- **Retries and errors:** transient provider errors retry once. Refusals and other failures are final (`FAILED` with a safe `errorCode`), and customers see "We couldn't create the design. Your content is saved…".
+
+**Models are configuration.**
+
+| Variable | Used for |
+| --- | --- |
+| `OPENAI_TEXT_MODEL` | Content text (overrides `OPENAI_MODEL_BEST`) |
+| `OPENAI_IMAGE_MODEL_FAST` | Drafts |
+| `OPENAI_IMAGE_MODEL_QUALITY` | Highest quality and edits (both fall back to `OPENAI_IMAGE_MODEL`) |
+
+Customers only see **Fast / Highest quality**. Model names appear only in `/admin/providers`, which also has **Test text** / **Test image** buttons. The test image is stored privately and never published.
+
+**Cost and limits.**
+- Each image logs an `ai_runs` row (`IMAGE_GENERATION` / `IMAGE_EDIT`, model, prompt version, estimated cost from `OPENAI_IMAGE_COST_*_USD`) and adds to the monthly AI budget (`ai_usage`).
+- Plans cap monthly generations and edits (`imageGenerationsPerMonth`: Starter 30, Growth 150, Scale 600). The cap is checked before anything is queued.
+- Settings → AI Team shows designs used / limit, edits, text runs and the estimated cost.
+
+**Automated tests never call OpenAI.** They use fake text and image providers. Live checks are manual, through the admin test buttons.
+
+**Fonts for Arabic templates:** the server needs an Arabic-capable system font, e.g. `fonts-noto-core` / Noto Sans Arabic or IBM Plex Sans Arabic on Linux. Windows and macOS already have one.

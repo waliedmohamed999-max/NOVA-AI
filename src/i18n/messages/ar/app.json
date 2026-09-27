@@ -36,7 +36,8 @@
     "searching_knowledge": "البحث في عقل الشركة",
     "writing_answer": "كتابة الإجابة",
     "reviewing_pipeline": "مراجعة خط المبيعات",
-    "finding_opportunities": "البحث عن الفرص"
+    "finding_opportunities": "البحث عن الفرص",
+    "creating_designs": "إنشاء التصاميم"
   },
   "result": {
     "types": {
@@ -59,7 +60,8 @@
       "hot": "عملاء مهتمون جدًا",
       "stalled": "متوقفة",
       "score": "التقييم",
-      "temperature": "درجة الاهتمام"
+      "temperature": "درجة الاهتمام",
+      "designs": "تصاميم قيد الإنشاء"
     },
     "fields": {
       "keyMessage": "الرسالة الأساسية",

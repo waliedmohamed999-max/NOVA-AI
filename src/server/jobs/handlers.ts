@@ -29,6 +29,11 @@ export function registerAllJobs() {
   registerJob("social.sync_all", async () => syncAll());
   registerJob("social.sync_integration", async (p) => syncIntegration(String(p.integrationId)));
   registerJob("integrations.refresh_tokens", async () => refreshExpiringTokens());
+  // Content studio: one image (design / variant / edit) per job; statuses live on content_assets.
+  registerJob("ai.image.generate", async (p, { job }) => {
+    const { runImageJob } = await import("../studio/images");
+    return runImageJob(String(p.assetId), job.attempts, job.maxAttempts);
+  });
   registerJob("integrations.health_check", async () => checkConnectionsHealth());
   registerJob("analytics.analyze_post", async (p) => {
     const scope = scopeOf(p);

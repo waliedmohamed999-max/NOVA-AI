@@ -9,6 +9,7 @@ import { brainPrompt, loadBrain, pillarsOf, type BrainSnapshot } from "../brain"
 import { campaignPlanSchema, contentPlanSchema, plannedPostSchema, type PlannedPost } from "../schemas";
 import { offlineCampaign, offlineContentPlan, offlinePost } from "../offline-content";
 import { performanceDigest } from "../../analytics/digest";
+import { recentContent } from "../../studio/context";
 
 export const CONTENT_PLAN_STEPS = [
   "understanding_goal",
@@ -18,8 +19,22 @@ export const CONTENT_PLAN_STEPS = [
   "writing_content",
   "design_briefs",
   "scheduling",
+  "creating_designs",
   "requesting_approval",
 ];
+
+/** Queues brand-template designs for new posts — only when asked for, and within the plan's monthly limit. */
+async function queueDesigns(scope: { organizationId: string; workspaceId: string }, userId: string | null, ids: string[]) {
+  const { imagesConfigured, imageUsage, requestImage } = await import("../../studio/images");
+  if (!imagesConfigured() || !userId) return { queued: 0, skipped: ids.length, reason: "not_configured" as const };
+  const usage = await imageUsage(scope.organizationId);
+  const room = Math.max(0, usage.limit - usage.used);
+  let queued = 0;
+  for (const id of ids.slice(0, room)) {
+    await requestImage(scope, userId, id, { mode: "brand_template" }).then(() => queued++).catch(() => undefined);
+  }
+  return { queued, skipped: ids.length - queued, reason: queued < ids.length ? ("limit" as const) : null };
+}
 
 function nextMonday(from = new Date()) {
   const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate() + 1));
@@ -56,10 +71,14 @@ defineWorkflow("content_plan", {
     const count = Math.min(14, Math.max(1, Number(ctx.params.count ?? 7)));
     const platform = (ctx.params.platform as PlannedPost["platform"] | null) ?? null;
     const topic = (ctx.params.topic as string | null) ?? null;
+    // An approved week proposal (Content Studio → Plan next week) fixes days, types, platforms and topics.
+    const proposal = Array.isArray(ctx.params.proposal) ? (ctx.params.proposal as { day: string; type: string; platform: string; format: string; topic: string }[]) : null;
+    const withDesigns = ctx.params.withDesigns === true;
 
     const b = await ctx.step("understanding_goal", () => loadBrain(ctx.scope));
     const { knowledge, perf } = await ctx.step("reviewing_business", () => gatherContext(ctx, b, topic ?? ctx.input));
     await ctx.step("analyzing_performance", async () => perf);
+    const recentHooks = await recentContent(ctx.scope);
 
     const plan = await ctx.step("creating_strategy", () =>
       aiStructured(ctx.ai, {
@@ -71,7 +90,10 @@ defineWorkflow("content_plan", {
           `Request from the business owner: "${ctx.input || `Create ${count} posts for next week`}"`,
           `Create exactly ${count} posts${platform ? ` for ${platform}` : " across the recommended channels"}.`,
           topic && `Focus topic: ${topic}`,
+          proposal &&
+            `Follow this approved plan exactly, one post per line (dayOffset: MON=0 … SUN=6):\n${proposal.map((d) => `- ${d.day}: ${d.type} · ${d.platform} ${d.format} · ${d.topic}`).join("\n")}`,
           `Content pillars to balance: ${pillarsOf(b).join(", ")}`,
+          `Recent hooks — do not repeat these or their angles:\n${recentHooks.slice(0, 15).map((r) => `- ${r.hook ?? r.title}`).join("\n") || "- (none yet)"}`,
           `dayOffset 0 = the first day of the plan (a Monday). Spread posts sensibly across the week; choose realistic posting times.`,
           `Real performance data (use it to decide themes and formats; don't cite numbers that aren't here):\n${perf.text}`,
           `Company knowledge:\n${knowledge}`,
@@ -89,8 +111,11 @@ defineWorkflow("content_plan", {
       createContentFromPlan(ctx.scope, plan.data.posts.slice(0, count), { agent: "CONTENT_STRATEGIST", startDate: start, generatedBy: plan.generatedBy, requestedById: ctx.requestedById }),
     );
 
+    const designs = await ctx.step("creating_designs", async () => (withDesigns ? queueDesigns(ctx.scope, ctx.requestedById ?? null, ids) : { queued: 0, skipped: 0, reason: null }));
+
     await ctx.step("requesting_approval", async () => {
       await ctx.task("CONTENT_STRATEGIST", b.locale === "ar" ? `كتب ${ids.length} منشورات` : `Wrote ${ids.length} posts`);
+      if (designs.queued) await ctx.task("DESIGNER", b.locale === "ar" ? `يصمّم ${designs.queued} تصاميم` : `Designing ${designs.queued} visuals`);
       await ctx.task("DESIGNER", b.locale === "ar" ? `جهّز ${ids.length} تصاميم مبدئية` : `Prepared ${ids.length} design briefs`);
       await ctx.task("SOCIAL_MANAGER", b.locale === "ar" ? "خطط لجدول النشر" : "Planned the publishing schedule");
       await notifyContentReady(ctx.scope, ids.length, "/content?view=approval", b.locale);
@@ -103,7 +128,7 @@ defineWorkflow("content_plan", {
       type: "content_plan",
       title: b.locale === "ar" ? `${ids.length} منشورات جاهزة للمراجعة` : `${ids.length} posts ready for review`,
       summary: plan.data.summary,
-      stats: [...byFormat.entries()].map(([label, value]) => ({ label: `format:${label}`, value })),
+      stats: [...[...byFormat.entries()].map(([label, value]) => ({ label: `format:${label}`, value })), ...(designs.queued ? [{ label: "designs", value: designs.queued }] : [])],
       items: plan.data.posts.slice(0, 7).map((p, i) => ({ title: p.title, subtitle: p.hook, href: `/content/${ids[i]}`, badge: p.platform })),
       actions: [
         { label: "review", href: "/content?view=approval", primary: true },

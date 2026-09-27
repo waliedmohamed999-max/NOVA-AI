@@ -10,7 +10,8 @@ import { ProviderError } from "../integrations/types";
 const appUrl = () => process.env.APP_URL ?? "http://localhost:3000";
 
 async function mediaUrlsFor(contentItemId: string) {
-  const assets = await db.contentAsset.findMany({ where: { contentItemId }, orderBy: { position: "asc" } });
+  // Only finished visuals the customer kept as the post's image (AI history and in-progress jobs are excluded).
+  const assets = await db.contentAsset.findMany({ where: { contentItemId, status: "COMPLETED", isSelected: true }, orderBy: { position: "asc" } });
   return assets.map((a) => a.url ?? (a.fileId ? `${appUrl()}${signedFileUrl(a.fileId, 86_400)}` : null)).filter((u): u is string => Boolean(u));
 }
 

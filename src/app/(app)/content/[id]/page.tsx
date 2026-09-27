@@ -4,7 +4,9 @@ import { requireTenant } from "@/server/context";
 import { ContentEditor } from "@/features/content/editor";
 import type { StudioItem } from "@/features/content/studio";
 import { signedFileUrl } from "@/server/storage";
-import { imageProvider } from "@/server/design/image-provider";
+import { contentAiConfigured } from "@/server/ai";
+import { imagesConfigured, imageUsage } from "@/server/studio/images";
+import type { QualityCheck } from "@/server/studio/context";
 
 export const metadata: Metadata = { title: "Post" };
 
@@ -19,12 +21,13 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
       approvals: { orderBy: { createdAt: "desc" }, take: 30 },
       socialPosts: { select: { id: true, permalink: true } },
       publications: { orderBy: { createdAt: "desc" }, take: 5 },
-      assets: { orderBy: { createdAt: "desc" }, take: 1 },
+      assets: { where: { kind: "IMAGE" }, orderBy: { createdAt: "desc" }, take: 24 },
     },
   });
   if (!item) notFound();
   const userIds = [...new Set([...item.approvals.map((a) => a.userId), ...item.versions.map((v) => v.createdById)].filter((x): x is string => Boolean(x)))];
   const users = await ctx.db.organizationMember.findMany({ where: { userId: { in: userIds } }, include: { user: { select: { id: true, name: true, email: true } } } });
+  const selected = item.assets.find((a) => a.isSelected && a.status === "COMPLETED") ?? null;
   const nameOf = (uid: string | null) => users.find((u) => u.userId === uid)?.user.name ?? users.find((u) => u.userId === uid)?.user.email ?? null;
 
   const data: StudioItem = {
@@ -44,8 +47,31 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
     campaign: item.campaign?.name ?? null,
     authorAgent: item.authorAgent,
     rationale: item.aiRationale,
-    imageUrl: item.assets[0]?.fileId ? signedFileUrl(item.assets[0].fileId) : item.assets[0]?.url ?? null,
+    imageUrl: selected?.fileId ? signedFileUrl(selected.fileId) : (selected?.url ?? null),
   };
+  const sp = await props.searchParams;
+  const [usage, settings] = await Promise.all([imageUsage(ctx.organization.id), ctx.db.workspaceSettings.findFirst()]);
+  const studio = {
+    text: contentAiConfigured(),
+    image: imagesConfigured(),
+    usage: { used: usage.used, limit: usage.limit },
+    defaults: { mode: settings?.imageMode === "ai_creative" ? ("ai_creative" as const) : ("brand_template" as const), quality: settings?.imageQuality === "quality" ? ("quality" as const) : ("fast" as const) },
+  };
+  const assets = item.assets.map((a) => ({
+    id: a.id,
+    status: a.status,
+    mode: a.mode,
+    quality: a.quality,
+    preset: a.preset,
+    variant: a.variant,
+    instruction: a.instruction,
+    isSelected: a.isSelected,
+    errorCode: a.errorCode,
+    ai: Boolean(a.provider),
+    url: a.status === "COMPLETED" && a.fileId ? signedFileUrl(a.fileId) : (a.url ?? null),
+    createdAt: a.createdAt.toISOString(),
+  }));
+  const currentVersion = item.versions.find((v) => v.version === item.currentVersion);
 
   return (
     <ContentEditor
@@ -55,10 +81,13 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
       socialPostId={item.socialPosts[0]?.id ?? null}
       permalink={item.socialPosts[0]?.permalink ?? null}
       publishError={item.publications.find((p) => p.status === "FAILED")?.error ?? null}
-      versions={item.versions.map((v) => ({ version: v.version, caption: v.caption, hook: v.hook, note: v.changeNote, by: v.createdByAgent ?? nameOf(v.createdById), at: v.createdAt.toISOString() }))}
+      versions={item.versions.map((v) => ({ version: v.version, caption: v.caption, hook: v.hook, note: v.changeNote, source: v.source, by: v.createdByAgent ?? nameOf(v.createdById), at: v.createdAt.toISOString() }))}
       history={item.approvals.map((a) => ({ id: a.id, action: a.action, comment: a.comment, by: nameOf(a.userId), at: a.createdAt.toISOString() }))}
       can={{ approve: ctx.can("content:approve"), edit: ctx.can("content:create"), publish: ctx.can("content:publish") }}
-      imagesEnabled={imageProvider().isConfigured()}
+      studio={studio}
+      assets={assets}
+      quality={(currentVersion?.qualityCheck as QualityCheck | null) ?? null}
+      autoOpen={sp.ai === "improve" || sp.ai === "edit" ? sp.ai : null}
     />
   );
 }

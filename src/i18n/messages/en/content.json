@@ -106,5 +106,134 @@
   },
   "generateVisual": "Generate visual",
   "visualReady": "Visual generated from your brand kit",
-  "visualUnavailable": "Needs an image provider (OPENAI_API_KEY). Until then the Designer delivers the brief above."
+  "visualUnavailable": "Needs an image provider (OPENAI_API_KEY). Until then the Designer delivers the brief above.",
+  "studio": {
+    "title": "AI studio",
+    "textSection": "Copy",
+    "designSection": "Design",
+    "improve": "Improve content",
+    "aiEdit": "Edit with AI",
+    "aiEditPlaceholder": "e.g. make it shorter and more personal",
+    "anotherVersion": "Create another version",
+    "createDesign": "Create design",
+    "preview": "Preview",
+    "notConfiguredText": "OpenAI generation isn't set up yet.",
+    "notConfiguredImage": "Image generation isn't set up yet.",
+    "usage": "{used} of {limit} designs this month",
+    "compare": {
+      "title": "Compare versions",
+      "current": "Current version",
+      "suggested": "Suggested version",
+      "why": "Why is this better?",
+      "use": "Use the new version",
+      "merge": "Merge",
+      "mergeHint": "Pick which parts to take from the suggestion:",
+      "saveMerge": "Save merged version",
+      "edit": "Edit",
+      "saveEdit": "Save as new version",
+      "retry": "Try again",
+      "saved": "Saved as version {version}",
+      "platformNotes": "Platform notes",
+      "videoConcept": "Video concept",
+      "onScreen": "On-screen text",
+      "duplicate": "Similar to a recent post — the angle was changed."
+    },
+    "fields": {
+      "hook": "Hook",
+      "caption": "Caption",
+      "cta": "Call to action",
+      "hashtags": "Hashtags"
+    },
+    "quality": {
+      "title": "Quality check",
+      "run": "Check quality",
+      "good": "Good",
+      "needs_attention": "Needs attention",
+      "dims": {
+        "brand_fit": "Brand fit",
+        "clarity": "Clarity",
+        "cta": "Call to action",
+        "platform_fit": "Platform fit",
+        "repetition": "Repetition",
+        "claim_safety": "Claim safety"
+      }
+    },
+    "adapt": {
+      "title": "Other platforms",
+      "hint": "NOVA writes a native version for each platform as a separate post.",
+      "run": "Create platform versions",
+      "done": "{count, plural, one {# platform version created} other {# platform versions created}}"
+    },
+    "design": {
+      "mode": "Style",
+      "modes": {
+        "brand_template": "Brand template",
+        "ai_creative": "AI creative"
+      },
+      "modeHint": {
+        "brand_template": "AI visual + your logo, colours and exact headline",
+        "ai_creative": "A fully AI-made image"
+      },
+      "speed": "Speed",
+      "speeds": {
+        "fast": "Fast",
+        "quality": "Highest quality"
+      },
+      "size": "Size",
+      "presets": {
+        "square": "Square (1:1)",
+        "portrait": "Portrait (4:5)",
+        "story": "Story / Reel (9:16)",
+        "landscape": "Landscape (LinkedIn)",
+        "facebook_landscape": "Landscape (Facebook)"
+      },
+      "queued": "Design is being created",
+      "history": "Design history",
+      "selected": "In use",
+      "use": "Use this",
+      "variants": "Variations",
+      "variant": {
+        "another": "Another version",
+        "different_style": "Different style",
+        "simpler": "Simpler",
+        "more_professional": "More professional",
+        "no_text": "No text"
+      },
+      "editTitle": "Edit design",
+      "editPlaceholder": "e.g. make the background lighter",
+      "editRun": "Apply edit",
+      "failed": "We couldn't create the design. Your content is saved — you can try again.",
+      "empty": "No design yet. NOVA reads the post and your brand kit, picks a creative direction and creates the visual.",
+      "ai": "AI",
+      "steps": {
+        "idea": "Building the idea",
+        "direction": "Creating the visual direction",
+        "image": "Creating the design",
+        "preview": "Preparing the preview"
+      }
+    },
+    "week": {
+      "title": "Plan next week",
+      "analyzing": "NOVA is reviewing your campaign, recent performance, content mix and what's already scheduled…",
+      "proposal": "Suggested plan",
+      "withDesigns": "Also create designs (uses your monthly design allowance)",
+      "create": "Create the week",
+      "days": {
+        "MON": "Monday",
+        "TUE": "Tuesday",
+        "WED": "Wednesday",
+        "THU": "Thursday",
+        "FRI": "Friday",
+        "SAT": "Saturday",
+        "SUN": "Sunday"
+      },
+      "remove": "Remove"
+    },
+    "card": {
+      "version": "v{version}",
+      "aiLabel": "AI",
+      "more": "More AI actions",
+      "designQueued": "Design is being created"
+    }
+  }
 }

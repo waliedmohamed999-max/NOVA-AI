@@ -53,3 +53,31 @@ export async function publishTestPostAction(input: { accountId: string; confirma
     return mapError(err, "admin.test_post");
   }
 }
+
+/** Admin-only live checks of the OpenAI configuration. Nothing is published; the test image is a private asset. */
+export async function openAiTestTextAction(): Promise<ActionResult<{ model: string; reply: string; inputTokens: number; outputTokens: number }>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  try {
+    const { aiText, contentAiConfigured } = await import("@/server/ai");
+    if (!contentAiConfigured()) return { ok: false, error: "content_ai_not_configured" };
+    const r = await aiText({ ...a.scope }, { task: "SUMMARIZATION", quality: "fast", realOnly: true, promptRef: { key: "admin_test", version: "admin_test@1" }, prompt: "Reply with exactly: NOVA OK", maxTokens: 200 });
+    return { ok: true, data: { model: r.model, reply: r.text.slice(0, 80), inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens } };
+  } catch (err) {
+    return mapError(err, "admin.openai_text");
+  }
+}
+
+export async function openAiTestImageAction(): Promise<ActionResult<{ model: string; bytes: number; url: string }>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  try {
+    await enforceRateLimit(`admin-test-image:${a.userId}`, 3, 3600);
+    const { adminTestImage } = await import("@/server/studio/images");
+    const { signedFileUrl } = await import("@/server/storage");
+    const r = await adminTestImage(a.scope, a.userId);
+    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId) } };
+  } catch (err) {
+    return mapError(err, "admin.openai_image");
+  }
+}

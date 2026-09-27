@@ -15,9 +15,12 @@ import { toast } from "@/components/ui/toast";
 import { PostPreview, PlatformDot } from "@/components/content/post-preview";
 import { RunView } from "@/features/agents/run-view";
 import type { StudioItem } from "./studio";
-import { approveItems, commentItem, editItem, generateVisual, regenerateItem, rejectItem, retryItem, scheduleItem } from "./actions";
+import { approveItems, commentItem, editItem, regenerateItem, rejectItem, retryItem, scheduleItem } from "./actions";
+import { AiTextPanel, DesignPanel, type StudioCaps } from "./ai-panels";
+import type { QualityCheck } from "@/server/studio/context";
 
-type Version = { version: number; caption: string; hook: string | null; note: string | null; by: string | null; at: string };
+type Version = { version: number; caption: string; hook: string | null; note: string | null; source: string | null; by: string | null; at: string };
+type Asset = Parameters<typeof DesignPanel>[0]["initial"][number];
 type History = { id: string; action: string; comment: string | null; by: string | null; at: string };
 
 function toLocalInput(iso: string | null) {
@@ -37,7 +40,10 @@ export function ContentEditor({
   versions,
   history,
   can,
-  imagesEnabled,
+  studio,
+  assets,
+  quality,
+  autoOpen,
 }: {
   item: StudioItem;
   brandName: string;
@@ -48,7 +54,10 @@ export function ContentEditor({
   versions: Version[];
   history: History[];
   can: { approve: boolean; edit: boolean; publish: boolean };
-  imagesEnabled: boolean;
+  studio: StudioCaps;
+  assets: Asset[];
+  quality: QualityCheck | null;
+  autoOpen: "improve" | "edit" | null;
 }) {
   const t = useTranslations("content");
   const tc = useTranslations("common");
@@ -167,6 +176,12 @@ export function ContentEditor({
           </Card>
 
           {can.edit && !locked && (
+            <AiTextPanel itemId={item.id} platform={item.platform} current={{ hook: item.hook, caption: item.caption, cta: item.cta, hashtags: item.hashtags }} caps={studio} initialQuality={quality} autoOpen={autoOpen} />
+          )}
+
+          {can.edit && !locked && <DesignPanel itemId={item.id} platform={item.platform} format={item.format} caps={studio} initial={assets} />}
+
+          {can.edit && !locked && (
             <Card className="space-y-3 p-5">
               <h2 className="flex items-center gap-2 text-sm font-semibold"><CalendarClock className="size-4" /> {t("schedule")}</h2>
               <div className="flex gap-2">
@@ -185,12 +200,6 @@ export function ContentEditor({
               <p className="text-sm text-ink-2">{item.designBrief.concept}</p>
               {item.designBrief.layout && <p className="text-sm text-ink-3">{item.designBrief.layout}</p>}
               <div className="flex gap-1.5 pt-1">{item.designBrief.palette?.map((c) => <span key={c} className="size-6 rounded-md ring-1 ring-line" style={{ background: c }} title={c} />)}</div>
-              {can.edit && !locked && (
-                <div className="pt-2">
-                  <Button size="sm" variant="secondary" disabled={!imagesEnabled} loading={pending} onClick={() => act(() => generateVisual({ id: item.id }), t("visualReady"))}>{t("generateVisual")}</Button>
-                  {!imagesEnabled && <p className="mt-1.5 text-xs text-ink-4">{t("visualUnavailable")}</p>}
-                </div>
-              )}
             </Card>
           )}
 
@@ -224,7 +233,7 @@ export function ContentEditor({
             <ol className="space-y-2">
               {versions.map((v) => (
                 <li key={v.version} className="flex items-baseline justify-between gap-3 text-sm">
-                  <span>v{v.version} · <span className="text-ink-3">{v.by ? (tc.has(`agents.${v.by}.name`) ? tc(`agents.${v.by}.name` as "agents.DESIGNER.name") : v.by) : "—"}</span></span>
+                  <span>v{v.version}{v.source && v.source !== "manual" && <Badge tone="accent" className="ms-1.5">AI</Badge>} · <span className="text-ink-3">{v.by ? (tc.has(`agents.${v.by}.name`) ? tc(`agents.${v.by}.name` as "agents.DESIGNER.name") : v.by) : "—"}</span></span>
                   <span className="text-xs text-ink-4">{format.relativeTime(new Date(v.at))}</span>
                 </li>
               ))}

@@ -666,6 +666,18 @@
         "selected": "المختارة",
         "notSelected": "لم يُختر بعد"
       }
+    },
+    "openai": {
+      "status": "الحالة",
+      "text": "النص",
+      "image": "الصور",
+      "configured": "مُعد",
+      "missing": "مفقود",
+      "textModel": "نموذج النص",
+      "imageModels": "نماذج الصور",
+      "testText": "اختبار النص",
+      "testImage": "اختبار الصورة",
+      "note": "الاختبارات تستخدم الواجهة الحقيقية وتكلف مبلغًا بسيطًا. صورة الاختبار تُحفظ بشكل خاص في مساحة عملك ولا تُربط بأي منشور ولا تُنشر."
     }
   },
   "connect": {
@@ -774,5 +786,24 @@
     "pickerInstagram": "Instagram Professional",
     "pickerInstagramHint": "حسابات Business أو Creator",
     "pickerInstagramOk": "Business / Creator"
+  },
+  "contentAi": {
+    "title": "ذكاء المحتوى",
+    "description": "ما يشغّل استوديو المحتوى. تدير المنصة المفاتيح والنماذج — ولا تُعرض هنا أبدًا.",
+    "textAi": "ذكاء المحتوى (OpenAI)",
+    "imageAi": "توليد الصور (OpenAI Image)",
+    "on": "مفعّل",
+    "off": "غير مُعد بعد",
+    "defaultQuality": "سرعة التصميم الافتراضية",
+    "fast": "سريع",
+    "quality": "أعلى جودة",
+    "defaultMode": "أسلوب التصميم الافتراضي",
+    "brandTemplate": "قالب الهوية",
+    "aiCreative": "تصميم بالذكاء",
+    "imagesUsed": "تصاميم هذا الشهر",
+    "imageEdits": "تعديلات التصاميم",
+    "textRuns": "توليدات النص",
+    "estimatedCost": "التكلفة التقديرية للذكاء",
+    "saved": "تم حفظ إعدادات ذكاء المحتوى"
   }
 }

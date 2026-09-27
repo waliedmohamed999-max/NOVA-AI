@@ -217,3 +217,15 @@ export const saveLeadForm = tenantAction(
     return { ok: true };
   },
 );
+
+/** Content studio defaults: speed (fast / highest quality) and style (brand template / AI creative). */
+export const saveContentAiDefaults = tenantAction(
+  { name: "settings.content_ai", permission: "agents:configure" },
+  z.object({ imageQuality: z.enum(["fast", "quality"]), imageMode: z.enum(["brand_template", "ai_creative"]) }),
+  async (input, ctx) => {
+    await ctx.db.workspaceSettings.updateMany({ data: input });
+    await audit({ ...scopeOf(ctx), ...who(ctx), action: "settings.content_ai", summary: `Content AI defaults: ${input.imageQuality}, ${input.imageMode}` });
+    revalidatePath("/settings/ai");
+    return { ok: true };
+  },
+);

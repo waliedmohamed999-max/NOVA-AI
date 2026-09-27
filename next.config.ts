@@ -12,7 +12,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  serverExternalPackages: ["@node-rs/argon2", "pino", "pino-pretty"],
+  serverExternalPackages: ["@node-rs/argon2", "pino", "pino-pretty", "sharp"],
   experimental: {
     serverActions: { bodySizeLimit: "8mb" },
   },

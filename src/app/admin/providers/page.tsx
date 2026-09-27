@@ -7,6 +7,10 @@ import { TEST_POST_CONFIRMATION, TEST_POST_TEXT } from "@/server/integrations/di
 import { Badge } from "@/components/ui/badge";
 import { ConnectionTests } from "@/features/admin/connection-tests";
 import { OAuthDiagnostics } from "@/features/admin/oauth-diagnostics";
+import { OpenAiTests } from "@/features/admin/openai-tests";
+import { contentAiConfigured } from "@/server/ai";
+import { modelCatalog } from "@/server/ai/models";
+import { imageModels, imageProvider } from "@/server/design/image-provider";
 import { oauthDiagnostics } from "@/server/admin/oauth-diagnostics";
 
 export const metadata: Metadata = { title: "Admin · Providers" };
@@ -54,6 +58,14 @@ export default async function AdminProvidersPage() {
         </ul>
         <p className="text-xs text-ink-4">{t("footer")}</p>
       </div>
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">OpenAI</h2>
+        <OpenAiTests
+          configured={{ text: contentAiConfigured(), image: imageProvider().isConfigured() }}
+          textModel={modelCatalog().find((m) => m.provider === "openai" && m.tier === "best")?.model ?? "—"}
+          imageModels={imageModels()}
+        />
+      </section>
       <section className="space-y-3">
         <div>
           <h2 className="text-lg font-semibold">{to("title")}</h2>

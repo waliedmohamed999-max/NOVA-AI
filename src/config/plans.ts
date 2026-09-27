@@ -11,6 +11,8 @@ export type PlanEntitlements = {
   seats: number;
   agents: readonly string[];
   aiMonthlyAllowanceMicro: bigint;
+  /** AI image generations + edits per month (drafts, variants and edits all count). */
+  imageGenerationsPerMonth: number;
   analytics: "basic" | "advanced";
   automation: boolean;
   advancedPermissions: boolean;
@@ -25,6 +27,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     seats: 2,
     agents: ["SOCIAL_MANAGER", "CONTENT_STRATEGIST", "DESIGNER", "PERFORMANCE_ANALYST"],
     aiMonthlyAllowanceMicro: 20_000_000n,
+    imageGenerationsPerMonth: 30,
     analytics: "basic",
     automation: false,
     advancedPermissions: false,
@@ -44,6 +47,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       "SALES_ASSISTANT",
     ],
     aiMonthlyAllowanceMicro: 75_000_000n,
+    imageGenerationsPerMonth: 150,
     analytics: "advanced",
     automation: false,
     advancedPermissions: false,
@@ -63,6 +67,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       "SALES_ASSISTANT",
     ],
     aiMonthlyAllowanceMicro: 250_000_000n,
+    imageGenerationsPerMonth: 600,
     analytics: "advanced",
     automation: true,
     advancedPermissions: true,

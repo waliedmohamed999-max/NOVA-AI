@@ -26,9 +26,18 @@ type CommonOptions = {
   images?: ImageInput[];
   maxTokens?: number;
   effort?: GenerateRequest["effort"];
+  /** Content studio: never fall back to the offline development provider (no fake generation). */
+  realOnly?: boolean;
+  /** Prompt registry key + version, recorded on the ai_runs row. */
+  promptRef?: { key: string; version: string };
 };
 
 export type AiMeta = { provider: ProviderName; model: string; usage: Usage; generatedBy: string; offline: boolean };
+
+/** Real (non-offline) text AI available — required by the content studio. */
+export function contentAiConfigured() {
+  return configuredProviders().some((p) => p !== "offline");
+}
 
 export function aiAvailability() {
   const providers = configuredProviders();
@@ -53,7 +62,7 @@ async function execute<T>(
 ): Promise<{ value: T; meta: AiMeta }> {
   const budget = await getBudgetStatus(ctx.organizationId);
   if (budget.state === "exhausted" && budget.hardLimitEnabled) {
-    await logRun(ctx, o.task, "none", "none", { inputTokens: 0, outputTokens: 0 }, 0n, 0, "BLOCKED", false, "budget exhausted");
+    await logRun(ctx, o.task, "none", "none", { inputTokens: 0, outputTokens: 0 }, 0n, 0, "BLOCKED", false, "budget exhausted", o.promptRef);
     throw new AiError("ai_budget_exceeded");
   }
 
@@ -61,7 +70,7 @@ async function execute<T>(
   const candidates = routeModels(
     { task: o.task, quality: o.quality, contextTokens: Math.ceil(promptChars / 3), needsVision: Boolean(o.images?.length) },
     { costSaving: budget.state === "soft" },
-  );
+  ).filter((c) => !o.realOnly || c.provider !== "offline");
   if (candidates.length === 0) throw new AiError("ai_not_configured");
 
   let lastError: unknown;
@@ -80,7 +89,7 @@ async function execute<T>(
       const res = await fn(spec, req);
       const cost = costMicro(spec, res.usage.inputTokens, res.usage.outputTokens);
       reportSuccess(spec.provider);
-      await logRun(ctx, o.task, spec.provider, res.model, res.usage, cost, Date.now() - started, "SUCCESS", i > 0);
+      await logRun(ctx, o.task, spec.provider, res.model, res.usage, cost, Date.now() - started, "SUCCESS", i > 0, undefined, o.promptRef);
       await recordUsage({ organizationId: ctx.organizationId, agentKey: ctx.agentKey, inputTokens: res.usage.inputTokens, outputTokens: res.usage.outputTokens, costMicro: cost });
       return {
         value: res.value,
@@ -90,7 +99,7 @@ async function execute<T>(
       lastError = err;
       reportFailure(spec.provider);
       const message = err instanceof Error ? err.message : String(err);
-      await logRun(ctx, o.task, spec.provider, spec.model, { inputTokens: 0, outputTokens: 0 }, 0n, Date.now() - started, "ERROR", i > 0, message.slice(0, 500));
+      await logRun(ctx, o.task, spec.provider, spec.model, { inputTokens: 0, outputTokens: 0 }, 0n, Date.now() - started, "ERROR", i > 0, message.slice(0, 500), o.promptRef);
       logger.warn({ provider: spec.provider, model: spec.model, task: o.task, err: message }, "AI call failed, trying fallback");
       if (err instanceof AiError && err.code === "ai_refused") break; // don't retry refusals elsewhere
     }
@@ -98,7 +107,7 @@ async function execute<T>(
   throw lastError instanceof AiError ? lastError : new AiError("ai_failed", "All AI providers failed", { cause: lastError });
 }
 
-async function logRun(
+export async function logRun(
   ctx: AiCallContext,
   task: AiTaskType,
   provider: string,
@@ -109,6 +118,7 @@ async function logRun(
   status: "SUCCESS" | "ERROR" | "BLOCKED",
   fallbackUsed: boolean,
   error?: string,
+  promptRef?: { key: string; version: string },
 ) {
   await db.aiRun
     .create({
@@ -127,6 +137,8 @@ async function logRun(
         status,
         fallbackUsed,
         error,
+        promptKey: promptRef?.key ?? null,
+        promptVersion: promptRef?.version ?? null,
       },
     })
     .catch((err) => logger.error({ err }, "failed to log AI run"));

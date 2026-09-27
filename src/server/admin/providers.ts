@@ -53,7 +53,7 @@ export function providerConfigStatus(): ProviderRow[] {
     instagramRow(),
     row("linkedin", [field("LINKEDIN_CLIENT_ID", "id"), field("LINKEDIN_CLIENT_SECRET", "secret")], [field("LINKEDIN_REDIRECT_URI", "setting"), field("LINKEDIN_API_VERSION", "setting"), field("LINKEDIN_ORGANIZATION_ACCESS", "setting")]),
     row("tiktok", [field("TIKTOK_CLIENT_KEY", "id"), field("TIKTOK_CLIENT_SECRET", "secret")]),
-    row("openai", [field("OPENAI_API_KEY", "secret")], [field("OPENAI_MODEL_BEST", "setting"), field("OPENAI_MODEL_FAST", "setting")]),
+    row("openai", [field("OPENAI_API_KEY", "secret")], [field("OPENAI_TEXT_MODEL", "setting"), field("OPENAI_MODEL_FAST", "setting"), field("OPENAI_IMAGE_MODEL_FAST", "setting"), field("OPENAI_IMAGE_MODEL_QUALITY", "setting")]),
     row("anthropic", [field("ANTHROPIC_API_KEY", "secret")], [field("AI_PRIMARY_PROVIDER", "setting")]),
     row("email", [field("SMTP_HOST", "setting"), field("EMAIL_FROM", "setting")], [field("SMTP_PORT", "setting"), field("SMTP_USER", "id"), field("SMTP_PASSWORD", "secret")]),
     storageDriver === "s3"

@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { CalendarDays, Check, CheckCheck, PenSquare, Sparkles, X } from "lucide-react";
+import { CalendarDays, Check, CheckCheck, Eye, ImagePlus, Loader2, MoreHorizontal, PenSquare, RefreshCw, Sparkles, Wand2, X } from "lucide-react";
+import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/components/ui/menu";
+import { PlanWeekDialog } from "./plan-week";
+import { generateImageAction } from "./studio-actions";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +17,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { PostPreview, PlatformDot, type PreviewPost } from "@/components/content/post-preview";
 import { RunView } from "@/features/agents/run-view";
-import { approveItems, planWeek, rejectItem } from "./actions";
+import { approveItems, planWeek, regenerateItem, rejectItem } from "./actions";
 
 export type StudioItem = PreviewPost & {
   id: string;
@@ -26,6 +29,9 @@ export type StudioItem = PreviewPost & {
   campaign: string | null;
   authorAgent: string | null;
   rationale: string | null;
+  version?: number;
+  ai?: boolean;
+  designing?: boolean;
 };
 
 type View = "ideas" | "drafts" | "approval" | "scheduled" | "published";
@@ -38,6 +44,7 @@ export function ContentStudio({
   canApprove,
   canCreate,
   autoStart,
+  studio,
 }: {
   view: View;
   items: StudioItem[];
@@ -46,6 +53,7 @@ export function ContentStudio({
   canApprove: boolean;
   canCreate: boolean;
   autoStart?: boolean;
+  studio: { text: boolean; image: boolean; offlineDev: boolean };
 }) {
   const t = useTranslations("content");
   const tc = useTranslations("common");
@@ -54,17 +62,33 @@ export function ContentStudio({
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [runId, setRunId] = useState<string | null>(null);
+  const [planning, setPlanning] = useState(false);
   const [pending, start] = useTransition();
+  const ts = useTranslations("content.studio");
 
-  const createWeek = () =>
+  // Real content AI → proposal first (Plan next week). The offline dev provider keeps the direct run for local work.
+  const createWeek = () => {
+    if (studio.text) return setPlanning(true);
+    if (!studio.offlineDev) return void toast.error(te("content_ai_not_configured"));
     start(async () => {
       const res = await planWeek({ count: 7 });
       if (res.ok) setRunId(res.data.runId);
       else toast.error(te(res.error as "unexpected"));
     });
+  };
+
+  const aiAction = (fn: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, done?: string, after?: (data: unknown) => void) =>
+    start(async () => {
+      const r = await fn();
+      if (r.ok) {
+        if (done) toast(done);
+        after?.(r.data);
+        router.refresh();
+      } else toast.error(te.has((r.error ?? "unexpected") as "unexpected") ? te((r.error ?? "unexpected") as "unexpected") : te("unexpected"));
+    });
 
   useEffect(() => {
-    if (autoStart && canCreate) createWeek();
+    if (autoStart && canCreate) queueMicrotask(createWeek);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -143,10 +167,17 @@ export function ContentStudio({
                 {canApprove && <Checkbox label={i.title} checked={selected.includes(i.id)} onChange={(v) => setSelected(v ? [...selected, i.id] : selected.filter((x) => x !== i.id))} />}
                 <PlatformDot platform={i.platform} />
                 <span className="truncate text-sm font-medium">{tc(`platforms.${i.platform}` as "platforms.INSTAGRAM")} · {tc(`formats.${i.format}` as "formats.POST")}</span>
+                {i.ai && <Badge tone="accent" className="shrink-0">{ts("card.aiLabel")}</Badge>}
+                {i.version && i.version > 1 && <span className="shrink-0 text-xs text-ink-4">{ts("card.version", { version: i.version })}</span>}
                 <span className="ms-auto flex shrink-0 items-center gap-1 text-xs text-ink-3"><CalendarDays className="size-3.5" />{when(i.scheduledAt)}</span>
               </div>
-              <div className="flex flex-1 justify-center bg-sunken/60 p-5">
+              <div className="relative flex flex-1 justify-center bg-sunken/60 p-5">
                 <PostPreview post={i} brandName={brandName} />
+                {i.designing && (
+                  <span className="absolute end-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs text-ink-2 shadow-xs">
+                    <Loader2 className="size-3 animate-spin" /> {ts("card.designQueued")}
+                  </span>
+                )}
               </div>
               {i.rationale && <p className="border-t border-line px-4 py-3 text-xs text-ink-3"><span className="font-semibold text-ink-2">{t("why")}</span> {i.rationale}</p>}
               <div className="flex items-center gap-2 border-t border-line p-3">
@@ -158,6 +189,20 @@ export function ContentStudio({
                 <Link href={`/content/${i.id}`} className="inline-flex h-8 items-center rounded-full border border-line px-3.5 text-[13px] font-medium hover:bg-sunken">
                   {tc("actions.edit")}
                 </Link>
+                {canCreate && (
+                  <Menu>
+                    <MenuTrigger aria-label={ts("card.more")} className="inline-flex size-8 items-center justify-center rounded-full border border-line hover:bg-sunken">
+                      <MoreHorizontal className="size-4" />
+                    </MenuTrigger>
+                    <MenuContent align="start">
+                      <MenuItem icon={<Wand2 className="size-4" />} disabled={!studio.text} onSelect={() => router.push(`/content/${i.id}?ai=improve`)}>{ts("improve")}</MenuItem>
+                      <MenuItem icon={<ImagePlus className="size-4" />} disabled={!studio.image || i.designing} onSelect={() => aiAction(() => generateImageAction({ id: i.id }), ts("design.queued"))}>{ts("createDesign")}</MenuItem>
+                      <MenuItem icon={<RefreshCw className="size-4" />} disabled={!studio.text && !studio.offlineDev} onSelect={() => aiAction(() => regenerateItem({ id: i.id }), undefined, (d) => setRunId((d as { runId: string }).runId))}>{ts("anotherVersion")}</MenuItem>
+                      <MenuItem icon={<Sparkles className="size-4" />} disabled={!studio.text} onSelect={() => router.push(`/content/${i.id}?ai=edit`)}>{ts("aiEdit")}</MenuItem>
+                      <MenuItem icon={<Eye className="size-4" />} onSelect={() => router.push(`/content/${i.id}`)}>{ts("preview")}</MenuItem>
+                    </MenuContent>
+                  </Menu>
+                )}
                 {canApprove && (
                   <Button size="sm" variant="ghost" className="ms-auto text-ink-3" onClick={() => reject(i.id)} icon={<X className="size-4" />}>
                     {tc("actions.reject")}
@@ -185,6 +230,8 @@ export function ContentStudio({
           ))}
         </ul>
       )}
+
+      <PlanWeekDialog open={planning} onClose={() => setPlanning(false)} imagesEnabled={studio.image} />
 
       <Dialog open={Boolean(runId)} onOpenChange={(o) => { if (!o) { setRunId(null); router.refresh(); } }}>
         <DialogContent title={t("createWeek")} size="lg">
