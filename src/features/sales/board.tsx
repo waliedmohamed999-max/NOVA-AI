@@ -109,7 +109,7 @@ export function LeadBoard({ leads, stageLabels, mode: initial, canManage, pipeli
           <EmptyState icon={<Flame />} title={t("empty.title")} description={t("empty.body")} action={<Link href="/settings/lead-capture" className="text-sm font-semibold text-accent-ink hover:underline">{t("empty.cta")}</Link>} />
         </div>
       ) : mode === "board" || pipeline ? (
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-7 lg:px-7">
           <div className="flex min-w-max gap-3">
             {STAGES.map((stage) => {
               const col = shown.filter((l) => l.stage === stage);

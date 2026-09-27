@@ -252,6 +252,10 @@
   button:disabled { cursor: not-allowed; }
 
   .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Grids default to one shrinkable column (instead of an implicit max-content
+     column) so long text truncates on small screens. Any grid-cols-* utility wins. */
+  .grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @layer utilities {

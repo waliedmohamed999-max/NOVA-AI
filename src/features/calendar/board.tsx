@@ -98,6 +98,33 @@ export function CalendarBoard({ items, anchor, brandName, canEdit }: { items: Ca
       else toast.error(te(res.error as "unexpected"));
     });
 
+  const renderAgenda = (className?: string) => (
+    <div className={cn("overflow-hidden rounded-[24px] border border-line bg-surface", className)}>
+            {[...byDay.entries()]
+              .filter(([, list]) => new Date(list[0].at) >= addDays(new Date(), -1))
+              .sort((a, b) => a[1][0].at.localeCompare(b[1][0].at))
+              .slice(0, 30)
+              .map(([k, list]) => (
+                <section key={k} className="border-b border-line last:border-0">
+                  <h3 className="bg-surface-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-ink-3">{format.dateTime(new Date(list[0].at), { weekday: "long", month: "long", day: "numeric" })}</h3>
+                  <ul>
+                    {list.map((i) => (
+                      <li key={i.id}>
+                        <button onClick={() => setOpen(i)} className="flex w-full items-center gap-4 px-5 py-3 text-start hover:bg-surface-2">
+                          <span className="w-16 shrink-0 text-sm tabular text-ink-3">{format.dateTime(new Date(i.at), { hour: "numeric", minute: "2-digit" })}</span>
+                          <PlatformDot platform={i.platform} />
+                          <span className="min-w-0 flex-1 truncate font-medium">{i.title}</span>
+                          <Badge tone={i.status === "PENDING_APPROVAL" ? "accent" : i.status === "PUBLISHED" ? "success" : "neutral"}>{ts(i.status as "DRAFT")}</Badge>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            {byDay.size === 0 && <p className="px-5 py-12 text-center text-sm text-ink-3">{t("empty")}</p>}
+          </div>
+  );
+
   const today = dayKey(new Date());
   const title = mode === "week" ? `${format.dateTime(days[0], { month: "short", day: "numeric" })} – ${format.dateTime(days[6], { month: "short", day: "numeric", year: "numeric" })}` : format.dateTime(cursor, { month: "long", year: "numeric" });
 
@@ -146,32 +173,12 @@ export function CalendarBoard({ items, anchor, brandName, canEdit }: { items: Ca
       </div>
 
       {mode === "agenda" ? (
-        <div className="overflow-hidden rounded-[24px] border border-line bg-surface">
-          {[...byDay.entries()]
-            .filter(([, list]) => new Date(list[0].at) >= addDays(new Date(), -1))
-            .sort((a, b) => a[1][0].at.localeCompare(b[1][0].at))
-            .slice(0, 30)
-            .map(([k, list]) => (
-              <section key={k} className="border-b border-line last:border-0">
-                <h3 className="bg-surface-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-ink-3">{format.dateTime(new Date(list[0].at), { weekday: "long", month: "long", day: "numeric" })}</h3>
-                <ul>
-                  {list.map((i) => (
-                    <li key={i.id}>
-                      <button onClick={() => setOpen(i)} className="flex w-full items-center gap-4 px-5 py-3 text-start hover:bg-surface-2">
-                        <span className="w-16 shrink-0 text-sm tabular text-ink-3">{format.dateTime(new Date(i.at), { hour: "numeric", minute: "2-digit" })}</span>
-                        <PlatformDot platform={i.platform} />
-                        <span className="min-w-0 flex-1 truncate font-medium">{i.title}</span>
-                        <Badge tone={i.status === "PENDING_APPROVAL" ? "accent" : i.status === "PUBLISHED" ? "success" : "neutral"}>{ts(i.status as "DRAFT")}</Badge>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          {byDay.size === 0 && <p className="px-5 py-12 text-center text-sm text-ink-3">{t("empty")}</p>}
-        </div>
+        renderAgenda()
       ) : (
-        <div className="overflow-x-auto rounded-[24px] border border-line bg-line">
+        <>
+        {/* Phones get the agenda list; the month/week grid needs more width. */}
+        {renderAgenda("sm:hidden")}
+        <div className="hidden overflow-x-auto rounded-[24px] border border-line bg-line sm:block">
           <div className={cn("grid min-w-[720px] grid-cols-7 gap-px")}>
             {days.slice(0, 7).map((d) => (
               <div key={`h-${d.toISOString()}`} className="bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-ink-3">{format.dateTime(d, { weekday: "short" })}</div>
@@ -197,8 +204,9 @@ export function CalendarBoard({ items, anchor, brandName, canEdit }: { items: Ca
             })}
           </div>
         </div>
+        </>
       )}
-      <p className="text-xs text-ink-4">{t("dragHint")}</p>
+      <p className="hidden text-xs text-ink-4 sm:block">{t("dragHint")}</p>
 
       <Dialog open={Boolean(open)} onOpenChange={(o) => !o && setOpen(null)}>
         {open && (
