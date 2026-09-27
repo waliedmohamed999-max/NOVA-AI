@@ -19,9 +19,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      // Everything except the embeddable lead-capture widget refuses framing.
+      // Everything except the embeddable lead-capture widget refuses framing (CSP frame-ancestors is set in proxy.ts).
       { source: "/((?!embed/).*)", headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }] },
-      { source: "/embed/:path*", headers: [{ key: "Content-Security-Policy", value: "frame-ancestors *" }] },
     ];
   },
 };

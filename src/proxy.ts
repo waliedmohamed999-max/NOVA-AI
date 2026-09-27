@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { brand } from "@/config/brand";
+import { buildCsp, makeNonce, storageImgOrigin } from "@/server/security/csp";
 
 /**
  * Optimistic auth gate: bounces visitors without a session cookie away from
@@ -49,9 +50,26 @@ export function proxy(request: NextRequest) {
     url.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(url);
   }
-  return NextResponse.next();
+  return withCsp(request, pathname.startsWith("/embed/"));
+}
+
+/** Per-request nonce CSP (see src/server/security/csp.ts). Next.js applies the nonce to its scripts. */
+function withCsp(request: NextRequest, embed: boolean) {
+  const nonce = makeNonce();
+  const csp = buildCsp(nonce, {
+    dev: process.env.NODE_ENV === "development",
+    embed,
+    https: (process.env.APP_URL ?? "").startsWith("https://"),
+    extraImgSrc: storageImgOrigin(),
+  });
+  const headers = new Headers(request.headers);
+  headers.set("x-nonce", nonce);
+  headers.set("content-security-policy", csp);
+  const res = NextResponse.next({ request: { headers } });
+  res.headers.set("content-security-policy", csp);
+  return res;
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|embed|.*\\..*).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

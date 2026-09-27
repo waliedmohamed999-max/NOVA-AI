@@ -67,3 +67,26 @@ test("connected accounts: no customer Integrations page, no config details, admi
   const anon = await request.get("/settings/connected-accounts", { maxRedirects: 0 });
   expect([302, 307]).toContain(anon.status());
 });
+
+test("CSP: nonce on every Next script, embed frameable cross-origin, app pages not", async ({ page, request }) => {
+  const res = await request.get("/sign-in");
+  const csp = res.headers()["content-security-policy"];
+  const nonce = /'nonce-([^']+)'/.exec(csp)?.[1];
+  expect(nonce).toBeTruthy();
+  expect(csp).toContain("frame-ancestors 'self'");
+  const html = await res.text();
+  const scripts = html.match(/<script\b[^>]*>/g) ?? [];
+  expect(scripts.length).toBeGreaterThan(0);
+  for (const s of scripts) expect(s).toContain(`nonce="${nonce}"`);
+
+  const embed = await request.get("/embed/lead/demo-luma-form");
+  expect(embed.headers()["content-security-policy"]).toContain("frame-ancestors *");
+  expect(embed.headers()["x-frame-options"]).toBeUndefined();
+
+  const violations: string[] = [];
+  page.on("console", (m) => /Content Security Policy|Refused to/i.test(m.text()) && violations.push(m.text()));
+  await page.goto("/");
+  await page.goto("/sign-in");
+  await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+  expect(violations).toEqual([]);
+});

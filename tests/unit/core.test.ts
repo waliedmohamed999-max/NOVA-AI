@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { clientIp, normalizeIp, trustedHops } from "@/server/net/client-ip";
+import { buildCsp, makeNonce } from "@/server/security/csp";
 import { applyTenantScope } from "@/server/db/tenant";
 import { can, canAssignRole } from "@/server/rbac";
 import { compareToRecent, engagementRate, findPatterns, pctChange, type MetricRow } from "@/server/analytics/compare";
@@ -243,5 +244,26 @@ describe("client IP / TRUST_PROXY", () => {
     expect(normalizeIp("[::1]:443")).toBe("::1");
     expect(normalizeIp("203.0.113.7:5000")).toBe("203.0.113.7");
     expect(normalizeIp("::ffff:203.0.113.7")).toBe("203.0.113.7");
+  });
+});
+
+describe("CSP", () => {
+  it("locks scripts to a per-request nonce and blocks plugins, base hijacking and framing", () => {
+    const n = makeNonce();
+    expect(n).not.toBe(makeNonce());
+    const csp = buildCsp(n, {});
+    expect(csp).toContain(`script-src 'self' 'nonce-${n}' 'strict-dynamic'`);
+    expect(csp).not.toContain("unsafe-eval");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("base-uri 'self'");
+    expect(csp).toContain("frame-ancestors 'self'");
+    expect(csp).toContain("connect-src 'self'");
+    expect(csp).not.toMatch(/script-src[^;]*unsafe-inline/);
+  });
+
+  it("only the embed widget may be framed by other sites; dev adds eval/HMR; https upgrades", () => {
+    expect(buildCsp("x", { embed: true })).toContain("frame-ancestors *");
+    expect(buildCsp("x", { dev: true })).toContain("'unsafe-eval'");
+    expect(buildCsp("x", { https: true })).toContain("upgrade-insecure-requests");
   });
 });
