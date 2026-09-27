@@ -32,6 +32,7 @@ async function main() {
     for (const o of orgs) await deleteOrganization(o.organizationId, existing.id);
     await db.user.delete({ where: { id: existing.id } });
   }
+  await db.user.deleteMany({ where: { email: "sara.manager@nova.local" } });
 
   const user = await db.user.create({
     data: { email, name: "Waleed Aboelazz", passwordHash: await hashPassword(password), emailVerifiedAt: new Date(), isPlatformAdmin: true, locale: "en" },
@@ -212,6 +213,57 @@ async function main() {
       const conv = await db.conversation.create({ data: { ...scope, leadId: lead.id, channel: "WEBSITE", subject: "Website form" } });
       await db.message.create({ data: { ...scope, conversationId: conv.id, direction: "INBOUND", authorType: "USER", body: `Hi, ${l.intent.toLowerCase()}. Can you tell me more?`, status: "RECEIVED", sentAt: new Date() } });
     }
+  }
+
+  // Conversations for the pipeline story (inbox + lead timelines)
+  const convoLeads = await db.lead.findMany({ where: { ...scope, stage: { in: ["CONTACTED", "QUALIFIED", "PROPOSAL", "NEGOTIATION"] } } });
+  for (const [i, l] of convoLeads.entries()) {
+    const conv = await db.conversation.create({ data: { ...scope, leadId: l.id, channel: l.channel === "MANUAL" ? "EMAIL" : l.channel, subject: l.intent, lastMessageAt: new Date(Date.now() - (i + 1) * 3600_000) } });
+    await db.message.create({ data: { ...scope, conversationId: conv.id, direction: "INBOUND", authorType: "USER", body: `Hello! ${l.intent}. What would you recommend?`, status: "RECEIVED", sentAt: new Date(Date.now() - (i + 2) * 3600_000) } });
+    await db.message.create({ data: { ...scope, conversationId: conv.id, direction: "OUTBOUND", authorType: "USER", authorId: user.id, body: "Thanks for reaching out! A free skin analysis is the best first step — shall we book one this week?", status: "SENT", sentAt: new Date(Date.now() - (i + 1) * 3600_000) } });
+    await addLeadEvent(scope, l.id, { type: "HUMAN_REPLY", title: "Reply sent", body: "Suggested a free skin analysis.", actor: { type: "USER", id: user.id } });
+  }
+
+  // Sensitive sales reply waiting for approval (discount requested → PRICING approval)
+  const omar = await db.lead.findFirstOrThrow({ where: { ...scope, email: "omar@nasser.example" } });
+  const omarConv = await db.conversation.findFirstOrThrow({ where: { ...scope, leadId: omar.id } });
+  await db.message.create({ data: { ...scope, conversationId: omarConv.id, direction: "INBOUND", authorType: "USER", body: "Could you do 15% off if we book all 12 employees?", status: "RECEIVED", sentAt: new Date() } });
+  const draft = await db.message.create({
+    data: { ...scope, conversationId: omarConv.id, direction: "OUTBOUND", authorType: "AGENT", aiDrafted: true, status: "PENDING_APPROVAL", body: "Hi Omar, thank you — a team package for 12 is a great fit. I've asked our clinic manager to confirm group pricing and will come back to you today with the details." },
+  });
+  await db.approval.create({
+    data: { ...scope, category: "PRICING", action: "send_message", title: "Reply to Omar Nasser (discount request)", summary: draft.body, reason: "Lead asked for 15% off a 12-person corporate package.", impact: "Mentions: discount", entityType: "Message", entityId: draft.id, requestedByAgent: "SALES_AGENT", payload: { leadId: omar.id, sensitiveTopics: ["discount"] } },
+  });
+  await addLeadEvent(scope, omar.id, { type: "MESSAGE_RECEIVED", title: "Message received", body: "Could you do 15% off if we book all 12 employees?", actor: { type: "SYSTEM" } });
+
+  // A second campaign waiting for approval
+  const pendingCampaign = await db.campaign.create({
+    data: { ...scope, name: "Ramadan Glow Ritual", objective: "Grow evening bookings during Ramadan", audience: "Working professionals in Dubai", channels: ["INSTAGRAM"], status: "PENDING_APPROVAL", createdByAgent: "SOCIAL_MANAGER", startDate: new Date(Date.now() + 20 * 86_400_000), endDate: new Date(Date.now() + 40 * 86_400_000), plan: { concept: "Calm evening skincare rituals after iftar", keyMessage: "Glowing skin, gentle routine.", creativeDirection: "Warm evening light, lanterns, deep green", cta: "Book an evening appointment", kpis: ["Evening bookings", "Saves"] } },
+  });
+  await db.approval.create({ data: { ...scope, category: "CAMPAIGNS", action: "activate_campaign", title: pendingCampaign.name, summary: "Calm evening skincare rituals after iftar", reason: "Grow evening bookings during Ramadan", impact: "Evening bookings · Saves", entityType: "Campaign", entityId: pendingCampaign.id, requestedByAgent: "SOCIAL_MANAGER" } });
+
+  // Published content linked to its real (demo) performance records
+  const recentPosts = await db.socialPost.findMany({ where: scope, orderBy: { publishedAt: "desc" }, take: 3 });
+  for (const [i, p] of recentPosts.entries()) {
+    const item = await db.contentItem.create({
+      data: { ...scope, platform: p.platform, format: p.format ?? "POST", status: "PUBLISHED", title: `Published: ${p.pillar ?? "post"} ${i + 1}`, pillar: p.pillar, caption: p.caption ?? "", hashtags: [], publishedAt: p.publishedAt, scheduledAt: p.publishedAt, authorAgent: "CONTENT_STRATEGIST", designBrief: { concept: "Educational carousel", layout: "5 slides", visualElements: ["Headline"], textOnImage: null, palette: ["#1F3A34", "#E9D8C4"] } },
+    });
+    await db.socialPost.update({ where: { id: p.id }, data: { contentItemId: item.id } });
+  }
+
+  // Team: a second member and a pending invitation
+  const sara = await db.user.create({ data: { email: "sara.manager@nova.local", name: "Sara Haddad", emailVerifiedAt: new Date(), passwordHash: await hashPassword(password) } });
+  await db.organizationMember.create({ data: { organizationId: organization.id, userId: sara.id, role: "MANAGER" } });
+  const { hashToken } = await import("../src/server/crypto");
+  await db.invitation.create({ data: { organizationId: organization.id, email: "designer@luma-skin.example", role: "MEMBER", tokenHash: hashToken("demo-invite-token"), invitedById: user.id, expiresAt: new Date(Date.now() + 5 * 86_400_000) } });
+
+  // Notifications that reflect the story
+  for (const n of [
+    { type: "HOT_OPPORTUNITY", title: "Hot lead: Mariam Al Hashimi", body: "Wants the Acne Clear Program before her wedding — reach out today.", link: `/leads/${(await db.lead.findFirstOrThrow({ where: { ...scope, email: "mariam@example.ae" } })).id}` },
+    { type: "APPROVAL_NEEDED", title: "5 posts are ready for your review", link: "/content?view=approval" },
+    { type: "APPROVAL_NEEDED", title: "Omar Nasser asked for a discount", body: "The Sales Agent drafted a reply that needs your approval.", link: "/approvals?tab=PRICING" },
+  ] as const) {
+    await db.notification.create({ data: { organizationId: organization.id, workspaceId: workspace.id, userId: user.id, type: n.type, title: n.title, body: "body" in n ? n.body : null, link: n.link } });
   }
 
   // Let the real analyst + brief generators run over the demo data.
