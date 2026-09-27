@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { clientIp, normalizeIp, trustedHops } from "@/server/net/client-ip";
 import { buildCsp, makeNonce } from "@/server/security/csp";
+import { safeInternalPath } from "@/lib/safe-path";
 import { applyTenantScope } from "@/server/db/tenant";
 import { can, canAssignRole } from "@/server/rbac";
 import { compareToRecent, engagementRate, findPatterns, pctChange, type MetricRow } from "@/server/analytics/compare";
@@ -266,4 +267,9 @@ describe("CSP", () => {
     expect(buildCsp("x", { dev: true })).toContain("'unsafe-eval'");
     expect(buildCsp("x", { https: true })).toContain("upgrade-insecure-requests");
   });
+});
+
+describe("post-login redirect targets", () => {
+  it.each(["//evil.example", "/\\evil.example", "/\\/evil.example", "/%5Cevil.example".replace("%5C", "\\"), "https://evil.example", "javascript:alert(1)", "/\u0000x", "", "home"])("rejects %j", (v) => expect(safeInternalPath(v)).toBeNull());
+  it("keeps same-origin paths with query", () => expect(safeInternalPath("/invite/abc?x=1")).toBe("/invite/abc?x=1"));
 });

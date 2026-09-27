@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { safeInternalPath } from "@/lib/safe-path";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { brand } from "@/config/brand";
@@ -39,10 +40,7 @@ async function destinationFor(userId: string) {
   return "/home";
 }
 
-function safeRedirect(to: FormDataEntryValue | null) {
-  const v = typeof to === "string" ? to : "";
-  return v.startsWith("/") && !v.startsWith("//") ? v : null;
-}
+const safeRedirect = (to: FormDataEntryValue | null) => safeInternalPath(to);
 
 export async function signUpAction(_: AuthFormState, form: FormData): Promise<AuthFormState> {
   if (await limited("signup", 10, 3600)) return { error: "rate_limited" };

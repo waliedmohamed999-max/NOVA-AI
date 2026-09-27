@@ -27,6 +27,11 @@ export function configuredProviders(): ProviderName[] {
 }
 
 // ── Availability: a tiny in-process circuit breaker per provider ──
+// Deliberately PROCESS-LOCAL: each web/worker process keeps its own failure window (3 failures in
+// 60s trips a provider; it closes on the next success or when the window passes). With N instances a
+// provider outage is detected N times — at most 3 extra failed calls per process per minute — which
+// is an acceptable cost versus a Redis dependency. State is lost on restart, which only means the
+// breaker starts closed. Budgets and rate limits are NOT here; those live in Postgres and are shared.
 const failures = new Map<ProviderName, number[]>();
 const WINDOW_MS = 60_000;
 const THRESHOLD = 3;
