@@ -584,7 +584,10 @@
       },
       "notes": {
         "local": "Local disk storage — fine for one server; use S3/R2 when running several instances.",
-        "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked."
+        "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked.",
+        "meta_secret_is_access_token": "META_APP_SECRET contains an access token (starts with EAA), not the App Secret. Use App settings → Basic → App secret (32 hex characters) of the same app as META_APP_ID. If that token was shared anywhere, revoke it.",
+        "meta_secret_format": "META_APP_SECRET doesn't look like an App Secret (32 hex characters from App settings → Basic).",
+        "meta_app_id_format": "META_APP_ID must be the numeric App ID."
       }
     },
     "tests": {
@@ -638,7 +641,25 @@
         "invalid_scope": "Invalid scopes",
         "exchange_failed": "Code exchange failed",
         "no_accounts": "No accounts returned",
-        "no_page_permission": "Authorized, no Page access"
+        "no_page_permission": "Authorized, no Page access",
+        "identity_connected": "Identity connected (no Page yet)"
+      },
+      "credential": {
+        "secret_is_access_token": "Code exchange will fail (\"Error validating client secret\"): META_APP_SECRET holds an access token, not the App Secret. Replace it with App settings → Basic → App secret.",
+        "secret_format": "META_APP_SECRET doesn't look like an App Secret (32 hex characters).",
+        "app_id_format": "META_APP_ID must be the numeric App ID."
+      },
+      "assets": {
+        "identity": "Meta identity",
+        "connected": "Connected",
+        "notConnected": "Not connected",
+        "pages": "Facebook Pages",
+        "instagram": "Instagram professional",
+        "permissionRequired": "Permission required",
+        "available": "Available ({count})",
+        "noneFound": "None managed",
+        "notFound": "Not found",
+        "selected": "Selected"
       }
     }
   },
@@ -660,18 +681,21 @@
       "connecting": "Connecting…",
       "choose": "Choose an account",
       "unavailable": "Not available yet",
-      "soon": "Coming soon"
+      "soon": "Coming soon",
+      "identity": "Meta identity connected"
     },
     "actions": {
       "connect": "Connect",
       "change": "Change account",
       "disconnect": "Disconnect",
       "reconnect": "Reconnect",
-      "choose": "Choose accounts"
+      "choose": "Choose accounts",
+      "grantPages": "Grant access to Pages",
+      "grantInstagram": "Grant Instagram access"
     },
     "why": {
-      "INSTAGRAM": "Posts, reels and real performance.",
-      "FACEBOOK": "Your Page's posts, reach and messages.",
+      "INSTAGRAM": "Connect a Business or Creator account",
+      "FACEBOOK": "Connect your company's Pages",
       "LINKEDIN": "Your profile or company page.",
       "TIKTOK": "Short videos and views.",
       "EMAIL": "Reply to leads from your own inbox.",
@@ -731,6 +755,18 @@
     "upgradeTitle": "NOVA needs an additional permission to do this.",
     "upgradeBody": "{platform} · {capability}. You'll confirm it on {platform}; nothing else changes.",
     "upgradeCta": "Grant permission",
-    "upgradeUnavailable": "This isn't available for this account yet."
+    "upgradeUnavailable": "This isn't available for this account yet.",
+    "identityToast": "Your Meta account is connected, but NOVA needs permission to access your Pages.",
+    "identityBody": "No manageable channel found yet. NOVA needs permission to access your Pages.",
+    "identityNoPages": "Signed in, but this account doesn't manage any Facebook Page yet. NOVA publishes to Pages, not to personal profiles.",
+    "instagramNotFound": "No Instagram professional account (Business or Creator) is linked to your Pages. Automatic publishing requires one.",
+    "profileNote": "Your personal Facebook profile is used for sign-in only — Meta doesn't allow automatic publishing to profiles. NOVA manages the Facebook Pages you choose.",
+    "instagramNote": "Automatic publishing requires an Instagram professional account (Business or Creator) linked to one of your Pages.",
+    "pickerPages": "Facebook Pages",
+    "pickerPagesHint": "NOVA can manage and publish content on these",
+    "pickerPageOk": "Can be connected",
+    "pickerInstagram": "Instagram Professional",
+    "pickerInstagramHint": "Business or Creator accounts linked to your Pages",
+    "pickerInstagramOk": "Business / Creator"
   }
 }

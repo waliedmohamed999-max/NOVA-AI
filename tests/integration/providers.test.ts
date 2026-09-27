@@ -21,8 +21,8 @@ function mockFetch(routes: [RegExp, (url: string, init?: RequestInit) => { statu
 }
 
 beforeAll(() => {
-  process.env.META_APP_ID = "app";
-  process.env.META_APP_SECRET = "secret";
+  process.env.META_APP_ID = "1234567890123456";
+  process.env.META_APP_SECRET = "0123456789abcdef0123456789abcdef";
   process.env.META_PERMISSION_MODE = "configured";
   process.env.META_OAUTH_SCOPES = "pages_show_list,instagram_basic,instagram_content_publish";
   process.env.LINKEDIN_CLIENT_ID = "li";
@@ -43,12 +43,12 @@ describe("Meta adapter (mocked Graph API)", () => {
     mockFetch([
       [/oauth\/access_token\?.*code=/, () => ({ body: { access_token: "short" } })],
       [/oauth\/access_token\?.*fb_exchange_token/, () => ({ body: { access_token: "long", expires_in: 5_000_000 } })],
-      [/me\/permissions/, () => ({ body: { data: [{ permission: "pages_show_list", status: "granted" }, { permission: "instagram_content_publish", status: "declined" }] } })],
+      [/me\/permissions/, () => ({ body: { data: [{ permission: "pages_show_list", status: "granted" }, { permission: "instagram_basic", status: "granted" }, { permission: "instagram_content_publish", status: "declined" }] } })],
       [/me\/accounts/, () => ({ body: { data: [{ id: "p1", name: "Luma", access_token: "page-token", instagram_business_account: { id: "ig1", username: "luma" } }] } })],
     ]);
     const token = await meta.exchangeCode({ code: "c", redirectUri: "https://app/cb" });
     expect(token.accessToken).toBe("long");
-    expect(token.scopes).toEqual(["pages_show_list"]); // granted only, not what was requested
+    expect(token.scopes).toEqual(["pages_show_list", "instagram_basic"]); // granted only, not what was requested
     const accounts = await meta.listAccounts(token);
     expect(accounts.map((a) => a.platform)).toEqual(["FACEBOOK", "INSTAGRAM"]);
     expect(accounts[1].token?.accessToken).toBe("page-token");

@@ -14,6 +14,9 @@ import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } fr
 
 const STATE_TTL_MS = 10 * 60_000;
 
+/** Meta sign-in succeeded but no Page is manageable yet; not a channel (doesn't count toward plan limits). */
+export const META_IDENTITY_ONLY = "identity_only";
+
 /** Where customers manage accounts after onboarding. */
 export const CONNECTED_ACCOUNTS_PATH = "/settings/connected-accounts";
 export const ONBOARDING_CONNECT_PATH = "/onboarding/connect";
@@ -85,6 +88,8 @@ export type ConnectResult = {
   needsSelection?: string[];
   /** Platforms skipped because the plan's channel limit was reached. */
   limited?: string[];
+  /** Meta sign-in worked but returned no manageable Page yet (Facebook profile = login only). */
+  identity?: boolean;
   error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope";
 };
 
@@ -142,7 +147,7 @@ export async function completeConnect(
       where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: platform as Provider } },
       include: { accounts: { where: { isActive: true }, select: { externalId: true } } },
     });
-    if (!existing || existing.status === "DISCONNECTED") {
+    if (!existing || existing.status === "DISCONNECTED" || existing.statusMessage === META_IDENTITY_ONLY) {
       try {
         await assertWithinLimit(scope.organizationId, "socialChannels");
       } catch {
@@ -160,7 +165,7 @@ export async function completeConnect(
     const previous = new Set(existing?.status === "DISCONNECTED" ? [] : (existing?.accounts.map((a) => a.externalId) ?? []));
     let active = 0;
     for (const a of list) {
-      const isActive = list.length === 1 || previous.has(a.externalId);
+      const isActive = (list.length === 1 && providerId !== "meta") || previous.has(a.externalId);
       if (isActive) active++;
       const metadata = { ...(a.metadata ?? {}), capabilities: provider.capabilities?.(a, tokens.scopes ?? []) ?? null } as object;
       const account = await db.integrationAccount.upsert({
@@ -170,7 +175,7 @@ export async function completeConnect(
       });
       if (a.token) await saveCredential(scope, integration.id, account.id, a.token);
     }
-    if (list.length > 1 && active === 0) needsSelection.push(platform);
+    if (list.length > 0 && active === 0) needsSelection.push(platform);
     connected.push(platform);
     await audit({
       ...scope,
@@ -184,10 +189,22 @@ export async function completeConnect(
     });
   }
   if (!connected.length && !limited.length) {
-    // OAuth worked, but without Page access Meta can't return any Page or Instagram account.
-    const noPages = providerId === "meta" && Array.isArray(tokens.scopes) && !tokens.scopes.includes("pages_show_list");
-    await finish(noPages ? "no_page_permission" : "no_accounts");
-    return { redirectTo, scope, error: noPages ? "no_page_permission" : "no_accounts" };
+    if (providerId === "meta") {
+      // Phase 1: the Meta login itself succeeded. A Facebook profile is only an identity (Meta doesn't allow
+      // publishing to personal profiles), so keep it as "identity connected" and ask for Page access next.
+      const integration = await db.integration.upsert({
+        where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: "FACEBOOK" } },
+        create: { ...scope, provider: "FACEBOOK", status: "CONNECTED", statusMessage: META_IDENTITY_ONLY, scopes: tokens.scopes ?? [], connectedById: stored.userId, connectedAt: new Date() },
+        update: { status: "CONNECTED", statusMessage: META_IDENTITY_ONLY, scopes: tokens.scopes ?? [], connectedById: stored.userId, connectedAt: new Date(), lastErrorAt: null },
+      });
+      await saveCredential(scope, integration.id, null, tokens);
+      await db.integrationAccount.updateMany({ where: { integrationId: integration.id }, data: { isActive: false } });
+      await audit({ ...scope, category: "SECURITY", actorType: "USER", actorId: stored.userId, action: "integration.identity_connected", entityType: "Integration", entityId: integration.id, summary: "Meta identity connected (no manageable Page yet)" });
+      await finish("identity_connected");
+      return { redirectTo, scope, connected: [], identity: true };
+    }
+    await finish("no_accounts");
+    return { redirectTo, scope, error: "no_accounts" };
   }
   await finish(needsSelection.length ? "connected_pending_selection" : "connected");
   return { redirectTo, connected, needsSelection, limited, scope };

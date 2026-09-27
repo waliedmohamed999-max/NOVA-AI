@@ -6,6 +6,33 @@ All social integrations use official APIs through the `SocialProvider` interface
 
 Customers never see app IDs, secrets, environment variable names or "admin setup" messages. They see channels, states and human-readable errors.
 
+### Meta, as the platform actually works
+
+| Asset | What NOVA does |
+| --- | --- |
+| Facebook **personal profile** | Sign-in and authorization **only**. Meta doesn't allow automatic publishing to profiles, so a profile is never offered as a destination. |
+| Facebook **Pages** the user manages | Discovered with `pages_show_list`, chosen in the picker ("NOVA can manage and publish content on these"). Publishing and analytics attach to Pages only. |
+| Instagram **Professional** (Business or Creator) | Discovered through the Page it is linked to (Instagram API with Facebook Login, `instagram_basic`). Personal Instagram accounts are not publishable, and Meta doesn't return them here. |
+
+The flow runs in steps, and each permission is requested only when the customer asks for that step:
+1. **Login** (`public_profile`). The card shows **Meta identity connected ✓** with "No manageable channel found yet", plus **[Grant access to Pages]**. This is a success state, not an error, and it doesn't count as a plan channel.
+2. **Grant access to Pages.** This re-runs OAuth with `auth_type=rerequest` for `pages_show_list` only.
+   - NOVA lists the managed Pages. Nothing is pre-selected, not even a single Page.
+   - If the account manages no Page, the card says so.
+3. **Instagram.** When `instagram_basic` is enabled (`META_OAUTH_SCOPES` / `META_OPTIONAL_SCOPES`), **[Grant Instagram access]** discovers the Professional accounts linked to the Pages and offers them in the picker ("Business / Creator").
+   - If none is linked: "Automatic publishing requires an Instagram professional account (Business or Creator)".
+   - If the permission isn't enabled for the app, the Instagram card says "Not available yet".
+4. **Publishing, analytics and other capabilities** light up only from **granted** permissions, e.g. `pages_manage_posts` for Page publishing. Page roles (tasks) are also respected.
+
+**Instagram Login** (Instagram API with Instagram Login, connecting a Professional account without a Facebook Page) is **not implemented**.
+- The architecture has one provider per platform, and the Instagram channel is served by the Meta Graph provider.
+- Supporting it needs a second Instagram provider on `graph.instagram.com` with `instagram_business_*` permissions, and per-integration provider routing.
+
+**Credential check.** `META_APP_SECRET` must be the 32-hex App Secret (App settings → Basic) of the app in `META_APP_ID`. An access token (`EAA…`) there is detected and treated as "not configured":
+- The login dialog would still open, because it needs only the App ID.
+- But the code exchange would fail with "Error validating client secret".
+- The problem shows in `/admin/providers` and in the dev startup log (the value itself is never printed).
+
 - **Onboarding** (`/onboarding`): company → products/services → brand → **connect accounts** (`/onboarding/connect`) → goals → NOVA analysis → ready. The connect step can be skipped ("You can connect more accounts later").
 - **After onboarding:** Settings → **Connected accounts** (`/settings/connected-accounts`). The old `/integrations` URL redirects there, and there is no Integrations item in the sidebar.
 - **Cards:**

@@ -28,8 +28,8 @@ function mockFetch(routes: Route[]) {
 }
 
 const ENV = {
-  META_APP_ID: "meta-app-id",
-  META_APP_SECRET: "meta-app-secret",
+  META_APP_ID: "9876543210987654",
+  META_APP_SECRET: "fedcba9876543210fedcba9876543210",
   META_REDIRECT_URI: "https://nova.example/api/integrations/meta/callback",
   META_PERMISSION_MODE: "configured",
   META_OAUTH_SCOPES: "pages_show_list,pages_read_engagement,pages_manage_posts,read_insights,instagram_basic,instagram_content_publish,instagram_manage_insights,business_management",
@@ -83,14 +83,14 @@ describe("Meta — OAuth", () => {
     const t = await makeTenant();
     const url = new URL(await startConnect(t.scope, t.user.id, "meta", "onboarding"));
     expect(url.origin + url.pathname).toMatch(/^https:\/\/www\.facebook\.com\/v[\d.]+\/dialog\/oauth$/);
-    expect(url.searchParams.get("client_id")).toBe("meta-app-id");
+    expect(url.searchParams.get("client_id")).toBe("9876543210987654");
     expect(url.searchParams.get("redirect_uri")).toBe(ENV.META_REDIRECT_URI);
     expect(url.searchParams.get("state")?.length).toBeGreaterThan(20);
     const scopes = url.searchParams.get("scope")!.split(",");
     expect(scopes).toContain("instagram_content_publish");
     // Not requested without Meta approval:
     for (const s of ["pages_messaging", "instagram_manage_messages", "leads_retrieval"]) expect(scopes).not.toContain(s);
-    expect(url.toString()).not.toContain("meta-app-secret");
+    expect(url.toString()).not.toContain("fedcba9876543210fedcba9876543210");
   });
 
   it("callback: exchanges server-side, stores encrypted tokens, handles a Page without Instagram, and asks which Pages to manage", async () => {
@@ -99,23 +99,23 @@ describe("Meta — OAuth", () => {
     const { res } = await connectMeta(t);
     expect(res.redirectTo).toBe("/onboarding/connect");
     expect(res.connected).toEqual(expect.arrayContaining(["FACEBOOK", "INSTAGRAM"]));
-    expect(res.needsSelection).toEqual(["FACEBOOK"]); // two Pages → customer chooses
+    expect(res.needsSelection).toEqual(["FACEBOOK", "INSTAGRAM"]); // Pages and Instagram are never auto-selected
     // The code exchange carried the app secret server-side, never through the browser.
-    expect(calls.some((c) => c.url.includes("oauth/access_token") && c.url.includes("client_secret=meta-app-secret"))).toBe(true);
+    expect(calls.some((c) => c.url.includes("oauth/access_token") && c.url.includes("client_secret=fedcba9876543210fedcba9876543210"))).toBe(true);
 
     const view = await loadConnections(t.scope, false);
     const fb = view.cards.find((c) => c.platform === "FACEBOOK")!;
     const ig = view.cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(fb.state).toBe("choose");
     expect(fb.accounts.map((a) => a.name)).toEqual(["Luma Skin Studio", "Luma Clinic Offers"]);
-    expect(ig.state).toBe("connected");
+    expect(ig.state).toBe("choose");
     expect(ig.accounts).toHaveLength(1); // only the Page that has Instagram produced one
     expect(ig.accounts[0].handle).toBe("@lumaskin");
 
     const creds = await db.integrationCredential.findMany({ where: { organizationId: t.organization.id }, omit: { accessTokenEnc: false } });
     expect(creds.length).toBeGreaterThan(0);
     for (const c of creds) expect(c.accessTokenEnc).not.toMatch(/token/);
-    expect(JSON.stringify(view)).not.toMatch(/page-token|long-user-token|meta-app-secret/);
+    expect(JSON.stringify(view)).not.toMatch(/page-token|long-user-token|fedcba9876543210fedcba9876543210/);
     const integration = await db.integration.findFirstOrThrow({ where: { ...t.scope, provider: "FACEBOOK" } });
     expect(integration.scopes).not.toContain("pages_messaging"); // declined ≠ granted
   });
@@ -238,7 +238,7 @@ describe("Meta — admin dev test", () => {
     expect(res.valid).toBe(true);
     expect(res.accounts.map((a) => `${a.platform}:${a.name}`)).toEqual(["FACEBOOK:Luma Skin Studio", "INSTAGRAM:lumaskin", "FACEBOOK:Luma Clinic Offers"]);
     expect(res.scopes).toContain("pages_manage_posts");
-    expect(JSON.stringify(res)).not.toMatch(/page-token|long-user-token|meta-app-secret/);
+    expect(JSON.stringify(res)).not.toMatch(/page-token|long-user-token|fedcba9876543210fedcba9876543210/);
     expect(calls.every((c) => c.method === "GET")).toBe(true); // testing never publishes
   });
 
@@ -251,7 +251,9 @@ describe("Meta — admin dev test", () => {
     const page1 = fb.accounts.find((a) => a.name === "Luma Skin Studio")!;
     await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: fb.integrationId!, accountIds: [page1.id] }]);
     await expect(publishTestPost(t.scope, t.user.id, page1.id, "yes")).rejects.toMatchObject({ code: "validation" });
-    const igAcc = view.cards.find((c) => c.platform === "INSTAGRAM")!.accounts[0];
+    const igCard = view.cards.find((c) => c.platform === "INSTAGRAM")!;
+    const igAcc = igCard.accounts[0];
+    await selectAccountsBatch(t.scope, t.user.id, [{ integrationId: igCard.integrationId!, accountIds: [igAcc.id] }]);
     await expect(publishTestPost(t.scope, t.user.id, igAcc.id, "PUBLISH")).rejects.toMatchObject({ code: "test_post_needs_media" });
 
     const res = await publishTestPost(t.scope, t.user.id, page1.id, "PUBLISH");

@@ -11,8 +11,8 @@ process.env.LOG_LEVEL = "silent";
 // Never use real OAuth app credentials in tests (the developer's .env may contain them).
 // Provider HTTP is always mocked; these dummies only make providers "configured".
 for (const [k, v] of Object.entries({
-  META_APP_ID: "test-meta-app",
-  META_APP_SECRET: "test-meta-secret",
+  META_APP_ID: "1234567890123456",
+  META_APP_SECRET: "0123456789abcdef0123456789abcdef",
   META_REDIRECT_URI: "",
   META_PERMISSION_MODE: "minimal",
   META_OAUTH_SCOPES: "",

@@ -32,6 +32,7 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/integrations
     if (res.connected?.length) out.searchParams.set("connected", res.connected.join(","));
     if (res.needsSelection?.length) out.searchParams.set("choose", res.needsSelection.join(","));
     if (res.limited?.length) out.searchParams.set("limited", res.limited.join(","));
+    if (res.identity) out.searchParams.set("identity", "meta");
     return NextResponse.redirect(out);
   } catch (err) {
     logger.warn({ provider, err: err instanceof Error ? err.message : String(err) }, "integration callback failed");

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
-import { AlertTriangle, Check, CheckCircle2, Loader2, Lock } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, CircleDashed, Loader2, Lock } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import { ChannelIcon } from "@/components/brand/channel-icon";
 import type { ConnectionCard, ConnectionsView } from "@/server/integrations/connections";
 import { analyzeWebsite, chooseAccounts, disconnect, websiteStatus } from "./actions";
 
-export type ConnectFlash = { connected: string[]; choose: string[]; limited: string[]; error: string | null; upgrade?: { platform: string; capability: string } | null };
+export type ConnectFlash = { connected: string[]; choose: string[]; limited: string[]; error: string | null; upgrade?: { platform: string; capability: string } | null; identity?: boolean };
 
 type Success = { platform: string; account: string | null };
 
@@ -39,10 +39,12 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
 
   // Handle the OAuth return exactly once, then clean the URL (no codes/tokens are ever in it).
   useEffect(() => {
-    const { connected, choose, limited, error } = flash;
-    if (!connected.length && !choose.length && !limited.length && !error) return;
+    const { connected, choose, limited, error, identity } = flash;
+    if (!connected.length && !choose.length && !limited.length && !error && !identity) return;
     queueMicrotask(() => {
       if (error) toast.error(errorText(error));
+      // The Meta login worked; Pages simply aren't accessible yet. That's a next step, not a failure.
+      if (identity) toast(t("identityToast"));
       if (limited.length) toast.error(t("limited", { platforms: limited.map(platformName).join(" · ") }));
       // If any platform of a sign-in needs a choice, show everything that sign-in returned in one picker.
       const needs = view.cards.filter((c) => choose.includes(c.platform) && c.state === "choose");
@@ -64,7 +66,7 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
     return () => clearTimeout(id);
   }, [success]);
 
-  const connectHref = (c: ConnectionCard) => `/api/integrations/${c.oauth}/start?from=${from}`;
+  const connectHref = (c: ConnectionCard) => `/api/integrations/${c.oauth}/start?from=${from}${c.nextStep ? `&upgrade=${c.nextStep.upgrade}` : ""}`;
   const startConnect = (c: ConnectionCard) => setConnecting(c.oauth);
 
   // One picker for every platform the sign-in returned several accounts for (Meta: Pages + Instagram).
@@ -128,10 +130,11 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
             />
           ))}
         </ul>
-        <p className="flex items-start gap-2 text-xs text-ink-3">
-          <Lock className="mt-0.5 size-3.5 shrink-0" />
-          <span>{t("metaNote")} {t("oauthNote")}</span>
-        </p>
+        <ul className="space-y-1.5 text-xs text-ink-3">
+          <li className="flex items-start gap-2"><CircleDashed className="mt-0.5 size-3.5 shrink-0" /><span>{t("profileNote")}</span></li>
+          <li className="flex items-start gap-2"><CircleDashed className="mt-0.5 size-3.5 shrink-0" /><span>{t("instagramNote")}</span></li>
+          <li className="flex items-start gap-2"><Lock className="mt-0.5 size-3.5 shrink-0" /><span>{t("metaNote")} {t("oauthNote")}</span></li>
+        </ul>
       </section>
 
       <section className="space-y-3">
@@ -249,6 +252,12 @@ function StateChip({ state, connecting }: { state: ConnectionCard["state"]; conn
       </span>
     );
   if (state === "choose") return <span className="text-xs font-semibold text-accent-ink">{t("choose")}</span>;
+  if (state === "identity")
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
+        <CheckCircle2 className="size-3.5" /> {t("identity")}
+      </span>
+    );
   if (state === "unavailable") return <span className="text-xs text-ink-4">{t("unavailable")}</span>;
   return <span className="text-xs text-ink-3">{t("idle")}</span>;
 }
@@ -286,9 +295,16 @@ function SocialCard(props: {
         </ul>
       )}
       {c.state === "reconnect" && props.healthText && <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">{props.healthText}</p>}
+      {c.state === "identity" && (
+        <p className="rounded-xl bg-surface-2 px-3 py-2 text-xs text-ink-2">
+          {c.noManagedPages ? t("identityNoPages") : c.instagramNotFound ? t("instagramNotFound") : t("identityBody")}
+        </p>
+      )}
+      {c.state !== "identity" && c.instagramNotFound && <p className="rounded-xl bg-surface-2 px-3 py-2 text-xs text-ink-2">{t("instagramNotFound")}</p>}
       {canManage && c.state !== "unavailable" && (
         <div className="mt-auto flex flex-wrap gap-2">
-          {c.state === "idle" && link(t("actions.connect"))}
+          {c.state === "idle" && link(c.nextStep ? t(c.nextStep.kind === "pages" ? "actions.grantPages" : "actions.grantInstagram") : t("actions.connect"))}
+          {c.state === "identity" && c.nextStep && link(t(c.nextStep.kind === "pages" ? "actions.grantPages" : "actions.grantInstagram"))}
           {c.state === "reconnect" && link(t("actions.reconnect"))}
           {c.state === "choose" && <Button size="sm" onClick={props.onChoose}>{t("actions.choose")}</Button>}
           {c.state === "connected" &&
@@ -326,7 +342,12 @@ function AccountPicker({ cards, onClose, onSaved }: { cards: ConnectionCard[]; o
             <section key={c.platform} className="space-y-2" aria-label={tc(`platforms.${c.platform}` as "platforms.INSTAGRAM")}>
               <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-2">
                 <ChannelIcon channel={c.platform} className="size-7 rounded-lg" />
-                {tc(`platforms.${c.platform}` as "platforms.INSTAGRAM")}
+                <span>
+                  {c.platform === "FACEBOOK" ? t("pickerPages") : c.platform === "INSTAGRAM" ? t("pickerInstagram") : tc(`platforms.${c.platform}` as "platforms.INSTAGRAM")}
+                  {(c.platform === "FACEBOOK" || c.platform === "INSTAGRAM") && (
+                    <span className="block text-xs font-normal text-ink-3">{c.platform === "FACEBOOK" ? t("pickerPagesHint") : t("pickerInstagramHint")}</span>
+                  )}
+                </span>
               </h3>
               <ul className="space-y-2">
                 {c.accounts.map((a) => {
@@ -350,6 +371,9 @@ function AccountPicker({ cards, onClose, onSaved }: { cards: ConnectionCard[]; o
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-medium" dir="auto">{a.name}</span>
                           {a.handle && <span className="block truncate text-xs text-ink-3" dir="ltr">{a.handle}</span>}
+                          {(c.platform === "FACEBOOK" || c.platform === "INSTAGRAM") && (
+                            <span className="mt-0.5 block text-xs font-medium text-success">✓ {c.platform === "FACEBOOK" ? t("pickerPageOk") : t("pickerInstagramOk")}</span>
+                          )}
                           {a.capabilities && (
                             <span className="mt-1.5 flex flex-wrap gap-1">
                               {a.capabilities.map((cap) => (
@@ -372,7 +396,8 @@ function AccountPicker({ cards, onClose, onSaved }: { cards: ConnectionCard[]; o
             </section>
           ))}
         </div>
-        <Button className="mt-5 w-full" disabled={picked.length === 0} loading={pending} onClick={save}>{t("pickerContinue")}</Button>
+        {cards.some((c) => c.oauth === "meta") && <p className="mt-4 text-xs text-ink-3">{t("profileNote")}</p>}
+        <Button className="mt-4 w-full" disabled={picked.length === 0} loading={pending} onClick={save}>{t("pickerContinue")}</Button>
       </DialogContent>
     </Dialog>
   );

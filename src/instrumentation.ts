@@ -11,8 +11,11 @@ export async function register() {
     const { oauthSetupSummary } = await import("./server/integrations/registry");
     for (const p of oauthSetupSummary()) {
       const name = p.id === "linkedin" ? "LinkedIn" : "Meta";
-      console.info(`[nova] ${name} redirect URI: ${p.problem ? "INVALID — see /admin/providers" : p.explicit ? "configured" : "derived from APP_URL"}${p.configured ? "" : " (app credentials missing)"}`);
+      console.info(`[nova] ${name} redirect URI: ${p.problem ? "INVALID — see /admin/providers" : p.explicit ? "configured" : "derived from APP_URL"}${p.configured ? "" : " (app credentials missing or invalid)"}`);
     }
+    const { metaCredentialProblem } = await import("./server/integrations/providers/meta");
+    const problem = metaCredentialProblem();
+    if (problem && problem !== "missing") console.warn(`[nova] Meta app credentials: INVALID (${problem}) — see /admin/providers`);
   }
   if (process.env.NOVA_INLINE_WORKER !== "true") return;
   const { startWorker } = await import("./server/jobs/runner");

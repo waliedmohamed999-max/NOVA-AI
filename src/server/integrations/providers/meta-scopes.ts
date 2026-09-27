@@ -77,10 +77,13 @@ export function metaScopeConfig(env: NodeJS.ProcessEnv = process.env): MetaScope
   const optional = parseScopes(env.META_OPTIONAL_SCOPES);
   const base = mode === "minimal" ? ["public_profile"] : [];
   const requested = [...new Set([...base, ...configured.scopes])];
+  // Phase 2 of the minimal flow: Page discovery is always allowed, but only requested when the
+  // customer clicks "Grant access to Pages" (never in the first login).
+  const onDemand = mode === "minimal" ? ["pages_show_list", ...optional.scopes] : optional.scopes;
   return {
     mode,
     requested: requested.length ? requested : ["public_profile"],
-    optional: optional.scopes.filter((s) => !requested.includes(s)),
+    optional: [...new Set(onDemand)].filter((s) => !requested.includes(s)),
     rejected: [...configured.rejected, ...optional.rejected],
     configId: env.META_LOGIN_CONFIG_ID?.trim() || null,
   };

@@ -105,10 +105,12 @@ describe("state validation", () => {
     expect(await db.integration.count({ where: { organizationId: t.organization.id } })).toBe(0);
   });
 
-  it("reports no_accounts when the sign-in has no business accounts", async () => {
+  it("a Meta sign-in without any Page is an identity connection, not a failure", async () => {
     setSocialProvider("meta", fakeMeta([]));
     const t = await makeTenant();
-    expect((await connect(t)).error).toBe("no_accounts");
+    const res = await connect(t);
+    expect(res.error).toBeUndefined();
+    expect(res.identity).toBe(true);
   });
 });
 
@@ -117,14 +119,14 @@ describe("account selection", () => {
     setSocialProvider("meta", fakeMeta([ig("brand_a"), ig("brand_b"), fb("p1")]));
     const t = await makeTenant();
     const res = await connect(t, "onboarding");
-    expect(res.needsSelection).toEqual(["INSTAGRAM"]);
+    expect(res.needsSelection).toEqual(["INSTAGRAM", "FACEBOOK"]); // Meta assets are never auto-selected
     expect(res.connected).toEqual(expect.arrayContaining(["INSTAGRAM", "FACEBOOK"]));
 
     const view = await loadConnections(t.scope, false);
     const card = view.cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(card.state).toBe("choose");
     expect(card.accounts.every((a) => !a.isActive)).toBe(true);
-    expect(view.cards.find((c) => c.platform === "FACEBOOK")!.state).toBe("connected"); // single page → used directly
+    expect(view.cards.find((c) => c.platform === "FACEBOOK")!.state).toBe("choose"); // even a single Page waits for the customer
 
     const b = card.accounts.find((a) => a.name === "brand_b")!;
     await selectAccounts(t.scope, t.user.id, card.integrationId!, [b.id]);
@@ -134,7 +136,7 @@ describe("account selection", () => {
 
     // Reconnecting keeps the customer's choice instead of guessing again.
     const again = await connect(t);
-    expect(again.needsSelection).toEqual([]);
+    expect(again.needsSelection).toEqual(["FACEBOOK"]); // Instagram keeps the earlier choice; the Page was never chosen
     const kept = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(kept.accounts.filter((a) => a.isActive).map((a) => a.name)).toEqual(["brand_b"]);
   });
@@ -184,7 +186,9 @@ describe("disconnect, expiry and reconnect", () => {
     setSocialProvider("meta", fakeMeta([ig("luma")]));
     const t = await makeTenant();
     await connect(t);
-    const id = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!.integrationId!;
+    const card0 = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
+    await selectAccounts(t.scope, t.user.id, card0.integrationId!, [card0.accounts[0].id]);
+    const id = card0.integrationId!;
     await markIntegrationError(t.scope, id, new ProviderError("expired", "token expired"));
     const expired = (await loadConnections(t.scope, false)).cards.find((c) => c.platform === "INSTAGRAM")!;
     expect(expired.state).toBe("reconnect");
@@ -228,18 +232,18 @@ describe("plan channel limit and missing credentials", () => {
 
 describe("helpers", () => {
   it("post-OAuth query only accepts platform names and short error codes", () => {
-    expect(parseConnectFlash({ connected: "INSTAGRAM,FACEBOOK", error: "oauth_denied" })).toEqual({ connected: ["INSTAGRAM", "FACEBOOK"], choose: [], limited: [], error: "oauth_denied", upgrade: null });
-    expect(parseConnectFlash({ connected: "<script>", error: "https://x" })).toEqual({ connected: [], choose: [], limited: [], error: null, upgrade: null });
+    expect(parseConnectFlash({ connected: "INSTAGRAM,FACEBOOK", error: "oauth_denied" })).toEqual({ connected: ["INSTAGRAM", "FACEBOOK"], choose: [], limited: [], error: "oauth_denied", upgrade: null, identity: false });
+    expect(parseConnectFlash({ connected: "<script>", error: "https://x" })).toEqual({ connected: [], choose: [], limited: [], error: null, upgrade: null, identity: false });
   });
 
   it("admin provider status masks ids and never returns secrets", () => {
     process.env.META_APP_ID = "123456789012";
-    process.env.META_APP_SECRET = "super-secret-value";
+    process.env.META_APP_SECRET = "a1b2c3d4e5f60718293a4b5c6d7e8f90";
     try {
       expect(maskId("123456789012")).toBe("1234••••12");
       const meta = providerConfigStatus().find((r) => r.key === "meta")!;
       expect(meta.status).toBe("configured");
-      expect(JSON.stringify(meta)).not.toContain("super-secret-value");
+      expect(JSON.stringify(meta)).not.toContain("a1b2c3d4e5f60718293a4b5c6d7e8f90");
       expect(JSON.stringify(meta)).not.toContain("123456789012");
       delete process.env.META_APP_SECRET;
       expect(providerConfigStatus().find((r) => r.key === "meta")!.status).toBe("error");
@@ -263,11 +267,11 @@ describe("callback route", () => {
     const res = await GET(new NextRequest(`http://localhost:3000/api/integrations/meta/callback?code=secret-code&state=${state}`), { params: Promise.resolve({ provider: "meta" }) });
     const location = new URL(res.headers.get("location")!);
     expect(location.pathname).toBe(ONBOARDING_CONNECT_PATH);
-    expect(location.searchParams.get("choose")).toBe("INSTAGRAM");
+    expect(location.searchParams.get("choose")).toBe("INSTAGRAM,FACEBOOK");
     expect(location.search).not.toMatch(/secret-code|state=|token/);
-    // Sync is only queued for accounts the customer has already chosen.
+    // Nothing is chosen yet, so nothing is synced until the customer picks accounts.
     const jobs = await db.job.findMany({ where: { organizationId: t.organization.id, type: "social.sync_integration" } });
-    expect(jobs).toHaveLength(1);
+    expect(jobs).toHaveLength(0);
   });
 });
 

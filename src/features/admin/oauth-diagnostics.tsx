@@ -27,6 +27,31 @@ export async function OAuthDiagnostics({ rows }: { rows: ProviderDiagnostics[] }
             <h3 className="text-base font-semibold">{r.id === "meta" ? "Meta" : "LinkedIn"}</h3>
             <Badge tone={r.configured && !r.redirectProblem ? "success" : "danger"}>{r.configured ? (r.redirectProblem ? t("redirectInvalid") : t("configured")) : t("missing")}</Badge>
           </header>
+          {r.credentialProblem && r.credentialProblem !== "missing" && (
+            <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-xs text-danger">{t(`credential.${r.credentialProblem}` as "credential.secret_format")}</p>
+          )}
+          {r.assets && (
+            <ul className="grid gap-1.5 rounded-xl bg-surface-2 p-3 text-xs sm:grid-cols-3">
+              <li>
+                <span className="block text-ink-3">{t("assets.identity")}</span>
+                <span className={r.assets.identity ? "font-semibold text-success" : "text-ink-3"}>{r.assets.identity ? t("assets.connected") : t("assets.notConnected")}</span>
+              </li>
+              <li>
+                <span className="block text-ink-3">{t("assets.pages")}</span>
+                <span className={r.assets.pages ? "font-semibold text-success" : "text-ink-3"}>{r.assets.pages === null ? t("assets.permissionRequired") : r.assets.pages > 0 ? t("assets.available", { count: r.assets.pages }) : t("assets.noneFound")}</span>
+              </li>
+              <li>
+                <span className="block text-ink-3">{t("assets.instagram")}</span>
+                <span className={r.assets.instagram ? "font-semibold text-success" : "text-ink-3"}>{r.assets.instagram === null ? t("assets.permissionRequired") : r.assets.instagram > 0 ? t("assets.available", { count: r.assets.instagram }) : t("assets.notFound")}</span>
+              </li>
+              {(r.assets.selectedPages.length > 0 || r.assets.selectedInstagram.length > 0) && (
+                <li className="sm:col-span-3">
+                  <span className="text-ink-3">{t("assets.selected")}: </span>
+                  <span dir="auto">{[...r.assets.selectedPages, ...r.assets.selectedInstagram].join(" · ")}</span>
+                </li>
+              )}
+            </ul>
+          )}
           <dl className="space-y-3">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wider text-ink-3">{t("redirectUri")}</dt>

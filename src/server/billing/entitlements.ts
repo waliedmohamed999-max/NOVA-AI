@@ -23,7 +23,7 @@ export async function getUsage(organizationId: string): Promise<Usage> {
     db.subscription.findUnique({ where: { organizationId } }),
     db.organizationMember.count({ where: { organizationId } }),
     db.invitation.count({ where: { organizationId, acceptedAt: null, revokedAt: null, expiresAt: { gt: new Date() } } }),
-    db.integration.count({ where: { organizationId, status: { not: "DISCONNECTED" }, provider: { in: ["INSTAGRAM", "FACEBOOK", "LINKEDIN", "TIKTOK", "X", "YOUTUBE", "PINTEREST"] } } }),
+    db.integration.count({ where: { organizationId, status: { not: "DISCONNECTED" }, provider: { in: ["INSTAGRAM", "FACEBOOK", "LINKEDIN", "TIKTOK", "X", "YOUTUBE", "PINTEREST"] }, OR: [{ statusMessage: null }, { statusMessage: { not: "identity_only" } }] } }),
     getBudgetStatus(organizationId),
   ]);
   const plan = sub?.plan ?? "STARTER";

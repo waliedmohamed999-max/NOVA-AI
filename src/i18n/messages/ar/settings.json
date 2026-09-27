@@ -584,7 +584,10 @@
       },
       "notes": {
         "local": "تخزين على القرص المحلي — مناسب لخادم واحد؛ استخدم S3/R2 عند تشغيل أكثر من نسخة.",
-        "stripe_not_implemented": "محوّل Stripe والـwebhook غير مُنفَّذين بعد. ضبط هذه المفاتيح لا يفعّل الدفع؛ تغيير الخطة يبقى متوقفًا."
+        "stripe_not_implemented": "محوّل Stripe والـwebhook غير مُنفَّذين بعد. ضبط هذه المفاتيح لا يفعّل الدفع؛ تغيير الخطة يبقى متوقفًا.",
+        "meta_secret_is_access_token": "قيمة META_APP_SECRET هي access token (تبدأ بـ EAA) وليست App Secret. استخدم App settings ← Basic ← App secret (32 حرفًا ست عشريًا) لنفس تطبيق META_APP_ID. إذا شُورك هذا التوكن في أي مكان فقم بإلغائه.",
+        "meta_secret_format": "قيمة META_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا من App settings ← Basic).",
+        "meta_app_id_format": "يجب أن يكون META_APP_ID هو رقم التطبيق (App ID)."
       }
     },
     "tests": {
@@ -638,7 +641,25 @@
         "invalid_scope": "صلاحيات غير صالحة",
         "exchange_failed": "فشل تبادل الرمز",
         "no_accounts": "لم تُرجع حسابات",
-        "no_page_permission": "تم التفويض بدون وصول للصفحات"
+        "no_page_permission": "تم التفويض بدون وصول للصفحات",
+        "identity_connected": "تم ربط الهوية (بدون صفحة بعد)"
+      },
+      "credential": {
+        "secret_is_access_token": "سيفشل تبادل الرمز (\"Error validating client secret\"): قيمة META_APP_SECRET هي access token وليست App Secret. استبدلها بـ App settings ← Basic ← App secret.",
+        "secret_format": "قيمة META_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا).",
+        "app_id_format": "يجب أن يكون META_APP_ID هو رقم التطبيق (App ID)."
+      },
+      "assets": {
+        "identity": "هوية Meta",
+        "connected": "متصلة",
+        "notConnected": "غير متصلة",
+        "pages": "صفحات Facebook",
+        "instagram": "Instagram الاحترافي",
+        "permissionRequired": "تحتاج صلاحية",
+        "available": "متاحة ({count})",
+        "noneFound": "لا توجد صفحات مُدارة",
+        "notFound": "غير موجود",
+        "selected": "المختارة"
       }
     }
   },
@@ -660,18 +681,21 @@
       "connecting": "جاري الربط…",
       "choose": "اختر الحساب",
       "unavailable": "غير متاح حاليًا",
-      "soon": "قريبًا"
+      "soon": "قريبًا",
+      "identity": "هوية Meta متصلة"
     },
     "actions": {
       "connect": "ربط",
       "change": "تغيير الحساب",
       "disconnect": "فصل",
       "reconnect": "إعادة الربط",
-      "choose": "اختيار الحسابات"
+      "choose": "اختيار الحسابات",
+      "grantPages": "منح صلاحية الصفحات",
+      "grantInstagram": "منح صلاحية Instagram"
     },
     "why": {
-      "INSTAGRAM": "المنشورات والريلز والأداء الحقيقي.",
-      "FACEBOOK": "منشورات صفحتك ووصولها ورسائلها.",
+      "INSTAGRAM": "اربط حساب Business أو Creator",
+      "FACEBOOK": "اربط صفحات شركتك",
       "LINKEDIN": "ملفك الشخصي أو صفحة شركتك.",
       "TIKTOK": "الفيديوهات القصيرة والمشاهدات.",
       "EMAIL": "الرد على العملاء المحتملين من بريدك.",
@@ -731,6 +755,18 @@
     "upgradeTitle": "NOVA تحتاج صلاحية إضافية لتنفيذ هذه المهمة.",
     "upgradeBody": "{platform} · {capability}. ستؤكد ذلك على {platform}؛ ولن يتغير شيء آخر.",
     "upgradeCta": "منح الصلاحية",
-    "upgradeUnavailable": "هذه الميزة غير متاحة لهذا الحساب حاليًا."
+    "upgradeUnavailable": "هذه الميزة غير متاحة لهذا الحساب حاليًا.",
+    "identityToast": "تم ربط حساب Meta، لكن NOVA تحتاج إذن الوصول إلى صفحاتك.",
+    "identityBody": "لم يتم العثور على قناة قابلة للإدارة حتى الآن. NOVA تحتاج إذن الوصول إلى صفحاتك.",
+    "identityNoPages": "تم تسجيل الدخول، لكن هذا الحساب لا يدير أي صفحة Facebook حاليًا. ينشر NOVA على الصفحات وليس على الحسابات الشخصية.",
+    "instagramNotFound": "لا يوجد حساب Instagram احترافي (Business أو Creator) مرتبط بصفحاتك. النشر التلقائي يتطلب حسابًا احترافيًا.",
+    "profileNote": "حساب Facebook الشخصي يُستخدم لتسجيل الدخول فقط — Meta لا تسمح بالنشر التلقائي على الحسابات الشخصية. يدير NOVA صفحات Facebook التي تختارها.",
+    "instagramNote": "يتطلب النشر التلقائي حساب Instagram احترافيًا (Business أو Creator) مرتبطًا بإحدى صفحاتك.",
+    "pickerPages": "صفحات Facebook",
+    "pickerPagesHint": "يمكن لـ NOVA إدارة ونشر المحتوى عليها",
+    "pickerPageOk": "قابل للربط",
+    "pickerInstagram": "Instagram Professional",
+    "pickerInstagramHint": "حسابات Business أو Creator المرتبطة بصفحاتك",
+    "pickerInstagramOk": "Business / Creator"
   }
 }

@@ -1,6 +1,7 @@
 import { db } from "../db/client";
 import { oauthSetupSummary } from "../integrations/registry";
 import { META_CAPABILITY_SCOPES, metaScopeConfig } from "../integrations/providers/meta-scopes";
+import { metaCredentialProblem } from "../integrations/providers/meta";
 
 /**
  * Platform-admin OAuth diagnostics: redirect URIs (not secret), requested vs granted permissions and
@@ -21,6 +22,9 @@ export type ProviderDiagnostics = {
   rejected: string[];
   lastAttempt: { at: string; outcome: string | null; requested: string[]; granted: string[]; missing: string[] } | null;
   capabilities: CapabilityRow[];
+  /** Meta only: what the admin's workspace actually has. */
+  credentialProblem?: string | null;
+  assets?: { identity: boolean; pages: number | null; instagram: number | null; granted: string[]; selectedPages: string[]; selectedInstagram: string[] };
 };
 
 const LINKEDIN_CAPABILITIES: { capability: string; scopes: string[]; approval?: boolean }[] = [
@@ -41,9 +45,25 @@ export async function oauthDiagnostics(organizationId: string | null): Promise<P
     return { at: a.createdAt.toISOString(), outcome: a.outcome, requested: a.requestedScopes, granted: a.grantedScopes, missing: a.requestedScopes.filter((s) => !a.grantedScopes.includes(s)) };
   };
 
+  // Meta assets in the admin's own workspace (names only — never tokens).
+  const metaRows = organizationId
+    ? await db.integration.findMany({ where: { organizationId, provider: { in: ["FACEBOOK", "INSTAGRAM"] }, status: { not: "DISCONNECTED" } }, include: { accounts: { select: { name: true, handle: true, isActive: true } } } })
+    : [];
+  const fb = metaRows.find((r) => r.provider === "FACEBOOK");
+  const igRow = metaRows.find((r) => r.provider === "INSTAGRAM");
+  const metaGranted = [...new Set(metaRows.flatMap((r) => r.scopes))];
+  const metaAssets = {
+    identity: metaRows.length > 0,
+    pages: metaGranted.includes("pages_show_list") ? (fb?.statusMessage === "identity_only" ? 0 : (fb?.accounts.length ?? 0)) : null,
+    instagram: metaGranted.includes("instagram_basic") ? (igRow?.accounts.length ?? 0) : null,
+    granted: metaGranted,
+    selectedPages: fb?.accounts.filter((a) => a.isActive).map((a) => a.name) ?? [],
+    selectedInstagram: igRow?.accounts.filter((a) => a.isActive).map((a) => a.handle ?? a.name) ?? [],
+  };
+
   return setup.map((s) => {
     const attempt = last(s.id);
-    const granted = new Set(attempt?.granted ?? []);
+    const granted = new Set([...(attempt?.granted ?? []), ...(s.id === "meta" ? metaGranted : [])]);
     if (s.id === "meta") {
       const enabled = new Set([...meta.requested, ...meta.optional]);
       const capabilities: CapabilityRow[] = [];
@@ -54,7 +74,7 @@ export async function oauthDiagnostics(organizationId: string | null): Promise<P
           capabilities.push({ platform, capability, scopes, status });
         }
       }
-      return { id: "meta", configured: s.configured, redirectUri: s.redirectUri, redirectProblem: s.problem, mode: meta.mode, loginConfigId: Boolean(meta.configId), requested: meta.requested, optional: meta.optional, rejected: meta.rejected, lastAttempt: attempt, capabilities };
+      return { id: "meta", configured: s.configured, redirectUri: s.redirectUri, redirectProblem: s.problem, mode: meta.mode, loginConfigId: Boolean(meta.configId), requested: meta.requested, optional: meta.optional, rejected: meta.rejected, lastAttempt: attempt, capabilities, assets: metaAssets, credentialProblem: metaCredentialProblem() };
     }
     const requested = s.scopes;
     return {

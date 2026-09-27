@@ -1,3 +1,5 @@
+import { metaCredentialProblem } from "../integrations/providers/meta";
+
 /**
  * Platform-admin view of provider configuration. Reads environment variables only —
  * secrets are never stored in the database and never returned unmasked.
@@ -26,13 +28,20 @@ function row(key: string, required: ProviderField[], optional: ProviderField[] =
   return { key, status: judge(required), fields: [...required, ...optional], note };
 }
 
+function metaRow(): ProviderRow {
+  const r = row("meta", [field("META_APP_ID", "id"), field("META_APP_SECRET", "secret")], [field("META_REDIRECT_URI", "setting"), field("META_PERMISSION_MODE", "setting"), field("META_OAUTH_SCOPES", "setting"), field("META_GRAPH_VERSION", "setting")]);
+  const problem = metaCredentialProblem();
+  if (problem && problem !== "missing") return { ...r, status: "error", note: `meta_${problem}` };
+  return r;
+}
+
 export function providerConfigStatus(): ProviderRow[] {
   const storageDriver = process.env.STORAGE_DRIVER ?? "local";
   const s3 = [field("S3_BUCKET", "setting"), field("S3_ACCESS_KEY_ID", "id"), field("S3_SECRET_ACCESS_KEY", "secret")];
   const stripe = [field("STRIPE_SECRET_KEY", "secret"), field("STRIPE_WEBHOOK_SECRET", "secret")];
   const stripeSet = stripe.some((f) => f.value);
   return [
-    row("meta", [field("META_APP_ID", "id"), field("META_APP_SECRET", "secret")], [field("META_REDIRECT_URI", "setting"), field("META_GRAPH_VERSION", "setting")]),
+    metaRow(),
     row("linkedin", [field("LINKEDIN_CLIENT_ID", "id"), field("LINKEDIN_CLIENT_SECRET", "secret")], [field("LINKEDIN_REDIRECT_URI", "setting"), field("LINKEDIN_API_VERSION", "setting"), field("LINKEDIN_ORGANIZATION_ACCESS", "setting")]),
     row("tiktok", [field("TIKTOK_CLIENT_KEY", "id"), field("TIKTOK_CLIENT_SECRET", "secret")]),
     row("openai", [field("OPENAI_API_KEY", "secret")], [field("OPENAI_MODEL_BEST", "setting"), field("OPENAI_MODEL_FAST", "setting")]),

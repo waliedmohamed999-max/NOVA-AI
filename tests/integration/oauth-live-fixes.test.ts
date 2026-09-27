@@ -117,24 +117,26 @@ describe("Meta configured scopes", () => {
     await completeConnect("meta", { code: "c", state: url.searchParams.get("state") }, t.user.id);
     const diag = (await oauthDiagnostics(t.organization.id)).find((d) => d.id === "meta")!;
     expect(diag.requested).toEqual(["public_profile", "pages_show_list"]);
-    expect(diag.lastAttempt).toMatchObject({ outcome: "no_accounts", granted: ["public_profile", "pages_show_list"], missing: [] });
+    expect(diag.lastAttempt).toMatchObject({ outcome: "identity_connected", granted: ["public_profile", "pages_show_list"], missing: [] });
+    expect(diag.assets).toMatchObject({ identity: true, pages: 0, instagram: null });
     const fbPublish = diag.capabilities.find((c) => c.platform === "FACEBOOK" && c.capability === "publish")!;
     expect(fbPublish.status).toBe("not_enabled");
     expect(diag.capabilities.find((c) => c.platform === "FACEBOOK" && c.capability === "discovery")!.status).toBe("available");
-    expect(JSON.stringify(diag)).not.toMatch(/test-meta-secret|long|short/);
+    expect(JSON.stringify(diag)).not.toMatch(/0123456789abcdef0123456789abcdef|"long"|"short"/);
   });
 });
 
 describe("Meta minimal mode live-flow outcomes", () => {
-  it("OAuth reaches NOVA with only public_profile: no Page discovery call, human message, attempt recorded", async () => {
+  it("OAuth reaches NOVA with only public_profile: identity connected (not a failure), no Page discovery call", async () => {
     const t = await makeTenant();
     const url = new URL(await startConnect(t.scope, t.user.id, "meta", "onboarding"));
     mockFetch(metaExchange(["public_profile"]));
     const res = await completeConnect("meta", { code: "c", state: url.searchParams.get("state") }, t.user.id);
-    expect(res).toMatchObject({ redirectTo: "/onboarding/connect", error: "no_page_permission" });
+    expect(res).toMatchObject({ redirectTo: "/onboarding/connect", identity: true });
+    expect(res.error).toBeUndefined();
     expect(calls.some((c) => c.url.includes("/me/accounts"))).toBe(false);
     const attempt = await db.oAuthState.findFirstOrThrow({ where: { organizationId: t.organization.id } });
-    expect(attempt).toMatchObject({ requestedScopes: ["public_profile"], grantedScopes: ["public_profile"], outcome: "no_page_permission" });
+    expect(attempt).toMatchObject({ requestedScopes: ["public_profile"], grantedScopes: ["public_profile"], outcome: "identity_connected" });
   });
 });
 

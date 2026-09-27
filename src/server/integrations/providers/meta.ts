@@ -25,6 +25,21 @@ const get = <T>(path: string, token: string, params: Record<string, string> = {}
   providerFetch<T>(`${GRAPH()}${path}?${new URLSearchParams({ ...params, access_token: token })}`, { classify });
 const post = <T>(path: string, token: string, data: Record<string, string>) => providerFetch<T>(`${GRAPH()}${path}`, { ...form({ ...data, access_token: token }), classify });
 
+/**
+ * Catches the classic setup mistake: an access token (EAA…) pasted into META_APP_SECRET. Meta then
+ * accepts the login dialog (it only needs the App ID) but rejects the code exchange with
+ * "Error validating client secret". The App Secret is 32 hex characters (App settings → Basic).
+ */
+export function metaCredentialProblem(env: NodeJS.ProcessEnv = process.env): "missing" | "app_id_format" | "secret_is_access_token" | "secret_format" | null {
+  const id = env.META_APP_ID?.trim().replace(/^["']|["']$/g, "") ?? "";
+  const secret = env.META_APP_SECRET?.trim().replace(/^["']|["']$/g, "") ?? "";
+  if (!id || !secret) return "missing";
+  if (!/^\d{5,20}$/.test(id)) return "app_id_format";
+  if (/^EAA/.test(secret)) return "secret_is_access_token";
+  if (!/^[0-9a-f]{32}$/i.test(secret)) return "secret_format";
+  return null;
+}
+
 function isInstagram(a: AccountRef) {
   return a.accountType === "instagram_business";
 }
@@ -44,7 +59,7 @@ export class MetaProvider implements SocialProvider {
   }
 
   isConfigured() {
-    return Boolean(process.env.META_APP_ID && process.env.META_APP_SECRET);
+    return metaCredentialProblem() === null;
   }
 
   connect({ state, redirectUri, scopes, rerequest }: { state: string; redirectUri: string; scopes?: string[]; rerequest?: boolean }) {
@@ -127,10 +142,12 @@ export class MetaProvider implements SocialProvider {
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {
     // Page discovery needs pages_show_list; without it Meta returns nothing useful, so don't ask.
     if (token.scopes && !token.scopes.includes("pages_show_list")) return [];
+    const withInstagram = !token.scopes || token.scopes.includes("instagram_basic");
     const pages = await get<{ data: { id: string; name: string; access_token: string; tasks?: string[]; picture?: { data?: { url?: string } }; instagram_business_account?: { id: string; username?: string; profile_picture_url?: string } }[] }>(
       "/me/accounts",
       token.accessToken,
-      { fields: "id,name,access_token,tasks,picture{url},instagram_business_account{id,username,profile_picture_url}", limit: "50" },
+      // Instagram professional accounts linked to a Page are only readable with instagram_basic; don't ask otherwise.
+      { fields: `id,name,access_token,tasks,picture{url}${withInstagram ? ",instagram_business_account{id,username,profile_picture_url}" : ""}`, limit: "50" },
     );
     const out: ConnectedAccount[] = [];
     for (const p of pages.data) {
@@ -138,7 +155,7 @@ export class MetaProvider implements SocialProvider {
       const pageToken: TokenSet = { accessToken: p.access_token, expiresAt: null };
       out.push({ externalId: p.id, platform: "FACEBOOK", name: p.name, avatarUrl: p.picture?.data?.url ?? null, accountType: "facebook_page", token: pageToken, metadata: p.tasks ? { tasks: p.tasks } : {} });
       // Not every Page has an Instagram professional account linked — only add one when Meta returns it.
-      if (p.instagram_business_account) {
+      if (withInstagram && p.instagram_business_account) {
         const ig = p.instagram_business_account;
         out.push({
           externalId: ig.id,

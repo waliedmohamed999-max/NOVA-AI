@@ -73,6 +73,8 @@ describe("publishing", () => {
     const t = await makeTenant();
     const url = await startConnect(t.scope, t.user.id, "meta");
     await completeConnect("meta", { code: "c", state: new URL(url).searchParams.get("state")! });
+    // Meta accounts are chosen by the customer, never auto-selected.
+    await db.integrationAccount.updateMany({ where: { organizationId: t.organization.id }, data: { isActive: true } });
     const b = await loadBrain(t.scope);
     const [id] = await createContentFromPlan(t.scope, [{ ...offlinePost(b, 0, { platform: "INSTAGRAM" }), dayOffset: 1 }], { agent: "CONTENT_STRATEGIST", startDate: new Date(), generatedBy: "test" });
     await approveContent(t.scope, [id], { userId: t.user.id });
