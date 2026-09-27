@@ -18,7 +18,7 @@ Candidates are ranked by:
 - the preferred provider (`AI_PRIMARY_PROVIDER`);
 - context size and vision support;
 - cost (cheaper wins ties);
-- availability — an in-process circuit breaker demotes a provider after 3 failures within 60 seconds.
+- availability — an in-process circuit breaker demotes a provider after 3 failures within 60 seconds. It is **process-local by design**. Each web and worker process keeps its own window, so with N instances an outage costs at most 3 extra failed calls per process per minute. It needs no Redis, and a restart simply starts it closed. Budgets, usage and rate limits are not affected: they live in PostgreSQL and are shared across instances.
 
 When the organization is past its soft budget, quality drops one tier (the cost tier). Up to three candidates are tried, which gives fallback across models and providers. Refusals are not retried elsewhere.
 

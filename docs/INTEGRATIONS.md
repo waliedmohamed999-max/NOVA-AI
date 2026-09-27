@@ -2,14 +2,61 @@
 
 All social integrations use official APIs through the `SocialProvider` interface (`src/server/integrations/types.ts`): `connect`, `exchangeCode`, `listAccounts`, `refreshToken`, `disconnect`, `publishPost`, `schedulePost`, `getPost`, `getPosts`, `getMetrics`, `getAccountMetrics`. There is no scraping and no password automation.
 
+## Customer experience
+
+Customers never see app IDs, secrets, environment variable names or "admin setup" messages. They see channels, states and human-readable errors.
+
+- **Onboarding** (`/onboarding`): company → products/services → brand → **connect accounts** (`/onboarding/connect`) → goals → NOVA analysis → ready. The connect step can be skipped ("You can connect more accounts later").
+- **After onboarding:** Settings → **Connected accounts** (`/settings/connected-accounts`). The old `/integrations` URL redirects there, and there is no Integrations item in the sidebar.
+- **Cards:**
+  - Instagram, Facebook, LinkedIn and TikTok;
+  - Email: coming soon, via Google/Microsoft sign-in only, never an email password;
+  - Website: URL plus "Analyze my website", with live status steps from the existing knowledge-ingestion job;
+  - later: WhatsApp, YouTube, X.
+- **Card states:**
+  - *Not connected* → **Connect**
+  - *Connecting…* while the browser goes to the platform
+  - *✓ Connected* with the account handle → **Change account** / **Disconnect**
+  - *Needs reconnecting* (with the health reason) → **Reconnect** / **Disconnect**
+  - *Choose an account*
+  - *Not available yet*, when the platform app isn't configured on the server
+- **Meta:** one sign-in connects Instagram and Facebook.
+  - When a platform returns several accounts, **none is selected automatically**. The page opens "Which account should NOVA manage?" with checkboxes.
+  - On reconnect, the previous choice is kept.
+  - A single account is used directly.
+- **Success:** "✓ Instagram connected — NOVA is ready to manage @handle", as a short animated confirmation.
+- **Plan limits:** channels over the plan's `socialChannels` limit are not added. The page says which platform was skipped and why.
+- **Demo workspace:** a "Demo account" notice explains that the data is sample data and no real account is connected. No fake OAuth success is ever shown.
+
 ## OAuth flow (`src/server/integrations/service.ts`)
 
-1. `GET /api/integrations/{meta|linkedin|tiktok}/connect` (session plus `integrations:manage`, and the plan's channel limit is checked). It stores a hashed one-time `state` with a 10-minute expiry and an encrypted PKCE verifier, then redirects to the provider.
-2. The provider redirects to `GET /api/integrations/{id}/callback`. The state is verified and consumed once, then the code is exchanged on the server.
-3. Tokens are encrypted (AES-256-GCM, `ENCRYPTION_KEY`) into `integration_credentials`. Accounts are upserted and the event is written to the audit log, then a first sync is queued.
-4. Tokens are never sent to the browser. Only `tokenForAccount()` decrypts them, inside server jobs.
+1. `GET /api/integrations/{meta|linkedin|tiktok}/connect?from=onboarding|settings`
+   - Requires a session plus `integrations:manage`, and the plan's channel limit is checked.
+   - Stores a hashed one-time `state` with a 10-minute expiry, an encrypted PKCE verifier and the return page, then redirects to the provider.
+   - `from` maps to one of two fixed pages (`/onboarding/connect`, `/settings/connected-accounts`). Any other value falls back to settings, so there is no open redirect.
+2. The provider redirects to `GET /api/integrations/{id}/callback`.
+   - The state is verified (exists, unexpired, same provider) and consumed once.
+   - The stored return page is re-checked against the allow-list.
+   - The code is exchanged on the server. Denied consent returns `oauth_denied`; a failed exchange returns `integration_error` (details go to the server log only); no business accounts returns `no_accounts`.
+3. Storage:
+   - Tokens are encrypted (AES-256-GCM, `ENCRYPTION_KEY`) into `integration_credentials`.
+   - Accounts are upserted: active if there is exactly one, or if it was previously chosen; otherwise the account waits for the customer's choice.
+   - The event is written to the audit log.
+   - A first sync is queued only for platforms whose account is chosen.
+   - The browser is sent back with `?connected=…&choose=…&limited=…` or `?error=<code>`, never a code, state or token.
+4. `selectAccounts()` activates only the chosen accounts. It is scoped to the caller's workspace, and IDs from another integration or tenant are rejected.
+5. Tokens are never sent to the browser. Only `tokenForAccount()` decrypts them, inside server jobs.
 
-Token refresh runs hourly (`integrations.refresh_tokens`) for credentials expiring within 7 days. Provider failures are normalized into `ProviderError` kinds (expired / permission / rate_limited / invalid_media / unavailable / unknown). The integration is then marked `EXPIRED` / `ACTION_REQUIRED` / `ERROR`, admins are notified, and the UI offers **Reconnect**.
+**Other lifecycle behaviour:**
+- **Token refresh:** runs hourly (`integrations.refresh_tokens`) for credentials expiring within 7 days.
+- **Provider failures:** normalized into `ProviderError` kinds (expired / permission / rate_limited / invalid_media / unavailable / unknown). The integration is marked `EXPIRED` / `ACTION_REQUIRED` / `ERROR`, admins are notified with a link to Connected accounts, and the card shows **Reconnect**.
+- **Disconnect:** revokes at the provider (best effort), deletes the credentials, deactivates the accounts and frees the channel.
+
+## Provider configuration (platform admins only)
+
+`/admin/providers` reads the environment and shows **Configured / Missing / Error** (Error = half-configured) for Meta, LinkedIn, TikTok, OpenAI, Anthropic, Email, Storage and Payments.
+- IDs are masked (`1234••••89`) and secrets are shown only as `••••`.
+- Nothing is editable, and secrets are never copied into the database. Change them in the deployment environment.
 
 ## Status matrix
 
@@ -25,7 +72,8 @@ Token refresh runs hourly (`integrations.refresh_tokens`) for credentials expiri
 | Email (SMTP) | verification, magic link, reset, invitations, notifications, sales replies | ✓ via Mailpit | — | n/a |
 | Website lead capture | embed + public API | ✓ manual + automated | ✓ | n/a |
 | WhatsApp / social DMs | `MessageChannel` adapters report "not configured" | — | — | ✗ |
-| Payments | provider boundary only (`src/server/billing/provider.ts`) | — | — | ✗ adapter not bundled |
+| File storage (S3/R2) | SigV4 driver: put/get/delete/presign, org-scoped keys | ✓ MinIO | ✓ AWS SigV4 reference vectors + mocked fetch | ✗ pending (AWS S3 / R2 account) |
+| Payments (Stripe) | `PaymentProvider` interface, `setPaymentProvider()`, `confirmPlanChange()`, idempotency-ready `billing_events`, `invoices` table | — | — | ✗ **Stripe adapter + webhook are NOT implemented** |
 
 ### Provider setup
 

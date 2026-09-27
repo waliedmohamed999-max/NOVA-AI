@@ -58,3 +58,11 @@ For AI without keys in development, set `AI_OFFLINE_MODE=true` (refused in produ
 ## Status of external integrations
 
 Adapters for Meta (Facebook/Instagram), LinkedIn, TikTok, OpenAI and Anthropic are implemented against the official APIs. They have **not** been validated against real provider accounts in this repository; see `docs/INTEGRATIONS.md` for what is tested and how. A payment-processor adapter is not bundled: billing plans, limits and enforcement work, and paid plan changes report "not configured" until an adapter is added.
+
+**Production readiness is blocked by the Stripe implementation and by remaining real-provider validation.**
+
+- **Payments:**
+  - Exists: the `PaymentProvider` interface, `setPaymentProvider()`, `confirmPlanChange()`, an idempotency-ready `billing_events` table and the `invoices` table.
+  - Missing: the Stripe adapter and webhook are **not implemented**.
+- **Storage:** local disk or any S3-compatible store (AWS S3, Cloudflare R2, MinIO). The S3 driver is validated against MinIO and AWS's SigV4 test vectors, not yet against a real AWS or R2 bucket.
+- **Deployment behind a proxy:** set `TRUST_PROXY`. See [Deployment](docs/DEPLOYMENT.md) for proxy setup, CSP and storage.
