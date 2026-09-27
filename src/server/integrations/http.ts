@@ -1,4 +1,5 @@
 import { ProviderError, type ProviderErrorKind } from "./types";
+import { recordProviderCall } from "../observability";
 
 /**
  * JSON HTTP helper for provider APIs: timeouts, error normalization, and no
@@ -9,9 +10,12 @@ export async function providerFetch<T>(
   init: RequestInit & { classify?: (status: number, body: unknown) => ProviderErrorKind | null } = {},
 ): Promise<T> {
   let res: Response;
+  const started = Date.now();
+  const method = init.method ?? "GET";
   try {
     res = await fetch(url, { ...init, signal: init.signal ?? AbortSignal.timeout(20_000) });
   } catch (err) {
+    recordProviderCall({ url, method, status: null, kind: "network", durationMs: Date.now() - started });
     throw new ProviderError("unavailable", "Network error contacting provider", undefined, String(err));
   }
   const text = await res.text();
@@ -25,8 +29,10 @@ export async function providerFetch<T>(
     const kind =
       init.classify?.(res.status, body) ??
       (res.status === 401 ? "expired" : res.status === 403 ? "permission" : res.status === 429 ? "rate_limited" : res.status >= 500 ? "unavailable" : "unknown");
+    recordProviderCall({ url, method, status: res.status, kind, durationMs: Date.now() - started });
     throw new ProviderError(kind, `Provider request failed (${res.status})`, res.status, redact(body));
   }
+  recordProviderCall({ url, method, status: res.status, kind: "ok", durationMs: Date.now() - started });
   return body as T;
 }
 

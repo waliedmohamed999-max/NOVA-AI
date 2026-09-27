@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { reportError } from "../observability";
 import type { IntegrationStatus, Provider, SocialPlatform } from "@/generated/prisma/enums";
 import { db } from "../db/client";
 import type { TenantScope } from "../db/tenant";
@@ -128,6 +129,7 @@ export async function completeConnect(
     accounts = await provider.listAccounts(tokens);
   } catch (err) {
     logger.warn({ provider: providerId, detail: err instanceof ProviderError ? err.detail : err instanceof Error ? err.message : String(err) }, "oauth exchange failed");
+    reportError(err, "oauth", { provider: providerId, stage: "exchange", organizationId: stored.organizationId });
     // Instagram Direct only supports professional (Business/Creator) accounts — say so plainly.
     if (err instanceof ProviderError && err.detail === "personal_account") {
       await finish("personal_account");

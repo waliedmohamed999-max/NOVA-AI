@@ -722,6 +722,24 @@
       "waBody": "اربط phone_number_id من Cloud API بمساحة العمل الحالية. يتم التحقق منه لدى Meta أولًا.",
       "waLink": "ربط الرقم",
       "waLinked": "تم ربط {phone}"
+    },
+    "health": {
+      "counts": {
+        "deadJobs": "مهام فشلت",
+        "failedPublishing": "منشورات فشلت",
+        "oauthFailures": "إخفاقات OAuth",
+        "providerFailures": "إخفاقات اتصال بالمزوّدين",
+        "reconnectNeeded": "تحتاج إعادة ربط",
+        "aiErrors": "أخطاء الذكاء الاصطناعي"
+      },
+      "latency": "زمن الاستجابة (7 أيام)",
+      "providerFailures": "اتصالات فاشلة / بطيئة بالمزوّدين",
+      "oauth": "إخفاقات OAuth",
+      "reconnect": "حسابات تحتاج إعادة ربط",
+      "validations": "فحوص مزوّدين فشلت",
+      "none": "لا يوجد",
+      "sentryOn": "الأخطاء تُرسل أيضًا إلى Sentry.",
+      "sentryOff": "Sentry غير مُعد (اضبط SENTRY_DSN). الأخطاء تُسجل في السجلات المنظمة."
     }
   },
   "connect": {

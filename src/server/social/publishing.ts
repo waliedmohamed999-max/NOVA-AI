@@ -1,4 +1,5 @@
 import { db } from "../db/client";
+import { reportError } from "../observability";
 import { audit } from "../audit";
 import { notify } from "../notifications/service";
 import { logger } from "../logger";
@@ -28,6 +29,7 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
   await db.contentItem.update({ where: { id: item.id }, data: { status: "PUBLISHING" } });
 
   const fail = async (code: string, detail?: unknown, link = `/content/${item.id}`) => {
+    reportError(detail instanceof Error ? detail : new Error(`publish failed: ${code}${detail ? ` — ${String(detail).slice(0, 300)}` : ""}`), "publishing", { code, platform: pub.platform, publicationId: pub.id, organizationId: scope.organizationId });
     await db.socialPublication.update({ where: { id: pub.id }, data: { status: "FAILED", error: code } });
     await db.contentItem.update({ where: { id: item.id }, data: { status: "FAILED" } });
     const org = await db.organization.findUniqueOrThrow({ where: { id: scope.organizationId } });

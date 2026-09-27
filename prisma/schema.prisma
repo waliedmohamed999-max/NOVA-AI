@@ -1920,3 +1920,19 @@ model WhatsAppNumber {
   @@index([organizationId, workspaceId])
   @@map("whatsapp_numbers")
 }
+
+/// Failed or slow calls to external provider APIs (observability). URL path only — never query strings or bodies.
+model ProviderCall {
+  id         String   @id @default(cuid())
+  host       String
+  path       String
+  method     String
+  status     Int?
+  kind       String
+  durationMs Int
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([host, createdAt])
+  @@map("provider_calls")
+}

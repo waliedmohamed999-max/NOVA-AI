@@ -7,6 +7,7 @@ import { enqueue, PermanentJobError } from "../jobs/queue";
 import { saveUpload, storage } from "../storage";
 import { UserFacingError } from "../errors";
 import { logger } from "../logger";
+import { reportError } from "../observability";
 import { PLANS } from "@/config/plans";
 import { loadBrain } from "../agents/brain";
 import { composeBrandTemplate, fitToSize } from "../design/compose";
@@ -226,6 +227,7 @@ export async function runImageJob(assetId: string, attempt = 1, maxAttempts = 2)
     const code = err instanceof ImageProviderError ? err.code : err instanceof PermanentJobError ? "image_failed" : "image_failed";
     const retry = err instanceof ImageProviderError && err.retryable && attempt < maxAttempts;
     logger.warn({ assetId, code, retry, err: err instanceof Error ? err.message : String(err) }, "image generation failed");
+    reportError(err, "image", { assetId, code, retry });
     await logRun({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, agentKey: "DESIGNER" }, task, imageProvider().name, asset.model ?? "unknown", { inputTokens: 0, outputTokens: 0 }, 0n, Date.now() - started, "ERROR", false, code, ref);
     if (retry) {
       await db.contentAsset.update({ where: { id: asset.id }, data: { status: "QUEUED" } });

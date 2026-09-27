@@ -722,6 +722,24 @@
       "waBody": "Link a Cloud API phone_number_id to your current workspace. It's verified with Meta first.",
       "waLink": "Link number",
       "waLinked": "Linked {phone}"
+    },
+    "health": {
+      "counts": {
+        "deadJobs": "Failed jobs",
+        "failedPublishing": "Failed posts",
+        "oauthFailures": "OAuth failures",
+        "providerFailures": "Provider call failures",
+        "reconnectNeeded": "Need reconnecting",
+        "aiErrors": "AI errors"
+      },
+      "latency": "Latency (7 days)",
+      "providerFailures": "Failed / slow provider calls",
+      "oauth": "OAuth failures",
+      "reconnect": "Accounts that need reconnecting",
+      "validations": "Failed provider validations",
+      "none": "None",
+      "sentryOn": "Errors are also sent to Sentry.",
+      "sentryOff": "Sentry is not configured (set SENTRY_DSN). Errors go to structured logs."
     }
   },
   "connect": {

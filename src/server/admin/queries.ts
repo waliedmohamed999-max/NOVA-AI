@@ -75,3 +75,48 @@ export async function adminIncidents() {
     ...ints.map((i) => ({ kind: "integration", id: i.id, title: i.provider, detail: i.statusMessage, at: i.lastErrorAt })),
   ].sort((a, b) => (b.at?.getTime() ?? 0) - (a.at?.getTime() ?? 0));
 }
+
+const OAUTH_FAILURES = ["denied", "invalid_scope", "exchange_failed", "personal_account", "no_accounts"];
+
+/**
+ * Health summary for the incidents page: failed jobs, failed provider calls, OAuth failures, provider
+ * validation failures, accounts that need reconnecting, and latency (AI runs and job runs).
+ */
+export async function adminHealth() {
+  const since = new Date(Date.now() - 7 * 86_400_000);
+  const [deadJobs, failedPubs, oauth, providerFails, slowCalls, validationFails, reconnect, ai, jobs] = await Promise.all([
+    db.job.count({ where: { status: "DEAD", finishedAt: { gte: since } } }),
+    db.socialPublication.count({ where: { status: "FAILED", updatedAt: { gte: since } } }),
+    db.oAuthState.groupBy({ by: ["provider", "outcome"], where: { createdAt: { gte: since }, outcome: { in: OAUTH_FAILURES } }, _count: true }),
+    db.providerCall.groupBy({ by: ["host", "kind"], where: { createdAt: { gte: since }, kind: { not: "slow" } }, _count: true, _max: { createdAt: true } }),
+    db.providerCall.groupBy({ by: ["host"], where: { createdAt: { gte: since }, kind: "slow" }, _count: true, _max: { durationMs: true } }),
+    db.providerValidation.findMany({ where: { createdAt: { gte: since }, ok: false }, orderBy: { createdAt: "desc" }, take: 10, select: { provider: true, check: true, detail: true, createdAt: true } }),
+    db.integration.findMany({ where: { status: { in: ["ERROR", "EXPIRED"] } }, select: { id: true, provider: true, status: true, statusMessage: true, lastErrorAt: true, organizationId: true }, orderBy: { lastErrorAt: "desc" }, take: 50 }),
+    db.aiRun.findMany({ where: { createdAt: { gte: since } }, select: { latencyMs: true, status: true }, take: 5000 }),
+    db.jobRun.findMany({ where: { startedAt: { gte: since }, durationMs: { not: null } }, select: { durationMs: true }, take: 5000 }),
+  ]);
+  const pct = (xs: number[], p: number) => {
+    if (!xs.length) return null;
+    const s = [...xs].sort((a, b) => a - b);
+    return s[Math.min(s.length - 1, Math.floor((p / 100) * s.length))];
+  };
+  const aiMs = ai.map((a) => a.latencyMs).filter((x) => x > 0);
+  const jobMs = jobs.map((j) => j.durationMs!).filter((x) => x > 0);
+  return {
+    counts: {
+      deadJobs,
+      failedPublishing: failedPubs,
+      oauthFailures: oauth.reduce((a, o) => a + o._count, 0),
+      providerFailures: providerFails.reduce((a, p) => a + p._count, 0),
+      reconnectNeeded: reconnect.length,
+      aiErrors: ai.filter((a) => a.status === "ERROR").length,
+    },
+    oauth: oauth.map((o) => ({ provider: o.provider, outcome: o.outcome ?? "unknown", count: o._count })),
+    providerFailures: providerFails.map((p) => ({ host: p.host, kind: p.kind, count: p._count, lastAt: p._max.createdAt })).sort((a, b) => b.count - a.count),
+    slowCalls: slowCalls.map((s) => ({ host: s.host, count: s._count, maxMs: s._max.durationMs })),
+    validationFailures: validationFails,
+    reconnect,
+    latency: { aiP50: pct(aiMs, 50), aiP95: pct(aiMs, 95), jobP50: pct(jobMs, 50), jobP95: pct(jobMs, 95) },
+    sentry: Boolean(process.env.SENTRY_DSN?.trim()),
+  };
+}

@@ -1,4 +1,5 @@
 import type { Job } from "@/generated/prisma/client";
+import { reportError } from "../observability";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "../db/client";
 
@@ -83,6 +84,7 @@ class PostgresJobQueue implements JobQueue {
     const message = (error instanceof Error ? `${error.name}: ${error.message}` : String(error)).slice(0, 2000);
     const permanent = error instanceof PermanentJobError;
     const dead = permanent || job.attempts >= job.maxAttempts;
+    if (dead) reportError(error, "job", { type: job.type, jobId: job.id, attempts: job.attempts, permanent });
     await db.$transaction([
       db.job.update({
         where: { id: job.id },

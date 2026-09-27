@@ -121,3 +121,19 @@ describe("LinkedIn test post", () => {
     spy.mockRestore();
   });
 });
+
+describe("provider call observability", () => {
+  it("records failed provider calls by host and path, never the query string", async () => {
+    const { providerFetch } = await import("@/server/integrations/http");
+    const { adminHealth } = await import("@/server/admin/queries");
+    await db.providerCall.deleteMany({});
+    vi.stubGlobal("fetch", vi.fn(async () => json({ error: { message: "boom" } }, 503)));
+    await expect(providerFetch("https://graph.example.test/v21.0/123/feed?access_token=SECRET123")).rejects.toMatchObject({ kind: "unavailable" });
+    await vi.waitFor(async () => expect(await db.providerCall.count()).toBe(1));
+    const row = await db.providerCall.findFirstOrThrow();
+    expect(row).toMatchObject({ host: "graph.example.test", path: "/v21.0/123/feed", status: 503, kind: "unavailable", method: "GET" });
+    expect(JSON.stringify(row)).not.toContain("SECRET123");
+    const h = await adminHealth();
+    expect(h.providerFailures[0]).toMatchObject({ host: "graph.example.test", count: 1 });
+  });
+});
