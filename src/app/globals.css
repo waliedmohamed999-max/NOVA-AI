@@ -69,6 +69,21 @@
   --shadow-md: 0 1px 3px rgb(23 22 28 / 0.05), 0 10px 30px -8px rgb(23 22 28 / 0.1);
   --shadow-lg: 0 2px 6px rgb(23 22 28 / 0.05), 0 28px 70px -18px rgb(23 22 28 / 0.22);
   --ring: 0 0 0 3px rgb(239 90 42 / 0.28);
+
+  /* command-center (home + shell navigation) */
+  --nova-blue: #1f5fd6;
+  --nova-blue-strong: #0f3f99;
+  --nova-blue-soft: #edf3ff;
+  --nova-blue-line: #d3e1fb;
+  --nova-navy: #0a2a6e;
+  --nova-hero-from: #ffffff;
+  --nova-hero-to: #e8f2fe;
+  --nova-line: #e3eaf4;
+  --orbit-blue: #2f80ed;
+  --orbit-cyan: #14b8c9;
+  --orbit-green: #12b981;
+  --orbit-orange: #f59a3a;
+  --orbit-purple: #8b5cf6;
 }
 
 [data-theme="dark"] {
@@ -100,6 +115,14 @@
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-md: 0 10px 30px -8px rgb(0 0 0 / 0.55);
   --shadow-lg: 0 28px 70px -18px rgb(0 0 0 / 0.7);
+  --nova-blue: #7aa7ff;
+  --nova-blue-strong: #9dbdff;
+  --nova-blue-soft: #16223b;
+  --nova-blue-line: #2a3b60;
+  --nova-navy: #2c5ad0;
+  --nova-hero-from: #17171b;
+  --nova-hero-to: #14203a;
+  --nova-line: #2a2a31;
 }
 
 @theme inline {
@@ -127,6 +150,12 @@
   --color-danger-soft: var(--danger-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-nova-blue: var(--nova-blue);
+  --color-nova-blue-strong: var(--nova-blue-strong);
+  --color-nova-blue-soft: var(--nova-blue-soft);
+  --color-nova-blue-line: var(--nova-blue-line);
+  --color-nova-navy: var(--nova-navy);
+  --color-nova-line: var(--nova-line);
   --color-agent-social: var(--agent-social);
   --color-agent-content: var(--agent-content);
   --color-agent-design: var(--agent-design);
@@ -265,3 +294,13 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ───────── NOVA orb (home) ───────── */
+@keyframes nova-glow { 0%,100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }
+@keyframes nova-spin { to { transform: rotate(360deg); } }
+@keyframes nova-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes nova-twinkle { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+.nova-orb { animation: nova-float 7s ease-in-out infinite; }
+.nova-orb-halo { animation: nova-glow 5s ease-in-out infinite; }
+.nova-orb-grid { animation: nova-spin 60s linear infinite; }
+.nova-orb-star { animation: nova-twinkle 3.2s ease-in-out infinite; }

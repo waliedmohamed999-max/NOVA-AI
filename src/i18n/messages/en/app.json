@@ -97,57 +97,74 @@
     "actionFailed": "That didn't work. Please try again."
   },
   "home": {
-    "readyCount": "{count, plural, one {Your AI team has # thing ready for you.} other {Your AI team has # things ready for you.}}",
-    "allClear": "Everything's under control. Your AI team is monitoring.",
-    "priorityTitle": "What needs your attention",
-    "nothingUrgent": "Nothing needs your attention right now.",
-    "priority": {
-      "approvals": "{count, plural, one {# post waiting for approval} other {# posts waiting for approval}}",
-      "followups": "{count, plural, one {# lead needs follow-up} other {# leads need follow-up}}",
-      "hot_leads": "{count, plural, one {# hot lead} other {# hot leads}}",
-      "performance_up": "Engagement is up {value}%",
-      "performance_down": "Engagement is down {value}%",
-      "opportunity": "Opportunity detected",
-      "meetings": "{count, plural, one {# meeting booked} other {# meetings booked}}",
-      "integrations": "{count, plural, one {# connection needs attention} other {# connections need attention}}",
-      "failed_publishing": "{count, plural, one {# post failed to publish} other {# posts failed to publish}}",
-      "setup_knowledge": "Teach your AI team more",
-      "connect_accounts": "Connect your social accounts"
+    "hero": {
+      "greeting": {
+        "morning": "Good morning, {name}.",
+        "afternoon": "Good afternoon, {name}.",
+        "evening": "Good evening, {name}."
+      },
+      "calm": "Your AI team is active and everything's under control.",
+      "working": "{count, plural, one {Your AI team is working on # task right now.} other {Your AI team is working on # tasks right now.}}",
+      "headline": "Your integrated AI system for managing growth",
+      "body": "Your AI team executes tasks, follows up on deals and serves customers automatically."
     },
-    "priorityHint": {
-      "approvals": "Review, edit or approve in one place.",
-      "followups": "Your Sales Assistant prepared next steps.",
-      "hot_leads": "High intent — reach out today.",
-      "performance": "Compared with the previous 7 days.",
-      "opportunity": "",
-      "meetings": "Coming up in the next 7 days.",
-      "integrations": "Reconnect to keep publishing.",
-      "failed_publishing": "See what went wrong and retry.",
-      "setup_knowledge": "Add services, pricing and FAQs so answers stay accurate.",
-      "connect_accounts": "Publishing and real analytics start once an account is connected."
+    "orbit": {
+      "calendar": "Calendar",
+      "leads": "Leads",
+      "approvals": "Approvals",
+      "content": "Content",
+      "campaigns": "Campaigns",
+      "analytics": "Analytics"
     },
-    "briefTitle": "AI Daily Brief",
-    "briefEmpty": "Your first daily brief will be ready tomorrow morning. You can also generate it now.",
-    "briefGenerated": "Updated {time}",
+    "commandPlaceholder": "Ask NOVA… review approvals, follow up deals, reach customers, or send messages…",
+    "commandLabel": "Ask NOVA",
+    "commandSend": "Send to your AI team",
     "briefRefresh": "Refresh",
-    "quickTitle": "Quick actions",
-    "quick": {
-      "create": "Create content",
-      "campaign": "Launch campaign",
-      "approvals": "Review approvals",
-      "opportunities": "Find opportunities",
-      "leads": "Check leads",
-      "ask": "Ask AI",
-      "prompts": {
-        "create": "Create 7 posts for next week",
-        "campaign": "Create a campaign for ",
-        "opportunities": "What growth opportunities should we focus on right now?"
-      }
+    "brief": {
+      "label": "AI DAILY BRIEF",
+      "title": "Your daily brief arrives every morning",
+      "readyTitle": "Your daily brief is ready",
+      "body": "A complete summary of your team's performance, deals, customers and important tasks — with smart recommendations.",
+      "open": "Read today's brief"
     },
-    "teamTitle": "Your AI team",
-    "upcomingTitle": "Coming up",
-    "upcomingEmpty": "No posts scheduled in the next 3 days.",
-    "hotLeadsTitle": "Hot leads"
+    "actions": {
+      "title": "Quick actions",
+      "approvals": "Review approvals",
+      "deals": "Open deals",
+      "leads": "Follow up leads",
+      "messages": "Reply to messages",
+      "create": "Create content",
+      "ask": "Ask AI",
+      "createPrompt": "Create 7 posts for next week"
+    },
+    "rail": {
+      "attention": {
+        "title": "Approvals & alerts",
+        "approvals": "Waiting for you",
+        "critical": "Critical alerts",
+        "empty": "Nothing waiting — you're all caught up.",
+        "integration": "{provider} connection needs attention",
+        "publishFailed": "Publishing failed: {title}"
+      },
+      "today": {
+        "title": "Important today",
+        "empty": "Nothing scheduled for today.",
+        "approveContent": "Approve before publishing: {title}",
+        "publish": "Publishing: {title}"
+      },
+      "deals": {
+        "title": "Deals & customers",
+        "active": "Active deals",
+        "followUp": "Awaiting follow-up",
+        "empty": "No active deals yet."
+      },
+      "messages": {
+        "title": "Messages & interventions",
+        "unread": "Unread messages",
+        "needsHuman": "Need your input",
+        "empty": "No conversations waiting."
+      }
+    }
   },
   "approvals": {
     "title": "Approvals",

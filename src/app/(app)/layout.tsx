@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         role: ctx.role,
         counts: { approvals, hotLeads, unreadNotifications: unread },
         collapsed,
-        aiOffline: aiAvailability().offline,
+        ai: (() => { const a = aiAvailability(); return a.offline ? "offline" : a.configured ? "live" : "off"; })(),
       }}
     >
       {children}

@@ -97,57 +97,74 @@
     "actionFailed": "لم تنجح العملية. حاول مرة أخرى."
   },
   "home": {
-    "readyCount": "{count, plural, one {لدى فريقك الذكي أمر واحد جاهز لك.} two {لدى فريقك الذكي أمران جاهزان لك.} few {لدى فريقك الذكي # أمور جاهزة لك.} many {لدى فريقك الذكي # أمرًا جاهزًا لك.} other {لدى فريقك الذكي # أمر جاهز لك.}}",
-    "allClear": "كل شيء تحت السيطرة. فريقك الذكي يراقب.",
-    "priorityTitle": "ما يحتاج انتباهك",
-    "nothingUrgent": "لا شيء يحتاج انتباهك الآن.",
-    "priority": {
-      "approvals": "{count, plural, one {منشور بانتظار الموافقة} two {منشوران بانتظار الموافقة} few {# منشورات بانتظار الموافقة} many {# منشورًا بانتظار الموافقة} other {# منشور بانتظار الموافقة}}",
-      "followups": "{count, plural, one {عميل يحتاج متابعة} two {عميلان يحتاجان متابعة} few {# عملاء يحتاجون متابعة} many {# عميلًا يحتاجون متابعة} other {# عميل يحتاجون متابعة}}",
-      "hot_leads": "{count, plural, one {عميل مهتم جدًا} two {عميلان مهتمان جدًا} few {# عملاء مهتمون جدًا} many {# عميلًا مهتمًا جدًا} other {# عميل مهتم جدًا}}",
-      "performance_up": "التفاعل ارتفع {value}٪",
-      "performance_down": "التفاعل انخفض {value}٪",
-      "opportunity": "اكتشفنا فرصة",
-      "meetings": "{count, plural, one {اجتماع محجوز} two {اجتماعان محجوزان} few {# اجتماعات محجوزة} many {# اجتماعًا محجوزًا} other {# اجتماع محجوز}}",
-      "integrations": "{count, plural, one {ربط يحتاج انتباهك} two {ربطان يحتاجان انتباهك} few {# روابط تحتاج انتباهك} many {# رابطًا يحتاج انتباهك} other {# رابط يحتاج انتباهك}}",
-      "failed_publishing": "{count, plural, one {تعذّر نشر منشور} two {تعذّر نشر منشورين} few {تعذّر نشر # منشورات} many {تعذّر نشر # منشورًا} other {تعذّر نشر # منشور}}",
-      "setup_knowledge": "علّم فريقك الذكي المزيد",
-      "connect_accounts": "اربط حسابات التواصل"
+    "hero": {
+      "greeting": {
+        "morning": "Good morning, {name}.",
+        "afternoon": "Good afternoon, {name}.",
+        "evening": "Good evening, {name}."
+      },
+      "calm": "Your AI team is active and everything's under control.",
+      "working": "{count, plural, one {Your AI team is working on # task right now.} other {Your AI team is working on # tasks right now.}}",
+      "headline": "نظامك الذكي المتكامل لإدارة النمو",
+      "body": "يعمل فريقك الذكي على تنفيذ المهام، متابعة الصفقات، وخدمة العملاء تلقائيًا."
     },
-    "priorityHint": {
-      "approvals": "راجع وعدّل ووافق من مكان واحد.",
-      "followups": "جهّز مساعد المبيعات الخطوات التالية.",
-      "hot_leads": "اهتمام مرتفع — تواصل اليوم.",
-      "performance": "مقارنة بالأيام السبعة السابقة.",
-      "opportunity": "",
-      "meetings": "خلال الأيام السبعة القادمة.",
-      "integrations": "أعد الربط لمتابعة النشر.",
-      "failed_publishing": "اعرف السبب وأعد المحاولة.",
-      "setup_knowledge": "أضف الخدمات والأسعار والأسئلة الشائعة لتبقى الإجابات دقيقة.",
-      "connect_accounts": "يبدأ النشر والتحليلات الحقيقية بعد ربط حساب."
+    "orbit": {
+      "calendar": "التقويم",
+      "leads": "العملاء",
+      "approvals": "الموافقات",
+      "content": "المحتوى",
+      "campaigns": "الحملات",
+      "analytics": "التحليلات"
     },
-    "briefTitle": "الملخص اليومي",
-    "briefEmpty": "سيكون ملخصك اليومي الأول جاهزًا صباح الغد. ويمكنك إنشاؤه الآن.",
-    "briefGenerated": "حُدِّث {time}",
+    "commandPlaceholder": "اطلب من NOVA … راجع الموافقات، تابع الصفقات، تواصل مع العملاء، أو أرسل رسائل …",
+    "commandLabel": "اطلب من NOVA",
+    "commandSend": "أرسل إلى فريقك الذكي",
     "briefRefresh": "تحديث",
-    "quickTitle": "إجراءات سريعة",
-    "quick": {
-      "create": "إنشاء محتوى",
-      "campaign": "إطلاق حملة",
-      "approvals": "مراجعة الموافقات",
-      "opportunities": "اكتشاف الفرص",
-      "leads": "متابعة العملاء",
-      "ask": "اسأل الذكاء",
-      "prompts": {
-        "create": "أنشئ 7 منشورات للأسبوع القادم",
-        "campaign": "أنشئ حملة لـ ",
-        "opportunities": "ما أهم فرص النمو التي يجب أن نركز عليها الآن؟"
-      }
+    "brief": {
+      "label": "AI DAILY BRIEF",
+      "title": "موجزك اليومي جاهز صباحًا",
+      "readyTitle": "موجزك اليومي جاهز",
+      "body": "ستحصل على ملخص شامل لأداء فريقك، الصفقات، العملاء، والمهام المهمة مع التوصيات الذكية.",
+      "open": "اقرأ موجز اليوم"
     },
-    "teamTitle": "فريقك الذكي",
-    "upcomingTitle": "القادم",
-    "upcomingEmpty": "لا توجد منشورات مجدولة خلال الأيام الثلاثة القادمة.",
-    "hotLeadsTitle": "العملاء الأكثر اهتمامًا"
+    "actions": {
+      "title": "Quick actions",
+      "approvals": "مراجعة الموافقات",
+      "deals": "فتح الصفقات",
+      "leads": "متابعة العملاء",
+      "messages": "الرد على الرسائل",
+      "create": "إنشاء محتوى",
+      "ask": "اسأل الذكاء",
+      "createPrompt": "أنشئ 7 منشورات للأسبوع القادم"
+    },
+    "rail": {
+      "attention": {
+        "title": "الموافقات والتنبيهات",
+        "approvals": "موافقات بانتظارك",
+        "critical": "تنبيهات حرجة",
+        "empty": "لا شيء بانتظارك الآن.",
+        "integration": "ربط {provider} يحتاج انتباهك",
+        "publishFailed": "تعذّر النشر: {title}"
+      },
+      "today": {
+        "title": "أمور مهمة اليوم",
+        "empty": "لا شيء مجدول لليوم.",
+        "approveContent": "موافقة قبل النشر: {title}",
+        "publish": "نشر: {title}"
+      },
+      "deals": {
+        "title": "الصفقات والعملاء",
+        "active": "الصفقات النشطة",
+        "followUp": "العملاء بانتظار المتابعة",
+        "empty": "لا توجد صفقات نشطة بعد."
+      },
+      "messages": {
+        "title": "الرسائل والتدخلات",
+        "unread": "رسائل غير مقروءة",
+        "needsHuman": "محادثات تحتاج تدخلك",
+        "empty": "لا توجد محادثات بانتظارك."
+      }
+    }
   },
   "approvals": {
     "title": "الموافقات",

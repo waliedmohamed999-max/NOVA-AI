@@ -21,7 +21,7 @@ export type ShellData = {
   role: string;
   counts: { approvals: number; hotLeads: number; unreadNotifications: number };
   collapsed: boolean;
-  aiOffline: boolean;
+  ai: "live" | "offline" | "off";
 };
 
 function isActive(pathname: string, href: string) {
@@ -40,12 +40,12 @@ function NavLink({ item, collapsed, count, onNavigate }: { item: NavItem; collap
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group relative flex h-9 items-center gap-3 rounded-xl px-2.5 text-[14px] font-medium transition-colors duration-150",
-        active ? "bg-surface text-ink shadow-xs ring-1 ring-line" : "text-ink-3 hover:bg-sunken hover:text-ink",
+        "group relative flex h-11 items-center gap-3 rounded-[12px] px-3 text-[15px] font-medium transition-colors duration-150",
+        active ? "bg-nova-blue-soft font-semibold text-nova-blue ring-1 ring-nova-blue-line" : "text-ink-2 hover:bg-sunken hover:text-ink",
         collapsed && "justify-center px-0",
       )}
     >
-      <Icon className={cn("size-[18px] shrink-0", active ? "text-ink" : "text-ink-3 group-hover:text-ink")} strokeWidth={active ? 2.2 : 1.9} aria-hidden />
+      <Icon className={cn("size-5 shrink-0", active ? "text-nova-blue" : "text-ink-3 group-hover:text-ink")} strokeWidth={1.8} aria-hidden />
       {!collapsed && <span className="truncate">{label}</span>}
       {count ? (
         <span
@@ -94,19 +94,19 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
         {/* Desktop sidebar */}
         <aside
           className={cn(
-            "sticky top-0 hidden h-dvh shrink-0 flex-col border-e border-line bg-canvas px-3 pb-3 pt-4 transition-[width] duration-300 ease-[var(--ease-out-soft)] lg:flex",
-            collapsed ? "w-[68px]" : "w-[236px]",
+            "sticky top-0 hidden h-dvh shrink-0 flex-col border-e border-[var(--nova-line)] bg-surface px-4 pb-4 pt-4 transition-[width] duration-300 ease-[var(--ease-out-soft)] lg:flex",
+            collapsed ? "w-[76px] px-3" : "w-[230px] xl:w-[248px]",
           )}
         >
-          <div className={cn("mb-5 flex items-center", collapsed ? "justify-center" : "justify-between px-1")}>
+          <div className={cn("mb-6 flex min-h-[44px] items-center", collapsed ? "justify-center" : "justify-between px-1")}>
             <Link href="/home" className="flex items-center gap-2.5" aria-label={brand.name}>
               <LogoMark />
               {!collapsed && (
                 <span className="min-w-0">
-                  <span className="block text-[13px] font-bold tracking-[0.14em]" dir="ltr">
+                  <span className="block text-[15px] font-bold tracking-[0.2em]" dir="ltr">
                     {brand.name}
                   </span>
-                  <span className="block max-w-[130px] truncate text-[11px] text-ink-3">{data.organization.name}</span>
+                  <span className="block max-w-[140px] truncate text-[12px] text-ink-3">{data.organization.name}</span>
                 </span>
               )}
             </Link>
@@ -117,17 +117,17 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
             )}
           </div>
 
-          <nav aria-label={t("nav.mainNav")} className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto scrollbar-none">
+          <nav aria-label={t("nav.mainNav")} className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto scrollbar-none">
             {PRIMARY_NAV.map((item) => (
               <NavLink key={item.href} item={item} collapsed={collapsed} count={countFor(item, data.counts)} />
             ))}
-            <div className="my-3 h-px bg-line" />
+            <div className="mx-1 my-3 h-px bg-[var(--nova-line)]" />
             {SECONDARY_NAV.map((item) => (
               <NavLink key={item.href} item={item} collapsed={collapsed} count={countFor(item, data.counts)} />
             ))}
           </nav>
 
-          <div className="mt-2 flex flex-col gap-0.5 border-t border-line pt-3">
+          <div className="mt-2 flex flex-col gap-1 border-t border-[var(--nova-line)] pt-3">
             {FOOTER_NAV.map((item) => (
               <NavLink key={item.href} item={item} collapsed={collapsed} />
             ))}
@@ -141,30 +141,28 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
 
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Top bar */}
-          <header className="sticky top-0 z-30 border-b border-line/80 bg-canvas/85 backdrop-blur-xl">
-            <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-30 border-b border-[var(--nova-line)] bg-surface/95 backdrop-blur-xl">
+            <div className="mx-auto flex h-[68px] max-w-[1480px] items-center gap-3 px-4 sm:px-6 lg:px-8">
               <Link href="/home" className="lg:hidden" aria-label={brand.name}>
                 <LogoMark />
               </Link>
               <button
                 onClick={() => command.open()}
-                className="group flex h-11 min-w-0 flex-1 items-center gap-3 rounded-full border border-line bg-surface ps-4 pe-2 text-start text-[14px] text-ink-4 shadow-xs transition hover:border-line-strong hover:shadow-sm md:max-w-xl"
+                className="group mx-auto flex h-11 min-w-0 flex-1 items-center gap-3 rounded-full border border-[var(--nova-line)] bg-surface ps-4 pe-2 text-start text-[14px] text-ink-3 shadow-[0_4px_16px_-10px_rgba(30,70,140,.35)] transition hover:border-nova-blue-line md:max-w-[560px]"
                 aria-label={t("command.dialogTitle")}
               >
                 <Sparkles className="size-4 shrink-0 text-accent" aria-hidden />
                 <span className="truncate">{t("command.placeholder")}</span>
                 <span className="ms-auto hidden items-center gap-1 rounded-full bg-sunken px-2 py-1 text-[11px] font-medium text-ink-3 sm:inline-flex">
-                  <span className="font-mono">⌘K</span>
+                  <span className="font-mono" dir="ltr">⌘K</span>
                 </span>
               </button>
-              <div className="ms-auto flex items-center gap-1.5">
-                {data.aiOffline && (
-                  <Tooltip content={t("aiOffline.hint")} side="bottom">
-                    <span className="hidden rounded-full border border-dashed border-line-strong px-2.5 py-1 text-[11px] font-medium text-ink-3 xl:inline-flex">
-                      {t("aiOffline.badge")}
-                    </span>
-                  </Tooltip>
-                )}
+              <div className="flex items-center gap-2">
+                <Tooltip content={data.ai === "offline" ? t("aiOffline.hint") : data.ai === "live" ? t("aiStatus.liveHint") : t("aiStatus.offHint")} side="bottom">
+                  <span className="hidden h-9 items-center rounded-full border border-[var(--nova-line)] bg-surface px-4 text-[13px] font-medium text-ink-2 md:inline-flex">
+                    {data.ai === "offline" ? t("aiOffline.badge") : data.ai === "live" ? t("aiStatus.live") : t("aiStatus.off")}
+                  </span>
+                </Tooltip>
                 <NotificationBell unread={data.counts.unreadNotifications} />
                 <UserMenu user={data.user} />
               </div>
@@ -174,7 +172,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
             )}
           </header>
 
-          <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-16 lg:pt-8">
+          <main id="main" className="mx-auto w-full max-w-[1480px] flex-1 px-4 pb-28 pt-5 sm:px-6 lg:px-7 lg:pb-12 lg:pt-5">
             {children}
           </main>
         </div>

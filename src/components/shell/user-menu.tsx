@@ -28,7 +28,7 @@ export function UserMenu({ user }: { user: { name: string | null; email: string;
   return (
     <Menu>
       <MenuTrigger className="rounded-full ring-offset-2 ring-offset-canvas transition hover:ring-2 hover:ring-line-strong" aria-label={t("nav.account")}>
-        <Avatar name={user.name ?? user.email} size={34} />
+        <Avatar name={(user.name ?? user.email).split(/\s+/)[0]} size={38} className="bg-surface text-[13px] font-bold text-ink shadow-xs ring-[var(--nova-line)]" />
       </MenuTrigger>
       <MenuContent className="w-64">
         <MenuLabel>

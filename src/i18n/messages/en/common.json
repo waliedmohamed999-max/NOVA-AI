@@ -64,14 +64,35 @@
     "mainNav": "Main navigation",
     "account": "Account"
   },
-  "language": { "en": "English", "ar": "العربية" },
+  "language": {
+    "en": "English",
+    "ar": "العربية"
+  },
   "agents": {
-    "SOCIAL_MANAGER": { "name": "AI Social Manager", "role": "Plans your content strategy" },
-    "CONTENT_STRATEGIST": { "name": "Content Strategist", "role": "Creates campaigns, topics, captions and hooks" },
-    "DESIGNER": { "name": "AI Designer", "role": "Creates branded visual concepts and creatives" },
-    "PERFORMANCE_ANALYST": { "name": "Performance Analyst", "role": "Evaluates performance and recommends improvements" },
-    "SALES_AGENT": { "name": "AI Sales Agent", "role": "Qualifies prospects and follows up with leads" },
-    "SALES_ASSISTANT": { "name": "Sales Assistant", "role": "Tracks opportunities, objections and next actions" }
+    "SOCIAL_MANAGER": {
+      "name": "AI Social Manager",
+      "role": "Plans your content strategy"
+    },
+    "CONTENT_STRATEGIST": {
+      "name": "Content Strategist",
+      "role": "Creates campaigns, topics, captions and hooks"
+    },
+    "DESIGNER": {
+      "name": "AI Designer",
+      "role": "Creates branded visual concepts and creatives"
+    },
+    "PERFORMANCE_ANALYST": {
+      "name": "Performance Analyst",
+      "role": "Evaluates performance and recommends improvements"
+    },
+    "SALES_AGENT": {
+      "name": "AI Sales Agent",
+      "role": "Qualifies prospects and follows up with leads"
+    },
+    "SALES_ASSISTANT": {
+      "name": "Sales Assistant",
+      "role": "Tracks opportunities, objections and next actions"
+    }
   },
   "agentStatus": {
     "WORKING": "Working",
@@ -148,7 +169,11 @@
     "badge": "Offline AI",
     "hint": "Using the local development AI. Add an OpenAI or Anthropic key for real generation."
   },
-  "pagination": { "previous": "Previous", "next": "Next", "page": "Page {page}" },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page}"
+  },
   "loading": "Loading…",
   "empty": "Nothing here yet",
   "required": "Required",
@@ -158,5 +183,11 @@
   "or": "or",
   "unknown": "Unknown",
   "new": "New",
-  "all": "All"
+  "all": "All",
+  "aiStatus": {
+    "live": "AI active",
+    "liveHint": "Your AI team is connected to a live AI provider.",
+    "off": "AI not set up",
+    "offHint": "Add an AI provider key to activate your AI team."
+  }
 }
