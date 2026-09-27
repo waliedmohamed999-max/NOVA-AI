@@ -119,7 +119,7 @@ export function SignInForm({ googleEnabled, next }: { googleEnabled: boolean; ne
   );
 }
 
-export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function SignUpForm({ googleEnabled, next }: { googleEnabled: boolean; next?: string }) {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
   const [state, action, pending] = useActionState<AuthFormState, FormData>(signUpAction, null);
@@ -130,6 +130,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
       <GoogleButton enabled={googleEnabled} />
       {googleEnabled && <Divider />}
       <form action={action} className="space-y-4" noValidate>
+        {next && <input type="hidden" name="next" value={next} />}
         <FormError code={state?.error} />
         <Field label={t("fields.name")} error={fe.name ? te("validation") : undefined}>
           {(p) => <Input {...p} name="name" autoComplete="name" required maxLength={120} />}
@@ -147,7 +148,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
       </form>
       <p className="mt-8 text-center text-sm text-ink-3">
         {t("signUp.hasAccount")}{" "}
-        <Link href="/sign-in" className="font-semibold text-ink hover:underline">
+        <Link href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"} className="font-semibold text-ink hover:underline">
           {t("signUp.signIn")}
         </Link>
       </p>

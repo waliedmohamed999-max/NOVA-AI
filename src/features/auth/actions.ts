@@ -62,7 +62,7 @@ export async function signUpAction(_: AuthFormState, form: FormData): Promise<Au
     return { error: "unexpected" };
   }
   await startSession(userId);
-  redirect("/onboarding");
+  redirect(safeRedirect(form.get("next")) ?? "/onboarding");
 }
 
 export async function signInAction(_: AuthFormState, form: FormData): Promise<AuthFormState> {

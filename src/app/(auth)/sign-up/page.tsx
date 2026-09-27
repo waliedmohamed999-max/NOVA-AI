@@ -6,7 +6,9 @@ import { googleAuthEnabled } from "@/server/auth/google";
 
 export const metadata: Metadata = { title: "Create your account" };
 
-export default async function SignUpPage() {
-  if (await getSession()) redirect("/onboarding");
-  return <SignUpForm googleEnabled={googleAuthEnabled()} />;
+export default async function SignUpPage(props: PageProps<"/sign-up">) {
+  const sp = await props.searchParams;
+  const next = typeof sp.next === "string" && sp.next.startsWith("/") && !sp.next.startsWith("//") ? sp.next : undefined;
+  if (await getSession()) redirect(next ?? "/onboarding");
+  return <SignUpForm googleEnabled={googleAuthEnabled()} next={next} />;
 }

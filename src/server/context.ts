@@ -1,10 +1,10 @@
 import "server-only";
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "./db/client";
 import { tenantDb, type TenantDb } from "./db/tenant";
 import { getSession } from "./auth/session";
-import { can, ForbiddenError, type Permission } from "./rbac";
+import { can, type Permission } from "./rbac";
 import type { Role } from "@/generated/prisma/enums";
 
 export type TenantContext = {
@@ -77,12 +77,13 @@ export async function requireTenant(opts: { permission?: Permission; allowIncomp
   const ctx = await resolveTenant();
   if (!ctx) redirect("/onboarding");
   if (!opts.allowIncompleteOnboarding && ctx.organization.onboardingStatus !== "COMPLETED") redirect("/onboarding");
-  if (opts.permission && !ctx.can(opts.permission)) throw new ForbiddenError(opts.permission);
+  if (opts.permission && !ctx.can(opts.permission)) redirect("/forbidden");
   return ctx;
 }
 
+/** Platform admin gate. Non-admins get a 404 so the admin area is not discoverable. Call it in every admin page. */
 export async function requirePlatformAdmin() {
   const user = await requireUser();
-  if (!user.isPlatformAdmin) throw new ForbiddenError();
+  if (!user.isPlatformAdmin) notFound();
   return user;
 }
