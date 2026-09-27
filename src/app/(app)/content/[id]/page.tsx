@@ -7,6 +7,10 @@ import { signedFileUrl } from "@/server/storage";
 import { contentAiConfigured } from "@/server/ai";
 import { imagesConfigured, imageUsage } from "@/server/studio/images";
 import type { QualityCheck } from "@/server/studio/context";
+import { listSlides } from "@/server/studio/carousel";
+import { readVideoPlan } from "@/server/studio/video";
+import { CarouselStudio } from "@/features/content/carousel-studio";
+import { VideoPlanPanel } from "@/features/content/video-plan";
 
 export const metadata: Metadata = { title: "Post" };
 
@@ -72,8 +76,15 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
     createdAt: a.createdAt.toISOString(),
   }));
   const currentVersion = item.versions.find((v) => v.version === item.currentVersion);
+  const scope = { organizationId: ctx.organization.id, workspaceId: ctx.workspace.id };
+  const isCarousel = item.format === "CAROUSEL";
+  const isVideo = ["REEL", "SHORT_VIDEO"].includes(item.format) || (item.platform === "TIKTOK" && item.format !== "CAROUSEL");
+  const slides = isCarousel ? await listSlides(scope, item.id) : [];
+  const videoPlan = isVideo ? readVideoPlan(item.designBrief) : null;
+  const canEdit = ctx.can("content:create") && !["PUBLISHED", "PUBLISHING"].includes(item.status);
 
   return (
+    <div className="space-y-6">
     <ContentEditor
       item={data}
       brandName={ctx.organization.name}
@@ -89,5 +100,15 @@ export default async function ContentItemPage(props: PageProps<"/content/[id]">)
       quality={(currentVersion?.qualityCheck as QualityCheck | null) ?? null}
       autoOpen={sp.ai === "improve" || sp.ai === "edit" ? sp.ai : null}
     />
+      {isCarousel && (
+        <CarouselStudio
+          contentId={item.id}
+          slides={slides.map((s) => ({ id: s.id, position: s.position, headline: s.headline, body: s.body, visualDirection: s.visualDirection, version: s.version, previewUrl: s.previewUrl, history: s.history.map((h) => ({ version: h.version, headline: h.headline, body: h.body, source: h.source, at: h.at })) }))}
+          aiReady={studio.text}
+          canEdit={canEdit}
+        />
+      )}
+      {isVideo && <VideoPlanPanel contentId={item.id} plan={videoPlan} coverUrl={videoPlan?.coverFileId ? signedFileUrl(videoPlan.coverFileId) : null} aiReady={studio.text} canEdit={canEdit} />}
+    </div>
   );
 }

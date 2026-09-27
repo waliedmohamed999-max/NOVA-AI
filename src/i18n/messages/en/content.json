@@ -235,5 +235,56 @@
       "more": "More AI actions",
       "designQueued": "Design is being created"
     }
+  },
+  "carousel": {
+    "title": "Carousel slides",
+    "topicPlaceholder": "Topic (optional) — e.g. 3 mistakes that cost you customers",
+    "slides": "Slides",
+    "generate": "Generate slides",
+    "regenerateAll": "Regenerate all",
+    "generated": "Slides ready. Review each one before approving.",
+    "empty": "No slides yet. Generate them from a topic, then edit or regenerate any single slide.",
+    "slideN": "Slide {n} of {total}",
+    "noPreview": "Preview not rendered yet",
+    "headline": "Headline",
+    "body": "Text",
+    "save": "Save",
+    "saved": "Slide saved as a new version",
+    "regenerateSlide": "Rewrite this slide",
+    "slideRegenerated": "Slide {n} rewritten — the old version is in its history",
+    "history": "History",
+    "restore": "Restore",
+    "restored": "Version restored",
+    "source": {
+      "ai": "AI",
+      "manual": "Edited",
+      "restore": "Restored"
+    },
+    "render": "Render previews",
+    "rendered": "Previews rendered with your brand template",
+    "approvalNote": "The carousel goes out only after the post is approved, like any other post."
+  },
+  "video": {
+    "title": "Video plan",
+    "duration": "Seconds",
+    "generate": "Plan the video",
+    "regenerate": "Re-plan",
+    "generated": "Video plan ready",
+    "cover": "Render cover",
+    "coverDone": "Cover rendered",
+    "noVideoNote": "NOVA plans the video and designs the cover; you film it. Automatic video generation isn't connected yet.",
+    "empty": "No plan yet. NOVA will write the hook, scenes, shot list, voice-over and on-screen text.",
+    "concept": "Concept",
+    "hook": "Hook (first 2 seconds)",
+    "length": "Length",
+    "scenes": "scenes",
+    "music": "Music mood",
+    "scene": "Scene {n}",
+    "shot": "Shot",
+    "voiceOver": "Voice-over",
+    "onScreen": "On screen",
+    "shotList": "Shot list",
+    "caption": "Caption",
+    "coverTitle": "Cover"
   }
 }

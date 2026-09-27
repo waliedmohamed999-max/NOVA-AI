@@ -126,3 +126,70 @@ export const createWeekAction = tenantAction(
     return { runId: run.id };
   },
 );
+
+// ── Carousel (per-slide history) ──
+
+const slideIn = z.object({ headline: z.string().trim().min(1).max(90), body: z.string().trim().max(280), visualDirection: z.string().trim().max(300) });
+
+export const generateCarouselAction = tenantAction(
+  { name: "studio.carousel", permission: "content:create", rateLimit: 10 },
+  z.object({ id: z.string(), topic: z.string().trim().max(300).optional(), slides: z.number().int().min(3).max(10) }),
+  async ({ id, topic, slides }, ctx) => {
+    const { generateCarousel } = await import("@/server/studio/carousel");
+    const r = await generateCarousel(scopeOf(ctx), id, { topic, slideCount: slides, userId: ctx.user.id });
+    refresh(id);
+    return { outline: r.outline, count: r.slides.length };
+  },
+);
+
+export const regenerateSlideAction = tenantAction(
+  { name: "studio.slide_regen", permission: "content:create", rateLimit: 20 },
+  z.object({ slideId: z.string(), instruction: z.string().trim().max(300).optional() }),
+  async ({ slideId, instruction }, ctx) => {
+    const { regenerateSlide } = await import("@/server/studio/carousel");
+    const s = await regenerateSlide(scopeOf(ctx), slideId, { instruction, userId: ctx.user.id });
+    refresh(s.contentItemId);
+    return { version: s.version };
+  },
+);
+
+export const editSlideAction = tenantAction({ name: "studio.slide_edit", permission: "content:create", rateLimit: 60 }, z.object({ slideId: z.string(), slide: slideIn }), async ({ slideId, slide }, ctx) => {
+  const { editSlide } = await import("@/server/studio/carousel");
+  const s = await editSlide(scopeOf(ctx), slideId, slide, ctx.user.id);
+  refresh(s.contentItemId);
+  return { version: s.version };
+});
+
+export const restoreSlideAction = tenantAction({ name: "studio.slide_restore", permission: "content:create" }, z.object({ slideId: z.string(), version: z.number().int().min(1) }), async ({ slideId, version }, ctx) => {
+  const { restoreSlide } = await import("@/server/studio/carousel");
+  const s = await restoreSlide(scopeOf(ctx), slideId, version, ctx.user.id);
+  refresh(s.contentItemId);
+  return { version: s.version };
+});
+
+export const renderCarouselAction = tenantAction({ name: "studio.carousel_render", permission: "content:create", rateLimit: 20 }, z.object({ id: z.string() }), async ({ id }, ctx) => {
+  const { renderCarouselPreview } = await import("@/server/studio/carousel");
+  const r = await renderCarouselPreview(scopeOf(ctx), id, ctx.user.id);
+  refresh(id);
+  return { warnings: r.warnings };
+});
+
+// ── Reels / short video plan (no video generation) ──
+
+export const generateVideoPlanAction = tenantAction(
+  { name: "studio.video_plan", permission: "content:create", rateLimit: 10 },
+  z.object({ id: z.string(), durationSec: z.number().int().min(7).max(90).optional() }),
+  async ({ id, durationSec }, ctx) => {
+    const { generateVideoPlan } = await import("@/server/studio/video");
+    const plan = await generateVideoPlan(scopeOf(ctx), id, { durationSec, userId: ctx.user.id });
+    refresh(id);
+    return { scenes: plan.scenes.length, durationSec: plan.durationSec };
+  },
+);
+
+export const renderReelCoverAction = tenantAction({ name: "studio.reel_cover", permission: "content:create", rateLimit: 20 }, z.object({ id: z.string() }), async ({ id }, ctx) => {
+  const { renderReelCover } = await import("@/server/studio/video");
+  const r = await renderReelCover(scopeOf(ctx), id, ctx.user.id);
+  refresh(id);
+  return r;
+});

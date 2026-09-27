@@ -11,7 +11,10 @@ export type PromptKey =
   | "image_generation"
   | "image_edit"
   | "performance_analysis"
-  | "content_quality";
+  | "content_quality"
+  | "carousel_generation"
+  | "carousel_slide"
+  | "video_plan";
 
 export const PROMPT_VERSIONS: Record<PromptKey, string> = {
   content_strategy: "content_strategy@1",
@@ -22,6 +25,9 @@ export const PROMPT_VERSIONS: Record<PromptKey, string> = {
   image_edit: "image_edit@1",
   performance_analysis: "performance_analysis@1",
   content_quality: "content_quality@1",
+  carousel_generation: "carousel_generation@1",
+  carousel_slide: "carousel_slide@1",
+  video_plan: "video_plan@1",
 };
 
 export const promptRef = (key: PromptKey) => ({ key, version: PROMPT_VERSIONS[key] });

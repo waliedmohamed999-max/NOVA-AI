@@ -62,5 +62,6 @@
   "meeting_needs_email": "Add the customer's email before booking so they receive the invite.",
   "whatsapp_window_closed": "WhatsApp only allows free-text replies within 24 hours of the customer's last message. Use an approved template.",
   "oauth_invalid_scope": "We couldn't finish connecting because a permission isn't enabled in the app yet.",
-  "policy_locked": "Pricing, discounts, proposals and contract language always need approval."
+  "policy_locked": "Pricing, discounts, proposals and contract language always need approval.",
+  "video_not_configured": "Automatic video generation isn't connected yet."
 }
