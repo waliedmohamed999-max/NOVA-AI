@@ -8,6 +8,7 @@ import { notify } from "../notifications/service";
 import { logger } from "../logger";
 import { UserFacingError } from "../errors";
 import { assertWithinLimit } from "../billing/entitlements";
+import { upgradeScopes } from "./providers/meta-scopes";
 import { SOCIAL_PROVIDERS, redirectUriFor } from "./registry";
 import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } from "./types";
 
@@ -32,12 +33,30 @@ function safeStoredReturn(path: string | null | undefined) {
   return path && Object.values(RETURN_PATHS).includes(path) ? path : CONNECTED_ACCOUNTS_PATH;
 }
 
-/** Step 1 of OAuth: store a one-time state (+ PKCE verifier, encrypted) and return the provider URL. */
-export async function startConnect(scope: TenantScope, userId: string, providerId: SocialProvider["id"], returnTo: ConnectReturn = "settings") {
+/**
+ * Step 1 of OAuth: store a one-time state (+ PKCE verifier, encrypted) and return the provider URL.
+ * With `upgrade`, asks only for what that capability needs on top of what is configured/granted
+ * (Meta `auth_type=rerequest`) — used when a feature needs a permission the account doesn't have yet.
+ */
+export async function startConnect(
+  scope: TenantScope,
+  userId: string,
+  providerId: SocialProvider["id"],
+  returnTo: ConnectReturn = "settings",
+  upgrade?: { platform: string; capability: string },
+) {
   const provider = SOCIAL_PROVIDERS[providerId];
   if (!provider?.isConfigured()) throw new UserFacingError("integration_not_configured");
   const already = await db.integration.count({ where: { ...scope, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
   if (!already) await assertWithinLimit(scope.organizationId, "socialChannels");
+  let scopes: string[] | undefined;
+  if (upgrade) {
+    if (providerId !== "meta" || !provider.platforms.includes(upgrade.platform as SocialPlatform)) throw new UserFacingError("capability_unavailable");
+    const current = await db.integration.findFirst({ where: { ...scope, provider: upgrade.platform as Provider } });
+    // Only permissions the operator enabled for the app (META_OAUTH_SCOPES / META_OPTIONAL_SCOPES) can be requested.
+    scopes = upgradeScopes(upgrade.platform, upgrade.capability, current?.scopes ?? []) ?? undefined;
+    if (!scopes) throw new UserFacingError("capability_unavailable");
+  }
   const state = randomToken(24);
   const verifier = randomToken(48);
   await db.oAuthState.create({
@@ -50,10 +69,12 @@ export async function startConnect(scope: TenantScope, userId: string, providerI
       codeVerifierEnc: encryptSecret(verifier),
       redirectTo: returnPathFor(returnTo),
       expiresAt: new Date(Date.now() + STATE_TTL_MS),
+      requestedScopes: scopes ?? provider.scopes,
+      outcome: "started",
     },
   });
   const challenge = createHash("sha256").update(verifier).digest("base64url");
-  return provider.connect({ state, redirectUri: redirectUriFor(providerId), codeChallenge: challenge });
+  return provider.connect({ state, redirectUri: redirectUriFor(providerId), codeChallenge: challenge, scopes, rerequest: Boolean(upgrade) });
 }
 
 export type ConnectResult = {
@@ -64,13 +85,13 @@ export type ConnectResult = {
   needsSelection?: string[];
   /** Platforms skipped because the plan's channel limit was reached. */
   limited?: string[];
-  error?: "oauth_denied" | "integration_error" | "no_accounts";
+  error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope";
 };
 
 /** Step 2 of OAuth (backend callback): verify state, exchange code, store encrypted tokens and accounts. */
 export async function completeConnect(
   providerId: SocialProvider["id"],
-  params: { code: string | null; state: string | null; error?: string | null },
+  params: { code: string | null; state: string | null; error?: string | null; errorDescription?: string | null },
   /** The signed-in user finishing the flow. When given, it must be the user who started it (login-CSRF guard). */
   actorUserId?: string | null,
 ): Promise<ConnectResult> {
@@ -81,7 +102,18 @@ export async function completeConnect(
   await db.oAuthState.update({ where: { id: stored.id }, data: { consumedAt: new Date() } });
   if (actorUserId !== undefined && actorUserId !== stored.userId) throw new UserFacingError("oauth_state");
   const redirectTo = safeStoredReturn(stored.redirectTo);
-  if (params.error || !params.code) return { redirectTo, error: "oauth_denied" };
+  const finish = (outcome: string, grantedScopes?: string[]) => db.oAuthState.update({ where: { id: stored.id }, data: { outcome, ...(grantedScopes ? { grantedScopes } : {}) } });
+  if (params.error || !params.code) {
+    // A permission the app isn't allowed to request. Customers get a plain message; the detail goes to logs.
+    const invalidScope = /invalid[_ ]?scope|unauthorized_scope/i.test(`${params.error ?? ""} ${params.errorDescription ?? ""}`);
+    if (invalidScope) {
+      logger.warn({ provider: providerId, error_type: "invalid_scope", requested_scopes: stored.requestedScopes, provider_error: params.error, provider_description: params.errorDescription?.slice(0, 300) }, "oauth rejected requested scopes");
+      await finish("invalid_scope");
+      return { redirectTo, error: providerId === "linkedin" ? "linkedin_invalid_scope" : "meta_invalid_scope" };
+    }
+    await finish("denied");
+    return { redirectTo, error: "oauth_denied" };
+  }
 
   const scope = { organizationId: stored.organizationId, workspaceId: stored.workspaceId };
   const provider = SOCIAL_PROVIDERS[providerId];
@@ -92,8 +124,10 @@ export async function completeConnect(
     accounts = await provider.listAccounts(tokens);
   } catch (err) {
     logger.warn({ provider: providerId, detail: err instanceof ProviderError ? err.detail : err instanceof Error ? err.message : String(err) }, "oauth exchange failed");
+    await finish("exchange_failed");
     return { redirectTo, error: "integration_error" };
   }
+  await finish("authorized", tokens.scopes ?? []);
 
   const byPlatform = new Map<SocialPlatform, typeof accounts>();
   for (const a of accounts) byPlatform.set(a.platform, [...(byPlatform.get(a.platform) ?? []), a]);
@@ -149,7 +183,13 @@ export async function completeConnect(
       summary: `Connected ${platform} (${list.length} account${list.length === 1 ? "" : "s"})`,
     });
   }
-  if (!connected.length && !limited.length) return { redirectTo, scope, error: "no_accounts" };
+  if (!connected.length && !limited.length) {
+    // OAuth worked, but without Page access Meta can't return any Page or Instagram account.
+    const noPages = providerId === "meta" && Array.isArray(tokens.scopes) && !tokens.scopes.includes("pages_show_list");
+    await finish(noPages ? "no_page_permission" : "no_accounts");
+    return { redirectTo, scope, error: noPages ? "no_page_permission" : "no_accounts" };
+  }
+  await finish(needsSelection.length ? "connected_pending_selection" : "connected");
   return { redirectTo, connected, needsSelection, limited, scope };
 }
 

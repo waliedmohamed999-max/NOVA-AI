@@ -1,4 +1,5 @@
 import { form, providerFetch } from "../http";
+import { metaScopeConfig } from "./meta-scopes";
 import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
 
 /**
@@ -37,23 +38,23 @@ function sumInsight(data: { name: string; values?: { value: number }[]; total_va
 export class MetaProvider implements SocialProvider {
   readonly id = "meta" as const;
   readonly platforms: SocialProvider["platforms"] = ["FACEBOOK", "INSTAGRAM"];
-  readonly scopes = [
-    "pages_show_list",
-    "pages_read_engagement",
-    "pages_manage_posts",
-    "read_insights",
-    "instagram_basic",
-    "instagram_content_publish",
-    "instagram_manage_insights",
-    "business_management",
-  ];
+  /** Configured, never hardcoded: see meta-scopes.ts (META_PERMISSION_MODE / META_OAUTH_SCOPES). */
+  get scopes() {
+    return metaScopeConfig().requested;
+  }
 
   isConfigured() {
     return Boolean(process.env.META_APP_ID && process.env.META_APP_SECRET);
   }
 
-  connect({ state, redirectUri }: { state: string; redirectUri: string }) {
-    const p = new URLSearchParams({ client_id: process.env.META_APP_ID!, redirect_uri: redirectUri, state, scope: this.scopes.join(","), response_type: "code" });
+  connect({ state, redirectUri, scopes, rerequest }: { state: string; redirectUri: string; scopes?: string[]; rerequest?: boolean }) {
+    const cfg = metaScopeConfig();
+    const p = new URLSearchParams({ client_id: process.env.META_APP_ID!, redirect_uri: redirectUri, state, response_type: "code" });
+    // Facebook Login for Business: the permission set lives in the login configuration, not in `scope`.
+    if (cfg.configId && !scopes) p.set("config_id", cfg.configId);
+    else p.set("scope", (scopes ?? cfg.requested).join(","));
+    // Re-prompt for permissions the user previously declined (permission upgrades).
+    if (rerequest) p.set("auth_type", "rerequest");
     return `https://www.facebook.com/${V()}/dialog/oauth?${p}`;
   }
 
@@ -124,6 +125,8 @@ export class MetaProvider implements SocialProvider {
   }
 
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {
+    // Page discovery needs pages_show_list; without it Meta returns nothing useful, so don't ask.
+    if (token.scopes && !token.scopes.includes("pages_show_list")) return [];
     const pages = await get<{ data: { id: string; name: string; access_token: string; tasks?: string[]; picture?: { data?: { url?: string } }; instagram_business_account?: { id: string; username?: string; profile_picture_url?: string } }[] }>(
       "/me/accounts",
       token.accessToken,

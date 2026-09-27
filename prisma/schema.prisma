@@ -940,6 +940,10 @@ model OAuthState {
   redirectTo      String?
   expiresAt       DateTime
   consumedAt      DateTime?
+  /// Diagnostics for platform admins: what was asked for, what the user granted, how it ended.
+  requestedScopes String[]  @default([])
+  grantedScopes   String[]  @default([])
+  outcome         String?
   createdAt       DateTime  @default(now())
 
   @@index([expiresAt])

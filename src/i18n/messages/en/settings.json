@@ -606,6 +606,40 @@
       "confirmLabel": "Type {word} to confirm",
       "publishNow": "Publish test post",
       "posted": "Published — external post id {id}"
+    },
+    "oauth": {
+      "title": "OAuth diagnostics",
+      "intro": "Redirect URIs and permission names are not secrets. Requested = what NOVA asks for; granted = what the last sign-in in your workspace actually allowed.",
+      "configured": "OAuth: Configured",
+      "missing": "OAuth: Missing credentials",
+      "redirectInvalid": "Redirect URI invalid",
+      "redirectUri": "Redirect URI (must match the developer console exactly)",
+      "mode": "Permission mode",
+      "loginConfig": "Login for Business configuration",
+      "requested": "Requested",
+      "optional": "Enabled, requested on demand",
+      "rejected": "Ignored (unknown or retired permission names)",
+      "lastAttempt": "Last sign-in attempt",
+      "granted": "Granted",
+      "notGranted": "Requested but not granted",
+      "noAttempt": "No attempt from your workspace yet.",
+      "capabilities": "Capabilities",
+      "capStatus": {
+        "available": "available",
+        "not_granted": "enabled, not granted yet",
+        "not_enabled": "advanced permission not enabled"
+      },
+      "outcomes": {
+        "started": "Started, not returned",
+        "authorized": "Authorized",
+        "connected": "Connected",
+        "connected_pending_selection": "Connected, choosing accounts",
+        "denied": "Cancelled by user",
+        "invalid_scope": "Invalid scopes",
+        "exchange_failed": "Code exchange failed",
+        "no_accounts": "No accounts returned",
+        "no_page_permission": "Authorized, no Page access"
+      }
     }
   },
   "connect": {
@@ -693,6 +727,10 @@
       "requires_approval": "Not available yet",
       "page_role": "Your role on this Page doesn't allow it",
       "not_applicable": "Not applicable"
-    }
+    },
+    "upgradeTitle": "NOVA needs an additional permission to do this.",
+    "upgradeBody": "{platform} · {capability}. You'll confirm it on {platform}; nothing else changes.",
+    "upgradeCta": "Grant permission",
+    "upgradeUnavailable": "This isn't available for this account yet."
   }
 }

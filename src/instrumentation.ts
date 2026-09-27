@@ -6,6 +6,14 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  if (process.env.NODE_ENV !== "production") {
+    // OAuth setup diagnostic: status only — no client secrets, tokens or URIs in the log.
+    const { oauthSetupSummary } = await import("./server/integrations/registry");
+    for (const p of oauthSetupSummary()) {
+      const name = p.id === "linkedin" ? "LinkedIn" : "Meta";
+      console.info(`[nova] ${name} redirect URI: ${p.problem ? "INVALID — see /admin/providers" : p.explicit ? "configured" : "derived from APP_URL"}${p.configured ? "" : " (app credentials missing)"}`);
+    }
+  }
   if (process.env.NOVA_INLINE_WORKER !== "true") return;
   const { startWorker } = await import("./server/jobs/runner");
   void startWorker({ concurrency: 2 });

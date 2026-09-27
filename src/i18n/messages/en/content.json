@@ -87,7 +87,8 @@
     "integration_expired": "The connection expired. Reconnect it to continue publishing.",
     "integration_error": "The platform didn't accept the post. You can retry publishing.",
     "invalid_media": "The platform couldn't use the attached media. Check the image or video and retry.",
-    "requires_approval": "This post needs approval before it can be published."
+    "requires_approval": "This post needs approval before it can be published.",
+    "permission_required": "NOVA needs an additional permission to do this. Open Settings → Connected accounts to grant it."
   },
   "calendar": {
     "title": "Calendar",

@@ -84,7 +84,8 @@ export interface SocialProvider {
   readonly scopes: string[];
   isConfigured(): boolean;
   /** Builds the authorization URL (the OAuth "connect" step). */
-  connect(opts: { state: string; redirectUri: string; codeChallenge?: string }): string;
+  /** `scopes` overrides the default request (permission upgrades); `rerequest` re-prompts declined permissions. */
+  connect(opts: { state: string; redirectUri: string; codeChallenge?: string; scopes?: string[]; rerequest?: boolean }): string;
   exchangeCode(opts: { code: string; redirectUri: string; codeVerifier?: string }): Promise<TokenSet>;
   listAccounts(token: TokenSet): Promise<ConnectedAccount[]>;
   refreshToken(token: TokenSet): Promise<TokenSet | null>;

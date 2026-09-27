@@ -15,7 +15,7 @@ import { ChannelIcon } from "@/components/brand/channel-icon";
 import type { ConnectionCard, ConnectionsView } from "@/server/integrations/connections";
 import { analyzeWebsite, chooseAccounts, disconnect, websiteStatus } from "./actions";
 
-export type ConnectFlash = { connected: string[]; choose: string[]; limited: string[]; error: string | null };
+export type ConnectFlash = { connected: string[]; choose: string[]; limited: string[]; error: string | null; upgrade?: { platform: string; capability: string } | null };
 
 type Success = { platform: string; account: string | null };
 
@@ -80,8 +80,26 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
       } else toast.error(errorText(r.error));
     });
 
+  // Graceful permission upgrade: a feature needed a permission this connection doesn't have yet.
+  const upgrade = flash.upgrade ?? null;
+  const upgradeCard = upgrade ? view.cards.find((c) => c.platform === upgrade.platform && c.integrationId) : null;
+  const upgradeCapability = upgrade && t.has(`capabilities.${upgrade.capability}` as "capabilities.identity") ? t(`capabilities.${upgrade.capability}` as "capabilities.identity") : upgrade?.capability;
+
   return (
     <div className="space-y-8">
+      {upgrade && (
+        <div role="alert" className="flex flex-col gap-3 rounded-2xl border border-accent/30 bg-accent-soft/40 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold">{t("upgradeTitle")}</p>
+            <p className="text-sm text-ink-3">{t("upgradeBody", { platform: platformName(upgrade.platform), capability: upgradeCapability ?? "" })}</p>
+          </div>
+          {upgradeCard && canManage && upgradeCard.oauth === "meta" ? (
+            <a href={`/api/integrations/meta/start?from=${from}&upgrade=${upgrade.platform}:${upgrade.capability}`} className={buttonClass("primary", "md", "shrink-0")}>{t("upgradeCta")}</a>
+          ) : (
+            <p className="text-sm text-ink-3">{t("upgradeUnavailable")}</p>
+          )}
+        </div>
+      )}
       {view.isDemo && (
         <div className="flex items-start gap-3 rounded-2xl border border-line bg-surface-2 px-4 py-3 text-sm text-ink-2">
           <Badge tone="warning" className="shrink-0">{t("demo")}</Badge>

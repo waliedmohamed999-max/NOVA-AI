@@ -25,7 +25,7 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
   const item = pub.contentItem;
   await db.contentItem.update({ where: { id: item.id }, data: { status: "PUBLISHING" } });
 
-  const fail = async (code: string, detail?: unknown) => {
+  const fail = async (code: string, detail?: unknown, link = `/content/${item.id}`) => {
     await db.socialPublication.update({ where: { id: pub.id }, data: { status: "FAILED", error: code } });
     await db.contentItem.update({ where: { id: item.id }, data: { status: "FAILED" } });
     const org = await db.organization.findUniqueOrThrow({ where: { id: scope.organizationId } });
@@ -35,7 +35,7 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
       type: "PUBLISHING_FAILED",
       title: ar ? `تعذّر نشر "${item.title}"` : `"${item.title}" couldn't be published`,
       body: publishErrorMessage(code, ar),
-      link: `/content/${item.id}`,
+      link,
     });
     await audit({ ...scope, actorType: "SYSTEM", action: "content.publish_failed", entityType: "ContentItem", entityId: item.id, summary: `Publishing "${item.title}" failed (${code})`, metadata: { detail: detail ? String(detail).slice(0, 300) : undefined } });
     return "failed" as const;
@@ -49,6 +49,13 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
     (await db.integrationAccount.findFirst({ where: { ...scope, platform: pub.platform, isActive: true, integration: { status: "CONNECTED" } }, include: { integration: true } }));
   const provider = providerForPlatform(pub.platform);
   if (!account || !provider || account.integration.status !== "CONNECTED") return fail("cannot_publish");
+
+  // Don't call the platform when the connection lacks the permission — ask the customer to grant it instead.
+  const needed = PUBLISH_CAPABILITY[account.accountType === "linkedin_organization" ? "LINKEDIN_ORG" : pub.platform];
+  const caps = (account.metadata as { capabilities?: { key: string; available: boolean }[] } | null)?.capabilities;
+  if (needed && Array.isArray(caps) && caps.some((c) => c.key === needed && !c.available)) {
+    return fail("permission_required", needed, `/settings/connected-accounts?upgrade=${pub.platform}:${needed}`);
+  }
 
   const token = await tokenForAccount(account.integrationId, account.id);
   if (!token) return fail("integration_expired");
@@ -85,8 +92,12 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
   }
 }
 
+/** The capability each platform needs to publish (see provider capabilities()). */
+const PUBLISH_CAPABILITY: Record<string, string> = { FACEBOOK: "publish", INSTAGRAM: "instagram_publishing", LINKEDIN: "member_publishing", LINKEDIN_ORG: "organization_publishing" };
+
 export function publishErrorMessage(code: string, ar: boolean) {
   const en: Record<string, string> = {
+    permission_required: "NOVA needs an additional permission to do this. Open Connected accounts to grant it.",
     cannot_publish: "There's no connected account for this channel. Connect one and we'll retry.",
     integration_expired: "The connection expired. Reconnect it to continue publishing.",
     integration_error: "The platform didn't accept the post right now. You can retry from the post page.",
@@ -94,6 +105,7 @@ export function publishErrorMessage(code: string, ar: boolean) {
     requires_approval: "This post needs approval before it can go out.",
   };
   const arm: Record<string, string> = {
+    permission_required: "NOVA تحتاج صلاحية إضافية لتنفيذ هذه المهمة. افتح الحسابات المرتبطة لمنح الصلاحية.",
     cannot_publish: "لا يوجد حساب مربوط لهذه القناة. اربط حسابًا وسنعيد المحاولة.",
     integration_expired: "انتهت صلاحية الربط. أعد الربط لمتابعة النشر.",
     integration_error: "لم تقبل المنصة المنشور الآن. يمكنك إعادة المحاولة من صفحة المنشور.",

@@ -43,5 +43,9 @@
     "home": "Go home"
   },
   "no_accounts": "We didn't find a business account on that sign-in. Make sure you manage the page or profile, then try again.",
-  "test_post_needs_media": "This platform needs an image or video to publish; test publishing on Facebook or LinkedIn."
+  "test_post_needs_media": "This platform needs an image or video to publish; test publishing on Facebook or LinkedIn.",
+  "meta_invalid_scope": "We couldn't finish connecting Meta because a permission isn't enabled in the app yet.",
+  "linkedin_invalid_scope": "We couldn't finish connecting LinkedIn because a permission isn't enabled in the app yet.",
+  "no_page_permission": "Meta is connected, but no Page access was granted yet, so there are no Pages or Instagram accounts to manage.",
+  "capability_unavailable": "This feature isn't available for this account yet."
 }

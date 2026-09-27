@@ -44,11 +44,16 @@ const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIREC
  * the provider console character-for-character); otherwise it is derived from APP_URL.
  */
 export function redirectUriFor(id: SocialProvider["id"]) {
-  const explicit = process.env[REDIRECT_ENV[id]]?.trim();
+  const explicit = process.env[REDIRECT_ENV[id]]?.trim().replace(/^["']|["']$/g, "");
   if (explicit) {
+    // Returned literally (not re-serialized) so the authorization request and the token exchange send
+    // exactly the string registered in the provider console. It must be the backend OAuth callback —
+    // never an in-app page like /settings/connected-accounts (that is where NOVA returns afterwards).
     const u = new URL(explicit);
-    if (!u.pathname.endsWith(`/api/integrations/${id}/callback`)) throw new Error(`${REDIRECT_ENV[id]} must point to /api/integrations/${id}/callback`);
-    return u.toString();
+    if (!/^https?:$/.test(u.protocol) || u.search || u.hash || u.pathname !== `/api/integrations/${id}/callback`) {
+      throw new Error(`${REDIRECT_ENV[id]} must be <origin>/api/integrations/${id}/callback with no query or fragment`);
+    }
+    return explicit;
   }
   return `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/${id}/callback`;
 }
@@ -74,4 +79,18 @@ export function providerRegistry(): RegistryEntry[] {
     { id: "google", label: "Google", stage: "planned", platforms: ["EMAIL"], provider: null },
     { id: "microsoft", label: "Microsoft", stage: "planned", platforms: ["EMAIL"], provider: null },
   ];
+}
+
+/** Non-secret OAuth setup summary for logs and admin diagnostics. Never includes secrets or tokens. */
+export function oauthSetupSummary() {
+  return (["linkedin", "meta"] as const).map((id) => {
+    let redirectUri: string | null = null;
+    let problem: string | null = null;
+    try {
+      redirectUri = redirectUriFor(id);
+    } catch (err) {
+      problem = err instanceof Error ? err.message : String(err);
+    }
+    return { id, configured: SOCIAL_PROVIDERS[id].isConfigured(), redirectUri, explicit: Boolean(process.env[REDIRECT_ENV[id]]?.trim()), problem, scopes: SOCIAL_PROVIDERS[id].scopes };
+  });
 }

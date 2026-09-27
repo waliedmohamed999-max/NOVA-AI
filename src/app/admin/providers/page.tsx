@@ -6,6 +6,8 @@ import { db } from "@/server/db/client";
 import { TEST_POST_CONFIRMATION, TEST_POST_TEXT } from "@/server/integrations/diagnostics";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionTests } from "@/features/admin/connection-tests";
+import { OAuthDiagnostics } from "@/features/admin/oauth-diagnostics";
+import { oauthDiagnostics } from "@/server/admin/oauth-diagnostics";
 
 export const metadata: Metadata = { title: "Admin · Providers" };
 
@@ -16,6 +18,7 @@ export default async function AdminProvidersPage() {
   await requirePlatformAdmin();
   const t = await getTranslations("settings.admin.providers");
   const tt = await getTranslations("settings.admin.tests");
+  const to = await getTranslations("settings.admin.oauth");
   const rows = providerConfigStatus();
   // Connection tests run only against the admin's own workspace connections.
   const tenant = await resolveTenant();
@@ -51,6 +54,13 @@ export default async function AdminProvidersPage() {
         </ul>
         <p className="text-xs text-ink-4">{t("footer")}</p>
       </div>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">{to("title")}</h2>
+          <p className="max-w-2xl text-sm text-ink-3">{to("intro")}</p>
+        </div>
+        <OAuthDiagnostics rows={await oauthDiagnostics(tenant?.organization.id ?? null)} />
+      </section>
       <section className="space-y-3">
         <div>
           <h2 className="text-lg font-semibold">{tt("title")}</h2>

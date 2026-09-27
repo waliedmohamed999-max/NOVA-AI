@@ -172,14 +172,60 @@ Capabilities are computed from **granted** scopes, never from requested ones. Fo
 - Create an app (Business type).
 - Add Facebook Login for Business and the Instagram Graph API.
 - Redirect URI: `{APP_URL}/api/integrations/meta/callback` (or set `META_REDIRECT_URI` to exactly what is registered).
-- Permissions: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `read_insights`, `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights`, `business_management`. These need App Review for production.
+- **Permissions are configuration, not code** (`src/server/integrations/providers/meta-scopes.ts`). Meta rejects the *whole* login with "Invalid Scopes" when a single requested permission isn't enabled for the app, so NOVA asks only for what you configure:
+
+  | Variable | Meaning |
+  | --- | --- |
+  | `META_PERMISSION_MODE=minimal` (default) | `public_profile` + `META_OAUTH_SCOPES` |
+  | `META_PERMISSION_MODE=configured` | exactly `META_OAUTH_SCOPES` |
+  | `META_OAUTH_SCOPES` | Comma- or space-separated. Duplicates are removed; unknown or retired names (e.g. `manage_pages`) are ignored and listed in `/admin/providers`. |
+  | `META_OPTIONAL_SCOPES` | Enabled in the app, but requested only when a feature needs them (see *Permission upgrades*). |
+  | `META_LOGIN_CONFIG_ID` | Facebook Login for Business configuration id. It is sent instead of `scope`, because the permission set lives in that configuration. |
+
+- **Rollout:**
+  1. Leave `META_OAUTH_SCOPES` empty. OAuth reaches NOVA; with no Page access NOVA says so ("no_page_permission").
+  2. Add `pages_show_list` for Page discovery.
+  3. Then add `instagram_basic`, `pages_manage_posts`, `read_insights`, `instagram_content_publish` and `instagram_manage_insights` as each is enabled or approved in the Meta dashboard.
+  4. Request `business_management` only if you truly need Business Manager assets.
+- **Capability → permission map:**
+
+  | Capability | Permissions |
+  | --- | --- |
+  | Facebook discovery | `pages_show_list` |
+  | Facebook publishing | + `pages_manage_posts` |
+  | Facebook analytics | + `read_insights` |
+  | Instagram identity | `pages_show_list`, `instagram_basic` |
+  | Instagram publishing | + `instagram_content_publish` |
+  | Instagram analytics | + `instagram_manage_insights` |
+  | Business assets | `business_management` |
+
+  Capabilities are true only when the permission was **granted**.
+- **Permission upgrades:** when a feature needs a permission the connection lacks (e.g. publishing without `pages_manage_posts`), NOVA does not call the platform.
+  - The post fails with "NOVA needs an additional permission to do this." and a link to Connected accounts, which shows **Grant permission**.
+  - That button re-runs OAuth with `auth_type=rerequest` and only the configured scopes plus what the capability needs (`/api/integrations/meta/start?upgrade=FACEBOOK:publish`).
+  - Only permissions listed in `META_OAUTH_SCOPES` / `META_OPTIONAL_SCOPES` can be requested this way; anything else returns "not available yet".
+- **Invalid scopes:**
+  - **When Meta redirects back with `invalid_scope`:** NOVA logs `provider=meta error_type=invalid_scope requested_scopes=[…]` and shows "We couldn't finish connecting Meta because a permission isn't enabled in the app yet."
+  - **When Meta shows the error on its own dialog page** (common for unconfigured permissions): the browser never returns to NOVA. The attempt stays "Started, not returned" in `/admin/providers`.
 - Instagram media must be reachable at a public URL, so `APP_URL` must be public.
 - Before App Review, only people with a role on the app (admin/developer/tester) can connect, and only Pages they manage.
-- Messaging (`pages_messaging`, `instagram_manage_messages`), lead forms (`leads_retrieval`) and page management (`pages_manage_metadata`) are **not requested**. Add them only after approval, and the capabilities light up automatically.
+
+**OAuth diagnostics** (`/admin/providers`, platform admins only):
+- Redirect URI: not secret, and must match the console exactly.
+- Permission mode.
+- Requested / optional / ignored permissions.
+- The **last sign-in attempt** from your workspace: outcome, granted permissions, and requested-but-not-granted permissions.
+- Every capability as available / enabled-not-granted / advanced permission not enabled.
+
+In development, the server also logs `LinkedIn redirect URI: configured` / `Meta redirect URI: configured` at startup. It never logs the URI itself, secrets or tokens.
 
 **LinkedIn**
 - Add the products "Sign In with LinkedIn using OpenID Connect" and "Share on LinkedIn".
 - Redirect URI: `{APP_URL}/api/integrations/linkedin/callback` (or set `LINKEDIN_REDIRECT_URI`).
+  - Register **this backend callback** under *Auth → Authorized redirect URLs*, character for character (e.g. `http://localhost:3000/api/integrations/linkedin/callback`).
+  - Do **not** register `/settings/connected-accounts`. That is where NOVA sends the user *after* it has processed the callback.
+  - The same literal string is used in the authorization request and in the token exchange, with no added query parameters.
+  - A value pointing anywhere else (a settings page, a query string, a trailing slash) is refused at startup and shown as invalid in `/admin/providers`.
 - Scopes requested: `openid profile email w_member_social` only.
 - Company pages and statistics require Community Management API approval; then set `LINKEDIN_ORGANIZATION_ACCESS=true`.
 

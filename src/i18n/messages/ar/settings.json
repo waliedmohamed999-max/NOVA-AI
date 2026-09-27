@@ -606,6 +606,40 @@
       "confirmLabel": "اكتب {word} للتأكيد",
       "publishNow": "نشر المنشور التجريبي",
       "posted": "تم النشر — معرّف المنشور الخارجي {id}"
+    },
+    "oauth": {
+      "title": "تشخيص OAuth",
+      "intro": "روابط إعادة التوجيه وأسماء الصلاحيات ليست أسرارًا. المطلوبة = ما يطلبه NOVA؛ الممنوحة = ما سمح به آخر تسجيل دخول في مساحة عملك فعلًا.",
+      "configured": "OAuth: مُعد",
+      "missing": "OAuth: بيانات التطبيق ناقصة",
+      "redirectInvalid": "رابط إعادة التوجيه غير صالح",
+      "redirectUri": "رابط إعادة التوجيه (يجب أن يطابق لوحة المطوّر حرفيًا)",
+      "mode": "وضع الصلاحيات",
+      "loginConfig": "إعداد Login for Business",
+      "requested": "المطلوبة",
+      "optional": "مفعّلة وتُطلب عند الحاجة",
+      "rejected": "متجاهلة (أسماء صلاحيات غير معروفة أو ملغاة)",
+      "lastAttempt": "آخر محاولة تسجيل دخول",
+      "granted": "الممنوحة",
+      "notGranted": "مطلوبة ولم تُمنح",
+      "noAttempt": "لا توجد محاولة من مساحة عملك بعد.",
+      "capabilities": "القدرات",
+      "capStatus": {
+        "available": "متاحة",
+        "not_granted": "مفعّلة ولم تُمنح بعد",
+        "not_enabled": "صلاحية متقدمة غير مفعّلة"
+      },
+      "outcomes": {
+        "started": "بدأت ولم تعد",
+        "authorized": "تم التفويض",
+        "connected": "متصل",
+        "connected_pending_selection": "متصل، بانتظار اختيار الحسابات",
+        "denied": "ألغاها المستخدم",
+        "invalid_scope": "صلاحيات غير صالحة",
+        "exchange_failed": "فشل تبادل الرمز",
+        "no_accounts": "لم تُرجع حسابات",
+        "no_page_permission": "تم التفويض بدون وصول للصفحات"
+      }
     }
   },
   "connect": {
@@ -693,6 +727,10 @@
       "requires_approval": "غير متاح حاليًا",
       "page_role": "دورك في هذه الصفحة لا يسمح بذلك",
       "not_applicable": "لا ينطبق"
-    }
+    },
+    "upgradeTitle": "NOVA تحتاج صلاحية إضافية لتنفيذ هذه المهمة.",
+    "upgradeBody": "{platform} · {capability}. ستؤكد ذلك على {platform}؛ ولن يتغير شيء آخر.",
+    "upgradeCta": "منح الصلاحية",
+    "upgradeUnavailable": "هذه الميزة غير متاحة لهذا الحساب حاليًا."
   }
 }

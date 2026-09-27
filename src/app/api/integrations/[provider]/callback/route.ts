@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/integrations
   try {
     // Bound to the signed-in user who started the flow (a mismatched or missing session is rejected).
     const session = await getSession().catch(() => null);
-    const res = await completeConnect(provider as keyof typeof SOCIAL_PROVIDERS, { code: sp.get("code"), state: sp.get("state"), error: sp.get("error") }, session?.userId ?? null);
+    const res = await completeConnect(provider as keyof typeof SOCIAL_PROVIDERS, { code: sp.get("code"), state: sp.get("state"), error: sp.get("error"), errorDescription: sp.get("error_description") ?? sp.get("error_message") ?? sp.get("error_reason") }, session?.userId ?? null);
     const out = new URL(res.redirectTo, base);
     if (res.error) {
       out.searchParams.set("error", res.error);

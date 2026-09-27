@@ -228,8 +228,8 @@ describe("plan channel limit and missing credentials", () => {
 
 describe("helpers", () => {
   it("post-OAuth query only accepts platform names and short error codes", () => {
-    expect(parseConnectFlash({ connected: "INSTAGRAM,FACEBOOK", error: "oauth_denied" })).toEqual({ connected: ["INSTAGRAM", "FACEBOOK"], choose: [], limited: [], error: "oauth_denied" });
-    expect(parseConnectFlash({ connected: "<script>", error: "https://x" })).toEqual({ connected: [], choose: [], limited: [], error: null });
+    expect(parseConnectFlash({ connected: "INSTAGRAM,FACEBOOK", error: "oauth_denied" })).toEqual({ connected: ["INSTAGRAM", "FACEBOOK"], choose: [], limited: [], error: "oauth_denied", upgrade: null });
+    expect(parseConnectFlash({ connected: "<script>", error: "https://x" })).toEqual({ connected: [], choose: [], limited: [], error: null, upgrade: null });
   });
 
   it("admin provider status masks ids and never returns secrets", () => {

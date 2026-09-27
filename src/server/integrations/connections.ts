@@ -78,5 +78,6 @@ export function parseConnectFlash(sp: Record<string, string | string[] | undefin
     return typeof v === "string" && PLATFORM_LIST.test(v) ? v.split(",") : [];
   };
   const error = typeof sp.error === "string" && /^[a-z_]{1,40}$/.test(sp.error) ? sp.error : null;
-  return { connected: list("connected"), choose: list("choose"), limited: list("limited"), error };
+  const up = typeof sp.upgrade === "string" ? /^([A-Z]{2,12}):([a-z_]{2,40})$/.exec(sp.upgrade) : null;
+  return { connected: list("connected"), choose: list("choose"), limited: list("limited"), error, upgrade: up ? { platform: up[1], capability: up[2] } : null };
 }
