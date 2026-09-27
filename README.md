@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NOVA — AI Growth Team
 
-## Getting Started
+A multi-tenant SaaS where a company "hires" an AI social media team and an AI sales team from one simple interface: plan and create content, get approval, publish, learn from real results, capture and qualify leads, and move them toward a sale. Arabic (RTL) and English (LTR) are both first-class.
 
-First, run the development server:
+> Branding lives in `src/config/brand.ts`. Rename the product there.
+
+## What's inside
+
+| Area | Where |
+| --- | --- |
+| Landing page, auth, onboarding | `src/app/(marketing)`, `src/app/(auth)`, `src/app/onboarding` |
+| App (home, AI team, content, calendar, social, leads, sales, analytics, approvals, campaigns, inbox, company brain, brand kit, reports, activity, settings) | `src/app/(app)` |
+| Platform admin | `src/app/admin` |
+| Public lead capture (embed + API) | `src/app/embed/lead/[key]`, `src/app/api/public/leads/[key]` |
+| Domain services (tenancy, auth, AI, agents, content, sales, social, billing, jobs…) | `src/server` |
+| UI features and primitives | `src/features`, `src/components` |
+| Schema and migrations | `prisma/` |
+| Background worker | `src/worker/index.ts` |
+| Tests | `tests/unit`, `tests/integration`, `tests/e2e` |
+
+## Quick start (local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up -d           # PostgreSQL + pgvector (port 5434) and Mailpit (8025)
+cp .env.example .env           # fill AUTH_SECRET and ENCRYPTION_KEY (see comments)
+npm install                    # also runs prisma generate
+npm run db:migrate             # apply migrations
+npm run db:seed                # optional demo workspace (dev only)
+npm run dev                    # http://localhost:3000
+npm run worker                 # background jobs (or NOVA_INLINE_WORKER=true in dev)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Demo login after seeding: `demo@nova.local` / `NovaDemo2026!` (platform admin). Every demo row is flagged and the UI shows a "demo data" banner.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For AI without keys in development, set `AI_OFFLINE_MODE=true` (refused in production). With `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set, real models are used.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Command | What it does |
+| --- | --- |
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run worker` | Job worker + database-backed scheduler |
+| `npm run typecheck` / `lint` | TypeScript and ESLint |
+| `npm test` | Unit + integration tests (uses `TEST_DATABASE_URL`, wiped per run) |
+| `npm run test:e2e` | Playwright end-to-end tests |
+| `npm run db:migrate` / `db:seed` / `db:reset` | Database |
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Architecture](docs/ARCHITECTURE.md)
+- [AI system](docs/AI-SYSTEM.md)
+- [Database](docs/DATABASE.md)
+- [Integrations](docs/INTEGRATIONS.md)
+- [Security](docs/SECURITY.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Local development](docs/LOCAL-DEVELOPMENT.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Status of external integrations
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Adapters for Meta (Facebook/Instagram), LinkedIn, TikTok, OpenAI and Anthropic are implemented against the official APIs. They have **not** been validated against real provider accounts in this repository; see `docs/INTEGRATIONS.md` for what is tested and how. A payment-processor adapter is not bundled: billing plans, limits and enforcement work, and paid plan changes report "not configured" until an adapter is added.
