@@ -38,7 +38,8 @@ const LINKEDIN_CAPABILITIES: { capability: string; scopes: string[]; approval?: 
 ];
 
 export async function oauthDiagnostics(organizationId: string | null): Promise<ProviderDiagnostics[]> {
-  const setup = oauthSetupSummary();
+  // Detailed scope diagnostics exist for LinkedIn, Meta and Instagram; other providers are covered by the readiness and callback matrices.
+  const setup = oauthSetupSummary().filter((s) => s.id === "linkedin" || s.id === "meta" || s.id === "instagram");
   const meta = metaScopeConfig();
   const attempts = organizationId
     ? await db.oAuthState.findMany({ where: { organizationId, provider: { in: ["meta", "instagram", "linkedin"] } }, orderBy: { createdAt: "desc" }, take: 20, select: { provider: true, createdAt: true, outcome: true, requestedScopes: true, grantedScopes: true } })

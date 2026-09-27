@@ -77,7 +77,7 @@ export async function providerReadiness(): Promise<ReadinessRow[]> {
     return {
       provider: p,
       configured: isConfigured(p),
-      credentialsValid: cred ? cred.ok : null,
+      credentialsValid: cred ? (cred.live ? cred.ok : cred.ok ? null : false) : null,
       liveAccounts,
       lastSuccessAt: lastOk?.createdAt.toISOString() ?? null,
       lastError: lastFail && (!lastOk || lastFail.createdAt > lastOk.createdAt) ? { at: lastFail.createdAt.toISOString(), check: lastFail.check, detail: lastFail.detail } : null,
@@ -106,7 +106,8 @@ function redact(s: string | null) {
     .slice(0, 500);
 }
 
-type Check = { ok: boolean; detail: string };
+/** live=false: the check passed but against something that isn't a production provider (e.g. Mailpit). */
+type Check = { ok: boolean; detail: string; live?: boolean };
 async function call(url: string, init: RequestInit = {}): Promise<{ status: number; body: Record<string, unknown> }> {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(15_000) });
   const text = await res.text();
@@ -192,7 +193,7 @@ const CHECKS: Partial<Record<ReadinessProvider, () => Promise<Check>>> = {
   },
   async email() {
     const t = await getMailer().testConnection();
-    return { ok: t.ok, detail: t.detail };
+    return { ok: t.ok, detail: t.detail, live: !/development mailbox/i.test(t.detail) };
   },
   async stripe() {
     const r = await call("https://api.stripe.com/v1/balance", { headers: { authorization: `Bearer ${clean(process.env.STRIPE_SECRET_KEY)}` } });
@@ -215,7 +216,7 @@ export async function validateCredentials(provider: ReadinessProvider, actor: { 
     result = { ok: false, detail: `Network error: ${e instanceof Error ? e.message : String(e)}` };
   }
   if (!result.ok) logger.warn({ provider, detail: redact(result.detail) }, "provider credential check failed");
-  const row = await recordValidation({ provider, check: "credentials", ok: result.ok, detail: result.detail, actorId: actor.userId, organizationId: actor.organizationId });
+  const row = await recordValidation({ provider, check: "credentials", ok: result.ok, live: result.live ?? true, detail: result.detail, actorId: actor.userId, organizationId: actor.organizationId });
   await audit({ category: "SECURITY", actorType: "USER", actorId: actor.userId, action: "admin.provider_validated", summary: `Validated ${provider} credentials: ${result.ok ? "ok" : "failed"}` });
   return row;
 }
