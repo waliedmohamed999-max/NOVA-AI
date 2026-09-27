@@ -1,1 +1,76 @@
-{}
+{
+  "progress": "Setup progress",
+  "welcome": {
+    "title": "Hi {name}, I'm your AI Growth Team.",
+    "body": "Answer a few quick questions and we'll learn your business, build your brand profile and prepare your first strategy. It takes about two minutes.",
+    "cta": "Let's go"
+  },
+  "company": { "q": "What's your company called?", "placeholder": "e.g. Bloom Bakery" },
+  "website": {
+    "q": "Do you have a website?",
+    "hint": "Paste it and I'll read it to understand what you do.",
+    "cta": "Read my website",
+    "none": "I don't have a website"
+  },
+  "sells": {
+    "q": "What do you mainly sell?",
+    "placeholder": "e.g. Custom celebration cakes and fresh bread",
+    "offeringPlaceholder": "Add a product or service",
+    "descriptionPlaceholder": "Anything else we should know? (optional)"
+  },
+  "customers": {
+    "q": "Who are your customers?",
+    "placeholder": "e.g. Families and offices ordering for events",
+    "markets": "Where are they? (city, country or region)",
+    "types": { "B2B": "Businesses", "B2C": "Consumers", "BOTH": "Both" }
+  },
+  "connect": {
+    "q": "Want to connect your social accounts?",
+    "hint": "Connecting lets your team publish and learn from real performance. You can do this later.",
+    "unavailable": "Coming soon",
+    "later": "I'll do this later",
+    "done": "Set up later in Integrations"
+  },
+  "brand": {
+    "q": "How should your brand sound?",
+    "colors": "Brand colors",
+    "tones": {
+      "friendly": "Friendly",
+      "professional": "Professional",
+      "bold": "Bold",
+      "luxury": "Luxury",
+      "playful": "Playful",
+      "warm": "Warm",
+      "expert": "Expert",
+      "calm": "Calm"
+    }
+  },
+  "goals": {
+    "q": "What do you mainly want us to help you with?",
+    "cta": "Build my AI team",
+    "options": {
+      "customers": "Get more customers",
+      "content": "Improve content",
+      "awareness": "Build brand awareness",
+      "leads": "Generate leads",
+      "sales": "Increase sales",
+      "everything": "Manage everything"
+    }
+  },
+  "analysis": {
+    "title": "Getting to know your business…",
+    "subtitle": "Your AI team is reading everything you shared.",
+    "done": "Your AI Growth Team is ready."
+  },
+  "ready": {
+    "title": "Your AI Growth Team is ready.",
+    "brand": "Brand profile",
+    "audience": "Audience",
+    "contentOpportunities": "Content opportunities",
+    "salesOpportunities": "Sales opportunities",
+    "channels": "Recommended channels",
+    "strategy": "Initial strategy",
+    "cta": "Meet your AI team",
+    "firstWeek": "Create my first week"
+  }
+}

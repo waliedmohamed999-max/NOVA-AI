@@ -1,5 +1,3 @@
-⚠ Slow filesystem detected. The benchmark took 445ms. If \\?\E:\xampp\htdocs\Ai Agant\.next\dev is a network drive, consider moving it to a local folder.
-See more: https://nextjs.org/docs/app/guides/local-development
 ⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
 Cross-origin access to Next.js dev resources is blocked by default for safety.
 
@@ -11,6 +9,821 @@ module.exports = {
 }
 
 Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
-Error: Failed to find Server Action "00734a76edd8558bf23139500c4a28445ee8b40ceb". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⨯ Error: The destination stream closed early.
+    at ignore-listed frames {
+  digest: '3980508334'
+}
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⨯ Error: The destination stream closed early.
+    at ignore-listed frames {
+  digest: '3980508334'
+}
+⨯ Error: The destination stream closed early.
+    at ignore-listed frames {
+  digest: '3980508334'
+}
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] useEffect must not return anything besides a function, which is used for clean-up.
+
+It looks like you wrote useEffect(async () => ...) or returned a Promise. Instead, write the async function inside your effect and call it immediately:
+
+useEffect(() => {
+  async function fetchData() {
+    // You can await here
+    const response = await MyAPI.getData(someId);
+    // ...
+  }
+  fetchData();
+}, [someId]); // Or [] if effect doesn't need props or state
+
+Learn more about data fetching with Hooks: https://react.dev/link/hooks-data-fetching 
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingPage (src\app\onboarding\page.tsx:19:10)
+  17 |     configured: SOCIAL_PROVIDERS[c.oauth!].isConfigured(),
+  18 |   }));
+> 19 |   return <OnboardingFlow userName={user.name ?? user.email.split("@")[0]} initial={snap} providers={providers} />;
+     |          ^
+  20 | }
+  21 |
+[browser] Uncaught TypeError: destroy is not a function
+    at OnboardingFlow (<anonymous>)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:178:82)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:168:22)
+  176 |                   <td className="px-4 py-3 tabular">{money(l.valueCents, l.currency)}</td>
+  177 |                   <td className="px-4 py-3 text-ink-3">{l.source ?? "—"}</td>
+> 178 |                   <td className="px-4 py-3 text-ink-3">{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : "—"}</td>
+      |                                                                                  ^
+  179 |                   <td className="max-w-64 truncate px-4 py-3 text-ink-2">{l.nextAction ?? "—"}</td>
+  180 |                 </tr>
+  181 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\board.tsx:144:61)
+    at Array.map (<anonymous>)
+    at <unknown> (src\features\sales\board.tsx:132:26)
+    at Array.map (<anonymous>)
+    at LeadBoard (src\features\sales\board.tsx:114:21)
+  142 |                           <div className="flex items-center justify-between text-xs text-ink-3">
+  143 |                             <span className="font-semibold tabular text-ink-2">{money(l.valueCents, l.currency)}</span>
+> 144 |                             <span>{l.lastContactAt ? format.relativeTime(new Date(l.lastContactAt)) : t("noContact")}</span>
+      |                                                             ^
+  145 |                           </div>
+  146 |                           {l.nextAction && <div className="rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-ink-2">→ {l.nextAction}</div>}
+  147 |                           {l.aiInsight && l.aiInsight !== l.nextAction && <div className="flex gap-1.5 text-xs text-ink-3"><Sparkles className="mt-0.5 size-3 shrink-0 text-accent" />{l.aiInsight}</div>} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at LeadDetail (src\features\sales\lead-detail.tsx:114:179)
+  112 |                 {lead.summary && <p className="text-[16px] leading-relaxed">{lead.summary}</p>}
+  113 |                 {lead.nextAction && (
+> 114 |                   <p className="text-sm"><span className="font-semibold">{t("recommended")}</span> {lead.nextAction}{lead.nextActionAt && <span className="text-ink-3"> · {format.relativeTime(new Date(lead.nextActionAt))}</span>}</p>
+      |                                                                                                                                                                                  ^
+  115 |                 )}
+  116 |                 {lead.objections.length > 0 && <p className="text-sm text-ink-2"><span className="font-semibold">{t("objections")}</span> {lead.objections.join(" · ")}</p>}
+  117 |               </div> {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\lead-detail.tsx:128:72)
+    at Array.map (<anonymous>)
+    at LeadDetail (src\features\sales\lead-detail.tsx:124:96)
+  126 |                   <div className={cn("max-w-[80%] rounded-2xl px-4 py-2.5 text-sm", m.direction === "OUTBOUND" ? "rounded-ee-md bg-ink text-ink-inverse" : "rounded-es-md bg-sunken")} dir="auto">
+  127 |                     <p className="whitespace-pre-line">{m.body}</p>
+> 128 |                     <p className="mt-1 text-[11px] opacity-60">{format.relativeTime(new Date(m.at))}</p>
+      |                                                                        ^
+  129 |                   </div>
+  130 |                 </li>
+  131 |               ))} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}
+Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow
+    at <unknown> (src\features\sales\followups.tsx:37:128)
+    at Array.map (<anonymous>)
+    at FollowUpList (src\features\sales\followups.tsx:21:14)
+  35 |               </div>
+  36 |             </div>
+> 37 |             {f.dueAt && <span className={cn("text-xs tabular", overdue ? "font-semibold text-warning" : "text-ink-3")}>{format.relativeTime(new Date(f.dueAt))}</span>}
+     |                                                                                                                                ^
+  38 |             <button
+  39 |               disabled={pending}
+  40 |               onClick={() => start(async () => { await completeActivity({ id: f.id }); router.refresh(); })} {
+  code: 'ENVIRONMENT_FALLBACK',
+  originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
+}

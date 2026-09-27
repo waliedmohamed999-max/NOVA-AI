@@ -32,6 +32,17 @@ export const APP_PREFIXES = [
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // /ar/... and /en/... are shareable language links: set the locale, then drop the prefix.
+  const lang = pathname.match(/^\/(ar|en)(?=\/|$)/)?.[1];
+  if (lang) {
+    const rest = pathname.slice(3) || "/";
+    const res = NextResponse.redirect(new URL(`${rest === "/dashboard" ? "/home" : rest}${search}`, request.url));
+    res.cookies.set(brand.localeCookie, lang, { path: "/", maxAge: 31536000, sameSite: "lax" });
+    return res;
+  }
+  if (pathname === "/dashboard" || pathname === "/app") return NextResponse.redirect(new URL("/home", request.url));
+
   const isApp = APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isApp && !request.cookies.has(brand.sessionCookie)) {
     const url = new URL("/sign-in", request.url);

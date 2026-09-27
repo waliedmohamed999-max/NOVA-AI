@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Instrument_Serif } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTimeZone } from "next-intl/server";
 import { brand } from "@/config/brand";
 import { dirFor, isLocale } from "@/i18n/config";
 import { Toaster } from "@/components/ui/toast";
@@ -42,6 +42,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const timeZone = await getTimeZone();
   const theme = (await cookies()).get(brand.themeCookie)?.value === "dark" ? "dark" : "light";
   const dir = dirFor(isLocale(locale) ? locale : "en");
 
@@ -54,7 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-full">
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages} now={new Date()} timeZone={timeZone}>
           {children}
           <Toaster />
         </NextIntlClientProvider>

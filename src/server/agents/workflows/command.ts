@@ -4,6 +4,18 @@ import { retrieveKnowledge, formatContext } from "../../knowledge/service";
 import { defineWorkflow, getWorkflow, type RunContext } from "../runtime";
 import { brainPrompt, loadBrain } from "../brain";
 import { answerSchema, commandIntentSchema, type CommandIntent } from "../schemas";
+import { storage } from "../../storage";
+import type { ImageInput } from "../../ai/types";
+
+/** Loads image attachments (tenant-checked) for vision-capable answers. */
+async function loadImages(ctx: RunContext): Promise<ImageInput[]> {
+  const ids = (ctx.params.imageFileIds as string[] | undefined) ?? [];
+  if (!ids.length) return [];
+  const files = await db.fileObject.findMany({ where: { id: { in: ids }, organizationId: ctx.scope.organizationId, deletedAt: null } });
+  return Promise.all(
+    files.map(async (f) => ({ mediaType: f.mimeType as ImageInput["mediaType"], base64: (await storage.get(f.storageKey)).toString("base64") })),
+  );
+}
 
 /** Keyword intent detection for the offline dev provider (EN + AR). */
 export function offlineIntent(text: string): CommandIntent {
@@ -41,9 +53,9 @@ const INTENT_TO_WORKFLOW: Partial<Record<CommandIntent["intent"], string>> = {
 async function answerQuestion(ctx: RunContext) {
   const b = await loadBrain(ctx.scope);
   const chunks = await ctx.step("searching_knowledge", () => retrieveKnowledge(ctx.scope, ctx.input, 6));
+  const images = await loadImages(ctx);
   const res = await ctx.step("writing_answer", () =>
     aiStructured(ctx.ai, {
-      task: "ANALYSIS",
       schemaName: "answer",
       schema: answerSchema,
       system: [
@@ -52,6 +64,8 @@ async function answerQuestion(ctx: RunContext) {
         brainPrompt(b),
       ].join("\n"),
       prompt: `Question: ${ctx.input}\n\nCompany knowledge:\n${formatContext(chunks)}`,
+      images,
+      task: images.length ? "VISION" : "ANALYSIS",
       offline: () => ({
         answer: chunks.length
           ? chunks[0].content.slice(0, 600)

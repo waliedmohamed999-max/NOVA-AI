@@ -47,3 +47,4 @@ next-env.d.ts
 /test-results
 /coverage
 !.env.example
+dev-server*.log

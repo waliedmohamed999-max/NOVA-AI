@@ -1,1 +1,272 @@
-{}
+{
+  "notifications": {
+    "markAll": "Mark all read",
+    "empty": "You're all caught up.",
+    "viewAll": "View all notifications",
+    "title": "Notifications",
+    "description": "Everything your AI team wants you to know."
+  },
+  "run": {
+    "working": "Your AI team is working on it…"
+  },
+  "steps": {
+    "understanding_goal": "Understanding your goal",
+    "reviewing_business": "Reviewing your business data",
+    "analyzing_performance": "Analyzing previous performance",
+    "creating_strategy": "Creating the strategy",
+    "writing_content": "Writing captions and hooks",
+    "design_briefs": "Preparing design briefs",
+    "scheduling": "Recommending a schedule",
+    "requesting_approval": "Sending for your approval",
+    "understanding_business": "Understanding your business",
+    "analyzing_brand": "Analyzing your brand",
+    "building_audience": "Building your audience profile",
+    "reviewing_services": "Reviewing your services",
+    "preparing_team": "Preparing your AI team",
+    "reading_lead": "Reading the lead",
+    "qualifying": "Qualifying the opportunity",
+    "recommending_action": "Recommending the next action",
+    "finding_leads": "Finding leads that need attention",
+    "reviewing_conversations": "Reviewing conversations",
+    "drafting_followups": "Drafting follow-ups",
+    "collecting_metrics": "Collecting performance data",
+    "comparing_performance": "Comparing with your averages",
+    "finding_patterns": "Finding patterns",
+    "writing_insights": "Writing insights",
+    "searching_knowledge": "Searching your Company Brain",
+    "writing_answer": "Writing the answer",
+    "reviewing_pipeline": "Reviewing your pipeline",
+    "finding_opportunities": "Looking for opportunities"
+  },
+  "result": {
+    "types": {
+      "content_plan": "Content plan",
+      "campaign": "Campaign created",
+      "answer": "Answer",
+      "analysis": "Performance insight",
+      "leads": "Sales",
+      "pipeline": "Pipeline",
+      "opportunities": "Opportunities",
+      "onboarding": "Company profile"
+    },
+    "stats": {
+      "posts": "Posts",
+      "videos": "Videos",
+      "carousels": "Carousels",
+      "days": "Days",
+      "open": "Open deals",
+      "value": "Pipeline value",
+      "hot": "Hot leads",
+      "stalled": "Stalled",
+      "score": "Score",
+      "temperature": "Temperature"
+    },
+    "fields": {
+      "keyMessage": "Key message",
+      "audience": "Target audience",
+      "cta": "Call to action",
+      "creativeDirection": "Creative direction"
+    },
+    "dispositions": {
+      "draft": "Draft ready for you to send",
+      "approval": "Waiting for your approval",
+      "send": "Sent automatically"
+    },
+    "badges": {
+      "HOT": "Hot",
+      "STALLED": "Stalled"
+    },
+    "actions": {
+      "review": "Review posts",
+      "approve_all": "Approve all",
+      "calendar": "Open calendar",
+      "review_campaign": "Review campaign",
+      "approve_plan": "Approve plan",
+      "edit": "Edit",
+      "open_lead": "Open lead",
+      "review_approvals": "Review approvals",
+      "open_leads": "Open leads",
+      "open_analytics": "Open analytics",
+      "connect_accounts": "Connect accounts",
+      "open_knowledge": "Add to Company Brain",
+      "open_pipeline": "Open pipeline",
+      "create_content": "Create content"
+    },
+    "approvedCount": "{count, plural, one {# post approved} other {# posts approved}}",
+    "campaignApproved": "Campaign approved and scheduled",
+    "actionFailed": "That didn't work. Please try again."
+  },
+  "home": {
+    "readyCount": "{count, plural, one {Your AI team has # thing ready for you.} other {Your AI team has # things ready for you.}}",
+    "allClear": "Everything's under control. Your AI team is monitoring.",
+    "priorityTitle": "What needs your attention",
+    "nothingUrgent": "Nothing needs your attention right now.",
+    "priority": {
+      "approvals": "{count, plural, one {# post waiting for approval} other {# posts waiting for approval}}",
+      "followups": "{count, plural, one {# lead needs follow-up} other {# leads need follow-up}}",
+      "hot_leads": "{count, plural, one {# hot lead} other {# hot leads}}",
+      "performance_up": "Engagement is up {value}%",
+      "performance_down": "Engagement is down {value}%",
+      "opportunity": "Opportunity detected",
+      "meetings": "{count, plural, one {# meeting booked} other {# meetings booked}}",
+      "integrations": "{count, plural, one {# connection needs attention} other {# connections need attention}}",
+      "failed_publishing": "{count, plural, one {# post failed to publish} other {# posts failed to publish}}",
+      "setup_knowledge": "Teach your AI team more",
+      "connect_accounts": "Connect your social accounts"
+    },
+    "priorityHint": {
+      "approvals": "Review, edit or approve in one place.",
+      "followups": "Your Sales Assistant prepared next steps.",
+      "hot_leads": "High intent — reach out today.",
+      "performance": "Compared with the previous 7 days.",
+      "opportunity": "",
+      "meetings": "Coming up in the next 7 days.",
+      "integrations": "Reconnect to keep publishing.",
+      "failed_publishing": "See what went wrong and retry.",
+      "setup_knowledge": "Add services, pricing and FAQs so answers stay accurate.",
+      "connect_accounts": "Publishing and real analytics start once an account is connected."
+    },
+    "briefTitle": "AI Daily Brief",
+    "briefEmpty": "Your first daily brief will be ready tomorrow morning. You can also generate it now.",
+    "briefGenerated": "Updated {time}",
+    "briefRefresh": "Refresh",
+    "quickTitle": "Quick actions",
+    "quick": {
+      "create": "Create content",
+      "campaign": "Launch campaign",
+      "approvals": "Review approvals",
+      "opportunities": "Find opportunities",
+      "leads": "Check leads",
+      "ask": "Ask AI",
+      "prompts": {
+        "create": "Create 7 posts for next week",
+        "campaign": "Create a campaign for ",
+        "opportunities": "What growth opportunities should we focus on right now?"
+      }
+    },
+    "teamTitle": "Your AI team",
+    "upcomingTitle": "Coming up",
+    "upcomingEmpty": "No posts scheduled in the next 3 days.",
+    "hotLeadsTitle": "Hot leads"
+  },
+  "approvals": {
+    "title": "Approvals",
+    "description": "Everything your AI team wants to do that needs your OK.",
+    "tabs": {
+      "CONTENT": "Content",
+      "PUBLISHING": "Publishing",
+      "SALES": "Sales",
+      "PRICING": "Pricing",
+      "CAMPAIGNS": "Campaigns"
+    },
+    "what": "What the AI wants to do",
+    "why": "Why",
+    "impact": "Potential impact",
+    "approveAll": "Approve all ({count})",
+    "approvedToast": "{count, plural, one {Approved} other {# items approved}}",
+    "rejectedToast": "Rejected",
+    "manualSend": "Approved — the message is ready for you to send from the lead page.",
+    "recent": "Recently decided",
+    "status": {
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "PENDING": "Pending"
+    },
+    "empty": {
+      "title": "You're all caught up.",
+      "body": "When your AI team needs a decision, it will appear here with what it wants to do and why."
+    }
+  },
+  "team": {
+    "title": "Your AI Team",
+    "description": "Six specialists sharing one understanding of your business.",
+    "groups": {
+      "social": "Social & content team",
+      "sales": "Sales team"
+    },
+    "currentTask": "Current task",
+    "idleTask": {
+      "WORKING": "Working…",
+      "WAITING_APPROVAL": "Waiting for your approval",
+      "MONITORING": "Monitoring your accounts and leads",
+      "IDLE": "Ready when you are",
+      "PAUSED": "Paused"
+    },
+    "recent": "Recently completed",
+    "noTasks": "Nothing completed yet.",
+    "open": "Open workspace",
+    "notInPlan": "Not in your plan",
+    "brainBadge": "Company Brain",
+    "brainNote": "Every agent reads and writes to the same Company Brain — that's how they collaborate.",
+    "work": "Completed work",
+    "runs": "Recent runs",
+    "noRuns": "No runs yet.",
+    "runStatus": {
+      "QUEUED": "Queued",
+      "RUNNING": "Running",
+      "COMPLETED": "Done",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "kinds": {
+      "command": "Request",
+      "content_plan": "Content plan",
+      "campaign": "Campaign",
+      "onboarding_analysis": "Company analysis",
+      "lead_qualify": "Lead qualification",
+      "leads_followup": "Follow-ups",
+      "performance_review": "Performance review",
+      "content_rewrite": "Rewrite"
+    },
+    "usage": "AI requests this month",
+    "usageHint": "Tracked for cost control. Details in Settings → Billing.",
+    "active": "Active",
+    "activeHint": "Paused agents don't take on new work.",
+    "advanced": "Advanced",
+    "guidanceHint": "Optional extra guidance for this agent. Most businesses never need this.",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "description": "Campaigns connect content, leads and revenue.",
+    "create": "Create a campaign",
+    "prompt": "Create a campaign for ",
+    "posts": "Posts",
+    "leads": "Leads",
+    "reach": "Reach",
+    "revenue": "Won revenue",
+    "revenueHint": "{count, plural, one {from # won deal} other {from # won deals}}",
+    "noMetrics": "Appears once posts are published",
+    "content": "Campaign content",
+    "status": {
+      "DRAFT": "Draft",
+      "PENDING_APPROVAL": "Needs approval",
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "COMPLETED": "Completed",
+      "ARCHIVED": "Archived"
+    },
+    "plan": {
+      "concept": "Concept",
+      "keyMessage": "Key message",
+      "creativeDirection": "Creative direction",
+      "cta": "Call to action",
+      "audience": "Audience",
+      "kpis": "KPIs"
+    },
+    "approve": "Approve plan",
+    "pause": "Pause",
+    "resume": "Resume",
+    "archive": "Archive",
+    "approvedToast": "Campaign approved and scheduled",
+    "pausedToast": "Campaign paused",
+    "resumedToast": "Campaign resumed",
+    "archivedToast": "Campaign archived",
+    "empty": {
+      "title": "Launch your first campaign.",
+      "body": "Tell your AI team what you want to promote — they'll plan the concept, content, schedule and KPIs."
+    }
+  }
+}

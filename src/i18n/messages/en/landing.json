@@ -1,1 +1,74 @@
-{}
+{
+  "nav": { "product": "Product", "team": "AI Team", "how": "How it Works", "pricing": "Pricing", "resources": "Resources", "signIn": "Sign in", "start": "Start free", "open": "Open workspace" },
+  "hero": {
+    "eyebrow": "Your AI Growth Team",
+    "line1": "Your company.",
+    "line2": "Now with an AI Growth Team.",
+    "body": "Plan content, create campaigns, publish across social channels, understand what works, follow leads and move opportunities toward a sale — from one AI workspace.",
+    "primary": "Build My AI Team",
+    "secondary": "Watch How It Works",
+    "note": "Free for 14 days · Arabic & English · Nothing goes out without your approval"
+  },
+  "workspace": {
+    "label": "Illustration of the AI workspace",
+    "title": "AI workspace",
+    "prompt": "Prepare next week's campaign for our new service.",
+    "items": {
+      "social": "Your next week's campaign is ready.",
+      "designer": "3 creatives generated.",
+      "analyst": "Educational content is outperforming your recent average.",
+      "sales": "7 new leads qualified."
+    }
+  },
+  "activity": {
+    "label": "What an AI Growth Team does",
+    "planned": "Campaign planned",
+    "connected": "Instagram connected",
+    "analyzed": "Leads analyzed",
+    "approved": "Design approved",
+    "scheduled": "Post scheduled",
+    "followed": "Lead followed up",
+    "booked": "Meeting booked"
+  },
+  "team": {
+    "eyebrow": "Meet your AI Growth Team",
+    "title": "Six specialists. One shared understanding of your business.",
+    "body": "They aren't disconnected bots. They collaborate through one Company Brain — so the designer knows what the strategist planned, and the sales agent knows what your posts promised.",
+    "examples": {
+      "SOCIAL_MANAGER": "“I've planned next week around your two best-performing topics.”",
+      "CONTENT_STRATEGIST": "“7 captions ready, each with a stronger opening hook.”",
+      "DESIGNER": "“Three branded carousels, using your colors and layout rules.”",
+      "PERFORMANCE_ANALYST": "“Saves rose on educational posts. Let's do more of those.”",
+      "SALES_AGENT": "“A new inquiry asked for a quote — I drafted the reply.”",
+      "SALES_ASSISTANT": "“Two deals haven't moved in two weeks. Here's a nudge.”"
+    }
+  },
+  "brain": {
+    "eyebrow": "The Company Brain",
+    "title": "Every interaction makes your team understand you better.",
+    "body": "Your brand, offers, audience, results and conversations live in one private, secure brain. Every agent reads from it before acting and learns from what happens next.",
+    "center": "Company Brain",
+    "items": ["Brand", "Services", "Products", "Audience", "Offers", "Pricing", "Content history", "Analytics", "Customers", "Leads", "Conversations", "FAQs", "Brand voice"]
+  },
+  "how": {
+    "title": "Connect. Understand. Create. Grow.",
+    "steps": {
+      "connect": { "title": "Connect", "body": "Tell us about your business and connect your accounts in minutes." },
+      "understand": { "title": "Understand", "body": "Your team learns your brand, audience and what already works." },
+      "create": { "title": "Create & approve", "body": "Plans, posts and replies arrive ready. You approve with one tap." },
+      "grow": { "title": "Measure & sell", "body": "Real results feed back in, and every lead gets a next step." }
+    }
+  },
+  "pricing": {
+    "title": "Simple plans that grow with you",
+    "body": "Start free for 14 days. Pricing is confirmed at checkout.",
+    "cta": "Start free",
+    "plans": {
+      "STARTER": { "name": "Starter", "tagline": "For one business getting consistent", "features": ["1 business", "2 social channels", "Social Manager, Strategist & Designer", "Basic analytics"] },
+      "GROWTH": { "name": "Growth", "tagline": "Content and sales working together", "features": ["5 social channels", "AI Sales Agent & Assistant", "Advanced analytics", "More AI usage"] },
+      "SCALE": { "name": "Scale", "tagline": "For teams and multiple brands", "features": ["Team seats & advanced permissions", "Higher limits", "Automation", "Multiple businesses"] }
+    }
+  },
+  "final": { "title": "Hire your AI Growth Team today.", "body": "Set up in minutes. See your first week of content before you finish your coffee." },
+  "footer": "Simple for you. Powerful under the hood."
+}

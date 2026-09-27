@@ -1,0 +1,93 @@
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+import { db } from "../db/client";
+import { hmac, safeEqual, sha256 } from "../crypto";
+import { UserFacingError } from "../errors";
+
+/** Storage driver abstraction — swap LocalDriver for S3/R2/GCS in production. */
+export interface StorageDriver {
+  put(key: string, data: Buffer, contentType: string): Promise<void>;
+  get(key: string): Promise<Buffer>;
+  delete(key: string): Promise<void>;
+}
+
+class LocalDriver implements StorageDriver {
+  private root = path.resolve(process.env.STORAGE_LOCAL_DIR ?? ".storage");
+  private resolve(key: string) {
+    const full = path.resolve(this.root, key);
+    if (!full.startsWith(this.root + path.sep)) throw new Error("Invalid storage key");
+    return full;
+  }
+  async put(key: string, data: Buffer) {
+    const full = this.resolve(key);
+    await mkdir(path.dirname(full), { recursive: true });
+    await writeFile(full, data);
+  }
+  get(key: string) {
+    return readFile(this.resolve(key));
+  }
+  async delete(key: string) {
+    await rm(this.resolve(key), { force: true });
+  }
+}
+
+export const storage: StorageDriver = new LocalDriver();
+
+/** Allowed uploads, verified by magic bytes — never by the client-provided type. */
+const SIGNATURES: { mime: string; ext: string; test: (b: Buffer) => boolean }[] = [
+  { mime: "image/png", ext: "png", test: (b) => b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) },
+  { mime: "image/jpeg", ext: "jpg", test: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
+  { mime: "image/gif", ext: "gif", test: (b) => b.subarray(0, 6).toString("ascii").startsWith("GIF8") },
+  { mime: "image/webp", ext: "webp", test: (b) => b.subarray(0, 4).toString("ascii") === "RIFF" && b.subarray(8, 12).toString("ascii") === "WEBP" },
+  { mime: "application/pdf", ext: "pdf", test: (b) => b.subarray(0, 5).toString("ascii") === "%PDF-" },
+];
+
+const TEXT_TYPES: Record<string, string> = { txt: "text/plain", md: "text/markdown", csv: "text/csv", json: "application/json" };
+
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+export function detectType(data: Buffer, fileName: string): { mime: string; ext: string } | null {
+  const sig = SIGNATURES.find((s) => s.test(data));
+  if (sig) return { mime: sig.mime, ext: sig.ext };
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  if (TEXT_TYPES[ext]) {
+    // Must be valid UTF-8 text without NUL bytes.
+    const sample = data.subarray(0, 4096);
+    if (sample.includes(0)) return null;
+    return { mime: TEXT_TYPES[ext], ext };
+  }
+  return null;
+}
+
+export async function saveUpload(input: { organizationId: string; workspaceId?: string | null; userId?: string | null; fileName: string; data: Buffer; purpose: string }) {
+  if (input.data.byteLength > MAX_UPLOAD_BYTES) throw new UserFacingError("file_too_large");
+  const type = detectType(input.data, input.fileName);
+  if (!type) throw new UserFacingError("file_type");
+  const key = `${input.organizationId}/${new Date().toISOString().slice(0, 7)}/${randomUUID()}.${type.ext}`;
+  await storage.put(key, input.data, type.mime);
+  return db.fileObject.create({
+    data: {
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId ?? null,
+      storageKey: key,
+      fileName: input.fileName.replace(/[^\p{L}\p{N}._ -]/gu, "_").slice(0, 200),
+      mimeType: type.mime,
+      sizeBytes: input.data.byteLength,
+      sha256: sha256(input.data),
+      purpose: input.purpose,
+      uploadedById: input.userId ?? null,
+    },
+  });
+}
+
+/** Short-lived signed URL; the file route verifies the signature before serving. */
+export function signedFileUrl(fileId: string, ttlSeconds = 3600) {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  return `/api/files/${fileId}?exp=${exp}&sig=${hmac(`${fileId}:${exp}`)}`;
+}
+
+export function verifyFileSignature(fileId: string, exp: string | null, sig: string | null) {
+  if (!exp || !sig || Number(exp) < Date.now() / 1000) return false;
+  return safeEqual(sig, hmac(`${fileId}:${exp}`));
+}

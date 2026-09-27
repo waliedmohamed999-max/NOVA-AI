@@ -6,8 +6,8 @@ import { createContentFromPlan, notifyContentReady } from "../../content/service
 import { audit } from "../../audit";
 import { defineWorkflow, type RunContext } from "../runtime";
 import { brainPrompt, loadBrain, pillarsOf, type BrainSnapshot } from "../brain";
-import { campaignPlanSchema, contentPlanSchema, type PlannedPost } from "../schemas";
-import { offlineCampaign, offlineContentPlan } from "../offline-content";
+import { campaignPlanSchema, contentPlanSchema, plannedPostSchema, type PlannedPost } from "../schemas";
+import { offlineCampaign, offlineContentPlan, offlinePost } from "../offline-content";
 import { performanceDigest } from "../../analytics/digest";
 
 export const CONTENT_PLAN_STEPS = [
@@ -220,6 +220,46 @@ defineWorkflow("campaign", {
       ],
       entity: { type: "Campaign", id: campaign.id },
       offline: plan.offline,
+    };
+  },
+});
+
+defineWorkflow("content_rewrite", {
+  agent: "CONTENT_STRATEGIST",
+  steps: ["reviewing_business", "writing_content"],
+  async run(ctx) {
+    const id = String(ctx.params.contentItemId);
+    const item = await db.contentItem.findFirstOrThrow({ where: { id, ...ctx.scope } });
+    const b = await ctx.step("reviewing_business", () => loadBrain(ctx.scope));
+    const res = await ctx.step("writing_content", () =>
+      aiStructured(ctx.ai, {
+        task: "COPYWRITING",
+        schemaName: "rewrite",
+        schema: plannedPostSchema,
+        system: WRITER_SYSTEM(b),
+        prompt: [
+          `Rewrite this ${item.platform} ${item.format} post with a fresh angle and a stronger hook. Keep the same pillar ("${item.pillar ?? ""}") and intent.`,
+          ctx.input && `Owner's note: ${ctx.input}`,
+          `Current hook: ${item.hook ?? ""}`,
+          `Current caption:\n${item.caption}`,
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
+        offline: () => ({ ...offlinePost(b, item.currentVersion + 3, { platform: item.platform as PlannedPost["platform"], pillar: item.pillar ?? undefined }), format: item.format }),
+      }),
+    );
+    const { editContent } = await import("../../content/service");
+    const version = await editContent(ctx.scope, id, { hook: res.data.hook, caption: res.data.caption, cta: res.data.cta, hashtags: res.data.hashtags }, { agent: "CONTENT_STRATEGIST", changeNote: `Regenerated (${res.generatedBy})` });
+    await db.contentItem.update({ where: { id }, data: { designBrief: res.data.designBrief as Prisma.InputJsonValue, aiRationale: res.data.rationale } });
+    await ctx.task("CONTENT_STRATEGIST", b.locale === "ar" ? `أعاد كتابة "${item.title}"` : `Rewrote "${item.title}"`, { type: "ContentItem", id });
+    return {
+      type: "content_plan",
+      title: res.data.title,
+      summary: res.data.hook,
+      actions: [{ label: "review", href: `/content/${id}`, primary: true }],
+      entity: { type: "ContentBatch", id },
+      stats: [{ label: "version", value: version }],
+      offline: res.offline,
     };
   },
 });
