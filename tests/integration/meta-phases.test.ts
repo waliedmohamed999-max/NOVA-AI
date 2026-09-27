@@ -147,3 +147,19 @@ describe("no personal publishing", () => {
     expect(await db.integrationAccount.count({ where: { organizationId: t.organization.id } })).toBe(0);
   });
 });
+
+describe("identity state survives background jobs", () => {
+  it("the periodic sync skips a Meta identity and never turns it into a Page-less 'channel'", async () => {
+    const { syncAll, syncIntegration } = await import("@/server/social/sync");
+    const t = await makeTenant();
+    mockMeta(["public_profile"]);
+    await login(t);
+    const fb = await db.integration.findFirstOrThrow({ where: { ...t.scope, provider: "FACEBOOK" } });
+    expect(await syncIntegration(fb.id)).toEqual({ skipped: true });
+    await syncAll();
+    expect(await db.job.count({ where: { organizationId: t.organization.id, type: "social.sync_integration" } })).toBe(0);
+    expect((await db.integration.findUniqueOrThrow({ where: { id: fb.id } })).statusMessage).toBe("identity_only");
+    expect((await loadConnections(t.scope, false)).cards.find((c) => c.platform === "FACEBOOK")!.state).toBe("identity");
+    expect((await getUsage(t.organization.id)).socialChannels.used).toBe(0);
+  });
+});

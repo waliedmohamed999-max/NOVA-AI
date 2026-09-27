@@ -42,6 +42,8 @@ export async function syncIntegration(integrationId: string) {
   const integration = await db.integration.findUniqueOrThrow({ where: { id: integrationId }, include: { accounts: { where: { isActive: true } } } });
   const scope = { organizationId: integration.organizationId, workspaceId: integration.workspaceId };
   if (integration.status !== "CONNECTED") return { skipped: true };
+  // A Meta identity without Pages has nothing to sync, and its state must not be cleared.
+  if (integration.statusMessage === "identity_only") return { skipped: true };
   const provider = providerForPlatform(integration.provider);
   if (!provider) return { skipped: true };
   let posts = 0;
@@ -78,7 +80,8 @@ export async function syncIntegration(integrationId: string) {
         });
       }
     }
-    await db.integration.update({ where: { id: integration.id }, data: { lastSyncAt: new Date(), statusMessage: null } });
+    // Clears a previous error message only; never the identity-only marker.
+    await db.integration.updateMany({ where: { id: integration.id, OR: [{ statusMessage: null }, { statusMessage: { not: "identity_only" } }] }, data: { lastSyncAt: new Date(), statusMessage: null } });
   } catch (err) {
     await markIntegrationError(scope, integration.id, err);
     logger.warn({ integrationId }, "sync failed");
@@ -89,7 +92,10 @@ export async function syncIntegration(integrationId: string) {
 }
 
 export async function syncAll() {
-  const integrations = await db.integration.findMany({ where: { status: "CONNECTED", provider: { in: ["INSTAGRAM", "FACEBOOK", "LINKEDIN", "TIKTOK"] } }, select: { id: true, organizationId: true, workspaceId: true } });
+  const integrations = await db.integration.findMany({
+    where: { status: "CONNECTED", provider: { in: ["INSTAGRAM", "FACEBOOK", "LINKEDIN", "TIKTOK"] }, OR: [{ statusMessage: null }, { statusMessage: { not: "identity_only" } }] },
+    select: { id: true, organizationId: true, workspaceId: true },
+  });
   for (const i of integrations) await enqueue("social.sync_integration", { integrationId: i.id, organizationId: i.organizationId, workspaceId: i.workspaceId }, { organizationId: i.organizationId, workspaceId: i.workspaceId, dedupeKey: `sync:${i.id}:${new Date().toISOString().slice(0, 13)}` });
   return { queued: integrations.length };
 }
