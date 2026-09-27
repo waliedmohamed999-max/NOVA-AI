@@ -1,6 +1,6 @@
 # Deployment
 
-> Production readiness is blocked by the missing Stripe implementation and by real-provider validation that has not been done yet (see "Blockers" below). This guide describes how the pieces are meant to run. It does not certify a production launch.
+> This guide describes how the pieces are meant to run. It does not certify a production launch: live provider validation on HTTPS staging, live Stripe, real storage/email and a production backup-restore drill are still pending (see "Blockers" below and docs/STAGING.md).
 
 ## Components
 
@@ -85,19 +85,16 @@ See `.env.example`. At minimum:
 
 ## Blockers
 
-- **Payments (Stripe):**
-  - What exists:
-    - the `PaymentProvider` interface;
-    - `setPaymentProvider()`;
-    - `confirmPlanChange()`;
-    - an idempotency-ready `billing_events` table (unique `provider + externalId`);
-    - the `invoices` table.
-  - What is missing: the Stripe adapter and webhook.
-  - Until they exist, plan changes return `billing_not_configured`. Nothing is charged or simulated.
-- **Real-provider validation:**
-  - Meta, LinkedIn, TikTok, OpenAI and Anthropic have only been exercised with mocked HTTP or the offline AI provider.
-  - S3 has been exercised against MinIO and the reference signing vectors, not yet against AWS or R2.
-  - Each needs a real account test before launch. Meta and TikTok also require app review.
+- **Payments (Stripe): implemented, not live-validated.**
+  - Built: `StripePaymentProvider` (checkout, in-place upgrade/downgrade, cancel at period end, portal) and `/api/webhooks/stripe` (signature, exactly-once via `billing_events`, state re-read from Stripe, invoices).
+  - Tested only with the Stripe API mocked.
+  - Payments stay off (`billing_not_configured`) until `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and the price ids are set.
+  - Needs a Stripe test-mode run on HTTPS staging (docs/STAGING.md step 7), then live keys.
+- **Real-provider validation:** see the readiness matrix on `/admin/providers` — every YES there comes from a recorded live call.
+  - Live so far: LinkedIn connection (member posting permission granted), Meta app credentials + identity login.
+  - Pending: OpenAI (no key), Instagram Direct (no app credentials), Facebook Pages (Meta must enable Page management), TikTok, Google, Microsoft, WhatsApp, real email provider, S3/R2.
+  - Meta, TikTok and Google sensitive scopes also require app review / verification.
+- **Backups:** scripts and a verified local restore exist (docs/BACKUPS.md); a production restore drill has not been run.
 
 ## Release checklist
 
@@ -106,7 +103,7 @@ See `.env.example`. At minimum:
 3. `npm run build`
 4. `npm run db:migrate`
 5. Deploy web and worker
-6. Register OAuth redirect URIs (`<APP_URL>/api/integrations/{meta|linkedin|tiktok}/callback`, `<APP_URL>/api/auth/google/callback`)
+6. Register every URL in the callback matrix (`/admin/providers` → Callback & URL matrix, or docs/STAGING.md)
 7. Verify:
    - the sign-up email arrives;
    - `/admin/providers` shows the expected Configured / Missing states;

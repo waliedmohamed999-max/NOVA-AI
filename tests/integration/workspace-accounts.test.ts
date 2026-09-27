@@ -48,7 +48,6 @@ afterEach(() => {
 });
 
 const GMAIL_SEND = "https://www.googleapis.com/auth/gmail.send";
-const CAL = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy"];
 
 function google(granted: string[]): Handler {
   return (url) => {

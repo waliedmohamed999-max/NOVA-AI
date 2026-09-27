@@ -219,9 +219,12 @@ Capabilities are computed from **granted** scopes, never from requested ones. Fo
 | Anthropic | text, structured, stream, refusal fallbacks | offline provider used locally | router tested | ✗ pending (no key in this environment) |
 | Email (SMTP) | verification, magic link, reset, invitations, notifications, sales replies | ✓ via Mailpit | — | n/a |
 | Website lead capture | embed + public API | ✓ manual + automated | ✓ | n/a |
-| WhatsApp / social DMs | `MessageChannel` adapters report "not configured" | — | — | ✗ |
+| Google (Gmail + Calendar) | OAuth + PKCE, identity first, incremental gmail.send / calendar scopes, send email, free/busy, create/update/cancel events | ✓ UI | ✓ mocked Google APIs | ✗ pending (no Google OAuth credentials for account connections) |
+| Microsoft (Outlook + Calendar) | OAuth + PKCE (tenant configurable), incremental Mail.Send / Calendars.ReadWrite, Graph sendMail, getSchedule, events | ✓ UI | ✓ mocked Graph | ✗ pending |
+| WhatsApp Business Platform | Cloud API: signed webhook + verify challenge, inbound → lead/conversation, delivery statuses, 24h window, templates, admin number linking | — | ✓ signature/idempotency/window tests | ✗ pending (no WhatsApp credentials) |
+| Instagram / Facebook DMs | `MessageChannel` reports "not configured" until messaging permissions pass App Review | — | — | ✗ |
 | File storage (S3/R2) | SigV4 driver: put/get/delete/presign, org-scoped keys | ✓ MinIO | ✓ AWS SigV4 reference vectors + mocked fetch | ✗ pending (AWS S3 / R2 account) |
-| Payments (Stripe) | `PaymentProvider` interface, `setPaymentProvider()`, `confirmPlanChange()`, idempotency-ready `billing_events`, `invoices` table | — | — | ✗ **Stripe adapter + webhook are NOT implemented** |
+| Payments (Stripe) | Checkout, portal, upgrade/downgrade with proration, cancel at period end, verified idempotent webhook, invoice sync | — | ✓ mocked Stripe API + signature tests | ✗ **pending: no Stripe keys; needs a test-mode run on HTTPS staging** |
 
 ### Provider setup
 
@@ -330,8 +333,10 @@ Implemented:
 - downgrade validation (`canMoveTo`);
 - `billing_events` for idempotent webhooks and `invoices` for invoice records.
 
-Not bundled: a payment-processor adapter. `PaymentProvider` (`src/server/billing/provider.ts`) is the boundary. Until an adapter is plugged in with `setPaymentProvider()`, plan changes return `billing_not_configured` and nothing is charged or simulated. A future adapter should:
-- create checkout sessions;
-- verify webhook signatures;
-- store each event once in `billing_events` (unique `provider + externalId`);
-- call `confirmPlanChange()` and upsert `invoices`.
+Stripe (`src/server/billing/stripe.ts`, webhook `/api/webhooks/stripe`):
+- one Stripe customer per organization; Checkout for a new subscription; plan changes on an existing subscription happen in place with proration; cancel at period end; billing portal;
+- idempotency keys on every write;
+- the webhook verifies `Stripe-Signature` (5-minute tolerance), stores each event once in `billing_events`, re-reads the subscription from Stripe (so out-of-order events are safe), applies the plan only while the subscription is active/trialing, moves to STARTER when it ends, and upserts `invoices`;
+- **plans change only from verified webhooks**, never from the redirect back from Checkout.
+
+Payments are off (`billing_not_configured`, nothing charged or simulated) until `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and at least `STRIPE_PRICE_GROWTH` are set.
