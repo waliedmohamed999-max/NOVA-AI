@@ -66,6 +66,11 @@ export const storage: StorageDriver = {
   },
 };
 
+/** Whether the configured driver can hand out direct presigned URLs (S3 / R2) or serves through the app. */
+export function supportsPresign() {
+  return Boolean((driver ??= createDriver()).presignGet);
+}
+
 /** Test hook. */
 export function setStorageDriver(d: StorageDriver | null) {
   driver = d;

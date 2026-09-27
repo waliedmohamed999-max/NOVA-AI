@@ -1,5 +1,12 @@
 import { form, providerFetch } from "../http";
-import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type ConnectedAccount, type NormalizedMetrics, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
+import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
+
+/** What each TikTok capability needs. Direct (public) posting additionally needs TikTok's app audit. */
+export const TIKTOK_CAPABILITY_SCOPES: Partial<Record<Capability["key"], string[]>> = {
+  identity: ["user.info.basic"],
+  publish: ["video.publish"],
+  metrics: ["video.list", "user.info.stats"],
+};
 
 /**
  * TikTok for Developers: Login Kit (OAuth v2) + Content Posting API + Display API.
@@ -55,6 +62,32 @@ export class TikTokProvider implements SocialProvider {
 
   exchangeCode({ code, redirectUri, codeVerifier }: { code: string; redirectUri: string; codeVerifier?: string }) {
     return this.token({ code, grant_type: "authorization_code", redirect_uri: redirectUri, ...(codeVerifier ? { code_verifier: codeVerifier } : {}) });
+  }
+
+  capabilities(_account: unknown, scopes: string[]): Capability[] {
+    return (Object.entries(TIKTOK_CAPABILITY_SCOPES) as [Capability["key"], string[]][]).map(([key, need]) =>
+      need.every((s) => scopes.includes(s)) ? { key, available: true } : { key, available: false, reason: key === "publish" ? "requires_approval" : "permission_missing" },
+    );
+  }
+
+  async grantedScopes(token: TokenSet) {
+    return token.scopes ?? [];
+  }
+
+  async getProfile(token: TokenSet): Promise<ProviderProfile> {
+    const [a] = await this.listAccounts(token);
+    return { id: a.externalId, name: a.handle ?? a.name, avatarUrl: a.avatarUrl ?? null };
+  }
+
+  /** A profile read validates the token; TikTok has no token-introspection endpoint for clients. */
+  async checkConnection(token: TokenSet): Promise<ConnectionCheck> {
+    try {
+      const profile = await this.getProfile(token);
+      return { valid: true, scopes: token.scopes ?? [], profile, expiresAt: token.expiresAt ?? null };
+    } catch (err) {
+      if (err instanceof ProviderError && err.kind === "expired") return { valid: false, scopes: [], detail: "token_invalid" };
+      throw err;
+    }
   }
 
   async listAccounts(token: TokenSet): Promise<ConnectedAccount[]> {

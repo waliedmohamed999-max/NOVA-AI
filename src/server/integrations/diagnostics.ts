@@ -7,6 +7,12 @@ import { SOCIAL_PROVIDERS } from "./registry";
 import { accountRef, providerIdFor, tokenForAccount } from "./service";
 import { decryptSecret } from "../crypto";
 import { ProviderError, type Capability } from "./types";
+import { recordValidation } from "../admin/readiness";
+import { InstagramProvider } from "./providers/instagram";
+
+/** Readiness dashboard key for an integration provider (meta → facebook). */
+const readinessKey = (id: string) => (id === "meta" ? "facebook" : id);
+const detailOf = (err: unknown) => (err instanceof ProviderError ? `${err.kind} (${err.status ?? "-"}): ${err.detail ?? err.message}` : err instanceof Error ? err.message : String(err));
 
 /**
  * Platform-admin connection diagnostics for the admin's OWN workspace connections.
@@ -26,7 +32,13 @@ export type ConnectionTestResult = {
   error: string | null;
 };
 
-export async function testConnection(scope: TenantScope, integrationId: string): Promise<ConnectionTestResult> {
+export async function testConnection(scope: TenantScope, integrationId: string, actorId?: string): Promise<ConnectionTestResult> {
+  const r = await runConnectionTest(scope, integrationId);
+  await recordValidation({ provider: readinessKey(r.provider), check: "connection", ok: r.valid, detail: r.valid ? `${r.profile?.name ?? "ok"}; scopes: ${r.scopes.join(" ")}` : r.error, organizationId: scope.organizationId, actorId });
+  return r;
+}
+
+async function runConnectionTest(scope: TenantScope, integrationId: string): Promise<ConnectionTestResult> {
   const integration = await db.integration.findFirst({ where: { id: integrationId, ...scope } });
   if (!integration) throw new UserFacingError("item_not_found");
   const providerId = providerIdFor(integration.provider);
@@ -78,12 +90,44 @@ export async function publishTestPost(scope: TenantScope, userId: string, accoun
     result = await provider.publishPost(accountRef(account), token, { format, caption: TEST_POST_TEXT, mediaUrls: [] });
   } catch (err) {
     logger.warn({ accountId, err: err instanceof ProviderError ? { kind: err.kind, status: err.status, detail: err.detail } : String(err) }, "test post failed");
-    throw new UserFacingError("integration_error");
+    await recordValidation({ provider: readinessKey(provider.id), check: "publish_test_post", ok: false, detail: detailOf(err), organizationId: scope.organizationId, actorId: userId });
+    throw new UserFacingError("integration_error", { cause: err });
   }
   if (!result.externalId) throw new UserFacingError("integration_error");
+  // Stored as a real social post (visible in /social with its external id), not only in diagnostics.
+  const now = new Date();
+  await db.socialPost.upsert({
+    where: { workspaceId_platform_externalId: { workspaceId: scope.workspaceId, platform: account.platform!, externalId: result.externalId } },
+    create: { ...scope, integrationAccountId: account.id, platform: account.platform!, externalId: result.externalId, permalink: result.permalink ?? null, format, caption: TEST_POST_TEXT, pillar: "integration_test", publishedAt: now },
+    update: { permalink: result.permalink ?? null },
+  });
+  await recordValidation({ provider: readinessKey(provider.id), check: "publish_test_post", ok: true, detail: `${account.platform} ${result.externalId}`, organizationId: scope.organizationId, actorId: userId });
   const meta = (account.metadata ?? {}) as { testPosts?: unknown[] };
   const testPosts = [...(Array.isArray(meta.testPosts) ? meta.testPosts : []), { externalId: result.externalId, permalink: result.permalink ?? null, at: new Date().toISOString() }].slice(-10);
   await db.integrationAccount.update({ where: { id: account.id }, data: { metadata: { ...meta, testPosts } as object } });
   await audit({ ...scope, category: "SECURITY", actorType: "USER", actorId: userId, action: "integration.test_post", entityType: "IntegrationAccount", entityId: account.id, summary: `Published integration test post ${result.externalId} on ${account.platform}` });
   return result;
+}
+
+/**
+ * Instagram admin feature tests (read-only). Offered only when the connection has the permission —
+ * otherwise it says which permission is missing instead of calling Instagram.
+ */
+export async function instagramFeatureTest(scope: TenantScope, userId: string, accountId: string, feature: "insights" | "comments" | "messages") {
+  const account = await db.integrationAccount.findFirst({ where: { id: accountId, ...scope, platform: "INSTAGRAM", isActive: true }, include: { integration: true } });
+  if (!account || account.integration.status !== "CONNECTED") throw new UserFacingError("item_not_found");
+  const provider = SOCIAL_PROVIDERS.instagram as InstagramProvider;
+  const capability = feature === "insights" ? "metrics" : feature;
+  const cap = provider.capabilities(account, account.integration.scopes).find((c) => c.key === capability);
+  if (!cap?.available) throw new UserFacingError("capability_unavailable");
+  const token = await tokenForAccount(account.integrationId, account.id);
+  if (!token) throw new UserFacingError("integration_expired");
+  try {
+    const detail = await provider.featureCheck(accountRef(account), token, feature);
+    await recordValidation({ provider: "instagram", check: feature, ok: true, detail, organizationId: scope.organizationId, actorId: userId });
+    return { detail };
+  } catch (err) {
+    await recordValidation({ provider: "instagram", check: feature, ok: false, detail: detailOf(err), organizationId: scope.organizationId, actorId: userId });
+    throw new UserFacingError("integration_error", { cause: err });
+  }
 }

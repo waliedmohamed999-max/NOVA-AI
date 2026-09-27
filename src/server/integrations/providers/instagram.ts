@@ -235,6 +235,26 @@ export class InstagramProvider implements SocialProvider {
     }
   }
 
+  /**
+   * Read-only live checks for the admin diagnostics (insights / comments / messages). Each call needs its
+   * permission; nothing is written, replied to or published.
+   */
+  async featureCheck(account: AccountRef, token: TokenSet, feature: "insights" | "comments" | "messages"): Promise<string> {
+    const id = account.externalId;
+    if (feature === "insights") {
+      const r = await get<{ data: { name: string }[] }>(`/${id}/insights`, token.accessToken, { metric: "reach", period: "day" });
+      return `insights: ${r.data.map((d) => d.name).join(", ") || "no data yet"}`;
+    }
+    if (feature === "comments") {
+      const media = await get<{ data: { id: string; comments_count?: number }[] }>(`/${id}/media`, token.accessToken, { fields: "id,comments_count", limit: "1" });
+      if (!media.data.length) return "comments: no media yet (permission accepted)";
+      const c = await get<{ data: unknown[] }>(`/${media.data[0].id}/comments`, token.accessToken, { limit: "5" });
+      return `comments: read ${c.data.length} on latest media`;
+    }
+    const conv = await get<{ data: unknown[] }>(`/${id}/conversations`, token.accessToken, { platform: "instagram", limit: "1" });
+    return `messages: ${conv.data.length} conversation(s) readable`;
+  }
+
   async getAccountMetrics(account: AccountRef, token: TokenSet): Promise<AccountMetrics | null> {
     const me = await this.me(token.accessToken);
     return { followers: me.followers_count ?? null, reach: null, impressions: null, profileViews: null, raw: { media_count: me.media_count ?? null } };

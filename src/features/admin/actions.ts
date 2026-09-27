@@ -8,7 +8,7 @@ import { audit } from "@/server/audit";
 import { mapError, type ActionResult } from "@/server/action";
 import { resolveTenant } from "@/server/context";
 import { enforceRateLimit } from "@/server/rate-limit";
-import { publishTestPost, testConnection, type ConnectionTestResult } from "@/server/integrations/diagnostics";
+import { instagramFeatureTest, publishTestPost, testConnection, type ConnectionTestResult } from "@/server/integrations/diagnostics";
 
 /** Re-queues a dead/failed job. Platform admins only. */
 export async function retryJobAction(input: { id: string }): Promise<ActionResult<undefined>> {
@@ -35,7 +35,7 @@ export async function testConnectionAction(input: { integrationId: string }): Pr
   if (!a) return { ok: false, error: "forbidden" };
   try {
     const { integrationId } = z.object({ integrationId: z.string() }).parse(input);
-    return { ok: true, data: await testConnection(a.scope, integrationId) };
+    return { ok: true, data: await testConnection(a.scope, integrationId, a.userId) };
   } catch (err) {
     return mapError(err, "admin.test_connection");
   }
@@ -54,30 +54,128 @@ export async function publishTestPostAction(input: { accountId: string; confirma
   }
 }
 
-/** Admin-only live checks of the OpenAI configuration. Nothing is published; the test image is a private asset. */
+
+/** The provider's own error text for the admin (never shown to customers). Tokens are redacted when stored. */
+function providerDetail(err: unknown): string {
+  let e: unknown = err;
+  const parts: string[] = [];
+  for (let i = 0; e && i < 4; i++) {
+    if (e instanceof Error) {
+      parts.push(`${e.name}: ${e.message}`);
+      const d = (e as { detail?: unknown }).detail;
+      if (d) parts.push(String(d));
+      e = e.cause;
+    } else {
+      parts.push(String(e));
+      break;
+    }
+  }
+  return parts.join(" ← ").slice(0, 500);
+}
+
+type ImageTestData = { model: string; bytes: number; url: string; cost: { basis: string; costMicro: string; pricingVersion: string; usage: { textInputTokens: number; imageInputTokens: number; outputTokens: number } } };
+
+/** Admin-only live checks of the OpenAI configuration. Nothing is published; test images are private assets. */
 export async function openAiTestTextAction(): Promise<ActionResult<{ model: string; reply: string; inputTokens: number; outputTokens: number }>> {
   const a = await adminScope();
   if (!a) return { ok: false, error: "forbidden" };
+  const { recordValidation } = await import("@/server/admin/readiness");
   try {
     const { aiText, contentAiConfigured } = await import("@/server/ai");
     if (!contentAiConfigured()) return { ok: false, error: "content_ai_not_configured" };
     const r = await aiText({ ...a.scope }, { task: "SUMMARIZATION", quality: "fast", realOnly: true, promptRef: { key: "admin_test", version: "admin_test@1" }, prompt: "Reply with exactly: NOVA OK", maxTokens: 200 });
+    await recordValidation({ provider: "openai", check: "generate_text", ok: true, detail: `${r.model}: ${r.usage.inputTokens} in / ${r.usage.outputTokens} out`, actorId: a.userId, organizationId: a.scope.organizationId });
     return { ok: true, data: { model: r.model, reply: r.text.slice(0, 80), inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens } };
   } catch (err) {
+    await recordValidation({ provider: "openai", check: "generate_text", ok: false, detail: providerDetail(err), actorId: a.userId, organizationId: a.scope.organizationId });
     return mapError(err, "admin.openai_text");
   }
 }
 
-export async function openAiTestImageAction(): Promise<ActionResult<{ model: string; bytes: number; url: string; cost: { basis: string; costMicro: string; pricingVersion: string; usage: { textInputTokens: number; imageInputTokens: number; outputTokens: number } } }>> {
+async function imageTest(kind: "generate_image" | "edit_image"): Promise<ActionResult<ImageTestData>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  const { recordValidation } = await import("@/server/admin/readiness");
+  try {
+    await enforceRateLimit(`admin-test-image:${a.userId}`, 3, 3600);
+    const { adminTestImage, adminTestImageEdit } = await import("@/server/studio/images");
+    const { signedFileUrl } = await import("@/server/storage");
+    const r = kind === "generate_image" ? await adminTestImage(a.scope, a.userId) : await adminTestImageEdit(a.scope, a.userId);
+    await recordValidation({ provider: "openai", check: kind, ok: true, detail: `${r.model}: ${r.bytes} bytes`, costMicro: BigInt(r.cost.costMicro), actorId: a.userId, organizationId: a.scope.organizationId });
+    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId), cost: r.cost } };
+  } catch (err) {
+    await recordValidation({ provider: "openai", check: kind, ok: false, detail: providerDetail(err), actorId: a.userId, organizationId: a.scope.organizationId });
+    return mapError(err, `admin.openai_${kind}`);
+  }
+}
+
+export async function openAiTestImageAction() {
+  return imageTest("generate_image");
+}
+
+export async function openAiTestImageEditAction() {
+  return imageTest("edit_image");
+}
+
+/** Platform admin: validate a provider's credentials against its real API (no customer data, nothing published). */
+export async function validateProviderAction(input: { provider: string }): Promise<ActionResult<{ ok: boolean; detail: string | null }>> {
+  const session = await getSession();
+  if (!session?.user.isPlatformAdmin) return { ok: false, error: "forbidden" };
+  try {
+    const { READINESS_PROVIDERS, validateCredentials } = await import("@/server/admin/readiness");
+    const { provider } = z.object({ provider: z.enum(READINESS_PROVIDERS) }).parse(input);
+    await enforceRateLimit(`admin-validate:${session.userId}`, 30, 3600);
+    const tenant = await resolveTenant();
+    const row = await validateCredentials(provider, { userId: session.userId, organizationId: tenant?.organization.id ?? null });
+    revalidatePath("/admin/providers");
+    return { ok: true, data: { ok: row.ok, detail: row.detail } };
+  } catch (err) {
+    return mapError(err, "admin.validate_provider");
+  }
+}
+
+/** Platform admin: storage upload → signed URL → delete on a test prefix of the configured bucket. */
+export async function storageTestAction(): Promise<ActionResult<{ ok: boolean; driver: string; steps: { step: string; ok: boolean; detail?: string }[] }>> {
+  const session = await getSession();
+  if (!session?.user.isPlatformAdmin) return { ok: false, error: "forbidden" };
+  try {
+    await enforceRateLimit(`admin-storage-test:${session.userId}`, 10, 3600);
+    const { storageRoundtrip } = await import("@/server/admin/readiness");
+    const r = await storageRoundtrip({ userId: session.userId });
+    revalidatePath("/admin/providers");
+    return { ok: true, data: r };
+  } catch (err) {
+    return mapError(err, "admin.storage_test");
+  }
+}
+
+/** Platform admin: link a WhatsApp Cloud API phone number to the admin's current workspace. */
+export async function linkWhatsAppNumberAction(input: { phoneNumberId: string; wabaId?: string }): Promise<ActionResult<{ displayPhone: string | null; verifiedName: string | null }>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  const { recordValidation } = await import("@/server/admin/readiness");
+  try {
+    const { phoneNumberId, wabaId } = z.object({ phoneNumberId: z.string().trim().regex(/^\d{5,25}$/), wabaId: z.string().trim().regex(/^\d{5,25}$/).optional().or(z.literal("")) }).parse(input);
+    const { linkNumber } = await import("@/server/whatsapp/service");
+    const n = await linkNumber(a.scope, phoneNumberId, wabaId || null);
+    await recordValidation({ provider: "whatsapp", check: "phone_number", ok: true, detail: `${n.displayPhone ?? phoneNumberId} (${n.verifiedName ?? "unverified name"})`, actorId: a.userId, organizationId: a.scope.organizationId });
+    await audit({ ...a.scope, category: "SECURITY", actorType: "USER", actorId: a.userId, action: "whatsapp.number_linked", summary: `Linked WhatsApp number ${n.displayPhone ?? phoneNumberId}` });
+    revalidatePath("/admin/providers");
+    return { ok: true, data: { displayPhone: n.displayPhone, verifiedName: n.verifiedName } };
+  } catch (err) {
+    await recordValidation({ provider: "whatsapp", check: "phone_number", ok: false, detail: providerDetail(err), actorId: a.userId, organizationId: a.scope.organizationId });
+    return mapError(err, "admin.whatsapp_link");
+  }
+}
+
+export async function instagramFeatureTestAction(input: { accountId: string; feature: "insights" | "comments" | "messages" }): Promise<ActionResult<{ detail: string }>> {
   const a = await adminScope();
   if (!a) return { ok: false, error: "forbidden" };
   try {
-    await enforceRateLimit(`admin-test-image:${a.userId}`, 3, 3600);
-    const { adminTestImage } = await import("@/server/studio/images");
-    const { signedFileUrl } = await import("@/server/storage");
-    const r = await adminTestImage(a.scope, a.userId);
-    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId), cost: r.cost } };
+    const { accountId, feature } = z.object({ accountId: z.string(), feature: z.enum(["insights", "comments", "messages"]) }).parse(input);
+    await enforceRateLimit(`admin-ig-test:${a.userId}`, 20, 3600);
+    return { ok: true, data: await instagramFeatureTest(a.scope, a.userId, accountId, feature) };
   } catch (err) {
-    return mapError(err, "admin.openai_image");
+    return mapError(err, "admin.instagram_feature");
   }
 }

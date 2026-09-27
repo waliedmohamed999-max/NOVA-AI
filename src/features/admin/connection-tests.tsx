@@ -11,7 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import type { ConnectionTestResult } from "@/server/integrations/diagnostics";
-import { publishTestPostAction, testConnectionAction } from "./actions";
+import { instagramFeatureTestAction, publishTestPostAction, testConnectionAction } from "./actions";
+
+const PROVIDER_LABEL: Record<string, string> = { LINKEDIN: "LinkedIn", INSTAGRAM: "Instagram", FACEBOOK: "Meta", TIKTOK: "TikTok", GOOGLE: "Google", MICROSOFT: "Microsoft" };
+/** Instagram feature tests and the capability each one needs; buttons appear only when it's granted. */
+const IG_FEATURES = [["insights", "metrics"], ["comments", "comments"], ["messages", "messages"]] as const;
 
 type Row = { id: string; provider: string; status: string; accounts: number };
 
@@ -24,6 +28,13 @@ export function ConnectionTests({ rows, testText, confirmWord }: { rows: Row[]; 
   const [typed, setTyped] = useState("");
   const [posted, setPosted] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
+  const [features, setFeatures] = useState<Record<string, string>>({});
+  const feature = (accountId: string, f: (typeof IG_FEATURES)[number][0]) =>
+    start(async () => {
+      const r = await instagramFeatureTestAction({ accountId, feature: f });
+      if (r.ok) setFeatures((x) => ({ ...x, [`${accountId}:${f}`]: r.data.detail }));
+      else toast.error(err(r.error));
+    });
   const err = (code: string) => (te.has(code as "unexpected") ? te(code as "unexpected") : code);
 
   const run = (id: string) => {
@@ -67,7 +78,7 @@ export function ConnectionTests({ rows, testText, confirmWord }: { rows: Row[]; 
                 <Badge tone={row.status === "CONNECTED" ? "success" : "danger"}>{row.status}</Badge>
               </div>
               <Button size="sm" variant="secondary" loading={busy === row.id} onClick={() => run(row.id)}>
-                {t("run", { provider: row.provider === "LINKEDIN" ? "LinkedIn" : row.provider === "INSTAGRAM" ? "Instagram" : "Meta" })}
+                {t("run", { provider: PROVIDER_LABEL[row.provider] ?? row.provider })}
               </Button>
             </div>
             {res && (
@@ -90,7 +101,7 @@ export function ConnectionTests({ rows, testText, confirmWord }: { rows: Row[]; 
                           <Badge tone="outline">{a.platform}</Badge> <span className="font-medium" dir="auto">{a.name}</span> {a.handle && <span className="text-ink-3" dir="ltr">{a.handle}</span>}
                           {!a.linked && <span className="ms-2 text-xs text-ink-4">{t("notLinked")}</span>}
                         </span>
-                        {a.id && a.active && a.platform !== "INSTAGRAM" && (
+                        {a.id && a.active && ["FACEBOOK", "LINKEDIN"].includes(a.platform) && (
                           <Button size="xs" variant="outline" onClick={() => setPublishing({ accountId: a.id!, label: `${a.platform} · ${a.name}` })}>{t("publish")}</Button>
                         )}
                         {a.platform === "INSTAGRAM" && <span className="text-xs text-ink-4">{t("igNeedsMedia")}</span>}
@@ -103,6 +114,14 @@ export function ConnectionTests({ rows, testText, confirmWord }: { rows: Row[]; 
                           </span>
                         ))}
                       </div>
+                      {a.id && a.active && a.platform === "INSTAGRAM" && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {IG_FEATURES.filter(([, cap]) => a.capabilities.some((c) => c.key === cap && c.available)).map(([f]) => (
+                            <Button key={f} size="xs" variant="outline" loading={pending} onClick={() => feature(a.id!, f)}>{t(`ig.${f}`)}</Button>
+                          ))}
+                        </div>
+                      )}
+                      {a.id && IG_FEATURES.map(([f]) => features[`${a.id}:${f}`] && <p key={f} className="mt-1 font-mono text-xs text-success" dir="ltr">{features[`${a.id}:${f}`]}</p>)}
                       {a.id && posted[a.id] && <p className="mt-2 text-xs text-success">{t("posted", { id: posted[a.id] })}</p>}
                     </li>
                   ))}

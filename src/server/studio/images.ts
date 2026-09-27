@@ -277,3 +277,25 @@ export async function adminTestImage(scope: TenantScope, userId: string) {
   await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_GENERATION", imageProvider().name, res, Date.now() - started, { key: "admin_test", version: "admin_test@1" });
   return { fileId: file.id, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
 }
+
+/**
+ * Admin-only live check of image *editing*: a plain generated test card is sent to the edit endpoint.
+ * Private asset, never published; cost recorded like any other edit.
+ */
+export async function adminTestImageEdit(scope: TenantScope, userId: string) {
+  if (!imagesConfigured()) throw new UserFacingError("image_not_configured");
+  const { default: sharp } = await import("sharp");
+  const base = await sharp({ create: { width: 1024, height: 1024, channels: 3, background: { r: 236, g: 240, b: 246 } } })
+    .composite([{ input: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><circle cx="512" cy="512" r="220" fill="#2f6f4f"/></svg>'), top: 0, left: 0 }])
+    .png()
+    .toBuffer();
+  const started = Date.now();
+  const res = await imageProvider()
+    .edit({ images: [base], prompt: "Turn the green circle into a small green plant in a white pot. Keep the plain light background. No text.", size: "1024x1024", quality: "fast" })
+    .catch((err) => {
+      throw new UserFacingError(err instanceof ImageProviderError ? err.code : "image_failed", { cause: err });
+    });
+  const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId, fileName: "openai-edit-test.png", data: res.data, purpose: "admin_test_image" });
+  await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_EDIT", imageProvider().name, res, Date.now() - started, { key: "admin_test", version: "admin_test@1" });
+  return { fileId: file.id, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
+}

@@ -616,7 +616,12 @@
       "confirmBody": "This publishes the text above to the real account. Type {word} to confirm.",
       "confirmLabel": "Type {word} to confirm",
       "publishNow": "Publish test post",
-      "posted": "Published — external post id {id}"
+      "posted": "Published — external post id {id}",
+      "ig": {
+        "insights": "Test insights",
+        "comments": "Test comments",
+        "messages": "Test messages"
+      }
     },
     "oauth": {
       "title": "OAuth diagnostics",
@@ -684,7 +689,39 @@
       "note": "Tests use the real API and cost a little. The test image is stored privately in your workspace and is never attached to a post or published.",
       "costTitle": "Image cost this month (all organizations)",
       "costEmpty": "No image generations this month.",
-      "costNote": "actual_usage = priced from the token usage OpenAI returned; estimated = fallback estimate when usage was missing or incomplete (not the provider's actual cost). Prices come from configuration."
+      "costNote": "actual_usage = priced from the token usage OpenAI returned; estimated = fallback estimate when usage was missing or incomplete (not the provider's actual cost). Prices come from configuration.",
+      "testImageEdit": "Test image edit"
+    },
+    "readiness": {
+      "title": "Provider readiness",
+      "intro": "What is configured, what the provider actually accepted, and what has been tested live. YES only appears after a real call succeeded and was recorded.",
+      "cols": {
+        "provider": "Provider",
+        "configured": "Configured",
+        "credentials": "Credentials",
+        "accounts": "Live accounts",
+        "lastSuccess": "Last success",
+        "lastError": "Last error",
+        "capabilities": "Capabilities",
+        "pending": "Pending external approval",
+        "liveTested": "Live tested"
+      },
+      "yes": "YES",
+      "no": "NO",
+      "valid": "Valid",
+      "invalid": "Rejected",
+      "notChecked": "Not checked",
+      "validate": "Validate",
+      "storageTest": "Upload / sign / delete",
+      "notes": {
+        "stripe_adapter": "Payments: see billing status",
+        "local_storage": "Local disk — not a production storage test"
+      },
+      "footnote": "Credential checks never publish, never connect customer accounts and don't cost money. Live product tests (test post, image generation) are separate buttons below.",
+      "waTitle": "WhatsApp Business number",
+      "waBody": "Link a Cloud API phone_number_id to your current workspace. It's verified with Meta first.",
+      "waLink": "Link number",
+      "waLinked": "Linked {phone}"
     }
   },
   "connect": {

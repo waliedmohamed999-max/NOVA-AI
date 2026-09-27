@@ -1,0 +1,123 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { db } from "@/server/db/client";
+import { providerReadiness, recordValidation, storageRoundtrip, validateCredentials } from "@/server/admin/readiness";
+import { setStorageDriver, type StorageDriver } from "@/server/storage";
+import { makeTenant } from "../support/factory";
+import { SOCIAL_PROVIDERS } from "@/server/integrations/registry";
+
+/** Readiness dashboard: every YES must come from a recorded validation. Provider HTTP is mocked. */
+const saved: Record<string, string | undefined> = {};
+function env(vars: Record<string, string>) {
+  for (const [k, v] of Object.entries(vars)) {
+    if (!(k in saved)) saved[k] = process.env[k];
+    process.env[k] = v;
+  }
+}
+const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status });
+beforeEach(async () => {
+  await db.providerValidation.deleteMany({});
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+  setStorageDriver(null);
+  for (const [k, v] of Object.entries(saved)) {
+    if (v === undefined) delete process.env[k];
+    else process.env[k] = v;
+    delete saved[k];
+  }
+});
+
+describe("provider readiness", () => {
+  it("nothing is valid or live tested until a real check succeeded", async () => {
+    const rows = await providerReadiness();
+    expect(rows.map((r) => r.provider)).toEqual(["openai", "linkedin", "instagram", "facebook", "tiktok", "google", "microsoft", "whatsapp", "email", "storage", "stripe"]);
+    for (const r of rows) {
+      expect(r.credentialsValid).toBeNull();
+      expect(r.liveTested).toBe(false);
+    }
+    expect(rows.find((r) => r.provider === "linkedin")!.pendingApproval[0]).toContain("Community Management");
+  });
+
+  it("validates OpenAI key and models, Google/Microsoft clients and TikTok client credentials", async () => {
+    env({ OPENAI_API_KEY: "sk-test-abcdefghijk", OPENAI_TEXT_MODEL: "gpt-5.1", OPENAI_IMAGE_MODEL_FAST: "gpt-image-1-mini", OPENAI_IMAGE_MODEL_QUALITY: "gpt-image-1", GOOGLE_CLIENT_ID: "g", GOOGLE_CLIENT_SECRET: "s", MICROSOFT_CLIENT_ID: "m", MICROSOFT_CLIENT_SECRET: "s", TIKTOK_CLIENT_KEY: "t", TIKTOK_CLIENT_SECRET: "s" });
+    let googleError = "invalid_grant";
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.startsWith("https://api.openai.com/v1/models/")) return url.endsWith("gpt-image-1") ? json({ error: { message: "The model `gpt-image-1` does not exist" } }, 404) : json({ id: "ok" });
+      if (url === "https://oauth2.googleapis.com/token") return json({ error: googleError, error_description: googleError === "invalid_client" ? "The OAuth client was not found." : "Bad Request" }, 400);
+      if (url.includes("login.microsoftonline.com")) return json({ error: "invalid_grant", error_codes: [9002313] }, 400);
+      if (url.startsWith("https://open.tiktokapis.com/v2/oauth/token/")) return json({ access_token: "clt.x", expires_in: 7200 });
+      return json({ error: "unmocked" }, 500);
+    }));
+    const actor = { userId: "admin-1" };
+    const openai = await validateCredentials("openai", actor);
+    expect(openai.ok).toBe(false);
+    expect(openai.detail).toContain("gpt-image-1 (404)");
+    expect((await validateCredentials("google", actor)).ok).toBe(true);
+    googleError = "invalid_client";
+    const bad = await validateCredentials("google", actor);
+    expect(bad.ok).toBe(false);
+    expect(bad.detail).toContain("invalid_client");
+    expect((await validateCredentials("microsoft", actor)).ok).toBe(true);
+    expect((await validateCredentials("tiktok", actor)).ok).toBe(true);
+
+    const rows = await providerReadiness();
+    expect(rows.find((r) => r.provider === "google")).toMatchObject({ credentialsValid: false, lastError: { check: "credentials" } });
+    expect(rows.find((r) => r.provider === "tiktok")).toMatchObject({ credentialsValid: true, liveTested: false });
+  });
+
+  it("an unconfigured provider is recorded as not configured, without calling anyone", async () => {
+    env({ STRIPE_SECRET_KEY: "", STRIPE_WEBHOOK_SECRET: "" });
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const r = await validateCredentials("stripe", { userId: "admin-1" });
+    expect(r).toMatchObject({ ok: false, live: false });
+    expect(r.detail).toContain("STRIPE_SECRET_KEY");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("never stores secrets in validation details", async () => {
+    const r = await recordValidation({ provider: "openai", check: "x", ok: false, detail: "Incorrect API key provided: sk-proj-abcdefghijklmnop; url?access_token=EAAB123&x=1; sk_live_abcdef" });
+    expect(r.detail).not.toMatch(/abcdefghijklmnop|EAAB123|sk_live_abcdef/);
+  });
+
+  it("storage test: upload, read, delete on a test prefix; local disk isn't counted as live", async () => {
+    const objects = new Map<string, Buffer>();
+    const mem: StorageDriver = {
+      name: "memory-s3",
+      put: async (k, d) => void objects.set(k, d),
+      get: async (k) => objects.get(k)!,
+      delete: async (k) => void objects.delete(k),
+    };
+    setStorageDriver(mem);
+    const r = await storageRoundtrip({ userId: "admin-1" });
+    expect(r.ok).toBe(true);
+    expect(objects.size).toBe(0);
+    const row = await db.providerValidation.findFirstOrThrow({ where: { provider: "storage" } });
+    expect(row).toMatchObject({ ok: true, live: true, check: "roundtrip" });
+    expect((await providerReadiness()).find((x) => x.provider === "storage")!.liveTested).toBe(true);
+  });
+});
+
+describe("LinkedIn test post", () => {
+  it("is stored as a real social post and recorded as a live validation", async () => {
+    env({ LINKEDIN_CLIENT_ID: "li", LINKEDIN_CLIENT_SECRET: "s" });
+    const t = await makeTenant();
+    const integration = await db.integration.create({ data: { ...t.scope, provider: "LINKEDIN", status: "CONNECTED", scopes: ["openid", "w_member_social"] } });
+    const account = await db.integrationAccount.create({ data: { ...t.scope, integrationId: integration.id, platform: "LINKEDIN", externalId: "urn:li:person:abc", name: "Walied", accountType: "linkedin_member", isActive: true } });
+    const { encryptSecret } = await import("@/server/crypto");
+    await db.integrationCredential.create({ data: { ...t.scope, integrationId: integration.id, accountId: null, accessTokenEnc: encryptSecret("AQX-token"), expiresAt: new Date(Date.now() + 86_400_000) } });
+    const spy = vi.spyOn(SOCIAL_PROVIDERS.linkedin, "publishPost").mockResolvedValue({ externalId: "urn:li:share:777", permalink: "https://www.linkedin.com/feed/update/urn:li:share:777" });
+    const { publishTestPost, TEST_POST_TEXT } = await import("@/server/integrations/diagnostics");
+    const r = await publishTestPost(t.scope, t.user.id, account.id, "PUBLISH");
+    expect(r.externalId).toBe("urn:li:share:777");
+    expect(spy).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ caption: TEST_POST_TEXT, format: "LINKEDIN_POST" }));
+    const post = await db.socialPost.findFirstOrThrow({ where: { ...t.scope, externalId: "urn:li:share:777" } });
+    expect(post).toMatchObject({ platform: "LINKEDIN", integrationAccountId: account.id });
+    const v = await db.providerValidation.findFirstOrThrow({ where: { provider: "linkedin", check: "publish_test_post" } });
+    expect(v.ok).toBe(true);
+    expect((await providerReadiness()).find((x) => x.provider === "linkedin")!.liveTested).toBe(true);
+    await expect(publishTestPost(t.scope, t.user.id, account.id, "publish")).rejects.toMatchObject({ code: "validation" });
+    spy.mockRestore();
+  });
+});

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
-import { openAiTestImageAction, openAiTestTextAction } from "./actions";
+import { openAiTestImageAction, openAiTestImageEditAction, openAiTestTextAction } from "./actions";
 
 type CostRow = { task: string; basis: string; runs: number; costUsd: number; inputTokens: number; outputTokens: number };
 type Pricing = { textInputPerM: number; imageInputPerM: number; imageOutputPerM: number; version: string };
@@ -43,13 +43,15 @@ export function OpenAiTests({ configured, textModel, imageModels, costs }: { con
           if (r.ok) setText(`${r.data.model} → "${r.data.reply}" (${r.data.inputTokens}/${r.data.outputTokens} tokens)`);
           else fail(r.error);
         })}>{t("testText")}</Button>
-        <Button size="sm" variant="secondary" disabled={!configured.image} loading={pending} onClick={() => start(async () => {
-          const r = await openAiTestImageAction();
-          if (r.ok) {
-            const c = r.data.cost;
-            setImage({ url: r.data.url, model: r.data.model, detail: `${c.basis} · USD ${(Number(c.costMicro) / 1e6).toFixed(4)} · text ${c.usage.textInputTokens} / image-in ${c.usage.imageInputTokens} / out ${c.usage.outputTokens} tokens · ${c.pricingVersion}` });
-          } else fail(r.error);
-        })}>{t("testImage")}</Button>
+        {([["testImage", openAiTestImageAction], ["testImageEdit", openAiTestImageEditAction]] as const).map(([label, action]) => (
+          <Button key={label} size="sm" variant="secondary" disabled={!configured.image} loading={pending} onClick={() => start(async () => {
+            const r = await action();
+            if (r.ok) {
+              const c = r.data.cost;
+              setImage({ url: r.data.url, model: r.data.model, detail: `${c.basis} · USD ${(Number(c.costMicro) / 1e6).toFixed(4)} · text ${c.usage.textInputTokens} / image-in ${c.usage.imageInputTokens} / out ${c.usage.outputTokens} tokens · ${c.pricingVersion}` });
+            } else fail(r.error);
+          })}>{t(label)}</Button>
+        ))}
       </div>
       <p className="text-xs text-ink-4">{t("note")}</p>
       <div className="space-y-2 border-t border-line pt-4">

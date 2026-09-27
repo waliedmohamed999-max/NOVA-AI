@@ -13,6 +13,8 @@ import { contentAiConfigured } from "@/server/ai";
 import { modelCatalog } from "@/server/ai/models";
 import { imageModels, imageProvider } from "@/server/design/image-provider";
 import { oauthDiagnostics } from "@/server/admin/oauth-diagnostics";
+import { providerReadiness } from "@/server/admin/readiness";
+import { ReadinessBoard } from "@/features/admin/readiness-board";
 
 export const metadata: Metadata = { title: "Admin · Providers" };
 
@@ -29,13 +31,21 @@ export default async function AdminProvidersPage() {
   const tenant = await resolveTenant();
   const own = tenant
     ? await db.integration.findMany({
-        where: { organizationId: tenant.organization.id, workspaceId: tenant.workspace.id, provider: { in: ["FACEBOOK", "INSTAGRAM", "LINKEDIN"] }, status: { not: "DISCONNECTED" } },
+        where: { organizationId: tenant.organization.id, workspaceId: tenant.workspace.id, provider: { in: ["FACEBOOK", "INSTAGRAM", "LINKEDIN", "TIKTOK", "GOOGLE", "MICROSOFT"] }, status: { not: "DISCONNECTED" } },
         include: { _count: { select: { accounts: true } } },
         orderBy: { provider: "asc" },
       })
     : [];
+  const tr = await getTranslations("settings.admin.readiness");
   return (
     <div className="space-y-8">
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">{tr("title")}</h2>
+          <p className="max-w-3xl text-sm text-ink-3">{tr("intro")}</p>
+        </div>
+        <ReadinessBoard rows={await providerReadiness()} />
+      </section>
       <div className="space-y-5">
         <p className="max-w-2xl text-sm text-ink-3">{t("intro")}</p>
         <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
