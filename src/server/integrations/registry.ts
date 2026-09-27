@@ -1,16 +1,20 @@
 import type { Provider } from "@/generated/prisma/enums";
 import { MetaProvider } from "./providers/meta";
 import { InstagramProvider } from "./providers/instagram";
+import { GoogleProvider } from "./providers/google";
+import { MicrosoftProvider } from "./providers/microsoft";
 import { LinkedInProvider } from "./providers/linkedin";
 import { TikTokProvider } from "./providers/tiktok";
 import type { SocialProvider } from "./types";
 
 const meta = new MetaProvider();
 const instagram = new InstagramProvider();
+const google = new GoogleProvider();
+const microsoft = new MicrosoftProvider();
 const linkedin = new LinkedInProvider();
 const tiktok = new TikTokProvider();
 
-export const SOCIAL_PROVIDERS: Record<SocialProvider["id"], SocialProvider> = { meta, instagram, linkedin, tiktok };
+export const SOCIAL_PROVIDERS: Record<SocialProvider["id"], SocialProvider> = { meta, instagram, linkedin, tiktok, google, microsoft };
 
 /** Test hook. */
 export function setSocialProvider(id: SocialProvider["id"], p: SocialProvider) {
@@ -40,7 +44,7 @@ export function providerForPlatform(platform: string): SocialProvider | null {
   return providerFor(platform as Provider);
 }
 
-const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIRECT_URI", instagram: "INSTAGRAM_REDIRECT_URI", linkedin: "LINKEDIN_REDIRECT_URI", tiktok: "TIKTOK_REDIRECT_URI" };
+const REDIRECT_ENV: Record<SocialProvider["id"], string> = { meta: "META_REDIRECT_URI", instagram: "INSTAGRAM_REDIRECT_URI", linkedin: "LINKEDIN_REDIRECT_URI", tiktok: "TIKTOK_REDIRECT_URI", google: "GOOGLE_REDIRECT_URI", microsoft: "MICROSOFT_REDIRECT_URI" };
 
 /**
  * The exact callback URL registered with the provider. `<PROVIDER>_REDIRECT_URI` wins (it must match
@@ -80,8 +84,8 @@ export function providerRegistry(): RegistryEntry[] {
     { id: "instagram", label: "Instagram Direct", stage: "live", platforms: ["INSTAGRAM"], provider: SOCIAL_PROVIDERS.instagram },
     { id: "linkedin", label: "LinkedIn", stage: "live", platforms: ["LINKEDIN"], provider: SOCIAL_PROVIDERS.linkedin },
     { id: "tiktok", label: "TikTok", stage: "live", platforms: ["TIKTOK"], provider: SOCIAL_PROVIDERS.tiktok },
-    { id: "google", label: "Google", stage: "planned", platforms: ["EMAIL"], provider: null },
-    { id: "microsoft", label: "Microsoft", stage: "planned", platforms: ["EMAIL"], provider: null },
+    { id: "google", label: "Google (Gmail + Calendar)", stage: "live", platforms: ["GOOGLE"], provider: SOCIAL_PROVIDERS.google },
+    { id: "microsoft", label: "Microsoft (Outlook + Calendar)", stage: "live", platforms: ["MICROSOFT"], provider: SOCIAL_PROVIDERS.microsoft },
   ];
 }
 

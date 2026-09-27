@@ -1,4 +1,4 @@
-import { Globe, Mail, MessageCircle } from "lucide-react";
+import { CalendarDays, Globe, LayoutGrid, Mail, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /** Simple monochrome channel glyphs on a tinted tile (generic shapes, no logos). */
@@ -11,6 +11,9 @@ const TINT: Record<string, string> = {
   X: "#17161c",
   WHATSAPP: "#25a366",
   EMAIL: "var(--nova-blue, #3b5bdb)",
+  GOOGLE: "#3b73e0",
+  MICROSOFT: "#1f6fbf",
+  CALENDAR: "var(--ink-2)",
   WEBSITE: "var(--ink-2)",
 };
 
@@ -62,7 +65,12 @@ function Glyph({ channel }: { channel: string }) {
     case "WHATSAPP":
       return <MessageCircle className="size-[18px]" aria-hidden />;
     case "EMAIL":
+    case "GOOGLE":
       return <Mail className="size-[18px]" aria-hidden />;
+    case "MICROSOFT":
+      return <LayoutGrid className="size-[18px]" aria-hidden />;
+    case "CALENDAR":
+      return <CalendarDays className="size-[18px]" aria-hidden />;
     default:
       return <Globe className="size-[18px]" aria-hidden />;
   }

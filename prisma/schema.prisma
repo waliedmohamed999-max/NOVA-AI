@@ -133,6 +133,8 @@ enum Provider {
   PINTEREST
   EMAIL
   WHATSAPP
+  GOOGLE
+  MICROSOFT
 }
 
 enum IntegrationStatus {
@@ -160,6 +162,10 @@ enum SocialPlatform {
   X
   YOUTUBE
   PINTEREST
+  /// Account connections (not publishing channels): mailbox + calendar, and WhatsApp Business numbers.
+  GOOGLE
+  MICROSOFT
+  WHATSAPP
 }
 
 enum ContentFormat {
@@ -557,6 +563,8 @@ model WorkspaceSettings {
   timezone               String        @default("UTC")
   dailyBriefHour         Int           @default(8)
   weeklyReportDay        Int           @default(1)
+  /// Business approval policies (see src/server/approvals/policies.ts).
+  policies               Json          @default("{}")
   /// Content studio defaults: "fast" | "quality"; "brand_template" | "ai_creative".
   imageQuality           String        @default("fast")
   imageMode              String        @default("brand_template")
@@ -621,29 +629,29 @@ model AiBudget {
 // ───────────────────────────── Company Brain ─────────────────────────────
 
 model CompanyProfile {
-  id               String   @id @default(cuid())
-  organizationId   String
-  workspaceId      String   @unique
-  name             String
-  tagline          String?
-  description      String?
-  website          String?
-  industry         String?
-  markets          String[] @default([])
-  languages        String[] @default([])
-  audience         Json     @default("[]") // [{ name, description, pains[], motivations[] }]
-  valueProps       String[] @default([])
-  differentiators  String[] @default([])
-  competitors      String[] @default([])
-  goals            String[] @default([])
-  primaryGoal      String?
-  contentPillars   String[] @default([])
-  strategy         Json? // initial strategy produced after onboarding
-  discoveries      Json? // onboarding "magic moment" results
-  summary          String?
-  completeness     Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String   @id @default(cuid())
+  organizationId  String
+  workspaceId     String   @unique
+  name            String
+  tagline         String?
+  description     String?
+  website         String?
+  industry        String?
+  markets         String[] @default([])
+  languages       String[] @default([])
+  audience        Json     @default("[]") // [{ name, description, pains[], motivations[] }]
+  valueProps      String[] @default([])
+  differentiators String[] @default([])
+  competitors     String[] @default([])
+  goals           String[] @default([])
+  primaryGoal     String?
+  contentPillars  String[] @default([])
+  strategy        Json? // initial strategy produced after onboarding
+  discoveries     Json? // onboarding "magic moment" results
+  summary         String?
+  completeness    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([organizationId])
   @@map("company_profiles")
@@ -897,7 +905,7 @@ model Integration {
 }
 
 model IntegrationAccount {
-  id             String   @id @default(cuid())
+  id             String          @id @default(cuid())
   organizationId String
   workspaceId    String
   integrationId  String
@@ -907,10 +915,10 @@ model IntegrationAccount {
   handle         String?
   avatarUrl      String?
   accountType    String?
-  isActive       Boolean  @default(true)
-  metadata       Json     @default("{}")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  isActive       Boolean         @default(true)
+  metadata       Json            @default("{}")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
 
@@ -967,7 +975,7 @@ model OAuthState {
 // ───────────────────────────── Content ─────────────────────────────
 
 model Campaign {
-  id             String         @id @default(cuid())
+  id             String           @id @default(cuid())
   organizationId String
   workspaceId    String
   name           String
@@ -979,12 +987,12 @@ model Campaign {
   endDate        DateTime?
   budgetCents    Int?
   currency       String?
-  status         CampaignStatus @default(DRAFT)
+  status         CampaignStatus   @default(DRAFT)
   plan           Json? // { concept, message, creativeDirection, cta, kpis[], schedule[] }
   createdByAgent AgentKey?
   createdById    String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   content ContentItem[]
   leads   Lead[]
@@ -1033,17 +1041,17 @@ model ContentItem {
 }
 
 model ContentVersion {
-  id             String    @id @default(cuid())
-  organizationId String
-  workspaceId    String
-  contentItemId  String
-  version        Int
-  hook           String?
-  caption        String
-  cta            String?
-  hashtags       String[]  @default([])
-  designBrief    Json?
-  changeNote     String?
+  id              String    @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  contentItemId   String
+  version         Int
+  hook            String?
+  caption         String
+  cta             String?
+  hashtags        String[]  @default([])
+  designBrief     Json?
+  changeNote      String?
   /// AI studio metadata: where the version came from and why it should be better (no chain-of-thought).
   source          String?
   reasons         String[]  @default([])
@@ -1051,9 +1059,9 @@ model ContentVersion {
   visualDirection String?
   qualityCheck    Json?
   promptVersion   String?
-  createdByAgent AgentKey?
-  createdById    String?
-  createdAt      DateTime  @default(now())
+  createdByAgent  AgentKey?
+  createdById     String?
+  createdAt       DateTime  @default(now())
 
   contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
 
@@ -1235,19 +1243,19 @@ model SocialMetricSnapshot {
 }
 
 model AccountMetricSnapshot {
-  id                   String   @id @default(cuid())
+  id                   String         @id @default(cuid())
   organizationId       String
   workspaceId          String
   integrationAccountId String?
   platform             SocialPlatform
-  date                 DateTime @db.Date
+  date                 DateTime       @db.Date
   followers            Int?
   reach                Int?
   impressions          Int?
   profileViews         Int?
-  raw                  Json     @default("{}")
-  isDemo               Boolean  @default(false)
-  createdAt            DateTime @default(now())
+  raw                  Json           @default("{}")
+  isDemo               Boolean        @default(false)
+  createdAt            DateTime       @default(now())
 
   @@unique([workspaceId, platform, date])
   @@index([organizationId])
@@ -1257,35 +1265,43 @@ model AccountMetricSnapshot {
 // ───────────────────────────── Leads & Sales ─────────────────────────────
 
 model Lead {
-  id                  String           @id @default(cuid())
+  id                  String          @id @default(cuid())
   organizationId      String
   workspaceId         String
   name                String
   company             String?
   email               String?
   phone               String?
-  channel             Channel          @default(MANUAL)
+  channel             Channel         @default(MANUAL)
   source              String?
   campaignId          String?
-  interests           String[]         @default([])
-  stage               LeadStage        @default(NEW)
-  score               Int              @default(0)
-  temperature         LeadTemperature  @default(COLD)
+  /// Attribution (from UTM parameters / tracked links on lead capture). Never inferred.
+  medium              String?
+  utmSource           String?
+  utmCampaign         String?
+  utmContent          String?
+  contentItemId       String?
+  socialPostId        String?
+  landingUrl          String?
+  interests           String[]        @default([])
+  stage               LeadStage       @default(NEW)
+  score               Int             @default(0)
+  temperature         LeadTemperature @default(COLD)
   estimatedValueCents Int?
-  currency            String           @default("USD")
+  currency            String          @default("USD")
   ownerId             String?
   lastContactAt       DateTime?
   nextAction          String?
   nextActionAt        DateTime?
-  tags                String[]         @default([])
+  tags                String[]        @default([])
   summary             String?
   intent              String?
-  objections          String[]         @default([])
+  objections          String[]        @default([])
   aiInsight           String?
-  stageChangedAt      DateTime         @default(now())
-  isDemo              Boolean          @default(false)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  stageChangedAt      DateTime        @default(now())
+  isDemo              Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
   campaign      Campaign?          @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   events        LeadEvent[]
@@ -1415,6 +1431,8 @@ model ConversationParticipant {
 }
 
 model Message {
+  /// Channel delivery status reported by the provider (e.g. WhatsApp: sent / delivered / read / failed).
+  deliveryStatus String?
   id             String           @id @default(cuid())
   organizationId String
   workspaceId    String
@@ -1802,4 +1820,103 @@ model Invoice {
   @@unique([provider, providerInvoiceId])
   @@index([organizationId, createdAt])
   @@map("invoices")
+}
+
+// ───────────────────────────── Meetings ─────────────────────────────
+
+enum MeetingStatus {
+  PROPOSED
+  BOOKED
+  CANCELLED
+}
+
+/// A sales meeting: proposed slots from real calendar availability, then a real calendar event once booked.
+model Meeting {
+  id              String        @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  leadId          String
+  integrationId   String?
+  provider        String?
+  externalEventId String?
+  joinUrl         String?
+  title           String
+  timezone        String        @default("UTC")
+  durationMin     Int           @default(30)
+  proposedSlots   Json          @default("[]")
+  startAt         DateTime?
+  endAt           DateTime?
+  attendeeEmail   String?
+  status          MeetingStatus @default(PROPOSED)
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([organizationId, workspaceId, leadId])
+  @@map("meetings")
+}
+
+// ───────────────────────────── Carousel ─────────────────────────────
+
+/// One slide of a carousel post. Each slide keeps its own history, so one slide can be rewritten alone.
+model CarouselSlide {
+  id              String   @id @default(cuid())
+  organizationId  String
+  workspaceId     String
+  contentItemId   String
+  position        Int
+  headline        String
+  body            String   @default("")
+  visualDirection String?
+  assetId         String?
+  version         Int      @default(1)
+  history         Json     @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([contentItemId, position])
+  @@index([organizationId, contentItemId])
+  @@map("carousel_slides")
+}
+
+// ───────────────────────────── Live readiness ─────────────────────────────
+
+/// Result of a manual, admin-run live check against a real provider (never part of automated tests).
+model ProviderValidation {
+  id             String   @id @default(cuid())
+  provider       String
+  check          String
+  ok             Boolean
+  /// true = executed against the real provider API with real credentials.
+  live           Boolean  @default(true)
+  detail         String?
+  costMicro      BigInt   @default(0)
+  organizationId String?
+  actorId        String?
+  createdAt      DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@map("provider_validations")
+}
+
+// ───────────────────────────── WhatsApp Business Platform ─────────────────────────────
+
+/// A WhatsApp Business phone number (Cloud API phone_number_id) linked to one workspace by an admin.
+/// Inbound webhooks are routed by phoneNumberId. Tokens live in env (WHATSAPP_ACCESS_TOKEN), never here.
+model WhatsAppNumber {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  phoneNumberId  String    @unique
+  wabaId         String?
+  displayPhone   String?
+  verifiedName   String?
+  isActive       Boolean   @default(true)
+  lastCheckedAt  DateTime?
+  lastError      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("whatsapp_numbers")
 }

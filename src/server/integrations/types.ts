@@ -67,6 +67,8 @@ export type CapabilityKey =
   | "instagram_publishing"
   | "messages"
   | "comments"
+  | "email_send"
+  | "calendar"
   | "leads"
   | "member_publishing"
   | "organization_publishing";
@@ -80,7 +82,9 @@ export type ConnectionCheck = { valid: boolean; expiresAt?: Date | null; scopes:
  * only — never scraping or password automation.
  */
 export interface SocialProvider {
-  readonly id: "meta" | "instagram" | "linkedin" | "tiktok";
+  readonly id: "meta" | "instagram" | "linkedin" | "tiktok" | "google" | "microsoft";
+  /** false for account connections (mailbox / calendar) that are not publishing channels — they don't count toward plan channel limits. */
+  readonly countsAsChannel?: boolean;
   readonly platforms: SocialPlatform[];
   readonly scopes: string[];
   isConfigured(): boolean;
@@ -108,6 +112,11 @@ export interface SocialProvider {
   getProfile?(token: TokenSet): Promise<ProviderProfile>;
   /** Validates a stored token with the provider (health checks, admin connection test). */
   checkConnection?(token: TokenSet): Promise<ConnectionCheck>;
+  /**
+   * Incremental authorization: the scopes to request to unlock one capability (already-requested + what the
+   * capability needs), or null when the operator hasn't enabled it for the app.
+   */
+  upgradeScopes?(platform: string, capability: string, alreadyGranted: string[]): string[] | null;
 }
 
 /**

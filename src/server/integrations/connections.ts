@@ -31,10 +31,27 @@ export type ConnectionCard = {
   noManagedPages: boolean;
   /** Instagram Direct: the connected Professional account type (Business or Creator). */
   professionalType: "BUSINESS" | "CREATOR" | null;
+  /** Meta identity is connected but Page access (pages_show_list) isn't enabled for the app — needs Meta approval. */
+  pagesPermissionUnavailable: boolean;
+};
+
+/** Google / Microsoft account connection (identity + email sending + calendar). Not a social channel. */
+export type AccountConnectionState = "idle" | "connected" | "reconnect" | "missing_permission" | "unavailable";
+export type AccountConnectionCard = {
+  provider: "GOOGLE" | "MICROSOFT";
+  oauth: "google" | "microsoft";
+  available: boolean;
+  state: AccountConnectionState;
+  integrationId: string | null;
+  email: string | null;
+  healthKey: string | null;
+  /** Per capability: granted, missing (can be requested now) or not enabled for the app. */
+  capabilities: { key: "email_send" | "calendar"; status: "granted" | "missing" | "not_enabled" }[];
 };
 
 export type ConnectionsView = {
   cards: ConnectionCard[];
+  accounts: AccountConnectionCard[];
   website: { url: string | null; status: string | null };
   plan: { used: number; limit: number };
   isDemo: boolean;
@@ -89,10 +106,29 @@ export async function loadConnections(scope: TenantScope, isDemo: boolean): Prom
       nextStep,
       noManagedPages: state === "identity" && metaGranted.includes("pages_show_list") && c.provider === "FACEBOOK",
       professionalType: igType === "BUSINESS" || igType === "CREATOR" ? igType : null,
+      pagesPermissionUnavailable: c.provider === "FACEBOOK" && state === "identity" && !metaGranted.includes("pages_show_list") && !nextStep,
     };
+  });
+
+  const accountCards = (["GOOGLE", "MICROSOFT"] as const).map<AccountConnectionCard>((p) => {
+    const oauth = p === "GOOGLE" ? "google" : "microsoft";
+    const provider = SOCIAL_PROVIDERS[oauth];
+    const available = provider.isConfigured();
+    const row = rows.find((r) => r.provider === p && r.status !== "DISCONNECTED");
+    const granted = row?.scopes ?? [];
+    const capabilities = (["email_send", "calendar"] as const).map((key) => {
+      const has = provider.capabilities?.({ platform: p }, granted).find((c) => c.key === key)?.available;
+      return { key, status: has ? ("granted" as const) : provider.upgradeScopes?.(p, key, granted) ? ("missing" as const) : ("not_enabled" as const) };
+    });
+    let state: AccountConnectionState = available ? "idle" : "unavailable";
+    if (row && row.status !== "CONNECTED") state = "reconnect";
+    else if (row) state = capabilities.some((c) => c.status === "missing") ? "missing_permission" : "connected";
+    const account = row?.accounts.find((a) => a.isActive) ?? row?.accounts[0];
+    return { provider: p, oauth, available, state, integrationId: row?.id ?? null, email: account?.handle ?? null, healthKey: state === "reconnect" ? (row?.statusMessage ?? "unknown") : null, capabilities };
   });
   return {
     cards,
+    accounts: accountCards,
     website: { url: site?.url ?? org.website ?? null, status: site?.status ?? null },
     plan: { used: usage.socialChannels.used, limit: usage.socialChannels.limit },
     isDemo,

@@ -111,7 +111,9 @@
     "PINTEREST": "بنترست",
     "EMAIL": "البريد الإلكتروني",
     "WHATSAPP": "واتساب",
-    "WEBSITE": "الموقع الإلكتروني"
+    "WEBSITE": "الموقع الإلكتروني",
+    "GOOGLE": "Google",
+    "MICROSOFT": "Microsoft"
   },
   "formats": {
     "POST": "منشور",

@@ -8,8 +8,6 @@ import { notify } from "../notifications/service";
 import { logger } from "../logger";
 import { UserFacingError } from "../errors";
 import { assertWithinLimit } from "../billing/entitlements";
-import { upgradeScopes } from "./providers/meta-scopes";
-import { instagramUpgradeScopes } from "./providers/instagram-scopes";
 import { SOCIAL_PROVIDERS, redirectUriFor } from "./registry";
 import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } from "./types";
 
@@ -52,13 +50,13 @@ export async function startConnect(
   const provider = SOCIAL_PROVIDERS[providerId];
   if (!provider?.isConfigured()) throw new UserFacingError("integration_not_configured");
   const already = await db.integration.count({ where: { ...scope, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
-  if (!already) await assertWithinLimit(scope.organizationId, "socialChannels");
+  if (!already && provider.countsAsChannel !== false) await assertWithinLimit(scope.organizationId, "socialChannels");
   let scopes: string[] | undefined;
   if (upgrade) {
-    if ((providerId !== "meta" && providerId !== "instagram") || !provider.platforms.includes(upgrade.platform as SocialPlatform)) throw new UserFacingError("capability_unavailable");
+    if (!provider.upgradeScopes || !provider.platforms.includes(upgrade.platform as SocialPlatform)) throw new UserFacingError("capability_unavailable");
     const current = await db.integration.findFirst({ where: { ...scope, provider: upgrade.platform as Provider } });
     // Only permissions the operator enabled for the app (…_OAUTH_SCOPES / …_OPTIONAL_SCOPES) can be requested.
-    scopes = (providerId === "instagram" ? instagramUpgradeScopes(upgrade.capability, current?.scopes ?? []) : upgradeScopes(upgrade.platform, upgrade.capability, current?.scopes ?? [])) ?? undefined;
+    scopes = provider.upgradeScopes(upgrade.platform, upgrade.capability, current?.scopes ?? []) ?? undefined;
     if (!scopes) throw new UserFacingError("capability_unavailable");
   }
   const state = randomToken(24);
@@ -91,7 +89,7 @@ export type ConnectResult = {
   limited?: string[];
   /** Meta sign-in worked but returned no manageable Page yet (Facebook profile = login only). */
   identity?: boolean;
-  error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope" | "instagram_invalid_scope" | "instagram_personal_account";
+  error?: "oauth_denied" | "integration_error" | "no_accounts" | "no_page_permission" | "meta_invalid_scope" | "linkedin_invalid_scope" | "instagram_invalid_scope" | "instagram_personal_account" | "oauth_invalid_scope";
 };
 
 /** Step 2 of OAuth (backend callback): verify state, exchange code, store encrypted tokens and accounts. */
@@ -115,7 +113,7 @@ export async function completeConnect(
     if (invalidScope) {
       logger.warn({ provider: providerId, error_type: "invalid_scope", requested_scopes: stored.requestedScopes, provider_error: params.error, provider_description: params.errorDescription?.slice(0, 300) }, "oauth rejected requested scopes");
       await finish("invalid_scope");
-      return { redirectTo, error: providerId === "linkedin" ? "linkedin_invalid_scope" : providerId === "instagram" ? "instagram_invalid_scope" : "meta_invalid_scope" };
+      return { redirectTo, error: providerId === "linkedin" ? "linkedin_invalid_scope" : providerId === "instagram" ? "instagram_invalid_scope" : providerId === "meta" ? "meta_invalid_scope" : "oauth_invalid_scope" };
     }
     await finish("denied");
     return { redirectTo, error: "oauth_denied" };
@@ -153,7 +151,7 @@ export async function completeConnect(
       where: { workspaceId_provider: { workspaceId: scope.workspaceId, provider: platform as Provider } },
       include: { accounts: { where: { isActive: true }, select: { externalId: true } } },
     });
-    if (!existing || existing.status === "DISCONNECTED" || existing.statusMessage === META_IDENTITY_ONLY) {
+    if (provider.countsAsChannel !== false && (!existing || existing.status === "DISCONNECTED" || existing.statusMessage === META_IDENTITY_ONLY)) {
       try {
         await assertWithinLimit(scope.organizationId, "socialChannels");
       } catch {
@@ -293,6 +291,8 @@ export async function disconnectIntegration(scope: TenantScope, integrationId: s
 }
 
 export function providerIdFor(p: Provider): SocialProvider["id"] {
+  if (p === "GOOGLE") return "google";
+  if (p === "MICROSOFT") return "microsoft";
   return p === "LINKEDIN" ? "linkedin" : p === "TIKTOK" ? "tiktok" : p === "INSTAGRAM" ? "instagram" : "meta";
 }
 

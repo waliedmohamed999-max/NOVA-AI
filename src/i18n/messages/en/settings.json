@@ -702,7 +702,8 @@
       "choose": "Choose an account",
       "unavailable": "Not available yet",
       "soon": "Coming soon",
-      "identity": "Meta identity connected"
+      "identity": "Meta identity connected",
+      "missing_permission": "Missing permission"
     },
     "actions": {
       "connect": "Connect",
@@ -711,7 +712,8 @@
       "reconnect": "Reconnect",
       "choose": "Choose accounts",
       "grantPages": "Grant access to Pages",
-      "grantInstagram": "Grant Instagram access"
+      "grantInstagram": "Grant Instagram access",
+      "allow": "Allow"
     },
     "why": {
       "INSTAGRAM": "Connect a Business or Creator account",
@@ -722,7 +724,9 @@
       "WEBSITE": "NOVA reads your site to learn your business.",
       "WHATSAPP": "Customer conversations.",
       "YOUTUBE": "Videos and channel analytics.",
-      "X": "Posts and replies."
+      "X": "Posts and replies.",
+      "GOOGLE": "Reply to leads from Gmail and book meetings.",
+      "MICROSOFT": "Reply to leads from Outlook and book meetings."
     },
     "metaNote": "Instagram connects directly with Instagram sign-in; Facebook Pages connect with Meta sign-in.",
     "oauthNote": "You sign in on the platform itself — NOVA never sees or stores your password.",
@@ -765,7 +769,9 @@
       "leads": "Lead forms",
       "member_publishing": "Posting as you",
       "organization_publishing": "Company page posting",
-      "comments": "Comments"
+      "comments": "Comments",
+      "email_send": "Send email from this inbox",
+      "calendar": "Calendar (free/busy + meetings)"
     },
     "capabilityReasons": {
       "permission_missing": "Permission not granted — reconnect and allow it",
@@ -788,7 +794,13 @@
     "pickerPageOk": "Can be connected",
     "pickerInstagram": "Instagram Professional",
     "pickerInstagramHint": "Business or Creator accounts",
-    "pickerInstagramOk": "Business / Creator"
+    "pickerInstagramOk": "Business / Creator",
+    "accountNames": {
+      "GOOGLE": "Google (Gmail + Calendar)",
+      "MICROSOFT": "Microsoft (Outlook + Calendar)"
+    },
+    "noPasswordNote": "Secure sign-in with the provider. NOVA never asks for or stores your password.",
+    "pagesPermissionUnavailable": "Needs Page-management permission from Meta. It isn't enabled for this app yet, so no Pages can be listed."
   },
   "contentAi": {
     "title": "Content AI",

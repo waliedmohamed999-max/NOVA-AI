@@ -14,7 +14,7 @@ import {
   type SocialProvider,
   type TokenSet,
 } from "../types";
-import { INSTAGRAM_CAPABILITY_SCOPES, instagramScopeConfig } from "./instagram-scopes";
+import { INSTAGRAM_CAPABILITY_SCOPES, instagramScopeConfig, instagramUpgradeScopes } from "./instagram-scopes";
 
 /**
  * Instagram API with Instagram Login ("Instagram Direct"): connects an Instagram Professional
@@ -70,6 +70,10 @@ export class InstagramProvider implements SocialProvider {
 
   isConfigured() {
     return instagramCredentialProblem() === null;
+  }
+
+  upgradeScopes(_platform: string, capability: string, alreadyGranted: string[]) {
+    return instagramUpgradeScopes(capability, alreadyGranted);
   }
 
   connect({ state, redirectUri, scopes, rerequest }: { state: string; redirectUri: string; scopes?: string[]; rerequest?: boolean }) {

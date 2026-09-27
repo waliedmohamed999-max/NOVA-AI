@@ -1,5 +1,5 @@
 import { form, providerFetch } from "../http";
-import { metaScopeConfig } from "./meta-scopes";
+import { metaScopeConfig, upgradeScopes } from "./meta-scopes";
 import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
 
 /**
@@ -61,6 +61,10 @@ export class MetaProvider implements SocialProvider {
 
   isConfigured() {
     return metaCredentialProblem() === null;
+  }
+
+  upgradeScopes(platform: string, capability: string, alreadyGranted: string[]) {
+    return upgradeScopes(platform, capability, alreadyGranted);
   }
 
   connect({ state, redirectUri, scopes, rerequest }: { state: string; redirectUri: string; scopes?: string[]; rerequest?: boolean }) {

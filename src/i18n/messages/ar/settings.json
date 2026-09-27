@@ -702,7 +702,8 @@
       "choose": "اختر الحساب",
       "unavailable": "غير متاح حاليًا",
       "soon": "قريبًا",
-      "identity": "هوية Meta متصلة"
+      "identity": "هوية Meta متصلة",
+      "missing_permission": "صلاحية ناقصة"
     },
     "actions": {
       "connect": "ربط",
@@ -711,7 +712,8 @@
       "reconnect": "إعادة الربط",
       "choose": "اختيار الحسابات",
       "grantPages": "منح صلاحية الصفحات",
-      "grantInstagram": "منح صلاحية Instagram"
+      "grantInstagram": "منح صلاحية Instagram",
+      "allow": "السماح"
     },
     "why": {
       "INSTAGRAM": "اربط حساب Business أو Creator",
@@ -722,7 +724,9 @@
       "WEBSITE": "يقرأ NOVA موقعك ليتعرّف على نشاطك.",
       "WHATSAPP": "محادثات العملاء.",
       "YOUTUBE": "الفيديوهات وتحليلات القناة.",
-      "X": "المنشورات والردود."
+      "X": "المنشورات والردود.",
+      "GOOGLE": "رد على العملاء من Gmail واحجز الاجتماعات.",
+      "MICROSOFT": "رد على العملاء من Outlook واحجز الاجتماعات."
     },
     "metaNote": "يُربط Instagram مباشرة بتسجيل دخول Instagram، وتُربط صفحات Facebook بتسجيل دخول Meta.",
     "oauthNote": "تسجّل الدخول على المنصة نفسها — NOVA لا يرى كلمة مرورك ولا يحفظها.",
@@ -765,7 +769,9 @@
       "leads": "نماذج العملاء",
       "member_publishing": "النشر باسمك",
       "organization_publishing": "النشر على صفحة الشركة",
-      "comments": "التعليقات"
+      "comments": "التعليقات",
+      "email_send": "إرسال البريد من هذا الصندوق",
+      "calendar": "التقويم (المواعيد المتاحة والاجتماعات)"
     },
     "capabilityReasons": {
       "permission_missing": "لم يتم منح الصلاحية — أعد الربط واسمح بها",
@@ -788,7 +794,13 @@
     "pickerPageOk": "قابل للربط",
     "pickerInstagram": "Instagram Professional",
     "pickerInstagramHint": "حسابات Business أو Creator",
-    "pickerInstagramOk": "Business / Creator"
+    "pickerInstagramOk": "Business / Creator",
+    "accountNames": {
+      "GOOGLE": "Google (Gmail + التقويم)",
+      "MICROSOFT": "Microsoft (Outlook + التقويم)"
+    },
+    "noPasswordNote": "تسجيل دخول آمن عبر المزوّد. NOVA لا يطلب كلمة مرورك ولا يخزنها.",
+    "pagesPermissionUnavailable": "تحتاج صلاحية إدارة الصفحات من Meta. هذه الصلاحية غير مفعّلة للتطبيق بعد، لذلك لا يمكن عرض الصفحات."
   },
   "contentAi": {
     "title": "ذكاء المحتوى",

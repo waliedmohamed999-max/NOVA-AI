@@ -23,6 +23,9 @@ export type TenantScope = {
 /** Models that belong to a workspace (organizationId + workspaceId). */
 export const WORKSPACE_MODELS = new Set<string>([
   "WorkspaceSettings",
+  "Meeting",
+  "CarouselSlide",
+  "WhatsAppNumber",
   "CompanyProfile",
   "Offering",
   "BrandKit",

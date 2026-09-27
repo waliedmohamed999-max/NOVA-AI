@@ -12,14 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { ChannelIcon } from "@/components/brand/channel-icon";
-import type { ConnectionCard, ConnectionsView } from "@/server/integrations/connections";
+import type { AccountConnectionCard, ConnectionCard, ConnectionsView } from "@/server/integrations/connections";
 import { analyzeWebsite, chooseAccounts, disconnect, websiteStatus } from "./actions";
 
 export type ConnectFlash = { connected: string[]; choose: string[]; limited: string[]; error: string | null; upgrade?: { platform: string; capability: string } | null; identity?: boolean };
 
 type Success = { platform: string; account: string | null };
 
-const LATER = ["WHATSAPP", "YOUTUBE", "X"] as const;
+const LATER = ["YOUTUBE", "X"] as const;
 
 export function ConnectAccounts({ view, from, canManage, flash }: { view: ConnectionsView; from: "onboarding" | "settings"; canManage: boolean; flash: ConnectFlash }) {
   const t = useTranslations("settings.connect");
@@ -84,7 +84,7 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
 
   // Graceful permission upgrade: a feature needed a permission this connection doesn't have yet.
   const upgrade = flash.upgrade ?? null;
-  const upgradeCard = upgrade ? view.cards.find((c) => c.platform === upgrade.platform && c.integrationId) : null;
+  const upgradeCard: { oauth: string } | null | undefined = upgrade ? (view.cards.find((c) => c.platform === upgrade.platform && c.integrationId) ?? view.accounts.find((a) => a.provider === upgrade.platform && a.integrationId)) : null;
   const upgradeCapability = upgrade && t.has(`capabilities.${upgrade.capability}` as "capabilities.identity") ? t(`capabilities.${upgrade.capability}` as "capabilities.identity") : upgrade?.capability;
 
   return (
@@ -95,7 +95,7 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
             <p className="font-semibold">{t("upgradeTitle")}</p>
             <p className="text-sm text-ink-3">{t("upgradeBody", { platform: platformName(upgrade.platform), capability: upgradeCapability ?? "" })}</p>
           </div>
-          {upgradeCard && canManage && (upgradeCard.oauth === "meta" || upgradeCard.oauth === "instagram") ? (
+          {upgradeCard && canManage ? (
             <a href={`/api/integrations/${upgradeCard.oauth}/start?from=${from}&upgrade=${upgrade.platform}:${upgrade.capability}`} className={buttonClass("primary", "md", "shrink-0")}>{t("upgradeCta")}</a>
           ) : (
             <p className="text-sm text-ink-3">{t("upgradeUnavailable")}</p>
@@ -140,10 +140,9 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-ink-2">{t("more")}</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
-          <li className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 shadow-xs">
-            <CardHead channel="EMAIL" name={t("emailTitle")} why={t("why.EMAIL")} chip={<Badge tone="outline">{t("state.soon")}</Badge>} />
-            <p className="text-xs text-ink-3">{t("emailNote")}</p>
-          </li>
+          {view.accounts.map((a) => (
+            <AccountCard key={a.provider} card={a} from={from} canManage={canManage} healthText={a.healthKey ? th(a.healthKey as "expired") : null} onDisconnect={() => setConfirming({ platform: a.provider, integrationId: a.integrationId } as ConnectionCard)} />
+          ))}
           <WebsiteCard initial={view.website} canManage={canManage} />
         </ul>
       </section>
@@ -298,7 +297,7 @@ function SocialCard(props: {
       {c.state === "reconnect" && props.healthText && <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">{props.healthText}</p>}
       {c.state === "identity" && (
         <p className="rounded-xl bg-surface-2 px-3 py-2 text-xs text-ink-2">
-          {c.noManagedPages ? t("identityNoPages") : t("identityBody")}
+          {c.noManagedPages ? t("identityNoPages") : c.pagesPermissionUnavailable ? t("pagesPermissionUnavailable") : t("identityBody")}
         </p>
       )}
       {canManage && c.state !== "unavailable" && (
@@ -312,6 +311,51 @@ function SocialCard(props: {
           {c.state !== "idle" && c.integrationId && (
             <Button size="sm" variant="ghost" onClick={props.onDisconnect}>{t("actions.disconnect")}</Button>
           )}
+        </div>
+      )}
+    </li>
+  );
+}
+
+/** Google / Microsoft: identity first, then "send email" and "calendar" permissions one at a time. */
+function AccountCard({ card: a, from, canManage, healthText, onDisconnect }: { card: AccountConnectionCard; from: string; canManage: boolean; healthText: string | null; onDisconnect: () => void }) {
+  const t = useTranslations("settings.connect");
+  const name = t(`accountNames.${a.provider}` as "accountNames.GOOGLE");
+  const href = (upgrade?: string) => `/api/integrations/${a.oauth}/start?from=${from}${upgrade ? `&upgrade=${a.provider}:${upgrade}` : ""}`;
+  const chip =
+    a.state === "connected" ? (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-success"><CheckCircle2 className="size-3.5" /> {t("state.connected")}</span>
+    ) : a.state === "reconnect" ? (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-warning"><AlertTriangle className="size-3.5" /> {t("state.reconnect")}</span>
+    ) : a.state === "missing_permission" ? (
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent-ink"><CircleDashed className="size-3.5" /> {t("state.missing_permission")}</span>
+    ) : a.state === "unavailable" ? (
+      <span className="text-xs text-ink-4">{t("state.unavailable")}</span>
+    ) : (
+      <span className="text-xs text-ink-3">{t("state.idle")}</span>
+    );
+  return (
+    <li className={cn("flex flex-col gap-3 rounded-2xl border bg-surface p-4 shadow-xs", a.state === "reconnect" ? "border-warning/40" : a.state === "connected" ? "border-success/30" : "border-line")} data-account={a.provider}>
+      <CardHead channel={a.provider} name={name} why={t(`why.${a.provider}` as "why.EMAIL")} chip={chip} />
+      {a.email && <p className="truncate text-sm font-medium" dir="ltr">{a.email}</p>}
+      {a.state === "reconnect" && healthText && <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">{healthText}</p>}
+      {a.integrationId && a.state !== "reconnect" && (
+        <ul className="space-y-1.5 text-xs">
+          {a.capabilities.map((c) => (
+            <li key={c.key} className="flex items-center justify-between gap-2">
+              <span className={c.status === "granted" ? "text-ink-2" : "text-ink-3"}>{c.status === "granted" ? "✓" : "○"} {t(`capabilities.${c.key}` as "capabilities.identity")}</span>
+              {c.status === "missing" && canManage && <a href={href(c.key)} className={buttonClass("secondary", "sm")}>{t("actions.allow")}</a>}
+              {c.status === "not_enabled" && <span className="text-ink-4">{t("state.unavailable")}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="text-xs text-ink-4">{t("noPasswordNote")}</p>
+      {canManage && a.state !== "unavailable" && (
+        <div className="mt-auto flex flex-wrap gap-2">
+          {a.state === "idle" && <a href={href()} className={buttonClass("primary", "sm")}>{t("actions.connect")}</a>}
+          {a.state === "reconnect" && <a href={href()} className={buttonClass("primary", "sm")}>{t("actions.reconnect")}</a>}
+          {a.integrationId && <Button size="sm" variant="ghost" onClick={onDisconnect}>{t("actions.disconnect")}</Button>}
         </div>
       )}
     </li>
