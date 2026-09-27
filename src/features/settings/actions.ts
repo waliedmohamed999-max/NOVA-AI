@@ -1,5 +1,7 @@
 "use server";
 
+import { AUTO_FORMATS, LOCKED_SALES_TOPICS, parsePolicies, policiesSchema } from "@/server/approvals/policies";
+import { DEFAULT_APPROVAL_POLICIES } from "@/server/tenancy/provision";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -131,7 +133,10 @@ export const saveAiSettings = tenantAction(
     dailyBriefHour: z.number().int().min(0).max(23),
   }),
   async ({ weeklyAutoPlan, ...input }, ctx) => {
-    await ctx.db.workspaceSettings.updateMany({ data: input });
+    // The simple switch maps onto the content policy: on = always ask; off = auto-publish every type.
+    const current = parsePolicies((await ctx.db.workspaceSettings.findFirst({ select: { policies: true } }))?.policies);
+    const content = input.requireContentApproval ? { mode: "always" as const, autoFormats: current.content.autoFormats } : { mode: "auto_selected" as const, autoFormats: [...AUTO_FORMATS] };
+    await ctx.db.workspaceSettings.updateMany({ data: { ...input, policies: { ...current, content } } });
     await db.scheduledJob.updateMany({ where: { key: `agent:weekly_plan:${ctx.workspace.id}` }, data: { enabled: weeklyAutoPlan } });
     await audit({ ...scopeOf(ctx), ...who(ctx), action: "settings.ai", summary: `AI settings updated (sales autonomy: ${input.salesAutonomy})` });
     revalidatePath("/settings/ai");
@@ -139,13 +144,28 @@ export const saveAiSettings = tenantAction(
   },
 );
 
-export const saveApprovalPolicy = tenantAction({ name: "settings.policy", permission: "approvals:policy" }, z.object({ action: z.string().max(40), requiresApproval: z.boolean() }), async ({ action, requiresApproval }, ctx) => {
+export const saveApprovalPolicy = tenantAction({ name: "settings.policy", permission: "approvals:policy" }, z.object({ action: z.enum(DEFAULT_APPROVAL_POLICIES), requiresApproval: z.boolean() }), async ({ action, requiresApproval }, ctx) => {
+  // Pricing, discounts, proposals and contract language always need a human — can't be switched off.
+  if (!requiresApproval && (LOCKED_SALES_TOPICS as readonly string[]).includes(action)) throw new UserFacingError("policy_locked");
   await ctx.db.approvalPolicy.upsert({
     where: { workspaceId_action: { workspaceId: ctx.workspace.id, action } },
     create: { organizationId: "", workspaceId: "", action, requiresApproval },
     update: { requiresApproval },
   });
   await audit({ ...scopeOf(ctx), ...who(ctx), action: "settings.approval_policy", summary: `Approval for "${action}" ${requiresApproval ? "required" : "not required"}` });
+  revalidatePath("/settings/approvals");
+  return { ok: true };
+});
+
+/** Business approval policies (content auto-publish types, safe FAQ auto-replies). */
+export const savePolicies = tenantAction({ name: "settings.policies", permission: "approvals:policy" }, policiesSchema, async (policies, ctx) => {
+  await ctx.db.workspaceSettings.updateMany({ data: { policies, requireContentApproval: policies.content.mode === "always" } });
+  await audit({
+    ...scopeOf(ctx),
+    ...who(ctx),
+    action: "settings.policies",
+    summary: `Approval policies updated (content: ${policies.content.mode}${policies.content.mode === "auto_selected" ? ` [${policies.content.autoFormats.join(", ") || "none"}]` : ""}; FAQ auto-replies: ${policies.messages.autoReplyFaq ? policies.messages.safeIntents.join(", ") || "none" : "off"})`,
+  });
   revalidatePath("/settings/approvals");
   return { ok: true };
 });

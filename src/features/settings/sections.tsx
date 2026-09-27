@@ -109,7 +109,7 @@ export function AiTeamSettings({ initial, canEdit, provider }: { initial: AiSett
 
 /* ───────── Approval rules ───────── */
 
-export function ApprovalRules({ policies, canEdit }: { policies: { action: string; requiresApproval: boolean }[]; canEdit: boolean }) {
+export function ApprovalRules({ policies, canEdit }: { policies: { action: string; requiresApproval: boolean; locked?: boolean }[]; canEdit: boolean }) {
   const t = useTranslations("settings.approvals");
   const { act } = useAct();
   const [local, setLocal] = useState(policies);
@@ -125,10 +125,10 @@ export function ApprovalRules({ policies, canEdit }: { policies: { action: strin
             <Switch
               label={t(`actions.${p.action}.title` as "actions.discount.title")}
               checked={p.requiresApproval}
-              disabled={!canEdit}
+              disabled={!canEdit || p.locked}
               onChange={(v) => {
                 setLocal(local.map((x) => (x.action === p.action ? { ...x, requiresApproval: v } : x)));
-                act(() => saveApprovalPolicy({ action: p.action, requiresApproval: v }), t("saved"));
+                act(() => saveApprovalPolicy({ action: p.action as Parameters<typeof saveApprovalPolicy>[0]["action"], requiresApproval: v }), t("saved"));
               }}
             />
           </li>

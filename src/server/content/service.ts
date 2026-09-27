@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import { contentNeedsApproval, loadPolicies } from "../approvals/policies";
 import type { AgentKey, ContentStatus } from "@/generated/prisma/enums";
 import { db } from "../db/client";
 import { tenantDb, type TenantScope } from "../db/tenant";
@@ -42,8 +43,7 @@ export async function createContentFromPlan(
   posts: PlannedPost[],
   opts: { campaignId?: string | null; agent: AgentKey; startDate: Date; generatedBy: string; requestedById?: string | null },
 ) {
-  const settings = await db.workspaceSettings.findFirst({ where: scope });
-  const requireApproval = settings?.requireContentApproval ?? true;
+  const policies = await loadPolicies(scope);
   return db.$transaction(async (tx) => {
     const ids: string[] = [];
     for (const p of posts) {
@@ -54,7 +54,7 @@ export async function createContentFromPlan(
           campaignId: opts.campaignId ?? null,
           platform: p.platform,
           format: p.format,
-          status: requireApproval ? "PENDING_APPROVAL" : "APPROVED",
+          status: contentNeedsApproval(policies, p.format) ? "PENDING_APPROVAL" : "APPROVED",
           title: p.title.slice(0, 200),
           pillar: p.pillar.slice(0, 80),
           hook: p.hook,
@@ -85,7 +85,7 @@ export async function createContentFromPlan(
         },
       });
       ids.push(item.id);
-      if (requireApproval) {
+      if (item.status === "PENDING_APPROVAL") {
         await tx.approval.create({
           data: {
             ...scope,
@@ -203,8 +203,7 @@ export async function editContent(
       changeNote: actor.changeNote ?? null,
     },
   });
-  const settings = await db.workspaceSettings.findFirst({ where: scope });
-  const backToApproval = actor.agent && (settings?.requireContentApproval ?? true);
+  const backToApproval = actor.agent && contentNeedsApproval(await loadPolicies(scope), item.format);
   const status: ContentStatus = item.status === "REJECTED" ? "DRAFT" : backToApproval ? "PENDING_APPROVAL" : item.status;
   await t.contentItem.update({ where: { id }, data: { ...next, title: patch.title ?? item.title, currentVersion: version, status } });
   return version;

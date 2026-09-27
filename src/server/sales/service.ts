@@ -7,6 +7,7 @@ import { audit } from "../audit";
 import { notify } from "../notifications/service";
 import { scoreLead } from "./scoring";
 import { channelFor } from "./channels";
+import { loadPolicies, salesReplyPolicy, type ReplyIntent } from "../approvals/policies";
 
 export type Actor = { type: ActorType; id?: string | null; label?: string };
 
@@ -155,20 +156,29 @@ export async function requiresApproval(scope: TenantScope, action: string) {
  * Decides what the AI may do with a drafted message given the workspace's
  * autonomy level, approval policies and any sensitive topics detected.
  */
-export async function messageDisposition(scope: TenantScope, sensitive: string[], task = "send_follow_up"): Promise<"draft" | "approval" | "send"> {
+export async function messageDisposition(
+  scope: TenantScope,
+  sensitive: string[],
+  task = "send_follow_up",
+  opts: { intent?: ReplyIntent | null; inbound?: boolean } = {},
+): Promise<"draft" | "approval" | "send"> {
   const settings = await db.workspaceSettings.findFirst({ where: scope });
   const autonomy = settings?.salesAutonomy ?? "COPILOT";
   if (autonomy === "ASSIST") return "draft";
   for (const topic of sensitive) if (await requiresApproval(scope, topic)) return "approval";
+  // Business policies: pricing / discounts / proposals / contract language always need a human;
+  // replies to customer messages go out automatically only for safe FAQ intents.
+  const policies = { ...(await loadPolicies(scope)), salesAutoReply: !(await requiresApproval(scope, "send_message")) };
+  if (salesReplyPolicy(policies, { sensitiveTopics: sensitive, intent: opts.intent, inbound: opts.inbound }).decision === "approval") return "approval";
   if (autonomy === "AUTOPILOT") return settings?.autopilotAllowedTasks.includes(task) ? "send" : "approval";
-  return (await requiresApproval(scope, "send_message")) ? "approval" : "send";
+  return "send";
 }
 
 /** Stores an AI-drafted reply and sends / queues it according to the disposition. */
 export async function draftLeadMessage(
   scope: TenantScope,
   leadId: string,
-  draft: { subject?: string | null; body: string; sensitiveTopics: string[] },
+  draft: { subject?: string | null; body: string; sensitiveTopics: string[]; intent?: ReplyIntent | null; inbound?: boolean },
   opts: { reason: string; locale: "en" | "ar" },
 ) {
   const t = tenantDb(scope);
@@ -178,7 +188,7 @@ export async function draftLeadMessage(
     (await t.conversation.findFirst({ where: { leadId }, orderBy: { lastMessageAt: "desc" } })) ??
     (await t.conversation.create({ data: { organizationId: scope.organizationId, workspaceId: scope.workspaceId, leadId, channel: lead.email ? "EMAIL" : lead.channel } }));
 
-  let disposition = await messageDisposition(scope, draft.sensitiveTopics);
+  let disposition = await messageDisposition(scope, draft.sensitiveTopics, "send_follow_up", { intent: draft.intent, inbound: draft.inbound });
   const channel = channelFor(conv.channel);
   const recipientKnown = conv.channel === "WHATSAPP" ? Boolean(lead.phone) : conv.channel === "EMAIL" || conv.channel === "WEBSITE" ? Boolean(lead.email) : true;
   const canSend = Boolean(await channel?.isConfigured(scope)) && recipientKnown;
@@ -202,7 +212,7 @@ export async function draftLeadMessage(
       data: {
         organizationId: scope.organizationId,
         workspaceId: scope.workspaceId,
-        category: draft.sensitiveTopics.some((s) => ["discount", "custom_pricing", "refund"].includes(s)) ? "PRICING" : "SALES",
+        category: draft.sensitiveTopics.some((s) => ["discount", "custom_pricing", "proposal", "refund"].includes(s)) || draft.intent === "pricing" ? "PRICING" : "SALES",
         action: "send_message",
         title: opts.locale === "ar" ? `رد على ${lead.name}` : `Reply to ${lead.name}`,
         summary: draft.body.slice(0, 500),

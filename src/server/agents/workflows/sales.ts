@@ -17,11 +17,25 @@ const SALES_SYSTEM = (b: BrainSnapshot) =>
     brainPrompt(b),
   ].join("\n");
 
+/** Keyword intent for offline mode. Anything unclear is "other" — never auto-answered. */
+function offlineIntent(message: string): LeadQualification["replyIntent"] {
+  if (!message.trim()) return null;
+  if (/(price|pricing|cost|how much|سعر|أسعار|تكلفة|بكام|كم سعر)/i.test(message)) return "pricing";
+  if (/(proposal|quotation|quote|عرض سعر)/i.test(message)) return "proposal";
+  if (/(complain|refund|angry|شكوى|استرداد)/i.test(message)) return "complaint";
+  if (/(opening hours|open today|working hours|مواعيد العمل|ساعات العمل)/i.test(message)) return "opening_hours";
+  if (/(where are you|address|location|العنوان|مكانكم|فين)/i.test(message)) return "location";
+  if (/(phone number|contact you|email address|رقم التليفون|رقم الهاتف|التواصل)/i.test(message)) return "contact_details";
+  return "other";
+}
+
 function offlineQualification(b: BrainSnapshot, lead: { name: string; score: number; interests: string[] }, message: string): LeadQualification {
   const ar = b.locale === "ar";
   const sensitive: LeadQualification["sensitiveTopics"] = [];
   if (/(discount|خصم)/i.test(message)) sensitive.push("discount");
   if (/(refund|استرداد)/i.test(message)) sensitive.push("refund");
+  if (/(proposal|quotation|quote|عرض سعر|عرض فني)/i.test(message)) sensitive.push("proposal");
+  if (/(contract|عقد)/i.test(message)) sensitive.push("contract_promise");
   const temperature = temperatureFor(lead.score);
   return {
     score: lead.score,
@@ -39,6 +53,7 @@ function offlineQualification(b: BrainSnapshot, lead: { name: string; score: num
     needsHuman: sensitive.length > 0,
     needsHumanReason: sensitive.length ? (ar ? "يطلب شروطًا تحتاج موافقة" : "Asks for terms that need approval") : null,
     sensitiveTopics: sensitive,
+    replyIntent: offlineIntent(message),
     reasons: [],
   };
 }
@@ -110,7 +125,7 @@ defineWorkflow("lead_qualify", {
       if (lead.stage === "NEW" && r.score >= 55) {
         await addLeadEvent(ctx.scope, lead.id, { type: "STATUS_CHANGE", title: "NEW → QUALIFIED", data: { from: "NEW", to: "QUALIFIED" }, actor: { type: "AGENT", label: "AI Sales Agent" } });
       }
-      const drafted = await draftLeadMessage(ctx.scope, lead.id, { subject: null, body: r.draftReply, sensitiveTopics: r.sensitiveTopics }, { reason: r.nextAction, locale: b.locale });
+      const drafted = await draftLeadMessage(ctx.scope, lead.id, { subject: null, body: r.draftReply, sensitiveTopics: r.sensitiveTopics, intent: r.replyIntent, inbound: Boolean(message) }, { reason: r.nextAction, locale: b.locale });
       await scheduleFollowUp(ctx.scope, lead.id, { title: r.nextAction, dueAt: new Date(Date.now() + r.nextActionInDays * 86_400_000), agent: true });
       await ctx.task("SALES_AGENT", b.locale === "ar" ? `أهّل ${lead.name} (${r.score}/100)` : `Qualified ${lead.name} (${r.score}/100)`, { type: "Lead", id: lead.id });
       if (temperature === "HOT") await notifyHotLead(ctx.scope, lead, b.locale);

@@ -21,6 +21,7 @@ export const DEFAULT_PIPELINE: { stage: LeadStage; en: string; ar: string; proba
 export const DEFAULT_APPROVAL_POLICIES = [
   "discount",
   "custom_pricing",
+  "proposal",
   "contract_promise",
   "refund",
   "legal_commitment",

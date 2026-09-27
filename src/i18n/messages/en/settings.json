@@ -156,6 +156,10 @@
       "publish_content": {
         "title": "Publishing content",
         "body": "Posts wait for approval before going live."
+      },
+      "proposal": {
+        "title": "Proposals & quotes",
+        "body": "Sending a proposal or quotation. Always needs your approval."
       }
     }
   },
@@ -818,5 +822,46 @@
     "imagesUsed": "Design usage this month",
     "saved": "Content AI defaults saved",
     "imagesUsedValue": "{used} of {limit} designs"
+  },
+  "policies": {
+    "saved": "Approval policy saved",
+    "content": {
+      "title": "Content",
+      "description": "Decide which posts go live without you.",
+      "always": "Always ask me before publishing",
+      "alwaysHint": "Every post waits for your approval.",
+      "auto_selected": "Publish some post types automatically",
+      "auto_selectedHint": "The types you pick go out on schedule; everything else waits for approval.",
+      "formats": "Publish automatically:",
+      "noneSelected": "No type selected yet, so every post still waits for approval."
+    },
+    "sales": {
+      "title": "Sales replies",
+      "description": "What the Sales Agent may send to leads on its own.",
+      "autoReply": "Let the AI send routine replies automatically",
+      "autoReplyHint": "Follow-ups and first replies without sensitive topics. Off = every reply waits for you.",
+      "alwaysAsk": "Always needs your approval (can't be turned off)",
+      "locked": {
+        "discount": "Discounts",
+        "custom_pricing": "Prices and quotes",
+        "proposal": "Proposals",
+        "contract_promise": "Contract language and commitments"
+      }
+    },
+    "messages": {
+      "title": "Customer messages",
+      "description": "Replies to messages customers send (WhatsApp, email, website).",
+      "autoFaq": "Answer simple questions automatically",
+      "autoFaqHint": "Only the question types you choose. Anything else waits for you.",
+      "intents": {
+        "greeting": "Greetings",
+        "opening_hours": "Opening hours",
+        "location": "Location / address",
+        "services_info": "What we offer",
+        "contact_details": "Contact details",
+        "booking_info": "How to book"
+      },
+      "note": "Questions about prices, proposals, complaints or anything unclear always wait for a human."
+    }
   }
 }

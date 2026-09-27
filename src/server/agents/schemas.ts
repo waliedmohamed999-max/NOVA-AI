@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { REPLY_INTENTS } from "../approvals/policies";
 
 /**
  * Structured-output schemas for agent work. Every field is required (use
@@ -131,7 +132,9 @@ export const leadQualificationSchema = z.object({
   draftReply: z.string(),
   needsHuman: z.boolean(),
   needsHumanReason: z.string().nullable(),
-  sensitiveTopics: z.array(z.enum(["discount", "custom_pricing", "contract_promise", "refund", "legal_commitment", "unusual_delivery"])),
+  /** What the customer's message is about — only safe FAQ intents may be answered automatically. */
+  replyIntent: z.enum(REPLY_INTENTS).nullable(),
+  sensitiveTopics: z.array(z.enum(["discount", "custom_pricing", "proposal", "contract_promise", "refund", "legal_commitment", "unusual_delivery"])),
   reasons: z.array(z.string()).max(5),
 });
 export type LeadQualification = z.infer<typeof leadQualificationSchema>;
@@ -139,7 +142,7 @@ export type LeadQualification = z.infer<typeof leadQualificationSchema>;
 export const followUpSchema = z.object({
   subject: z.string().nullable(),
   message: z.string(),
-  sensitiveTopics: z.array(z.enum(["discount", "custom_pricing", "contract_promise", "refund", "legal_commitment", "unusual_delivery"])),
+  sensitiveTopics: z.array(z.enum(["discount", "custom_pricing", "proposal", "contract_promise", "refund", "legal_commitment", "unusual_delivery"])),
 });
 
 export const postInsightSchema = z.object({
