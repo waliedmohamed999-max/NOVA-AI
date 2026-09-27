@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -37,11 +36,11 @@ export function UserMenu({ user }: { user: { name: string | null; email: string;
           <div className="truncate text-xs font-normal text-ink-3">{user.email}</div>
         </MenuLabel>
         <MenuSeparator />
-        <MenuItem icon={<User />} asChild>
-          <Link href="/settings/profile">{t("nav.account")}</Link>
+        <MenuItem icon={<User />} onSelect={() => router.push("/settings/profile")}>
+          {t("nav.account")}
         </MenuItem>
-        <MenuItem icon={<Settings />} asChild>
-          <Link href="/settings">{t("nav.settings")}</Link>
+        <MenuItem icon={<Settings />} onSelect={() => router.push("/settings")}>
+          {t("nav.settings")}
         </MenuItem>
         <MenuItem icon={<Languages />} onSelect={switchLocale}>
           <span lang={locale === "ar" ? "en" : "ar"}>{t(`language.${locale === "ar" ? "en" : "ar"}`)}</span>
@@ -50,8 +49,8 @@ export function UserMenu({ user }: { user: { name: string | null; email: string;
           {t("nav.theme")}
         </MenuItem>
         {user.isPlatformAdmin && (
-          <MenuItem icon={<Shield />} asChild>
-            <Link href="/admin">{t("nav.admin")}</Link>
+          <MenuItem icon={<Shield />} onSelect={() => router.push("/admin")}>
+            {t("nav.admin")}
           </MenuItem>
         )}
         <MenuSeparator />

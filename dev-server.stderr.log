@@ -827,3 +827,2806 @@ Error: ENVIRONMENT_FALLBACK: The `now` parameter wasn't provided to `relativeTim
   code: 'ENVIRONMENT_FALLBACK',
   originalMessage: "The `now` parameter wasn't provided to `relativeTime` and there is no global default configured, therefore the current time will be used as a fallback. See https://next-intl.dev/docs/usage/dates-times#relative-times-usenow"
 }
+[browser] Uncaught Error: Primitive.div failed to slot onto its children. Expected a single React element child or `Slottable`.
+    at MenuItem (src/components/ui/menu.tsx:31:5)
+    at UserMenu (src/components/shell/user-menu.tsx:40:9)
+    at AppShell (src/components/shell/app-shell.tsx:169:17)
+    at AppLayout (src\app\(app)\layout.tsx:16:5)
+  29 | export function MenuItem({ className, icon, children, tone, ...props }: ComponentPropsWithoutRef<typeof M.Item> & { icon?: ReactNode; tone?: "danger" }) {
+  30 |   return (
+> 31 |     <M.Item
+     |     ^
+  32 |       className={cn(
+  33 |         "flex cursor-pointer select-none items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-2 outline-none data-[highlighted]:bg-sunken data-[highlighted]:text-ink data-[disabled]:opacity-50",
+  34 |         tone === "danger" && "text-danger data-[highlighted]:text-danger",
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.social` in messages for locale `en`.
+    at async SocialPage (src\app\(app)\social\page.tsx:16:13)
+  14 | export default async function SocialPage() {
+  15 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 16 |   const t = await getTranslations("settings.social");
+     |             ^
+  17 |   const tc = await getTranslations("common");
+  18 |   const format = await getFormatter();
+  19 |   const [accounts, queue, posts] = await Promise.all([ {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.social` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `en`.
+    at IntegrationGrid (src\features\integrations\grid.tsx:31:28)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at async KnowledgePage (src\app\(app)\knowledge\page.tsx:11:13)
+   9 | export default async function KnowledgePage() {
+  10 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 11 |   const t = await getTranslations("settings.knowledge");
+     |             ^
+  12 |   const format = await getFormatter();
+  13 |   const [profile, offerings, sources] = await Promise.all([
+  14 |     ctx.db.companyProfile.findFirst(), {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at async KnowledgePage (src\app\(app)\knowledge\page.tsx:11:13)
+   9 | export default async function KnowledgePage() {
+  10 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 11 |   const t = await getTranslations("settings.knowledge");
+     |             ^
+  12 |   const format = await getFormatter();
+  13 |   const [profile, offerings, sources] = await Promise.all([
+  14 |     ctx.db.companyProfile.findFirst(), {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.knowledge` in messages for locale `en`.
+    at KnowledgeCenter (src\features\knowledge\center.tsx:21:28)
+  19 |
+  20 | export function KnowledgeCenter({ canManage, profile, offerings, sources }: { canManage: boolean; profile: { summary: string; industry: string; valueProps: string[]; contentPillars: string[]; completeness: number }; offerings: Off...
+> 21 |   const t = useTranslations("settings.knowledge");
+     |                            ^
+  22 |   const tc = useTranslations("common");
+  23 |   const te = useTranslations("errors");
+  24 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.knowledge` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at async BrandPage (src\app\(app)\brand\page.tsx:12:13)
+  10 | export default async function BrandPage() {
+  11 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 12 |   const t = await getTranslations("settings.brand");
+     |             ^
+  13 |   const [kit, templates] = await Promise.all([ctx.db.brandKit.findFirst(), ctx.db.designTemplate.findMany({ orderBy: { createdAt: "asc" } })]);
+  14 |   return (
+  15 |     <> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at async BrandPage (src\app\(app)\brand\page.tsx:12:13)
+  10 | export default async function BrandPage() {
+  11 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 12 |   const t = await getTranslations("settings.brand");
+     |             ^
+  13 |   const [kit, templates] = await Promise.all([ctx.db.brandKit.findFirst(), ctx.db.designTemplate.findMany({ orderBy: { createdAt: "asc" } })]);
+  14 |   return (
+  15 |     <> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.brand` in messages for locale `en`.
+    at BrandKitEditor (src\features\knowledge\brand-kit.tsx:30:28)
+  28 |
+  29 | export function BrandKitEditor({ kit, templates, canManage, logoUrl }: { kit: Kit; templates: { id: string; name: string; format: string; spec: { width: number; height: number } }[]; canManage: boolean; logoUrl: string | null }) {
+> 30 |   const t = useTranslations("settings.brand");
+     |                            ^
+  31 |   const tc = useTranslations("common");
+  32 |   const te = useTranslations("errors");
+  33 |   const router = useRouter(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.brand` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.inbox` in messages for locale `en`.
+    at async InboxPage (src\app\(app)\inbox\page.tsx:17:13)
+  15 | export default async function InboxPage() {
+  16 |   const ctx = await requireTenant({ permission: "leads:read" });
+> 17 |   const t = await getTranslations("settings.inbox");
+     |             ^
+  18 |   const format = await getFormatter();
+  19 |   const conversations = await ctx.db.conversation.findMany({
+  20 |     orderBy: { lastMessageAt: "desc" }, {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.inbox` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.reports` in messages for locale `en`.
+    at async ReportsPage (src\app\(app)\reports\page.tsx:15:13)
+  13 | export default async function ReportsPage() {
+  14 |   const ctx = await requireTenant({ permission: "analytics:read" });
+> 15 |   const t = await getTranslations("settings.reports");
+     |             ^
+  16 |   const format = await getFormatter();
+  17 |   const reports = await ctx.db.report.findMany({ orderBy: { periodStart: "desc" }, take: 40 });
+  18 |   return ( {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.reports` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.reports` in messages for locale `en`.
+    at async ReportsPage (src\app\(app)\reports\page.tsx:15:13)
+  13 | export default async function ReportsPage() {
+  14 |   const ctx = await requireTenant({ permission: "analytics:read" });
+> 15 |   const t = await getTranslations("settings.reports");
+     |             ^
+  16 |   const format = await getFormatter();
+  17 |   const reports = await ctx.db.report.findMany({ orderBy: { periodStart: "desc" }, take: 40 });
+  18 |   return ( {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.reports` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.reports` in messages for locale `en`.
+    at async ReportsPage (src\app\(app)\reports\page.tsx:15:13)
+  13 | export default async function ReportsPage() {
+  14 |   const ctx = await requireTenant({ permission: "analytics:read" });
+> 15 |   const t = await getTranslations("settings.reports");
+     |             ^
+  16 |   const format = await getFormatter();
+  17 |   const reports = await ctx.db.report.findMany({ orderBy: { periodStart: "desc" }, take: 40 });
+  18 |   return ( {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.reports` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.reports` in messages for locale `en`.
+    at async ReportsPage (src\app\(app)\reports\page.tsx:15:13)
+  13 | export default async function ReportsPage() {
+  14 |   const ctx = await requireTenant({ permission: "analytics:read" });
+> 15 |   const t = await getTranslations("settings.reports");
+     |             ^
+  16 |   const format = await getFormatter();
+  17 |   const reports = await ctx.db.report.findMany({ orderBy: { periodStart: "desc" }, take: 40 });
+  18 |   return ( {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.reports` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.reports` in messages for locale `en`.
+    at GenerateReportButton (src\features\reports\generate.tsx:12:28)
+  10 |
+  11 | export function GenerateReportButton() {
+> 12 |   const t = useTranslations("settings.reports");
+     |                            ^
+  13 |   const te = useTranslations("errors");
+  14 |   const router = useRouter();
+  15 |   const [pending, start] = useTransition(); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.reports` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.activity` in messages for locale `en`.
+    at async ActivityPage (src\app\(app)\activity\page.tsx:16:13)
+  14 | export default async function ActivityPage(props: PageProps<"/activity">) {
+  15 |   const ctx = await requireTenant({ permission: "audit:read" });
+> 16 |   const t = await getTranslations("settings.activity");
+     |             ^
+  17 |   const format = await getFormatter();
+  18 |   const sp = await props.searchParams;
+  19 |   const security = sp.category === "SECURITY"; {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.activity` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.help` in messages for locale `en`.
+    at async HelpPage (src\app\(app)\help\page.tsx:12:13)
+  10 |
+  11 | export default async function HelpPage() {
+> 12 |   const t = await getTranslations("settings.help");
+     |             ^
+  13 |   const faqs = t.raw("faqs") as { q: string; a: string }[];
+  14 |   return (
+  15 |     <div className="mx-auto max-w-3xl"> {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.help` in messages for locale `en`.'
+}
+⨯ TypeError: faqs.map is not a function
+    at HelpPage (src\app\(app)\help\page.tsx:34:15)
+  32 |       </h2>
+  33 |       <div className="divide-y divide-line rounded-[22px] border border-line bg-surface">
+> 34 |         {faqs.map((f) => (
+     |               ^
+  35 |           <details key={f.q} className="px-5 py-4">
+  36 |             <summary className="cursor-pointer list-none font-medium">{f.q}</summary>
+  37 |             <p className="mt-2 text-sm leading-relaxed text-ink-2">{f.a}</p> {
+  digest: '105506471'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:56:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:109:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:112:100)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:113:82)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:114:62)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:115:72)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:124:128)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:56:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:109:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:112:100)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:113:82)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:114:62)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:115:72)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:124:128)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at async IntegrationsPage (src\app\(app)\integrations\page.tsx:14:13)
+  12 | export default async function IntegrationsPage(props: PageProps<"/integrations">) {
+  13 |   const ctx = await requireTenant({ permission: "workspace:read" });
+> 14 |   const t = await getTranslations("settings.integrations");
+     |             ^
+  15 |   const format = await getFormatter();
+  16 |   const sp = await props.searchParams;
+  17 |   const rows = await ctx.db.integration.findMany({ include: { accounts: { where: { isActive: true } } } }); {
+  code: 'MISSING_MESSAGE',
+  originalMessage: 'Could not resolve `settings.integrations` in messages for locale `ar`.'
+}
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:56:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:109:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:112:100)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:113:82)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:114:62)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:115:72)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:124:128)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:56:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:65)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:82:113)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:92:48)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:68:47)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:109:87)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:112:100)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:113:82)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:114:62)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:115:72)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:124:128)
+[browser] Error: MISSING_MESSAGE: Could not resolve `settings.integrations` in messages for locale `ar`.
+    at IntegrationGrid (src/features/integrations/grid.tsx:31:28)
+    at IntegrationsPage (src\app\(app)\integrations\page.tsx:38:7)
+  29 |
+  30 | export function IntegrationGrid({ tiles, canManage, flash, system }: { tiles: IntegrationTile[]; canManage: boolean; flash: { connected: string | null; error: string | null }; system: { ai: string | null; email: boolean } }) {
+> 31 |   const t = useTranslations("settings.integrations");
+     |                            ^
+  32 |   const tc = useTranslations("common");
+  33 |   const te = useTranslations("errors");
+  34 |   const router = useRouter(); (src/features/integrations/grid.tsx:122:51)

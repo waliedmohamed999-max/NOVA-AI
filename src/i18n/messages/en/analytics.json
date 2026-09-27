@@ -1,1 +1,60 @@
-{}
+{
+  "title": "Analytics",
+  "description": "The questions that matter, answered with your real data.",
+  "empty": {
+    "title": "Real analytics start with your first connected account.",
+    "body": "We never show estimated numbers. Connect Instagram, Facebook, LinkedIn or TikTok and your Performance Analyst will start comparing every post.",
+    "cta": "Connect accounts"
+  },
+  "q": {
+    "improving": "Is our content improving?",
+    "attention": "What needs attention",
+    "formats": "Which formats work?",
+    "pillars": "Which topics work?",
+    "platforms": "Which channel performs best?",
+    "leads": "Are we generating leads?",
+    "progressing": "Are leads progressing?",
+    "audience": "Is our audience growing?"
+  },
+  "engagementHint": "Average engagement rate across {posts} posts in the last 30 days, compared with the 30 days before.",
+  "basedOn": "Based on {source}",
+  "yourData": "your published posts",
+  "aiAnalysis": "AI analysis of your data",
+  "noInsights": "Insights appear as your Performance Analyst reviews real results.",
+  "postsCount": "{count, plural, one {# post} other {# posts}}",
+  "last30": "New leads in the last 30 days",
+  "followersHint": "Follower change in the last 30 days",
+  "topPosts": "Best posts",
+  "topCampaigns": "Campaigns",
+  "campaignStats": "{posts} posts · {leads} leads",
+  "noCampaigns": "No active campaigns yet.",
+  "post": {
+    "title": "Post performance",
+    "scorecards": "Performance",
+    "vsAverage": "vs average",
+    "noMetrics": "The platform hasn't reported metrics for this post yet.",
+    "baseline": "Compared with the average of your previous {count} posts ({scope}).",
+    "allPlatforms": "all channels",
+    "whatWorked": "What worked",
+    "whatDidnt": "What didn't",
+    "tryNext": "What to try next",
+    "evidence": "Every number here comes from the platform's reported metrics.",
+    "noInsight": "Ask your Performance Analyst to explain this post's results.",
+    "analyze": "Explain these results",
+    "reanalyze": "Refresh analysis",
+    "ask": "Ask AI about this post",
+    "askPrompt": "Why did this post perform the way it did?",
+    "metrics": {
+      "reach": "Reach",
+      "impressions": "Impressions",
+      "likes": "Likes",
+      "comments": "Comments",
+      "shares": "Shares",
+      "saves": "Saves",
+      "clicks": "Clicks",
+      "videoViews": "Video views",
+      "leads": "Leads",
+      "engagementRate": "Engagement rate"
+    }
+  }
+}
