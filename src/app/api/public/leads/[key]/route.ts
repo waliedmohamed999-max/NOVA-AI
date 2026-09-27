@@ -1,3 +1,4 @@
+import { clientIp } from "@/server/net/client-ip";
 import { NextResponse, type NextRequest } from "next/server";
 import { captureLead, originAllowed } from "@/server/sales/capture";
 import { db } from "@/server/db/client";
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/public/lead
     return NextResponse.json({ error: "validation" }, { status: 400, headers });
   }
   try {
-    const res = await captureLead(key, body, { ip: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null, origin, appUrl: appUrl() });
+    const res = await captureLead(key, body, { ip: clientIp(req.headers), origin, appUrl: appUrl() });
     if (!res.ok) return NextResponse.json({ error: res.error, fields: res.fields }, { status: res.status, headers });
     return NextResponse.json({ ok: true, message: res.message }, { status: 201, headers });
   } catch (err) {

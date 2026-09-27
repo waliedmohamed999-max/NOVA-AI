@@ -1,4 +1,5 @@
 import "server-only";
+import { clientIp } from "../net/client-ip";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { brand } from "@/config/brand";
@@ -15,7 +16,7 @@ const cookieOptions = (expires: Date) => ({
 export async function requestMeta() {
   const h = await headers();
   return {
-    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? null,
+    ip: clientIp(h),
     userAgent: h.get("user-agent"),
   };
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { clientIp, normalizeIp, trustedHops } from "@/server/net/client-ip";
 import { applyTenantScope } from "@/server/db/tenant";
 import { can, canAssignRole } from "@/server/rbac";
 import { compareToRecent, engagementRate, findPatterns, pctChange, type MetricRow } from "@/server/analytics/compare";
@@ -216,5 +217,31 @@ describe("job backoff", () => {
     expect(backoffMs(1)).toBeGreaterThanOrEqual(24_000);
     expect(backoffMs(3)).toBeGreaterThan(backoffMs(1));
     expect(backoffMs(20)).toBeLessThanOrEqual(72 * 60_000);
+  });
+});
+
+describe("client IP / TRUST_PROXY", () => {
+  const h = (map: Record<string, string>) => ({ get: (n: string) => map[n.toLowerCase()] ?? null });
+  const env = (v: Record<string, string>) => v as unknown as NodeJS.ProcessEnv;
+
+  it("ignores forwarding headers unless TRUST_PROXY is set", () => {
+    expect(trustedHops(env({}))).toBe(0);
+    expect(trustedHops(env({ TRUST_PROXY: "false" }))).toBe(0);
+    expect(clientIp(h({ "x-forwarded-for": "6.6.6.6" }), env({}))).toBeNull();
+  });
+
+  it("uses the entry appended by the trusted proxy, not the spoofable leftmost one", () => {
+    const spoofed = h({ "x-forwarded-for": "1.1.1.1, 203.0.113.7" }); // client sent 1.1.1.1 itself
+    expect(clientIp(spoofed, env({ TRUST_PROXY: "true" }))).toBe("203.0.113.7");
+    expect(clientIp(h({ "x-forwarded-for": "1.1.1.1, 203.0.113.7, 10.0.0.2" }), env({ TRUST_PROXY: "2" }))).toBe("203.0.113.7");
+    expect(clientIp(h({ "x-forwarded-for": "203.0.113.7" }), env({ TRUST_PROXY: "2" }))).toBeNull();
+  });
+
+  it("supports a single trusted edge header and rejects garbage", () => {
+    expect(clientIp(h({ "cf-connecting-ip": "2001:db8::1", "x-forwarded-for": "9.9.9.9" }), env({ TRUST_PROXY: "true", TRUST_PROXY_HEADER: "cf-connecting-ip" }))).toBe("2001:db8::1");
+    expect(clientIp(h({ "x-forwarded-for": "not-an-ip" }), env({ TRUST_PROXY: "1" }))).toBeNull();
+    expect(normalizeIp("[::1]:443")).toBe("::1");
+    expect(normalizeIp("203.0.113.7:5000")).toBe("203.0.113.7");
+    expect(normalizeIp("::ffff:203.0.113.7")).toBe("203.0.113.7");
   });
 });
