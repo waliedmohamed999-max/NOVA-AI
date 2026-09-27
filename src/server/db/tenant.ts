@@ -76,6 +76,7 @@ export const ORGANIZATION_MODELS = new Set<string>([
   "AiUsage",
   "AuditLog",
   "DataExport",
+  "Invoice",
   "Notification",
   "NotificationPreference",
   "ConversationParticipant",

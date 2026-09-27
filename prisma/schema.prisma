@@ -1702,3 +1702,42 @@ model DataExport {
   @@index([organizationId])
   @@map("data_exports")
 }
+
+// ───────────────────────────── Billing records ─────────────────────────────
+
+/// Raw provider webhook events, stored once (idempotency) and processed asynchronously-safe.
+model BillingEvent {
+  id             String    @id @default(cuid())
+  provider       String
+  externalId     String
+  type           String
+  organizationId String?
+  payload        Json
+  processedAt    DateTime?
+  error          String?
+  createdAt      DateTime  @default(now())
+
+  @@unique([provider, externalId])
+  @@index([organizationId])
+  @@map("billing_events")
+}
+
+model Invoice {
+  id                String    @id @default(cuid())
+  organizationId    String
+  provider          String
+  providerInvoiceId String
+  status            String
+  amountDueCents    Int
+  amountPaidCents   Int
+  currency          String
+  hostedUrl         String?
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([provider, providerInvoiceId])
+  @@index([organizationId, createdAt])
+  @@map("invoices")
+}

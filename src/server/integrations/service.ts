@@ -7,6 +7,7 @@ import { audit } from "../audit";
 import { notify } from "../notifications/service";
 import { logger } from "../logger";
 import { UserFacingError } from "../errors";
+import { assertWithinLimit } from "../billing/entitlements";
 import { SOCIAL_PROVIDERS, redirectUriFor } from "./registry";
 import { ProviderError, type AccountRef, type SocialProvider, type TokenSet } from "./types";
 
@@ -16,6 +17,8 @@ const STATE_TTL_MS = 10 * 60_000;
 export async function startConnect(scope: TenantScope, userId: string, providerId: SocialProvider["id"], redirectTo = "/integrations") {
   const provider = SOCIAL_PROVIDERS[providerId];
   if (!provider?.isConfigured()) throw new UserFacingError("integration_not_configured");
+  const already = await db.integration.count({ where: { ...scope, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
+  if (!already) await assertWithinLimit(scope.organizationId, "socialChannels");
   const state = randomToken(24);
   const verifier = randomToken(48);
   await db.oAuthState.create({
