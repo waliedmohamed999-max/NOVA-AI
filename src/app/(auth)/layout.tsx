@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { LegalLinks } from "@/features/legal/legal-page";
 import { Check } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { LocaleSwitch } from "@/components/shell/locale-switch";
@@ -19,6 +20,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
         <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-[400px] animate-fade-up">{children}</div>
         </div>
+        <LegalLinks locale={(await getLocale()) === "ar" ? "ar" : "en"} />
       </main>
 
       <aside className="relative hidden overflow-hidden border-s border-line bg-canvas text-ink lg:flex lg:flex-col lg:justify-between lg:p-12" data-theme="dark">

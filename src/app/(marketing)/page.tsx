@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getLocale } from "next-intl/server";
+import { LegalLinks } from "@/features/legal/legal-page";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, Check, PlayCircle } from "lucide-react";
 import { AGENTS } from "@/config/agents";
@@ -144,6 +146,7 @@ export default async function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-10 text-sm text-ink-3 sm:flex-row lg:px-8">
           <Logo subtitle={tc("subtitle")} />
           <p>{t("footer")}</p>
+          <LegalLinks locale={(await getLocale()) === "ar" ? "ar" : "en"} />
         </div>
       </footer>
     </div>
