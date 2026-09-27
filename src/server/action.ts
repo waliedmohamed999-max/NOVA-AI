@@ -50,6 +50,7 @@ export function tenantAction<S extends z.ZodType, R>(
 
 export function mapError(err: unknown, name: string): { ok: false; error: string } {
   if (err instanceof UserFacingError) return { ok: false, error: err.code };
+  if (err instanceof z.ZodError) return { ok: false, error: "validation" };
   if (err instanceof ForbiddenError) return { ok: false, error: "forbidden" };
   if (err instanceof RateLimitError) return { ok: false, error: "rate_limited" };
   if (err instanceof TenantScopeError) {

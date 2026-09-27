@@ -21,6 +21,7 @@ const ids = {
   campaign: await one(`select id from campaigns where "organizationId" = ${demo} limit 1`),
   post: await one(`select id from social_posts where "organizationId" = ${demo} order by "publishedAt" desc limit 1`),
   report: await one(`select id from reports where "organizationId" = ${demo} and kind='WEEKLY_REPORT' limit 1`),
+  carousel: await one(`select id from content_items where "organizationId" = ${demo} and format='CAROUSEL' limit 1`),
 };
 await db.end();
 
@@ -64,6 +65,9 @@ const APP = [
   ["settings-billing", "/settings/billing"],
   ["settings-lead", "/settings/lead-capture"],
   ["settings-data", "/settings/data"],
+  ["settings-approvals", "/settings/approvals"],
+  ["carousel", `/content/${ids.carousel}`],
+  ["admin-incidents", "/admin/incidents"],
   ["admin", "/admin"],
   ["admin-orgs", "/admin/organizations"],
   ["admin-jobs", "/admin/jobs"],
@@ -94,7 +98,7 @@ for (const locale of ["ar", "en"]) {
       const res = await page.goto(`http://localhost:3000${path}`, { waitUntil: "networkidle" }).catch((e) => ({ status: () => `ERR ${e.message}` }));
       await page.waitForTimeout(400);
       const status = res?.status?.() ?? "?";
-      const probe = await page.evaluate(() => {
+      const probeFn = () => {
         const vw = window.innerWidth;
         const escaping = [...document.querySelectorAll("main *, header *, aside *, nav *")]
           .filter((el) => {
@@ -117,7 +121,19 @@ for (const locale of ["ar", "en"]) {
           dir: document.documentElement.dir,
           text: document.body.innerText.slice(0, 20000),
         };
-      });
+      };
+      // Pages that redirect or refresh right after load: wait and re-probe instead of aborting the sweep.
+      let probe;
+      for (let i = 0; ; i++) {
+        try {
+          probe = await page.evaluate(probeFn);
+          break;
+        } catch (e) {
+          if (i >= 3) throw e;
+          await page.waitForLoadState("networkidle").catch(() => {});
+          await page.waitForTimeout(800);
+        }
+      }
       const raw = probe.text.match(RAW_KEY)?.[0];
       const expectedDir = locale === "ar" ? "rtl" : "ltr";
       const problems = [];

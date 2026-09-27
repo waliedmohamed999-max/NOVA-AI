@@ -63,7 +63,7 @@ test("connected accounts: no customer Integrations page, no config details, admi
   await page.goto("/admin/providers");
   await expect(page.getByRole("heading", { name: "Facebook Pages (Meta)" }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Instagram Direct" }).first()).toBeVisible();
-  await expect(page.getByText("The Stripe adapter and webhook are not implemented yet", { exact: false })).toBeVisible();
+  await expect(page.getByText("Stripe adapter is built; payments stay off until", { exact: false })).toBeVisible();
   // Admin-only connection tests: scoped to the admin workspace (the demo has no real connection).
   await expect(page.getByRole("heading", { name: "Connection tests" })).toBeVisible();
   await expect(page.getByText("No Meta or LinkedIn connection in your workspace yet.")).toBeVisible();

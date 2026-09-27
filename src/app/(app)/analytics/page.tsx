@@ -35,7 +35,13 @@ export default async function AnalyticsPage() {
             icon={<BarChart3 />}
             title={t("empty.title")}
             description={t("empty.body")}
-            action={<Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}><Plug className="size-4" /> {t("empty.cta")}</Link>}
+            action={
+              a.connected > 0 ? (
+                <Link href="/content" className={buttonClass("primary", "md")}>{t("empty.ctaContent")}</Link>
+              ) : (
+                <Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}><Plug className="size-4" /> {t("empty.cta")}</Link>
+              )
+            }
           />
         </div>
         {attribution.totals.leads > 0 && <div className="mt-8"><AttributionCard report={attribution} /></div>}

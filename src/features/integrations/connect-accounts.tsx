@@ -109,6 +109,13 @@ export function ConnectAccounts({ view, from, canManage, flash }: { view: Connec
         </div>
       )}
 
+      {!view.cards.some((c) => c.state === "connected" || c.state === "identity" || c.state === "choose" || c.state === "reconnect") && (
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2 px-5 py-4" data-testid="first-channel">
+          <p className="font-semibold">{t("firstChannel")}</p>
+          <p className="text-sm text-ink-3">{t("firstChannelBody")}</p>
+        </div>
+      )}
+
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold text-ink-2">{t("social")}</h2>

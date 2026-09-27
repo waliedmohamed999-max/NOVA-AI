@@ -17,8 +17,8 @@
   "moved": "{name} moved to {stage}",
   "noContact": "Not contacted",
   "empty": {
-    "title": "Your first leads will appear here.",
-    "body": "Add your website form so the Sales Agent can qualify every inquiry automatically — or add a lead manually.",
+    "title": "Add your first lead",
+    "body": "Add your website form so every inquiry reaches the Sales Agent and is qualified automatically — or add a lead by hand now.",
     "cta": "Set up website lead capture"
   },
   "columns": {

@@ -2,9 +2,10 @@
   "title": "Analytics",
   "description": "The questions that matter, answered with your real data.",
   "empty": {
-    "title": "Real analytics start with your first connected account.",
-    "body": "We never show estimated numbers. Connect Instagram, Facebook, LinkedIn or TikTok and your Performance Analyst will start comparing every post.",
-    "cta": "Connect accounts"
+    "title": "Results will appear after your first post",
+    "body": "We never show estimated numbers. Connect a channel and publish your first post — your Performance Analyst will then measure every post with real numbers.",
+    "cta": "Connect your first channel",
+    "ctaContent": "Create your first post"
   },
   "q": {
     "improving": "Is our content improving?",

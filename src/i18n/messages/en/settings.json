@@ -326,7 +326,7 @@
     "title": "Social",
     "description": "Your connected accounts, publishing queue and recent posts.",
     "accounts": "Connected accounts",
-    "noAccounts": "No accounts connected yet",
+    "noAccounts": "Connect your first channel",
     "noAccountsBody": "Connect Instagram, Facebook, LinkedIn or TikTok to publish and see real results.",
     "synced": "Synced {time}",
     "queue": "Publishing queue",
@@ -880,7 +880,9 @@
       "MICROSOFT": "Microsoft (Outlook + Calendar)"
     },
     "noPasswordNote": "Secure sign-in with the provider. NOVA never asks for or stores your password.",
-    "pagesPermissionUnavailable": "Needs Page-management permission from Meta. It isn't enabled for this app yet, so no Pages can be listed."
+    "pagesPermissionUnavailable": "Needs Page-management permission from Meta. It isn't enabled for this app yet, so no Pages can be listed.",
+    "firstChannel": "Connect your first channel",
+    "firstChannelBody": "Pick one channel to start — you can add the rest later. We never ask for passwords."
   },
   "contentAi": {
     "title": "Content AI",
