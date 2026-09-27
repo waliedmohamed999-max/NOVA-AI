@@ -28,14 +28,86 @@ Customers never see app IDs, secrets, environment variable names or "admin setup
 - **Plan limits:** channels over the plan's `socialChannels` limit are not added. The page says which platform was skipped and why.
 - **Demo workspace:** a "Demo account" notice explains that the data is sample data and no real account is connected. No fake OAuth success is ever shown.
 
+## Universal connection contract
+
+One contract for every connector. It is the existing `SocialProvider` interface, exported as `IntegrationProvider` (`src/server/integrations/types.ts`).
+
+| Contract method | Implementation |
+| --- | --- |
+| getAuthorizationUrl | `connect()` |
+| handleCallback | `exchangeCode()` + `listAccounts()`, orchestrated by `completeConnect()` |
+| refreshConnection | `refreshToken()` |
+| disconnect | `disconnect()` |
+| listAccounts | `listAccounts()` |
+| getProfile | `getProfile?()` (optional) |
+| getCapabilities | `capabilities?()` from `grantedScopes?()` (optional) |
+| publishContent | `publishPost()` / `schedulePost()` |
+| getMetrics | `getMetrics()` / `getAccountMetrics()` |
+| (health) | `checkConnection?()` (optional) |
+
+Optional members are capabilities: no provider is forced to implement everything. `providerRegistry()` (`registry.ts`) is the central list:
+- **Live:** `meta`, `linkedin`, `tiktok`.
+- **Planned, not connectable yet:** `google`, `microsoft` (email via OAuth only, never passwords).
+
+### Connection data model (existing tables)
+
+| Requested field | Where it lives |
+| --- | --- |
+| organization_id | `integrations.organizationId` (+ `workspaceId`) |
+| provider | `integrations.provider` |
+| external_account_id / name / username | `integration_accounts.externalId` / `name` / `handle` (+ `avatarUrl`, `accountType`) |
+| encrypted_access_token / refresh_token | `integration_credentials.accessTokenEnc` / `refreshTokenEnc` (AES-256-GCM, never selected by default) |
+| expires_at | `integration_credentials.expiresAt` |
+| scopes | `integrations.scopes`, the permissions **actually granted** |
+| provider_metadata | `integration_accounts.metadata` (`capabilities`, Page `tasks`, `pageId`, `testPosts`) |
+| created_at / updated_at | both tables |
+
+Status mapping (`IntegrationStatus`):
+
+| Status | Stored as |
+| --- | --- |
+| connected | `CONNECTED` with at least one selected account |
+| pending | `CONNECTED` with no selected account yet; the customer must choose in the picker |
+| needs_reauth | `ACTION_REQUIRED` (a permission was removed) |
+| expired | `EXPIRED` |
+| error | `ERROR` |
+| revoked / disconnected | `DISCONNECTED` |
+
+`lastCheckedAt` records the last health check.
+
+### Capabilities
+
+Capabilities are computed from **granted** scopes, never from requested ones. For Facebook Pages, the user's Page `tasks` are also taken into account. They are stored per account and shown in the picker as ✓ (available) or ○ (not available, with the reason).
+
+**Meta**
+- **Facebook Page:**
+  - `identity` — needs `pages_show_list`
+  - `publish` — needs `pages_manage_posts` and the CREATE_CONTENT task
+  - `metrics` — needs `read_insights` or `pages_read_engagement`, and the ANALYZE task
+  - `page_management`, `messages`, `leads` — need permissions that are **not requested** and need App Review, so they show "Not available yet"
+- **Instagram:**
+  - `identity`
+  - `instagram_publishing` — needs `instagram_content_publish`
+  - `metrics` — needs `instagram_manage_insights`
+  - `messages` — not requested
+
+**LinkedIn** (scopes: `openid profile email w_member_social`)
+- `identity` ✓
+- `member_publishing` ✓
+- `organization_publishing` ○ — requires Community Management API approval and `LINKEDIN_ORGANIZATION_ACCESS=true`
+
 ## OAuth flow (`src/server/integrations/service.ts`)
 
-1. `GET /api/integrations/{meta|linkedin|tiktok}/connect?from=onboarding|settings`
+1. `GET /api/integrations/{meta|linkedin|tiktok}/start?from=onboarding|settings`
+   - `/connect` is kept as an alias for older links.
    - Requires a session plus `integrations:manage`, and the plan's channel limit is checked.
+   - Requests with `Sec-Fetch-Site: cross-site` are refused, so no other site can start a connect flow for a signed-in user.
    - Stores a hashed one-time `state` with a 10-minute expiry, an encrypted PKCE verifier and the return page, then redirects to the provider.
    - `from` maps to one of two fixed pages (`/onboarding/connect`, `/settings/connected-accounts`). Any other value falls back to settings, so there is no open redirect.
 2. The provider redirects to `GET /api/integrations/{id}/callback`.
    - The state is verified (exists, unexpired, same provider) and consumed once.
+   - The callback must be finished by **the same signed-in user** who started it, which blocks login-CSRF. A mismatched attempt also burns the state.
+   - The redirect URI is `META_REDIRECT_URI` / `LINKEDIN_REDIRECT_URI` when set. It must point at `/api/integrations/{id}/callback`; otherwise it is derived from `APP_URL`.
    - The stored return page is re-checked against the allow-list.
    - The code is exchanged on the server. Denied consent returns `oauth_denied`; a failed exchange returns `integration_error` (details go to the server log only); no business accounts returns `no_accounts`.
 3. Storage:
@@ -44,13 +116,22 @@ Customers never see app IDs, secrets, environment variable names or "admin setup
    - The event is written to the audit log.
    - A first sync is queued only for platforms whose account is chosen.
    - The browser is sent back with `?connected=…&choose=…&limited=…` or `?error=<code>`, never a code, state or token.
-4. `selectAccounts()` activates only the chosen accounts. It is scoped to the caller's workspace, and IDs from another integration or tenant are rejected.
+4. The **account picker** ("Choose the accounts you want NOVA to manage") shows everything one sign-in returned: Pages and Instagram accounts together, each with avatar, name, @username, platform and capabilities. Nothing is pre-selected.
+   - `selectAccountsBatch()` activates exactly the chosen accounts.
+   - A platform with nothing chosen is released.
+   - It is scoped to the caller's workspace, and IDs from another integration or tenant are rejected.
 5. Tokens are never sent to the browser. Only `tokenForAccount()` decrypts them, inside server jobs.
 
 **Other lifecycle behaviour:**
 - **Token refresh:** runs hourly (`integrations.refresh_tokens`) for credentials expiring within 7 days.
 - **Provider failures:** normalized into `ProviderError` kinds (expired / permission / rate_limited / invalid_media / unavailable / unknown). The integration is marked `EXPIRED` / `ACTION_REQUIRED` / `ERROR`, admins are notified with a link to Connected accounts, and the card shows **Reconnect**.
-- **Disconnect:** revokes at the provider (best effort), deletes the credentials, deactivates the accounts and frees the channel.
+- **Health check:** runs every 6 hours (`integrations.health_check`). It validates live tokens with Meta `debug_token` or LinkedIn token introspection. Invalid tokens become `EXPIRED` / `ACTION_REQUIRED` and the customer is notified: "The connection expired. Reconnect to continue." Transient outages do not change the status.
+- **Disconnect:**
+  - Verifies tenant ownership.
+  - Revokes at the provider, but only when no sibling integration still uses the same grant (Instagram and Facebook share one Meta grant).
+  - Deletes the credentials, deactivates the accounts and frees the channel.
+  - Keeps posts, metrics and the audit history.
+- **Errors shown to customers:** always human-readable, e.g. "We couldn't complete the connection. Please try again." Raw provider codes (`OAuthException`, `invalid_grant`, 401…) go to server logs only.
 
 ## Provider configuration (platform admins only)
 
@@ -58,13 +139,23 @@ Customers never see app IDs, secrets, environment variable names or "admin setup
 - IDs are masked (`1234••••89`) and secrets are shown only as `••••`.
 - Nothing is editable, and secrets are never copied into the database. Change them in the deployment environment.
 
+**Connection tests.** These appear on the same page, run only against the admin's **own workspace** connections, and are read-only:
+- **Meta:** `debug_token` validity and expiry, the Pages list, the linked Instagram accounts, granted scopes and per-account capabilities.
+- **LinkedIn:** token introspection, the connected member, granted scopes and capabilities.
+
+**Publish test post** is a separate button. It publishes the fixed text "NOVA integration test — this post can be deleted." only after the admin types `PUBLISH`.
+- Rate limit: 5 per hour.
+- Supported on Facebook Pages and LinkedIn. Instagram needs an image.
+- The external post id is saved on the account (`metadata.testPosts`) and written to the audit log.
+- Results never contain tokens.
+
 ## Status matrix
 
 | Integration | Implemented | Locally tested | Integration-tested (mocked) | Real-provider tested |
 | --- | --- | --- | --- | --- |
-| Meta: Facebook Pages | OAuth, long-lived tokens, pages, publish (feed/photo), native schedule (text), posts, insights | ✓ UI/flow | ✓ adapter tests with mocked HTTP | ✗ pending (needs Meta app + review) |
-| Meta: Instagram professional | via Page; publish image/carousel/reels/stories, insights, followers | ✓ | ✓ | ✗ pending |
-| LinkedIn | OIDC, member posting, image upload, org pages + share stats when `LINKEDIN_ORGANIZATION_ACCESS=true` | ✓ | ✓ | ✗ pending |
+| Meta: Facebook Pages | OAuth, long-lived tokens, granted-scope detection, Page tasks → capabilities, account picker, publish (feed/photo), native schedule (text), posts, insights, debug_token health check, admin test + confirmed test post | ✓ UI/flow (picker rendered with temporary rows) | ✓ OAuth start/callback/state/picker/capabilities/disconnect/expiry/missing credentials with mocked Graph API | ✗ **not tested with a real Meta app or account** (no credentials in this environment) |
+| Meta: Instagram professional | via Page (only when a Page has one linked); publish image/carousel/reels/stories, insights, followers | ✓ | ✓ | ✗ not tested with a real account |
+| LinkedIn | OIDC (`openid profile email w_member_social`), profile, member posting, image upload, introspection health check, admin test + confirmed test post; org pages only when `LINKEDIN_ORGANIZATION_ACCESS=true` | ✓ | ✓ OAuth start/callback/profile/scopes/capabilities/disconnect/expiry/missing credentials with mocked API | ✗ **not tested with a real LinkedIn app or account** |
 | TikTok | Login Kit v2 + PKCE, refresh, Content Posting (PULL_FROM_URL), video list/query | ✓ | ✓ | ✗ pending |
 | X / YouTube / Pinterest | listed as "coming soon" | — | — | — |
 | OpenAI | text, structured, stream, embeddings, images | offline provider used locally | provider logic unit-tested | ✗ pending (no key in this environment) |
@@ -80,13 +171,16 @@ Customers never see app IDs, secrets, environment variable names or "admin setup
 **Meta**
 - Create an app (Business type).
 - Add Facebook Login for Business and the Instagram Graph API.
-- Redirect URI: `{APP_URL}/api/integrations/meta/callback`.
+- Redirect URI: `{APP_URL}/api/integrations/meta/callback` (or set `META_REDIRECT_URI` to exactly what is registered).
 - Permissions: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `read_insights`, `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights`, `business_management`. These need App Review for production.
 - Instagram media must be reachable at a public URL, so `APP_URL` must be public.
+- Before App Review, only people with a role on the app (admin/developer/tester) can connect, and only Pages they manage.
+- Messaging (`pages_messaging`, `instagram_manage_messages`), lead forms (`leads_retrieval`) and page management (`pages_manage_metadata`) are **not requested**. Add them only after approval, and the capabilities light up automatically.
 
 **LinkedIn**
 - Add the products "Sign In with LinkedIn using OpenID Connect" and "Share on LinkedIn".
-- Redirect URI: `{APP_URL}/api/integrations/linkedin/callback`.
+- Redirect URI: `{APP_URL}/api/integrations/linkedin/callback` (or set `LINKEDIN_REDIRECT_URI`).
+- Scopes requested: `openid profile email w_member_social` only.
 - Company pages and statistics require Community Management API approval; then set `LINKEDIN_ORGANIZATION_ACCESS=true`.
 
 **TikTok**
