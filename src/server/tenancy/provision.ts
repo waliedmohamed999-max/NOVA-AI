@@ -14,7 +14,10 @@ export const DEFAULT_PIPELINE: { stage: LeadStage; en: string; ar: string; proba
   { stage: "LOST", en: "Lost", ar: "خسارة", probability: 0 },
 ];
 
-/** Sensitive sales actions that always require human approval by default. */
+/**
+ * Approval policies. Sensitive sales actions always require a human by default.
+ * "send_message" covers routine replies, which Copilot mode may send on its own.
+ */
 export const DEFAULT_APPROVAL_POLICIES = [
   "discount",
   "custom_pricing",
@@ -110,7 +113,7 @@ export async function provisionOrganization(input: ProvisionInput) {
       data: DEFAULT_PIPELINE.map((s, i) => ({ ...scope, stage: s.stage, label: s[locale], position: i, probability: s.probability })),
     });
     await tx.approvalPolicy.createMany({
-      data: DEFAULT_APPROVAL_POLICIES.map((action) => ({ ...scope, action, requiresApproval: true })),
+      data: DEFAULT_APPROVAL_POLICIES.map((action) => ({ ...scope, action, requiresApproval: action !== "send_message" })),
     });
     await tx.companyProfile.create({ data: { ...scope, name: input.name, website: input.website ?? null } });
     await tx.brandKit.create({ data: { ...scope } });
