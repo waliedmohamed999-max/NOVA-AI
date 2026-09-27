@@ -5,16 +5,46 @@
   "board": "Board",
   "table": "Table",
   "temperature": "Temperature",
-  "temps": { "ALL": "All", "HOT": "Hot", "WARM": "Warm", "COLD": "Cold" },
+  "temps": {
+    "ALL": "All",
+    "HOT": "Hot",
+    "WARM": "Warm",
+    "COLD": "Cold"
+  },
   "add": "Add lead",
   "addHint": "The Sales Agent will qualify them and suggest the next step.",
   "optional": "Optional",
   "moved": "{name} moved to {stage}",
   "noContact": "Not contacted",
-  "empty": { "title": "Your first leads will appear here.", "body": "Add your website form so the Sales Agent can qualify every inquiry automatically — or add a lead manually.", "cta": "Set up website lead capture" },
-  "columns": { "name": "Name", "stage": "Stage", "score": "Score", "value": "Value", "source": "Source", "lastContact": "Last contact", "nextAction": "Next action" },
-  "fields": { "name": "Name", "company": "Company", "email": "Email", "phone": "Phone", "value": "Estimated value", "message": "What did they ask?", "messageHint": "Paste their message and the Sales Agent will draft a reply." },
-  "ai": { "summarize": "Summarize pipeline", "stalled": "Find stalled deals", "hot": "Show hot leads", "followups": "Prepare follow-ups" },
+  "empty": {
+    "title": "Your first leads will appear here.",
+    "body": "Add your website form so the Sales Agent can qualify every inquiry automatically — or add a lead manually.",
+    "cta": "Set up website lead capture"
+  },
+  "columns": {
+    "name": "Name",
+    "stage": "Stage",
+    "score": "Score",
+    "value": "Value",
+    "source": "Source",
+    "lastContact": "Last contact",
+    "nextAction": "Next action"
+  },
+  "fields": {
+    "name": "Name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "value": "Estimated value",
+    "message": "What did they ask?",
+    "messageHint": "Paste their message and the Sales Agent will draft a reply."
+  },
+  "ai": {
+    "summarize": "Summarize pipeline",
+    "stalled": "Find stalled deals",
+    "hot": "Show hot leads",
+    "followups": "Prepare follow-ups"
+  },
   "aiTitle": "Sales Agent",
   "markDone": "Mark done",
   "scoreLabel": "Score {score}/100",
@@ -67,5 +97,26 @@
     "followUps": "Follow-ups",
     "allLeads": "All leads",
     "noFollowUps": "No follow-ups due. Your Sales Assistant will add them as leads come in."
+  },
+  "meetings": {
+    "title": "Meetings",
+    "notConnected": "No calendar is connected, so NOVA can't propose or book meetings yet.",
+    "connect": "Connect Google or Microsoft calendar",
+    "via": "Using {provider} {email}",
+    "propose": "Propose 3 times",
+    "proposed": "3 free times proposed. Share them with the customer.",
+    "pickHint": "Book the time the customer agreed to:",
+    "book": "Book",
+    "booked": "Meeting booked and invite sent",
+    "cancel": "Cancel meeting",
+    "cancelled": "Meeting cancelled",
+    "open": "Open",
+    "timezone": "Times in {tz}",
+    "needsEmail": "Add the customer's email to send a calendar invite.",
+    "status": {
+      "PROPOSED": "Proposed",
+      "BOOKED": "Booked",
+      "CANCELLED": "Cancelled"
+    }
   }
 }

@@ -6,7 +6,7 @@ import { requireTenant } from "@/server/context";
 import { PageHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/misc";
-import { channelFor } from "@/server/sales/channels";
+import { sendableChannels } from "@/server/sales/channels";
 
 export const metadata: Metadata = { title: "Inbox" };
 
@@ -21,12 +21,13 @@ export default async function InboxPage() {
     take: 50,
     include: { lead: { select: { id: true, name: true, company: true } }, messages: { orderBy: { createdAt: "desc" }, take: 1 } },
   });
+  const sendable = await sendableChannels({ organizationId: ctx.organization.id, workspaceId: ctx.workspace.id });
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} />
       <div className="mb-6 flex flex-wrap gap-2">
         {CHANNELS.map((c) => {
-          const ok = c === "MANUAL" || c === "WEBSITE" || Boolean(channelFor(c)?.isConfigured());
+          const ok = c === "MANUAL" || c === "WEBSITE" || sendable.has(c);
           return (
             <Badge key={c} tone={ok ? "success" : "outline"}>
               {t(`channels.${c}`)} · {ok ? t("active") : t("notConnected")}

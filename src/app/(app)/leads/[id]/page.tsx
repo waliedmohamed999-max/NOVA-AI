@@ -4,6 +4,7 @@ import { requireTenant } from "@/server/context";
 import { LeadDetail } from "@/features/sales/lead-detail";
 import { stageLabels } from "@/server/sales/queries";
 import { channelFor } from "@/server/sales/channels";
+import { calendarConnected } from "@/server/calendar/service";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -23,7 +24,17 @@ export default async function LeadPage(props: PageProps<"/leads/[id]">) {
   if (!lead) notFound();
   const labels = await stageLabels(ctx);
   const messages = lead.conversations.flatMap((c) => c.messages.map((m) => ({ id: m.id, direction: m.direction, body: m.body, status: m.status, aiDrafted: m.aiDrafted, at: m.createdAt.toISOString(), channel: c.channel })));
-  const sendable = lead.conversations.some((c) => channelFor(c.channel)?.isConfigured()) && Boolean(lead.email);
+  const scope = { organizationId: ctx.organization.id, workspaceId: ctx.workspace.id };
+  let sendable = false;
+  for (const c of lead.conversations) {
+    const needs = c.channel === "WHATSAPP" ? lead.phone : lead.email;
+    if (needs && (await channelFor(c.channel)?.isConfigured(scope))) sendable = true;
+  }
+
+  const [calendar, meetings] = await Promise.all([
+    calendarConnected(scope),
+    ctx.db.meeting.findMany({ where: { leadId: lead.id }, orderBy: { createdAt: "desc" }, take: 5 }),
+  ]);
 
   return (
     <LeadDetail
@@ -56,6 +67,8 @@ export default async function LeadPage(props: PageProps<"/leads/[id]">) {
       stageLabels={labels}
       canManage={ctx.can("leads:manage")}
       sendable={sendable}
+      calendar={calendar}
+      meetings={meetings.map((m) => ({ id: m.id, status: m.status, title: m.title, startAt: m.startAt?.toISOString() ?? null, slots: (m.proposedSlots as { start: string }[]).map((s) => s.start), timezone: m.timezone, joinUrl: m.joinUrl }))}
     />
   );
 }

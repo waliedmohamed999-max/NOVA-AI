@@ -35,7 +35,7 @@ export async function decideApproval(scope: TenantScope, id: string, decision: "
   } else if (approval.entityType === "Message" && approval.entityId) {
     const msg = await t.message.findUnique({ where: { id: approval.entityId }, include: { conversation: true } });
     if (msg && decision === "APPROVED") {
-      if (channelFor(msg.conversation.channel)?.isConfigured()) {
+      if (await channelFor(msg.conversation.channel)?.isConfigured(scope)) {
         await sendMessage(scope, msg.id, { type: "USER", id: actor.userId, label: actor.label }, (approval.payload as { subject?: string }).subject);
         outcome = "sent";
       } else {

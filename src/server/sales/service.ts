@@ -31,6 +31,16 @@ export async function addLeadEvent(
   });
 }
 
+export type LeadAttribution = {
+  medium?: string | null;
+  utmSource?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  contentItemId?: string | null;
+  socialPostId?: string | null;
+  landingUrl?: string | null;
+};
+
 export type NewLead = {
   name: string;
   company?: string | null;
@@ -39,6 +49,8 @@ export type NewLead = {
   channel?: Channel;
   source?: string | null;
   campaignId?: string | null;
+  /** Attribution captured with the lead (UTM / tracked link). Only what was actually observed. */
+  attribution?: LeadAttribution;
   interests?: string[];
   message?: string | null;
   estimatedValueCents?: number | null;
@@ -67,6 +79,13 @@ export async function createLead(scope: TenantScope, input: NewLead, actor: Acto
       channel: input.channel ?? "MANUAL",
       source: input.source ?? null,
       campaignId: input.campaignId ?? null,
+      medium: input.attribution?.medium ?? null,
+      utmSource: input.attribution?.utmSource ?? null,
+      utmCampaign: input.attribution?.utmCampaign ?? null,
+      utmContent: input.attribution?.utmContent ?? null,
+      contentItemId: input.attribution?.contentItemId ?? null,
+      socialPostId: input.attribution?.socialPostId ?? null,
+      landingUrl: input.attribution?.landingUrl ?? null,
       interests: input.interests ?? [],
       tags: input.tags ?? [],
       estimatedValueCents: input.estimatedValueCents ?? null,
@@ -161,7 +180,8 @@ export async function draftLeadMessage(
 
   let disposition = await messageDisposition(scope, draft.sensitiveTopics);
   const channel = channelFor(conv.channel);
-  const canSend = channel?.isConfigured() && (conv.channel !== "EMAIL" && conv.channel !== "WEBSITE" ? true : Boolean(lead.email));
+  const recipientKnown = conv.channel === "WHATSAPP" ? Boolean(lead.phone) : conv.channel === "EMAIL" || conv.channel === "WEBSITE" ? Boolean(lead.email) : true;
+  const canSend = Boolean(await channel?.isConfigured(scope)) && recipientKnown;
   if (disposition === "send" && !canSend) disposition = "draft";
 
   const message = await t.message.create({
@@ -208,22 +228,24 @@ export async function sendMessage(scope: TenantScope, messageId: string, actor: 
   if (message.status === "SENT") return message;
   const lead = message.conversation.lead;
   const channel = channelFor(message.conversation.channel);
-  if (!channel?.isConfigured()) throw new UserFacingError("integration_not_configured");
+  if (!channel || !(await channel.isConfigured(scope))) throw new UserFacingError("integration_not_configured");
   const org = await db.organization.findUniqueOrThrow({ where: { id: scope.organizationId } });
+  let result: { externalId?: string | null; via: string };
   try {
-    await channel.send({ email: lead?.email, phone: lead?.phone }, { subject: subject ?? org.name, body: message.body, locale: org.locale });
+    result = await channel.send(scope, { email: lead?.email, phone: lead?.phone }, { subject: subject ?? org.name, body: message.body, locale: org.locale });
   } catch (err) {
     await t.message.update({ where: { id: messageId }, data: { status: "FAILED" } });
+    if (err instanceof UserFacingError) throw err;
     throw new UserFacingError("integration_error", { cause: err });
   }
-  const sent = await t.message.update({ where: { id: messageId }, data: { status: "SENT", sentAt: new Date() } });
+  const sent = await t.message.update({ where: { id: messageId }, data: { status: "SENT", sentAt: new Date(), externalId: result.externalId ?? null, deliveryStatus: "accepted" } });
   await t.conversation.update({ where: { id: message.conversationId }, data: { lastMessageAt: new Date() } });
   if (lead) {
     await t.lead.update({ where: { id: lead.id }, data: { lastContactAt: new Date(), stage: lead.stage === "NEW" ? "CONTACTED" : lead.stage } });
     await addLeadEvent(scope, lead.id, { type: actor.type === "AGENT" ? "MESSAGE_SENT" : "HUMAN_REPLY", title: actor.type === "AGENT" ? "AI sent a reply" : "Reply sent", body: message.body.slice(0, 2000), actor });
     if (lead.stage === "NEW") await addLeadEvent(scope, lead.id, { type: "STATUS_CHANGE", title: "NEW → CONTACTED", data: { from: "NEW", to: "CONTACTED" }, actor });
   }
-  await audit({ ...scope, actorType: actor.type, actorId: actor.id, actorLabel: actor.label, action: "message.sent", entityType: "Message", entityId: messageId, summary: `Message sent to ${lead?.name ?? "contact"}` });
+  await audit({ ...scope, actorType: actor.type, actorId: actor.id, actorLabel: actor.label, action: "message.sent", entityType: "Message", entityId: messageId, summary: `Message sent to ${lead?.name ?? "contact"} via ${result.via}` });
   return sent;
 }
 

@@ -55,5 +55,11 @@
   "image_limit": "You've used this month's design generations for your plan. Upgrade or wait for next month.",
   "image_failed": "We couldn't create the design. Your content is saved — you can try again.",
   "image_refused": "This design request couldn't be created under the image provider's safety rules. Try describing it differently.",
-  "image_rate_limited": "The image service is busy. Try again in a minute."
+  "image_rate_limited": "The image service is busy. Try again in a minute.",
+  "calendar_not_connected": "Connect a Google or Microsoft calendar first. No meeting was booked.",
+  "calendar_no_free_slots": "Your calendar has no free working-hour slots in the next 10 days.",
+  "calendar_slot_taken": "That time is no longer free in your calendar. Propose new times.",
+  "meeting_needs_email": "Add the customer's email before booking so they receive the invite.",
+  "whatsapp_window_closed": "WhatsApp only allows free-text replies within 24 hours of the customer's last message. Use an approved template.",
+  "oauth_invalid_scope": "We couldn't finish connecting because a permission isn't enabled in the app yet."
 }

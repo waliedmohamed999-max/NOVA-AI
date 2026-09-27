@@ -14,6 +14,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { RunView } from "@/features/agents/run-view";
 import { FollowUpList } from "./followups";
+import { MeetingsCard, type MeetingView } from "./meetings";
 import { STAGES } from "./board";
 import { followUpLead, moveLead, noteLead, requalifyLead, sendLeadMessage } from "./actions";
 
@@ -43,7 +44,7 @@ type Lead = {
 type Event = { id: string; type: string; title: string; body: string | null; actorType: string; at: string };
 type Message = { id: string; direction: string; body: string; status: string; aiDrafted: boolean; at: string; channel: string };
 
-export function LeadDetail({ lead, events, messages, activities, stageLabels, canManage, sendable }: {
+export function LeadDetail({ lead, events, messages, activities, stageLabels, canManage, sendable, calendar, meetings }: {
   lead: Lead;
   events: Event[];
   messages: Message[];
@@ -51,6 +52,8 @@ export function LeadDetail({ lead, events, messages, activities, stageLabels, ca
   stageLabels: Record<string, string>;
   canManage: boolean;
   sendable: boolean;
+  calendar: { provider: "GOOGLE" | "MICROSOFT"; email: string | null } | null;
+  meetings: MeetingView[];
 }) {
   const t = useTranslations("leads");
   const te = useTranslations("errors");
@@ -171,6 +174,8 @@ export function LeadDetail({ lead, events, messages, activities, stageLabels, ca
             {lead.phone && <Row icon={Phone} label={t("fields.phone")} value={<a href={`tel:${lead.phone}`} dir="ltr">{lead.phone}</a>} />}
             {lead.interests.length > 0 && <div className="flex flex-wrap gap-1.5 pt-1">{lead.interests.map((i) => <Badge key={i} tone="outline">{i}</Badge>)}</div>}
           </Card>
+
+          <MeetingsCard leadId={lead.id} calendar={calendar} meetings={meetings} canManage={canManage} hasEmail={Boolean(lead.email)} />
 
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">{t("sales.followUps")}</h2>

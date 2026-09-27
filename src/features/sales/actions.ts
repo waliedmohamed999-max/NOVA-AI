@@ -106,3 +106,26 @@ export const runPipelineAction = tenantAction(
     return { runId: run.id };
   },
 );
+
+// ── Meetings (connected Google / Outlook calendar only) ──
+
+export const proposeMeetingSlots = tenantAction({ name: "leads.meeting_propose", permission: "leads:manage", rateLimit: 20 }, z.object({ leadId: z.string(), durationMin: z.number().int().min(15).max(120).optional() }), async ({ leadId, durationMin }, ctx) => {
+  const { proposeSlots } = await import("@/server/calendar/service");
+  const r = await proposeSlots(scopeOf(ctx), leadId, who(ctx), { durationMin });
+  refresh(leadId);
+  return { meetingId: r.meeting.id, slots: r.slots.map((s) => s.start.toISOString()), timezone: r.timezone };
+});
+
+export const bookMeetingSlot = tenantAction({ name: "leads.meeting_book", permission: "leads:manage", rateLimit: 20 }, z.object({ meetingId: z.string(), start: z.string().datetime() }), async ({ meetingId, start }, ctx) => {
+  const { bookMeeting } = await import("@/server/calendar/service");
+  const m = await bookMeeting(scopeOf(ctx), meetingId, start, who(ctx));
+  refresh(m.leadId);
+  return { ok: true };
+});
+
+export const cancelLeadMeeting = tenantAction({ name: "leads.meeting_cancel", permission: "leads:manage" }, z.object({ meetingId: z.string() }), async ({ meetingId }, ctx) => {
+  const { cancelMeeting } = await import("@/server/calendar/service");
+  const m = await cancelMeeting(scopeOf(ctx), meetingId, who(ctx));
+  refresh(m.leadId);
+  return { ok: true };
+});
