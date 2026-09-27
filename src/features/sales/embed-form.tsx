@@ -30,7 +30,7 @@ export function EmbedLeadForm({ publicKey, fields, companyName, locale, successM
     const res = await fetch(`/api/public/leads/${publicKey}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...data, _ts: started.current, utm_source: params.get("utm_source") ?? undefined, utm_campaign: params.get("utm_campaign") ?? undefined, referrer: document.referrer || undefined }),
+      body: JSON.stringify({ ...data, _ts: started.current, utm_source: params.get("utm_source") ?? undefined, utm_medium: params.get("utm_medium") ?? undefined, utm_campaign: params.get("utm_campaign") ?? undefined, utm_content: params.get("utm_content") ?? undefined, nova_post: params.get("nova_post") ?? undefined, page: params.get("page") ?? undefined, referrer: document.referrer || undefined }),
     });
     const json = await res.json().catch(() => ({}));
     if (res.ok) {

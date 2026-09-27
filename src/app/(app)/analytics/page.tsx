@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/misc";
 import { buttonClass } from "@/components/ui/button";
 import { AnalyticsCharts } from "@/features/analytics/charts";
+import { AttributionCard } from "@/features/analytics/attribution-card";
+import { attributionReport } from "@/server/analytics/attribution";
 import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Analytics" };
@@ -22,6 +24,7 @@ export default async function AnalyticsPage() {
   const pct = (v: number | null) => (v == null ? "—" : `${(v * 100).toFixed(1)}%`);
   const delta = (v: number | null) => (v == null ? null : { value: `${v >= 0 ? "+" : ""}${Math.round(v * 100)}%`, positive: v >= 0 });
   const stageLabel = await ctx.db.pipelineStage.findMany();
+  const attribution = await attributionReport({ organizationId: ctx.organization.id, workspaceId: ctx.workspace.id });
 
   if (!a.hasData) {
     return (
@@ -35,6 +38,7 @@ export default async function AnalyticsPage() {
             action={<Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}><Plug className="size-4" /> {t("empty.cta")}</Link>}
           />
         </div>
+        {attribution.totals.leads > 0 && <div className="mt-8"><AttributionCard report={attribution} /></div>}
       </>
     );
   }
@@ -120,6 +124,8 @@ export default async function AnalyticsPage() {
           {a.followers.series.length > 1 && <AnalyticsCharts kind="trend" integer data={a.followers.series.map((f) => ({ x: f.date, label: format.dateTime(new Date(f.date), { month: "short", day: "numeric" }), y: f.value }))} label={t("q.audience")} />}
         </Card>
       </section>
+
+      <AttributionCard report={attribution} />
 
       {/* Best posts & campaigns */}
       <section className="grid gap-4 lg:grid-cols-2">

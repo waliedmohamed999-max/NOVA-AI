@@ -56,5 +56,24 @@
       "leads": "Leads",
       "engagementRate": "Engagement rate"
     }
+  },
+  "attribution": {
+    "title": "Where customers come from",
+    "window": "Leads from the last 90 days",
+    "empty": "No leads yet. Tracked links in your posts and your website form will show here.",
+    "kpi": {
+      "leads": "Leads",
+      "attributed": "Attributed",
+      "opportunities": "Opportunities",
+      "won": "Deals won",
+      "revenue": "Revenue"
+    },
+    "cols": {
+      "campaign": "Campaign"
+    },
+    "unattributed": "No campaign / direct",
+    "mixedCurrencies": "Mixed currencies",
+    "noValue": "{count, plural, one {# deal without a value} other {# deals without a value}}",
+    "note": "Revenue counts only won deals with a recorded value. Nothing is estimated."
   }
 }

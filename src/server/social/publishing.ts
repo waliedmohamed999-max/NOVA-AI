@@ -6,6 +6,7 @@ import { signedFileUrl } from "../storage";
 import { accountRef, markIntegrationError, tokenForAccount } from "../integrations/service";
 import { providerForPlatform } from "../integrations/registry";
 import { ProviderError } from "../integrations/types";
+import { tagOwnLinks } from "../analytics/attribution";
 
 const appUrl = () => process.env.APP_URL ?? "http://localhost:3000";
 
@@ -61,10 +62,17 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
   const token = await tokenForAccount(account.integrationId, account.id);
   if (!token) return fail("integration_expired");
 
+  // Links to the company's own site get UTM tracking so leads from this post are attributed to it.
+  const [org, campaign] = await Promise.all([
+    db.organization.findUnique({ where: { id: scope.organizationId }, select: { website: true } }),
+    item.campaignId ? db.campaign.findUnique({ where: { id: item.campaignId }, select: { name: true } }) : null,
+  ]);
+  const caption = tagOwnLinks([item.caption, item.hashtags.join(" ")].filter(Boolean).join("\n\n"), org?.website, { platform: pub.platform, campaign: campaign?.name, contentItemId: item.id });
+
   try {
     const result = await provider.publishPost(accountRef(account), token, {
       format: item.format,
-      caption: [item.caption, item.hashtags.join(" ")].filter(Boolean).join("\n\n"),
+      caption,
       mediaUrls: await mediaUrlsFor(item.id),
       link: null,
     });

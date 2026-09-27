@@ -4,6 +4,7 @@ import { createLead } from "./service";
 import { aiAvailability } from "../ai";
 import { rateLimit } from "../rate-limit";
 import { logger } from "../logger";
+import { attributionFrom } from "../analytics/attribution";
 
 export type FormField = { key: string; label: string; type: "text" | "email" | "tel" | "textarea"; required: boolean };
 
@@ -11,7 +12,7 @@ export type CaptureResult =
   | { ok: true; message: string | null; leadId: string }
   | { ok: false; status: number; error: "not_found" | "forbidden_origin" | "rate_limited" | "validation"; fields?: string[] };
 
-const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "referrer", "page"] as const;
+const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "nova_post", "referrer", "page"] as const;
 
 /** Origins allowed to post: the app itself (the hosted embed) plus the form's configured origins. */
 export function originAllowed(origin: string | null, allowed: string[], appUrl: string) {
@@ -72,6 +73,7 @@ export async function captureLead(publicKey: string, input: Record<string, unkno
       channel: "WEBSITE",
       source: attribution.utm_source ? `Website form (${attribution.utm_source})` : `Website form: ${form.name}`,
       campaignId,
+      attribution: await attributionFrom(scope, input),
       formFields: { ...Object.fromEntries(Object.entries(v).filter(([, x]) => x)), ...attribution } as Record<string, string>,
     },
     { type: "SYSTEM", label: form.name },

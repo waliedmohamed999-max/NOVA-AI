@@ -377,8 +377,10 @@ const { act, pending } = useAct();
   const [msg, setMsg] = useState(form.successMessage);
   const [active, setActive] = useState(form.isActive);
   const [copied, setCopied] = useState(false);
-  const iframe = `<iframe src="${base}/embed/lead/${form.publicKey}" style="width:100%;max-width:520px;height:560px;border:0" title="Contact form"></iframe>`;
-  const api = `POST ${base}/api/public/leads/${form.publicKey}\nContent-Type: application/json\n\n{"name":"…","email":"…","message":"…","utm_source":"…"}`;
+  // The snippet forwards the host page's UTM / tracked-link parameters so leads keep their attribution.
+  const iframe = `<iframe id="nova-lead-${form.publicKey}" style="width:100%;max-width:520px;height:560px;border:0" title="Contact form"></iframe>
+<script>(function(){var q=new URLSearchParams(location.search),o=new URLSearchParams();["utm_source","utm_medium","utm_campaign","utm_content","nova_post"].forEach(function(k){if(q.get(k))o.set(k,q.get(k))});o.set("page",location.origin+location.pathname);document.getElementById("nova-lead-${form.publicKey}").src="${base}/embed/lead/${form.publicKey}?"+o})();</script>`;
+  const api = `POST ${base}/api/public/leads/${form.publicKey}\nContent-Type: application/json\n\n{"name":"…","email":"…","message":"…","utm_source":"…","utm_medium":"…","utm_campaign":"…","utm_content":"…","page":"https://…"}`;
   return (
     <Section
       title={form.name}
