@@ -10,6 +10,10 @@ export interface PaymentProvider {
   readonly name: string;
   isConfigured(): boolean;
   checkoutUrl(input: { organizationId: string; plan: PlanTier; email: string }): Promise<string>;
+  /** Self-service portal (payment method, invoices, cancel). */
+  portalUrl?(organizationId: string): Promise<string>;
+  /** Cancel at the end of the paid period. */
+  cancel?(organizationId: string): Promise<void>;
 }
 
 export class UnconfiguredPayments implements PaymentProvider {

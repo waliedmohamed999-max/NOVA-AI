@@ -186,6 +186,18 @@ export const saveAiBudget = tenantAction({ name: "settings.budget", permission: 
   return { ok: true };
 });
 
+export const openBillingPortal = tenantAction({ name: "billing.portal", permission: "billing:manage", rateLimit: 10 }, z.object({}), async (_, ctx) => {
+  const { billingPortalUrl } = await import("@/server/billing/service");
+  return { url: await billingPortalUrl(ctx.organization.id) };
+});
+
+export const cancelPlan = tenantAction({ name: "billing.cancel", permission: "billing:manage", rateLimit: 5 }, z.object({ confirm: z.literal(true) }), async (_, ctx) => {
+  const { cancelSubscription } = await import("@/server/billing/service");
+  await cancelSubscription(ctx.organization.id, ctx.user.id);
+  revalidatePath("/settings/billing");
+  return { ok: true };
+});
+
 export const startCheckout = tenantAction({ name: "billing.checkout", permission: "billing:manage" }, z.object({ plan: z.enum(["STARTER", "GROWTH", "SCALE"]) }), async ({ plan }, ctx) => {
   return requestPlanChange({ organizationId: ctx.organization.id, plan, email: ctx.user.email, actorId: ctx.user.id });
 });

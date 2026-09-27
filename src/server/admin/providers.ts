@@ -59,7 +59,7 @@ export function providerConfigStatus(): ProviderRow[] {
     storageDriver === "s3"
       ? row("storage", s3, [field("S3_ENDPOINT", "setting"), field("S3_REGION", "setting"), { env: "STORAGE_DRIVER", kind: "setting", value: "s3" }])
       : { key: "storage", status: "configured", fields: [{ env: "STORAGE_DRIVER", kind: "setting", value: storageDriver }, field("STORAGE_LOCAL_DIR", "setting")], note: "local" },
-    // The Stripe adapter and webhook are not implemented yet; keys alone do not enable payments.
-    { key: "payments", status: stripeSet ? "error" : "missing", fields: [...stripe, field("STRIPE_PRICE_GROWTH", "setting")], note: "stripe_not_implemented" },
+    // Payments turn on only when keys, webhook secret and at least the Growth price are all set.
+    { key: "payments", status: judge([...stripe, field("STRIPE_PRICE_GROWTH", "setting")]), fields: [...stripe, field("STRIPE_PRICE_STARTER", "setting"), field("STRIPE_PRICE_GROWTH", "setting"), field("STRIPE_PRICE_SCALE", "setting")], note: stripeSet ? null : "stripe_pending_keys" },
   ];
 }

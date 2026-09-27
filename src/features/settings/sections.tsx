@@ -19,6 +19,8 @@ import {
   saveAiBudget,
   saveAiSettings,
   saveApprovalPolicy,
+  openBillingPortal,
+  cancelPlan,
   saveLeadForm,
   saveNotificationPref,
   startCheckout,
@@ -180,6 +182,9 @@ type BillingProps = {
   ai: { spentUsd: number; allowanceUsd: number; percent: number; softLimitPercent: number; hardLimitEnabled: boolean };
   byAgent: { agent: string; requests: number; costUsd: number }[];
   paymentsConfigured: boolean;
+  hasSubscription: boolean;
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: string | null;
   canManage: boolean;
   invoices: { id: string; status: string; amount: string; date: string; url: string | null }[];
 };
@@ -218,8 +223,19 @@ export function BillingSettings(b: BillingProps) {
                 {t("switchTo", { plan: t(`plans.${p}`) })}
               </Button>
             ))}
+            {b.paymentsConfigured && b.hasSubscription && (
+              <Button variant="ghost" size="sm" loading={pending} onClick={() => act(async () => {
+                const r = await openBillingPortal({});
+                if (r.ok) window.location.href = r.data.url;
+                return r;
+              })}>{t("portal")}</Button>
+            )}
+            {b.paymentsConfigured && b.hasSubscription && !b.cancelAtPeriodEnd && (
+              <Button variant="ghost" size="sm" loading={pending} onClick={() => { if (window.confirm(t("cancelConfirm"))) act(() => cancelPlan({ confirm: true }), t("cancelRequested")); }}>{t("cancel")}</Button>
+            )}
           </div>
         )}
+        {b.cancelAtPeriodEnd && b.currentPeriodEnd && <p className="text-sm text-warning">{t("cancelsOn", { date: format.dateTime(new Date(b.currentPeriodEnd), { dateStyle: "medium" }) })}</p>}
       </Section>
 
       <Section

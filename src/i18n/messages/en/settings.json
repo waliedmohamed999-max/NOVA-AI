@@ -217,7 +217,12 @@
     "system": "System",
     "invoices": "Invoices",
     "noInvoices": "No invoices yet.",
-    "view": "View"
+    "view": "View",
+    "portal": "Manage payment & invoices",
+    "cancel": "Cancel plan",
+    "cancelConfirm": "Cancel at the end of the current billing period? You keep access until then.",
+    "cancelRequested": "Cancellation requested. It takes effect at the end of the period.",
+    "cancelsOn": "Your plan ends on {date}."
   },
   "security": {
     "sessions": "Active sessions",
@@ -589,13 +594,13 @@
       },
       "notes": {
         "local": "Local disk storage — fine for one server; use S3/R2 when running several instances.",
-        "stripe_not_implemented": "The Stripe adapter and webhook are not implemented yet. Setting these keys does not enable payments; plan changes stay blocked.",
         "meta_secret_is_access_token": "META_APP_SECRET contains an access token (starts with EAA), not the App Secret. Use App settings → Basic → App secret (32 hex characters) of the same app as META_APP_ID. If that token was shared anywhere, revoke it.",
         "meta_secret_format": "META_APP_SECRET doesn't look like an App Secret (32 hex characters from App settings → Basic).",
         "meta_app_id_format": "META_APP_ID must be the numeric App ID.",
         "instagram_secret_is_access_token": "INSTAGRAM_APP_SECRET contains an access token, not the Instagram App Secret. Use Instagram → API setup with Instagram login → Instagram app secret.",
         "instagram_secret_format": "INSTAGRAM_APP_SECRET doesn't look like an App Secret (32 hex characters).",
-        "instagram_app_id_format": "INSTAGRAM_APP_ID must be the numeric Instagram app ID (not the Facebook App ID field name)."
+        "instagram_app_id_format": "INSTAGRAM_APP_ID must be the numeric Instagram app ID (not the Facebook App ID field name).",
+        "stripe_pending_keys": "Stripe adapter is built; payments stay off until STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and the price ids are set."
       }
     },
     "tests": {

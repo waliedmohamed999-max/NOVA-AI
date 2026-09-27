@@ -255,7 +255,7 @@ describe("helpers", () => {
       expect(JSON.stringify(meta)).not.toContain("123456789012");
       delete process.env.META_APP_SECRET;
       expect(providerConfigStatus().find((r) => r.key === "meta")!.status).toBe("error");
-      expect(providerConfigStatus().find((r) => r.key === "payments")!.note).toBe("stripe_not_implemented");
+      expect(providerConfigStatus().find((r) => r.key === "payments")!.note).toBe("stripe_pending_keys");
     } finally {
       delete process.env.META_APP_ID;
       delete process.env.META_APP_SECRET;

@@ -217,7 +217,12 @@
     "system": "النظام",
     "invoices": "الفواتير",
     "noInvoices": "لا توجد فواتير بعد.",
-    "view": "عرض"
+    "view": "عرض",
+    "portal": "إدارة الدفع والفواتير",
+    "cancel": "إلغاء الخطة",
+    "cancelConfirm": "إلغاء الخطة في نهاية فترة الفوترة الحالية؟ يستمر وصولك حتى ذلك الحين.",
+    "cancelRequested": "تم طلب الإلغاء. يسري في نهاية الفترة.",
+    "cancelsOn": "تنتهي خطتك في {date}."
   },
   "security": {
     "sessions": "الجلسات النشطة",
@@ -589,13 +594,13 @@
       },
       "notes": {
         "local": "تخزين على القرص المحلي — مناسب لخادم واحد؛ استخدم S3/R2 عند تشغيل أكثر من نسخة.",
-        "stripe_not_implemented": "محوّل Stripe والـwebhook غير مُنفَّذين بعد. ضبط هذه المفاتيح لا يفعّل الدفع؛ تغيير الخطة يبقى متوقفًا.",
         "meta_secret_is_access_token": "قيمة META_APP_SECRET هي access token (تبدأ بـ EAA) وليست App Secret. استخدم App settings ← Basic ← App secret (32 حرفًا ست عشريًا) لنفس تطبيق META_APP_ID. إذا شُورك هذا التوكن في أي مكان فقم بإلغائه.",
         "meta_secret_format": "قيمة META_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا من App settings ← Basic).",
         "meta_app_id_format": "يجب أن يكون META_APP_ID هو رقم التطبيق (App ID).",
         "instagram_secret_is_access_token": "قيمة INSTAGRAM_APP_SECRET هي access token وليست Instagram App Secret. استخدم Instagram ← API setup with Instagram login ← Instagram app secret.",
         "instagram_secret_format": "قيمة INSTAGRAM_APP_SECRET لا تبدو App Secret (32 حرفًا ست عشريًا).",
-        "instagram_app_id_format": "يجب أن يكون INSTAGRAM_APP_ID رقم تطبيق Instagram."
+        "instagram_app_id_format": "يجب أن يكون INSTAGRAM_APP_ID رقم تطبيق Instagram.",
+        "stripe_pending_keys": "محوّل Stripe جاهز؛ تبقى المدفوعات متوقفة حتى ضبط STRIPE_SECRET_KEY وSTRIPE_WEBHOOK_SECRET ومعرّفات الأسعار."
       }
     },
     "tests": {
