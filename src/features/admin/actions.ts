@@ -68,7 +68,7 @@ export async function openAiTestTextAction(): Promise<ActionResult<{ model: stri
   }
 }
 
-export async function openAiTestImageAction(): Promise<ActionResult<{ model: string; bytes: number; url: string }>> {
+export async function openAiTestImageAction(): Promise<ActionResult<{ model: string; bytes: number; url: string; cost: { basis: string; costMicro: string; pricingVersion: string; usage: { textInputTokens: number; imageInputTokens: number; outputTokens: number } } }>> {
   const a = await adminScope();
   if (!a) return { ok: false, error: "forbidden" };
   try {
@@ -76,7 +76,7 @@ export async function openAiTestImageAction(): Promise<ActionResult<{ model: str
     const { adminTestImage } = await import("@/server/studio/images");
     const { signedFileUrl } = await import("@/server/storage");
     const r = await adminTestImage(a.scope, a.userId);
-    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId) } };
+    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId), cost: r.cost } };
   } catch (err) {
     return mapError(err, "admin.openai_image");
   }

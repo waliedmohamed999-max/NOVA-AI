@@ -132,7 +132,8 @@ test.describe("content studio AI (no OpenAI key in this environment)", () => {
 
     await page.goto("/settings/ai");
     await expect(page.getByRole("heading", { name: "Content AI" })).toBeVisible();
-    await expect(page.getByText("Designs this month")).toBeVisible();
+    await expect(page.getByText("Design usage this month")).toBeVisible();
+    await expect(page.locator("main")).not.toContainText(/tokens|USD|\$\d/); // cost details are admin-only
     await expect(page.locator("main")).not.toContainText("OPENAI_API_KEY");
     await expect(page.locator("main")).not.toContainText("gpt-image");
 

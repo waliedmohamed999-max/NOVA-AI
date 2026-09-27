@@ -1,5 +1,6 @@
 import OpenAI, { toFile } from "openai";
 import type { DesignBrief } from "../agents/schemas";
+import { priceImage, type ImageCost } from "./image-cost";
 
 export type BrandKitInput = {
   primaryColors: string[];
@@ -13,7 +14,8 @@ export type BrandKitInput = {
 export type ImageSize = "1024x1024" | "1024x1536" | "1536x1024";
 export type ImageQuality = "fast" | "quality";
 
-export type ImageResult = { data: Buffer; mimeType: "image/png"; model: string; costMicro: bigint };
+/** `cost` is token-based (see image-cost.ts): priced from the provider's usage, or a labelled estimate. */
+export type ImageResult = { data: Buffer; mimeType: "image/png"; model: string; cost: ImageCost };
 
 /** Why an image request failed — mapped to customer-safe messages, raw provider errors stay in logs. */
 export class ImageProviderError extends Error {
@@ -77,12 +79,6 @@ export function sizeForFormat(format: string): ImageSize {
   return "1024x1024";
 }
 
-/** Estimated cost per image in micro-USD (env-configurable; OpenAI pricing changes). */
-export function estimatedImageCostMicro(quality: ImageQuality, env: NodeJS.ProcessEnv = process.env): bigint {
-  const usd = Number(quality === "quality" ? (env.OPENAI_IMAGE_COST_QUALITY_USD ?? 0.17) : (env.OPENAI_IMAGE_COST_FAST_USD ?? 0.04));
-  return BigInt(Math.round((Number.isFinite(usd) ? usd : 0) * 1_000_000));
-}
-
 export function imageModels(env: NodeJS.ProcessEnv = process.env) {
   const fallback = env.OPENAI_IMAGE_MODEL || "gpt-image-1";
   return { fast: env.OPENAI_IMAGE_MODEL_FAST || fallback, quality: env.OPENAI_IMAGE_MODEL_QUALITY || fallback };
@@ -110,17 +106,17 @@ class OpenAIImages implements ImageProvider {
     this.client ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 1, timeout: 180_000 });
     return this.client;
   }
-  private result(res: OpenAI.Images.ImagesResponse, model: string, quality: ImageQuality): ImageResult {
+  private result(res: OpenAI.Images.ImagesResponse, model: string, ctx: { promptChars: number; referenceImages: number; size: ImageSize }): ImageResult {
     const b64 = res.data?.[0]?.b64_json;
     if (!b64) throw new ImageProviderError("image_failed", "Image provider returned no image");
     // Decoded server-side and handed to storage — base64 never reaches the database.
-    return { data: Buffer.from(b64, "base64"), mimeType: "image/png", model, costMicro: estimatedImageCostMicro(quality) };
+    return { data: Buffer.from(b64, "base64"), mimeType: "image/png", model, cost: priceImage(res.usage, ctx) };
   }
   async generate({ prompt, size, quality = "fast" }: { prompt: string; size: ImageSize; quality?: ImageQuality }) {
     if (!this.isConfigured()) throw new ImageProviderError("image_not_configured", "OpenAI images not configured");
     const model = quality === "quality" ? this.models().quality : this.models().fast;
     try {
-      return this.result(await this.sdk().images.generate({ model, prompt, size, n: 1 }), model, quality);
+      return this.result(await this.sdk().images.generate({ model, prompt, size, n: 1 }), model, { promptChars: prompt.length, referenceImages: 0, size });
     } catch (err) {
       throw err instanceof ImageProviderError ? err : mapError(err);
     }
@@ -130,7 +126,8 @@ class OpenAIImages implements ImageProvider {
     const model = quality === "quality" ? this.models().quality : this.models().fast;
     try {
       const files = await Promise.all(images.slice(0, 4).map((b, i) => toFile(b, `reference-${i}.png`, { type: "image/png" })));
-      return this.result(await this.sdk().images.edit({ model, image: files.length === 1 ? files[0] : files, prompt, size, n: 1 }), model, quality);
+      // Reference images are billed as image input tokens.
+      return this.result(await this.sdk().images.edit({ model, image: files.length === 1 ? files[0] : files, prompt, size, n: 1 }), model, { promptChars: prompt.length, referenceImages: files.length, size });
     } catch (err) {
       throw err instanceof ImageProviderError ? err : mapError(err);
     }

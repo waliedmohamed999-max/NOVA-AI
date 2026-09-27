@@ -1091,6 +1091,11 @@ model ContentAsset {
   contentVersion Int?
   errorCode      String?
   costMicro      BigInt      @default(0)
+  /// "actual_usage" (priced from the provider's token usage) | "estimated" (fallback estimate, not provider cost).
+  costBasis      String?
+  pricingVersion String?
+  /// { textInputTokens, imageInputTokens, outputTokens }
+  usage          Json?
   isSelected     Boolean     @default(false)
   createdById    String?
   createdAt      DateTime    @default(now())
@@ -1588,6 +1593,9 @@ model AiRun {
   /// Prompt registry key + version used for this call.
   promptKey      String?
   promptVersion  String?
+  /// Image runs: how costMicro was derived ("actual_usage" | "estimated") and which pricing table.
+  costBasis      String?
+  pricingVersion String?
   createdAt      DateTime    @default(now())
 
   @@index([organizationId, createdAt])

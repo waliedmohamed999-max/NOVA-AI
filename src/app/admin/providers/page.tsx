@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConnectionTests } from "@/features/admin/connection-tests";
 import { OAuthDiagnostics } from "@/features/admin/oauth-diagnostics";
 import { OpenAiTests } from "@/features/admin/openai-tests";
+import { imageCostSummary } from "@/server/admin/image-costs";
 import { contentAiConfigured } from "@/server/ai";
 import { modelCatalog } from "@/server/ai/models";
 import { imageModels, imageProvider } from "@/server/design/image-provider";
@@ -64,6 +65,7 @@ export default async function AdminProvidersPage() {
           configured={{ text: contentAiConfigured(), image: imageProvider().isConfigured() }}
           textModel={modelCatalog().find((m) => m.provider === "openai" && m.tier === "best")?.model ?? "—"}
           imageModels={imageModels()}
+          costs={await imageCostSummary()}
         />
       </section>
       <section className="space-y-3">

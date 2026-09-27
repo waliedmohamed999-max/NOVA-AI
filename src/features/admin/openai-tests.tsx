@@ -7,12 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
 import { openAiTestImageAction, openAiTestTextAction } from "./actions";
 
-/** Admin-only: live OpenAI checks. Model names are visible here (and only here). */
-export function OpenAiTests({ configured, textModel, imageModels }: { configured: { text: boolean; image: boolean }; textModel: string; imageModels: { fast: string; quality: string } }) {
+type CostRow = { task: string; basis: string; runs: number; costUsd: number; inputTokens: number; outputTokens: number };
+type Pricing = { textInputPerM: number; imageInputPerM: number; imageOutputPerM: number; version: string };
+
+/** Admin-only: live OpenAI checks and image cost details. Model names and token costs are visible here (and only here). */
+export function OpenAiTests({ configured, textModel, imageModels, costs }: { configured: { text: boolean; image: boolean }; textModel: string; imageModels: { fast: string; quality: string }; costs: { pricing: Pricing; rows: CostRow[] } }) {
   const t = useTranslations("settings.admin.openai");
   const te = useTranslations("errors");
   const [text, setText] = useState<string | null>(null);
-  const [image, setImage] = useState<{ url: string; model: string } | null>(null);
+  const [image, setImage] = useState<{ url: string; model: string; detail: string } | null>(null);
   const [pending, start] = useTransition();
   const fail = (code: string) => toast.error(te.has(code as "unexpected") ? te(code as "unexpected") : code);
   return (
@@ -42,17 +45,40 @@ export function OpenAiTests({ configured, textModel, imageModels }: { configured
         })}>{t("testText")}</Button>
         <Button size="sm" variant="secondary" disabled={!configured.image} loading={pending} onClick={() => start(async () => {
           const r = await openAiTestImageAction();
-          if (r.ok) setImage({ url: r.data.url, model: r.data.model });
-          else fail(r.error);
+          if (r.ok) {
+            const c = r.data.cost;
+            setImage({ url: r.data.url, model: r.data.model, detail: `${c.basis} · USD ${(Number(c.costMicro) / 1e6).toFixed(4)} · text ${c.usage.textInputTokens} / image-in ${c.usage.imageInputTokens} / out ${c.usage.outputTokens} tokens · ${c.pricingVersion}` });
+          } else fail(r.error);
         })}>{t("testImage")}</Button>
       </div>
       <p className="text-xs text-ink-4">{t("note")}</p>
+      <div className="space-y-2 border-t border-line pt-4">
+        <p className="text-sm font-semibold">{t("costTitle")}</p>
+        <p className="font-mono text-xs text-ink-3" dir="ltr">
+          {costs.pricing.version}: text-in {"$"}{costs.pricing.textInputPerM} · image-in {"$"}{costs.pricing.imageInputPerM} · image-out {"$"}{costs.pricing.imageOutputPerM} / 1M tokens
+        </p>
+        {costs.rows.length === 0 ? (
+          <p className="text-xs text-ink-4">{t("costEmpty")}</p>
+        ) : (
+          <table className="w-full text-xs" dir="ltr">
+            <thead className="text-ink-3">
+              <tr><th className="text-start">task</th><th className="text-start">basis</th><th className="text-end">runs</th><th className="text-end">input tok</th><th className="text-end">output tok</th><th className="text-end">USD</th></tr>
+            </thead>
+            <tbody className="font-mono">
+              {costs.rows.map((r) => (
+                <tr key={`${r.task}-${r.basis}`}><td>{r.task}</td><td>{r.basis}</td><td className="text-end">{r.runs}</td><td className="text-end">{r.inputTokens}</td><td className="text-end">{r.outputTokens}</td><td className="text-end">{r.costUsd.toFixed(4)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <p className="text-xs text-ink-4">{t("costNote")}</p>
+      </div>
       {text && <p className="rounded-xl bg-surface-2 px-3 py-2 font-mono text-xs" dir="ltr">{text}</p>}
       {image && (
         <figure className="space-y-1">
           {/* eslint-disable-next-line @next/next/no-img-element -- signed private test asset */}
           <img src={image.url} alt="" className="size-40 rounded-xl object-cover ring-1 ring-line" />
-          <figcaption className="font-mono text-xs text-ink-3" dir="ltr">{image.model}</figcaption>
+          <figcaption className="font-mono text-xs text-ink-3" dir="ltr">{image.model}<br />{image.detail}</figcaption>
         </figure>
       )}
     </div>

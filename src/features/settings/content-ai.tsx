@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, CircleDashed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/controls";
@@ -11,7 +11,8 @@ import { saveContentAiDefaults } from "./actions";
 type Props = {
   canEdit: boolean;
   status: { text: boolean; image: boolean };
-  usage: { images: number; limit: number; edits: number; textRuns: number; costUsd: number };
+  /** Customers see design consumption only — token and cost details are admin-only. */
+  usage: { images: number; limit: number };
   initial: { imageQuality: "fast" | "quality"; imageMode: "brand_template" | "ai_creative" };
 };
 
@@ -29,7 +30,6 @@ function StatusRow({ ok, label, on, off }: { ok: boolean; label: string; on: str
 export function ContentAiSettings({ canEdit, status, usage, initial }: Props) {
   const t = useTranslations("settings.contentAi");
   const tc = useTranslations("common");
-  const format = useFormatter();
   const { act, pending } = useAct();
   const [s, setS] = useState(initial);
   return (
@@ -53,12 +53,10 @@ export function ContentAiSettings({ canEdit, status, usage, initial }: Props) {
             <Segmented label={t("defaultMode")} value={s.imageMode} onChange={(v) => canEdit && setS({ ...s, imageMode: v })} size="sm" options={[{ value: "brand_template", label: t("brandTemplate") }, { value: "ai_creative", label: t("aiCreative") }]} />
           </div>
         </div>
-        <dl className="grid gap-3 rounded-2xl bg-surface-2 p-4 text-sm sm:grid-cols-4">
-          <div><dt className="text-ink-3">{t("imagesUsed")}</dt><dd className="font-semibold tabular">{usage.images} / {usage.limit}</dd></div>
-          <div><dt className="text-ink-3">{t("imageEdits")}</dt><dd className="font-semibold tabular">{usage.edits}</dd></div>
-          <div><dt className="text-ink-3">{t("textRuns")}</dt><dd className="font-semibold tabular">{usage.textRuns}</dd></div>
-          <div><dt className="text-ink-3">{t("estimatedCost")}</dt><dd className="font-semibold tabular">{format.number(usage.costUsd, { style: "currency", currency: "USD", maximumFractionDigits: 2 })}</dd></div>
-        </dl>
+        <div className="rounded-2xl bg-surface-2 p-4 text-sm">
+          <p className="text-ink-3">{t("imagesUsed")}</p>
+          <p className="font-semibold tabular">{t("imagesUsedValue", { used: usage.images, limit: usage.limit })}</p>
+        </div>
       </div>
     </Section>
   );

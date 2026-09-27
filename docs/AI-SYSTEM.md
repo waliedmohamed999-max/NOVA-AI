@@ -103,10 +103,32 @@ Other image rules:
 
 Customers only see **Fast / Highest quality**. Model names appear only in `/admin/providers`, which also has **Test text** / **Test image** buttons. The test image is stored privately and never published.
 
-**Cost and limits.**
-- Each image logs an `ai_runs` row (`IMAGE_GENERATION` / `IMAGE_EDIT`, model, prompt version, estimated cost from `OPENAI_IMAGE_COST_*_USD`) and adds to the monthly AI budget (`ai_usage`).
-- Plans cap monthly generations and edits (`imageGenerationsPerMonth`: Starter 30, Growth 150, Scale 600). The cap is checked before anything is queued.
-- Settings → AI Team shows designs used / limit, edits, text runs and the estimated cost.
+**Cost (token-based; `src/server/design/image-cost.ts`).** GPT Image is billed per token, not per image. Prices are configuration (USD per 1M tokens):
+
+| Token type | Variable | Default (GPT Image 2.5) |
+| --- | --- | --- |
+| Text input | `OPENAI_IMAGE_TEXT_INPUT_USD_PER_1M` | 5 |
+| Image input | `OPENAI_IMAGE_IMAGE_INPUT_USD_PER_1M` | 8 |
+| Image output | `OPENAI_IMAGE_IMAGE_OUTPUT_USD_PER_1M` | 30 |
+
+Tag the price table with `OPENAI_IMAGE_PRICING_VERSION`.
+
+- **`actual_usage`:** when the Images response returns complete `usage` (`input_tokens_details.text_tokens` / `image_tokens`, `output_tokens`), the cost is Σ tokens × price.
+  - A pure generation without the input split counts all input as text.
+- **`estimated`:** when usage is missing or incomplete (e.g. an edit without the input split), NOVA uses a configurable estimate. It is stored with `costBasis = "estimated"` and is never recorded as the provider's actual cost.
+  - Text is estimated at about 4 characters per token.
+  - Reference images: `OPENAI_IMAGE_EST_INPUT_TOKENS_PER_REFERENCE`.
+  - Output: `OPENAI_IMAGE_EST_OUTPUT_TOKENS_PER_MEGAPIXEL`.
+- **Edits pay for their reference images.** The current design sent as reference counts as image input tokens.
+- **What is stored:**
+  - `content_assets`: `usage` {textInputTokens, imageInputTokens, outputTokens}, `costMicro`, `costBasis`, `pricingVersion`, `model`.
+  - `ai_runs`: input tokens (text + image), output tokens, cost, `costBasis`, `pricingVersion`.
+  - The cost is also added to the monthly AI budget (`ai_usage`).
+- **Who sees what:**
+  - Customers see only "Design usage this month" (used / plan limit).
+  - Token and cost details are admin-only: `/admin/providers` → OpenAI shows the active price table, this month's image runs split by actual vs estimated (tokens and USD), and the test image's usage breakdown.
+
+**Limits.** Plans cap monthly generations and edits (`imageGenerationsPerMonth`: Starter 30, Growth 150, Scale 600). The cap is checked before anything is queued.
 
 **Automated tests never call OpenAI.** They use fake text and image providers. Live checks are manual, through the admin test buttons.
 

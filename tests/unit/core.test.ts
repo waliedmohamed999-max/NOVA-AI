@@ -128,8 +128,14 @@ describe("crypto", () => {
     const enc = encryptSecret("ya29.super-secret");
     expect(enc).not.toContain("super-secret");
     expect(decryptSecret(enc)).toBe("ya29.super-secret");
-    const tampered = enc.slice(0, -2) + (enc.endsWith("A") ? "B" : "A") + enc.slice(-1);
-    expect(() => decryptSecret(tampered)).toThrow();
+    // Flip a real ciphertext byte (editing a base64 character can land on padding bits and change nothing).
+    const [v, iv, tag, data] = enc.split(".");
+    const bytes = Buffer.from(data, "base64url");
+    bytes[0] ^= 0x01;
+    expect(() => decryptSecret([v, iv, tag, bytes.toString("base64url")].join("."))).toThrow();
+    const tag2 = Buffer.from(tag, "base64url");
+    tag2[0] ^= 0x01;
+    expect(() => decryptSecret([v, iv, tag2.toString("base64url"), data].join("."))).toThrow();
   });
   it("hashes tokens deterministically", () => {
     const t = randomToken();

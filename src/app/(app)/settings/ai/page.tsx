@@ -41,9 +41,6 @@ export default async function AiSettingsPage() {
         usage={{
           images: usage.used,
           limit: usage.limit,
-          edits: usage.edits,
-          textRuns: usage.textRuns,
-          costUsd: Number(usage.estimatedCostMicro) / 1_000_000,
         }}
         initial={{
           imageQuality: s?.imageQuality === "quality" ? "quality" : "fast",

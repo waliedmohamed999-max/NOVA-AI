@@ -677,7 +677,10 @@
       "imageModels": "Image models",
       "testText": "Test text",
       "testImage": "Test image",
-      "note": "Tests use the real API and cost a little. The test image is stored privately in your workspace and is never attached to a post or published."
+      "note": "Tests use the real API and cost a little. The test image is stored privately in your workspace and is never attached to a post or published.",
+      "costTitle": "Image cost this month (all organizations)",
+      "costEmpty": "No image generations this month.",
+      "costNote": "actual_usage = priced from the token usage OpenAI returned; estimated = fallback estimate when usage was missing or incomplete (not the provider's actual cost). Prices come from configuration."
     }
   },
   "connect": {
@@ -800,10 +803,8 @@
     "defaultMode": "Default design style",
     "brandTemplate": "Brand template",
     "aiCreative": "AI creative",
-    "imagesUsed": "Designs this month",
-    "imageEdits": "Design edits",
-    "textRuns": "Text generations",
-    "estimatedCost": "Estimated AI cost",
-    "saved": "Content AI defaults saved"
+    "imagesUsed": "Design usage this month",
+    "saved": "Content AI defaults saved",
+    "imagesUsedValue": "{used} of {limit} designs"
   }
 }

@@ -14,6 +14,7 @@ import { approveContent, createContentFromPlan } from "@/server/content/service"
 import { offlinePost } from "@/server/agents/offline-content";
 import { loadBrain } from "@/server/agents/brain";
 import { PermanentJobError } from "@/server/jobs/queue";
+import { priceImage } from "@/server/design/image-cost";
 
 // ── Fakes: no automated test ever calls OpenAI or spends money ──
 const originalOpenAI = getProvider("openai");
@@ -47,6 +48,9 @@ function fakeOpenAI(): LLMProvider {
 
 let imageCalls: { kind: "generate" | "edit"; prompt: string; size: string; quality?: string; refs?: number }[] = [];
 let imageBehavior: (kind: string) => Promise<void> = async () => undefined;
+/** Mirrors the OpenAI Images response usage; set to null to simulate a response without usage. */
+let usageFor: (kind: "generate" | "edit") => { input_tokens: number; output_tokens: number; input_tokens_details?: { text_tokens: number; image_tokens: number } } | null = (kind) =>
+  kind === "edit" ? { input_tokens: 1590, output_tokens: 4160, input_tokens_details: { text_tokens: 90, image_tokens: 1500 } } : { input_tokens: 120, output_tokens: 4160, input_tokens_details: { text_tokens: 120, image_tokens: 0 } };
 async function png(w: number, h: number) {
   return sharp({ create: { width: w, height: h, channels: 3, background: "#b9a38f" } }).png().toBuffer();
 }
@@ -59,13 +63,13 @@ function fakeImages(): ImageProvider {
       imageCalls.push({ kind: "generate", prompt, size, quality });
       await imageBehavior("generate");
       const [w, h] = size.split("x").map(Number);
-      return { data: await png(w, h), mimeType: "image/png", model: quality === "quality" ? "gpt-image-quality-test" : "gpt-image-fast-test", costMicro: quality === "quality" ? 170_000n : 40_000n };
+      return { data: await png(w, h), mimeType: "image/png", model: quality === "quality" ? "gpt-image-quality-test" : "gpt-image-fast-test", cost: priceImage(usageFor("generate"), { promptChars: prompt.length, referenceImages: 0, size }) };
     },
     edit: async ({ images, prompt, size, quality }) => {
       imageCalls.push({ kind: "edit", prompt, size, quality, refs: images.length });
       await imageBehavior("edit");
       const [w, h] = size.split("x").map(Number);
-      return { data: await png(w, h), mimeType: "image/png", model: "gpt-image-quality-test", costMicro: 170_000n };
+      return { data: await png(w, h), mimeType: "image/png", model: "gpt-image-quality-test", cost: priceImage(usageFor("edit"), { promptChars: prompt.length, referenceImages: images.length, size }) };
     },
   };
 }
@@ -97,6 +101,8 @@ beforeEach(() => {
   calls = [];
   imageCalls = [];
   imageBehavior = async () => undefined;
+  usageFor = (kind) =>
+    kind === "edit" ? { input_tokens: 1590, output_tokens: 4160, input_tokens_details: { text_tokens: 90, image_tokens: 1500 } } : { input_tokens: 120, output_tokens: 4160, input_tokens_details: { text_tokens: 120, image_tokens: 0 } };
   responses = { improved_content: IMPROVED, quality_check: QUALITY, visual_direction: DIRECTION };
 });
 afterEach(() => {
@@ -202,7 +208,8 @@ describe("images", () => {
 
     await runImageJob(asset.id);
     const done = await db.contentAsset.findUniqueOrThrow({ where: { id: asset.id } });
-    expect(done).toMatchObject({ status: "COMPLETED", isSelected: true, model: "gpt-image-fast-test", promptVersion: "image_generation@1", width: 1080, height: 1080, costMicro: 40_000n });
+    expect(done).toMatchObject({ status: "COMPLETED", isSelected: true, model: "gpt-image-fast-test", promptVersion: "image_generation@1", width: 1080, height: 1080, costMicro: 125_400n, costBasis: "actual_usage", pricingVersion: "gpt-image-2.5:default" });
+    expect(done.usage).toEqual({ textInputTokens: 120, imageInputTokens: 0, outputTokens: 4160 });
     const file = await db.fileObject.findUniqueOrThrow({ where: { id: done.fileId! } });
     const bytes = objects.get(file.storageKey)!;
     expect(await sharp(bytes).metadata()).toMatchObject({ width: 1080, height: 1080, format: "png" });
@@ -212,7 +219,9 @@ describe("images", () => {
     const after = await db.contentItem.findUniqueOrThrow({ where: { id } });
     expect({ caption: after.caption, v: after.currentVersion, status: after.status, at: after.scheduledAt }).toEqual({ caption: before.caption, v: before.currentVersion, status: before.status, at: before.scheduledAt });
     const run = await db.aiRun.findFirstOrThrow({ where: { organizationId: t.organization.id, task: "IMAGE_GENERATION" } });
-    expect(run).toMatchObject({ costMicro: 40_000n, model: "gpt-image-fast-test", promptKey: "image_generation", status: "SUCCESS" });
+    expect(run).toMatchObject({ costMicro: 125_400n, model: "gpt-image-fast-test", promptKey: "image_generation", status: "SUCCESS", inputTokens: 120, outputTokens: 4160, costBasis: "actual_usage", pricingVersion: "gpt-image-2.5:default" });
+    const spend = await db.aiUsage.findFirstOrThrow({ where: { organizationId: t.organization.id, agentKey: "DESIGNER" } });
+    expect(spend.costMicro).toBeGreaterThanOrEqual(125_400n);
   });
 
   it("LinkedIn gets a landscape crop; highest quality uses the quality model", async () => {
@@ -286,6 +295,47 @@ describe("images", () => {
     await expect(requestImage(other.scope, other.user.id, id, {})).rejects.toMatchObject({ code: "content_not_found" });
     await expect(selectAsset(other.scope, asset.id)).rejects.toMatchObject({ code: "item_not_found" });
     await expect(improveContent(other.scope, id)).rejects.toMatchObject({ code: "content_not_found" });
+  });
+});
+
+describe("token-based image cost", () => {
+  it("edits count the reference image as image input tokens", async () => {
+    const { t, id } = await tenantWithPost();
+    const first = await requestImage(t.scope, t.user.id, id, {});
+    await runImageJob(first.id);
+    const edit = await requestImage(t.scope, t.user.id, id, { parentAssetId: first.id, instruction: "make it warmer" });
+    await runImageJob(edit.id);
+    const done = await db.contentAsset.findUniqueOrThrow({ where: { id: edit.id } });
+    // 90×5 (text) + 1500×8 (reference image) + 4160×30 (output) = 137,250 micro-USD
+    expect(done).toMatchObject({ costMicro: 137_250n, costBasis: "actual_usage" });
+    expect(done.usage).toEqual({ textInputTokens: 90, imageInputTokens: 1500, outputTokens: 4160 });
+    const run = await db.aiRun.findFirstOrThrow({ where: { organizationId: t.organization.id, task: "IMAGE_EDIT" } });
+    expect(run).toMatchObject({ inputTokens: 1590, outputTokens: 4160, costBasis: "actual_usage" });
+  });
+
+  it("without usage in the response the cost is a labelled estimate, never recorded as actual", async () => {
+    usageFor = () => null;
+    const { t, id } = await tenantWithPost();
+    const asset = await requestImage(t.scope, t.user.id, id, {});
+    await runImageJob(asset.id);
+    const done = await db.contentAsset.findUniqueOrThrow({ where: { id: asset.id } });
+    expect(done.costBasis).toBe("estimated");
+    expect(done.costMicro).toBeGreaterThan(0n);
+    expect((await db.aiRun.findFirstOrThrow({ where: { organizationId: t.organization.id, task: "IMAGE_GENERATION" } })).costBasis).toBe("estimated");
+  });
+
+  it("pricing is configuration: env overrides change the calculated cost and pricing version", async () => {
+    process.env.OPENAI_IMAGE_IMAGE_OUTPUT_USD_PER_1M = "40";
+    process.env.OPENAI_IMAGE_PRICING_VERSION = "gpt-image-2.5:2026-10";
+    try {
+      const { t, id } = await tenantWithPost();
+      const asset = await requestImage(t.scope, t.user.id, id, {});
+      await runImageJob(asset.id);
+      expect(await db.contentAsset.findUniqueOrThrow({ where: { id: asset.id } })).toMatchObject({ costMicro: 120n * 5n + 4160n * 40n, pricingVersion: "gpt-image-2.5:2026-10" });
+    } finally {
+      delete process.env.OPENAI_IMAGE_IMAGE_OUTPUT_USD_PER_1M;
+      delete process.env.OPENAI_IMAGE_PRICING_VERSION;
+    }
   });
 });
 

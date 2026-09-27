@@ -119,6 +119,7 @@ export async function logRun(
   fallbackUsed: boolean,
   error?: string,
   promptRef?: { key: string; version: string },
+  costMeta?: { basis: "actual_usage" | "estimated"; pricingVersion: string },
 ) {
   await db.aiRun
     .create({
@@ -139,6 +140,8 @@ export async function logRun(
         error,
         promptKey: promptRef?.key ?? null,
         promptVersion: promptRef?.version ?? null,
+        costBasis: costMeta?.basis ?? null,
+        pricingVersion: costMeta?.pricingVersion ?? null,
       },
     })
     .catch((err) => logger.error({ err }, "failed to log AI run"));

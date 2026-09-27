@@ -10,7 +10,7 @@ import { logger } from "../logger";
 import { PLANS } from "@/config/plans";
 import { loadBrain } from "../agents/brain";
 import { composeBrandTemplate, fitToSize } from "../design/compose";
-import { IMAGE_PRESETS, ImageProviderError, imageProvider, presetFor, type ImagePreset, type ImageQuality } from "../design/image-provider";
+import { IMAGE_PRESETS, ImageProviderError, imageProvider, presetFor, type ImagePreset, type ImageQuality, type ImageResult } from "../design/image-provider";
 import { contentAiConfigured } from "../ai";
 import { visualDirectionSchema, type VisualDirection } from "./context";
 
@@ -215,10 +215,12 @@ export async function runImageJob(assetId: string, attempt = 1, maxAttempts = 2)
     const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId: asset.createdById, fileName: `${item.id}-${asset.id}.png`, data: png, purpose: "generated_visual" });
     await db.$transaction([
       db.contentAsset.updateMany({ where: { contentItemId: item.id, isSelected: true }, data: { isSelected: false } }),
-      db.contentAsset.update({ where: { id: asset.id }, data: { status: "COMPLETED", fileId: file.id, costMicro: result.costMicro, isSelected: true, width, height } }),
+      db.contentAsset.update({
+        where: { id: asset.id },
+        data: { status: "COMPLETED", fileId: file.id, costMicro: result.cost.costMicro, costBasis: result.cost.basis, pricingVersion: result.cost.pricingVersion, usage: result.cost.usage, isSelected: true, width, height },
+      }),
     ]);
-    await logRun({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, agentKey: "DESIGNER" }, task, provider.name, result.model, { inputTokens: 0, outputTokens: 0 }, result.costMicro, Date.now() - started, "SUCCESS", false, undefined, ref);
-    await recordUsage({ organizationId: scope.organizationId, agentKey: "DESIGNER", inputTokens: 0, outputTokens: 0, costMicro: result.costMicro });
+    await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, agentKey: "DESIGNER" }, task, provider.name, result, Date.now() - started, ref);
     return { completed: true, fileId: file.id };
   } catch (err) {
     const code = err instanceof ImageProviderError ? err.code : err instanceof PermanentJobError ? "image_failed" : "image_failed";
@@ -232,6 +234,24 @@ export async function runImageJob(assetId: string, attempt = 1, maxAttempts = 2)
     await db.contentAsset.update({ where: { id: asset.id }, data: { status: "FAILED", errorCode: code } });
     throw new PermanentJobError(code);
   }
+}
+
+/**
+ * Logs an image run with token usage (text+image input / image output), the token-based cost and whether it
+ * was priced from the provider's usage or estimated, and adds it to the monthly AI spend.
+ */
+async function recordImageCost(
+  ctx: { organizationId: string; workspaceId: string; agentKey?: "DESIGNER" },
+  task: "IMAGE_GENERATION" | "IMAGE_EDIT",
+  provider: string,
+  result: ImageResult,
+  latencyMs: number,
+  ref: { key: string; version: string },
+) {
+  const u = result.cost.usage;
+  const tokens = { inputTokens: u.textInputTokens + u.imageInputTokens, outputTokens: u.outputTokens };
+  await logRun(ctx, task, provider, result.model, tokens, result.cost.costMicro, latencyMs, "SUCCESS", false, undefined, ref, { basis: result.cost.basis, pricingVersion: result.cost.pricingVersion });
+  await recordUsage({ organizationId: ctx.organizationId, agentKey: ctx.agentKey ?? null, ...tokens, costMicro: result.cost.costMicro });
 }
 
 /** Marks a completed asset as the one used for the post (history is kept). */
@@ -254,7 +274,6 @@ export async function adminTestImage(scope: TenantScope, userId: string) {
       throw new UserFacingError(err instanceof ImageProviderError ? err.code : "image_failed", { cause: err });
     });
   const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId, fileName: "openai-test.png", data: res.data, purpose: "admin_test_image" });
-  await logRun({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_GENERATION", imageProvider().name, res.model, { inputTokens: 0, outputTokens: 0 }, res.costMicro, Date.now() - started, "SUCCESS", false, undefined, { key: "admin_test", version: "admin_test@1" });
-  await recordUsage({ organizationId: scope.organizationId, agentKey: "DESIGNER", inputTokens: 0, outputTokens: 0, costMicro: res.costMicro });
-  return { fileId: file.id, model: res.model, bytes: res.data.byteLength };
+  await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_GENERATION", imageProvider().name, res, Date.now() - started, { key: "admin_test", version: "admin_test@1" });
+  return { fileId: file.id, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
 }
