@@ -4,15 +4,21 @@ import { randomUUID } from "node:crypto";
 import { db } from "../db/client";
 import { hmac, safeEqual, sha256 } from "../crypto";
 import { UserFacingError } from "../errors";
+import { logger } from "../logger";
+import { S3Driver, s3ConfigFromEnv } from "./s3";
 
-/** Storage driver abstraction — swap LocalDriver for S3/R2/GCS in production. */
+/** Storage driver abstraction. `STORAGE_DRIVER=local` (default) or `s3` (AWS S3, Cloudflare R2, MinIO…). */
 export interface StorageDriver {
+  readonly name: string;
   put(key: string, data: Buffer, contentType: string): Promise<void>;
   get(key: string): Promise<Buffer>;
   delete(key: string): Promise<void>;
+  /** Optional: a short-lived direct URL for the object (S3 presigned GET). */
+  presignGet?(key: string, ttlSeconds: number, opts: { contentType?: string; disposition?: string }): string;
 }
 
-class LocalDriver implements StorageDriver {
+export class LocalDriver implements StorageDriver {
+  readonly name = "local";
   // Runtime-configured directory; excluded from build tracing.
   private root = path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.STORAGE_LOCAL_DIR ?? ".storage");
   private resolve(key: string) {
@@ -33,7 +39,61 @@ class LocalDriver implements StorageDriver {
   }
 }
 
-export const storage: StorageDriver = new LocalDriver();
+function createDriver(): StorageDriver {
+  const kind = process.env.STORAGE_DRIVER ?? "local";
+  if (kind === "s3") return new S3Driver(s3ConfigFromEnv());
+  if (kind !== "local") throw new Error(`Unknown STORAGE_DRIVER "${kind}" (use "local" or "s3")`);
+  if (process.env.NODE_ENV === "production" && process.env.STORAGE_ALLOW_LOCAL_IN_PRODUCTION !== "true") {
+    // Local disk loses files on redeploy and isn't shared between instances.
+    logger.warn("STORAGE_DRIVER=local in production — files are only safe on a single persistent server");
+  }
+  return new LocalDriver();
+}
+
+let driver: StorageDriver | null = null;
+/** Lazily created so a misconfigured driver fails on first use with a clear message, not at import. */
+export const storage: StorageDriver = {
+  get name() {
+    return (driver ??= createDriver()).name;
+  },
+  put: (k, d, t) => (driver ??= createDriver()).put(k, d, t),
+  get: (k) => (driver ??= createDriver()).get(k),
+  delete: (k) => (driver ??= createDriver()).delete(k),
+  presignGet: (k, ttl, o) => {
+    const d = (driver ??= createDriver());
+    if (!d.presignGet) throw new Error("presign not supported by this driver");
+    return d.presignGet(k, ttl, o);
+  },
+};
+
+/** Test hook. */
+export function setStorageDriver(d: StorageDriver | null) {
+  driver = d;
+}
+
+/** Every object key starts with its organization id; reads and deletes re-check that. */
+export function orgKey(organizationId: string, ext: string) {
+  if (!/^[a-z0-9]+$/i.test(organizationId) || !/^[a-z0-9]{1,8}$/.test(ext)) throw new Error("Invalid storage key parts");
+  return `${organizationId}/${new Date().toISOString().slice(0, 7)}/${randomUUID()}.${ext}`;
+}
+
+export function keyBelongsTo(organizationId: string, key: string) {
+  return key.startsWith(`${organizationId}/`) && !key.includes("..");
+}
+
+/** Deletes a tenant's file (object + record). Refuses keys outside the organization's prefix. */
+export async function deleteFile(organizationId: string, fileId: string) {
+  const file = await db.fileObject.findFirst({ where: { id: fileId, organizationId, deletedAt: null } });
+  if (!file) throw new UserFacingError("item_not_found");
+  if (!keyBelongsTo(organizationId, file.storageKey)) throw new Error("Storage key outside organization prefix");
+  await storage.delete(file.storageKey);
+  await db.fileObject.update({ where: { id: file.id }, data: { deletedAt: new Date() } });
+}
+
+/** Direct presigned URLs are opt-in (S3_SIGNED_REDIRECT=true); by default the app streams files itself. */
+export function directDownloadsEnabled() {
+  return process.env.STORAGE_DRIVER === "s3" && process.env.S3_SIGNED_REDIRECT === "true";
+}
 
 /** Allowed uploads, verified by magic bytes — never by the client-provided type. */
 const SIGNATURES: { mime: string; ext: string; test: (b: Buffer) => boolean }[] = [
@@ -65,7 +125,7 @@ export async function saveUpload(input: { organizationId: string; workspaceId?: 
   if (input.data.byteLength > MAX_UPLOAD_BYTES) throw new UserFacingError("file_too_large");
   const type = detectType(input.data, input.fileName);
   if (!type) throw new UserFacingError("file_type");
-  const key = `${input.organizationId}/${new Date().toISOString().slice(0, 7)}/${randomUUID()}.${type.ext}`;
+  const key = orgKey(input.organizationId, type.ext);
   await storage.put(key, input.data, type.mime);
   return db.fileObject.create({
     data: {
