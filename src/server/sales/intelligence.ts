@@ -223,12 +223,19 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
-export const IMPORT_FIELDS = ["name", "company", "email", "phone", "source", "value", "notes", "tags"] as const;
+export const IMPORT_FIELDS = ["name", "company", "email", "phone", "source", "value", "notes", "tags", "city", "country", "lastOrder", "totalSpend", "ordersCount", "category", "externalId"] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 
 /** Guesses a column mapping from header names (EN/AR). */
 export function guessMapping(headers: string[]): Record<number, ImportField | null> {
   const rules: [ImportField, RegExp][] = [
+    ["externalId", /^(id|customer.?id|external.?id|client.?id|رقم العميل|المعرف|معرف العميل)$/i],
+    ["totalSpend", /total.?spen|spent|lifetime|revenue|إجمالي|اجمالي|مجموع المشتريات/i],
+    ["ordersCount", /orders?.?(count|number)|number.?of.?orders|^orders$|عدد الطلبات/i],
+    ["lastOrder", /last.?(order|purchase)|آخر طلب|اخر طلب|آخر شراء/i],
+    ["city", /^city$|city|المدينة|مدينة/i],
+    ["country", /country|الدولة|دولة|البلد/i],
+    ["category", /categor|product|الفئة|فئة|المنتج/i],
     ["email", /e-?mail|بريد|ايميل|إيميل/i],
     ["phone", /phone|mobile|tel|whats|هاتف|جوال|موبايل|رقم/i],
     ["company", /company|organi[sz]ation|business|شركة|مؤسسة|جهة/i],

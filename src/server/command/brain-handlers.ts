@@ -13,7 +13,41 @@ const metrics = (c: CompanyContext) => ({ contextTokens: c.contextTokens, retrie
 
 // ── Company Brain facts: retrieval + a formatted answer. No model call, ever. ──
 
+/** Structured Company Intelligence entities (approved only) — read directly, no retrieval, no AI. */
+async function brainEntityAnswer(h: HandlerInput): Promise<Outcome | null> {
+  const t = h.ctx.db;
+  let items: ResultItem[] = [];
+  switch (h.def.key) {
+    case "brain_icp": {
+      const rows = await t.idealCustomerProfile.findMany({ where: { status: "approved" }, orderBy: { updatedAt: "desc" }, take: 5 });
+      items = rows.map((r) => ({ title: r.name, subtitle: [r.industry, r.location, r.companySize, r.painPoints.slice(0, 2).join(" · ")].filter(Boolean).join(" · ") || null, badge: r.kind }));
+      break;
+    }
+    case "brain_objections": {
+      const rows = await t.brainObjection.findMany({ where: { status: "approved" }, orderBy: { updatedAt: "desc" }, take: 8 });
+      items = rows.map((r) => ({ title: r.objection, subtitle: r.response.slice(0, 160) }));
+      break;
+    }
+    case "brain_content_strategy": {
+      const [rows, kit, profile] = await Promise.all([t.strategy.findMany({ where: { status: "APPROVED", type: { in: ["content", "marketing"] } }, orderBy: { approvedAt: "desc" }, take: 3 }), t.brandKit.findFirst(), t.companyProfile.findFirst()]);
+      items = [...rows.map((r) => ({ title: r.title, subtitle: r.objective ?? r.positioning, badge: r.type })), ...(profile?.contentPillars.length ? [{ title: profile.contentPillars.join(" · "), badge: "pillars" }] : []), ...(kit?.tone ? [{ title: kit.tone, badge: "tone" }] : [])];
+      break;
+    }
+    case "brain_top_products": {
+      const rows = await t.offering.findMany({ where: { isActive: true, priceCents: { not: null } }, orderBy: { priceCents: "desc" }, take: 5 });
+      items = rows.map((r) => ({ title: r.name, subtitle: r.description?.slice(0, 120) ?? null, badge: r.priceText }));
+      break;
+    }
+    default:
+      return null;
+  }
+  if (!items.length) return { status: "needs_input", message: msg("brainMissing", { topic: h.def.key }), actions: [{ label: "openKnowledge", href: "/knowledge", primary: true }], mode: "brain", sources: 0 };
+  return { status: "completed", message: msg("brainFound", { topic: h.def.key, count: items.length }), items, actions: [{ label: "openKnowledge", href: "/knowledge", primary: true }], mode: "brain", sources: 1 };
+}
+
 export async function brainFact(h: HandlerInput): Promise<Outcome> {
+  const entity = await brainEntityAnswer(h);
+  if (entity) return entity;
   const c = await retrieveCompanyContext(h.scope, { purpose: "facts", sections: h.def.brainSections, budget: "medium" });
   const offering = (o: { name: string; detail?: string | null; price?: string | null }): ResultItem => ({ title: o.name, subtitle: o.detail ?? null, badge: o.price ?? null });
   const lines = (xs: string[]): ResultItem[] => xs.map((title) => ({ title }));
@@ -75,6 +109,10 @@ export async function brainQuestion(h: HandlerInput): Promise<Outcome> {
   const query = h.params.input ?? "";
   const c = await retrieveCompanyContext(h.scope, { purpose: "support", query, budget: "small", topK: 3 });
   const src = c.chunks.map((x) => ({ title: x.title || "—", subtitle: x.text.slice(0, 140), badge: x.source }));
+  // An approved FAQ that answers the question is the most trusted structured answer.
+  if (c.faqMatch && c.faqMatch.coverage >= 0.6) {
+    return { status: "completed", message: msg("brainAnswer"), text: c.faqMatch.answer.slice(0, 800), items: [{ title: c.faqMatch.question, badge: "faq" }], mode: "brain", sources: sourceCount(c), metrics: metrics(c) };
+  }
   if (c.confidence === "high") {
     return { status: "completed", message: msg("brainAnswer"), text: extractAnswer(query, c.chunks[0].text), items: src.slice(0, 3), mode: "brain", sources: sourceCount(c), metrics: metrics(c) };
   }
@@ -187,6 +225,10 @@ export const BRAIN_HANDLERS = {
   brain_strengths: brainFact,
   brain_pricing: brainFact,
   brain_tone: brainFact,
+  brain_icp: brainFact,
+  brain_objections: brainFact,
+  brain_content_strategy: brainFact,
+  brain_top_products: brainFact,
   brain_question: brainQuestion,
   draft_sales_message: draftSalesMessage,
   move_stage: moveStage,

@@ -96,6 +96,10 @@ export const INTENTS = [
   d({ key: "run_sales_cycle", kind: "action", permission: "leads:manage", match: has(/دوره المبيعات|sales cycle|(حلل|راجع) (العملا|كل العملا|الصفقات)|analy[sz]e (my |all )?(leads|customers|deals)/) }),
 
   // ── Company Brain facts (retrieval + formatted answer — never a model call) ──
+  brainFact("brain_icp", ["icp"], has(/عميلنا المثالي|العميل المثالي|عملاءنا المثاليين|ideal customer|\bicp\b/)),
+  brainFact("brain_objections", ["objections"], has(/اعتراضات|اعتراض|objections?/)),
+  brainFact("brain_content_strategy", ["strategy", "contentPillars", "brandVoice"], (n) => /استراتيجيه المحتوي|استراتيجيه التسويق|content strategy|marketing strategy/.test(n)),
+  brainFact("brain_top_products", ["products", "services"], (n) => /(المنتجات|الخدمات|products|services)/.test(n) && /(الاعلي قيمه|اعلي قيمه|الاغلي|highest.?value|most expensive|top.?value)/.test(n)),
   brainFact("brain_about", ["company", "valueProps"], has(/مين احنا|من نحن|عن الشركه|عن شركتنا|نبذه عن|عرفني بالشركه|about (us|the company|our company)|who are we/)),
   brainFact("brain_services", ["company", "services"], (n) => /(خدمات|خدمه|services?\b)/.test(n) && BRAIN_Q.test(n)),
   brainFact("brain_products", ["company", "products"], (n) => /(منتجات|منتج|products?\b)/.test(n) && BRAIN_Q.test(n)),
@@ -155,7 +159,7 @@ export const INTENTS = [
 export type IntentKey =
   | "delete_anything" | "approve_all" | "approve_item" | "publish_content" | "send_discount" | "send_quote" | "send_message" | "close_deal" | "move_stage"
   | "import_leads" | "create_campaign" | "draft_sales_message" | "prepare_followups" | "create_followup" | "create_b2b_opportunity" | "create_quote" | "create_lead" | "create_carousel" | "design_post" | "improve_content" | "prepare_week_content" | "run_sales_cycle"
-  | "brain_about" | "brain_services" | "brain_products" | "brain_audience" | "brain_strengths" | "brain_pricing" | "brain_tone" | "brain_question"
+  | "brain_about" | "brain_services" | "brain_products" | "brain_audience" | "brain_strengths" | "brain_pricing" | "brain_tone" | "brain_icp" | "brain_objections" | "brain_content_strategy" | "brain_top_products" | "brain_question"
   | "pipeline_value" | "calendar_lookup" | "lead_activity" | "integrations_status" | "stalled_deals" | "overdue_followups" | "followups_today" | "hot_leads" | "approvals_summary" | "sales_brief" | "best_content" | "lead_sources" | "campaign_summary" | "analytics_summary" | "sales_summary"
   | "open_hot_leads" | "open_overdue_followups" | "open_followups" | "open_content_pending" | "open_approvals" | "open_calendar" | "open_messages" | "open_pipeline" | "open_quotes" | "open_b2b" | "open_sales" | "open_customers"
   | "open_content" | "open_campaigns" | "open_analytics" | "open_reports" | "open_integrations" | "open_settings" | "open_knowledge" | "open_team" | "open_home" | "open_entity"

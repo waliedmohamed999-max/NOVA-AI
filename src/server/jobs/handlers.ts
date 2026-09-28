@@ -1,6 +1,7 @@
 import { registerJob, registeredJobTypes, scopeOf } from "./registry";
 import { db } from "../db/client";
 import { ingestSource } from "../knowledge/service";
+import { runImport } from "../brain/imports";
 import { registerAgentJobs } from "../agents/jobs";
 import { publishDue } from "../social/publishing";
 import { syncAll, syncIntegration, notifyInsight } from "../social/sync";
@@ -23,6 +24,7 @@ export function registerAllJobs() {
   registerAgentJobs();
 
   registerJob("knowledge.ingest", async (p) => ingestSource(scopeOf(p), String(p.sourceId)));
+  registerJob("brain.import", async (p) => runImport(scopeOf(p), String(p.importId)));
 
   // Social
   registerJob("social.publish_due", async () => publishDue());

@@ -1,3 +1,4 @@
+import { readZip } from "../brain/parsers";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -117,6 +118,17 @@ export function detectType(data: Buffer, fileName: string): { mime: string; ext:
   const sig = SIGNATURES.find((s) => s.test(data));
   if (sig) return { mime: sig.mime, ext: sig.ext };
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  // Office Open XML (Company Brain imports): a real ZIP that contains the expected document part.
+  if ((ext === "docx" || ext === "xlsx") && data.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
+    try {
+      const entries = readZip(data);
+      if (ext === "docx" && entries.has("word/document.xml")) return { mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ext };
+      if (ext === "xlsx" && entries.has("xl/workbook.xml")) return { mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ext };
+    } catch {
+      return null;
+    }
+    return null;
+  }
   if (TEXT_TYPES[ext]) {
     // Must be valid UTF-8 text without NUL bytes.
     const sample = data.subarray(0, 4096);

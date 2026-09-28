@@ -14,8 +14,11 @@ import { similarity } from "../studio/context";
  */
 
 export type BrainPurpose = "sales" | "content" | "support" | "facts";
-export type BrainSection = "company" | "services" | "products" | "audience" | "valueProps" | "pricing" | "brandVoice" | "contentPillars" | "forbidden" | "salesRules" | "knowledge";
-export type SourceKind = "profile" | "offering" | "brand" | "policy" | "website" | "document" | "manual" | "faq" | "pricing" | "case_study";
+export type BrainSection =
+  | "company" | "services" | "products" | "audience" | "valueProps" | "pricing" | "brandVoice" | "contentPillars" | "forbidden" | "salesRules" | "knowledge"
+  // Company Intelligence entities (structured, approved only)
+  | "facts" | "faqs" | "objections" | "icp" | "segments" | "strategy" | "competitors";
+export type SourceKind = "profile" | "offering" | "brand" | "policy" | "website" | "document" | "manual" | "faq" | "pricing" | "case_study" | "fact" | "sales" | "strategy" | "customers";
 export type Budget = "small" | "medium" | "large";
 
 /** Context-token ceilings and top-K per budget. Default is small. */
@@ -23,10 +26,18 @@ export const TOKEN_BUDGETS: Record<Budget, number> = { small: 1000, medium: 3000
 export const TOP_K: Record<Budget, number> = { small: 3, medium: 5, large: 8 };
 
 export const PURPOSE_SECTIONS: Record<BrainPurpose, BrainSection[]> = {
-  sales: ["company", "services", "products", "audience", "pricing", "salesRules", "knowledge"],
-  content: ["company", "brandVoice", "services", "products", "audience", "contentPillars", "forbidden", "knowledge"],
-  support: ["company", "services", "products", "knowledge"],
+  sales: ["facts", "company", "services", "products", "audience", "icp", "segments", "pricing", "salesRules", "objections", "strategy", "knowledge"],
+  content: ["facts", "company", "brandVoice", "services", "products", "audience", "icp", "segments", "contentPillars", "forbidden", "strategy", "competitors", "knowledge"],
+  support: ["facts", "company", "services", "products", "faqs", "knowledge"],
   facts: ["company", "services", "products", "audience", "valueProps", "pricing", "brandVoice", "contentPillars"],
+};
+
+/** Fact categories each purpose may read (approved facts only). */
+const PURPOSE_FACTS: Record<BrainPurpose, string[]> = {
+  sales: ["pricing", "discount", "policy", "proof", "positioning", "catalog", "reputation", "strategy", "question"],
+  content: ["positioning", "proof", "customer_language", "catalog", "reputation", "strategy"],
+  support: ["policy", "pricing", "catalog", "general"],
+  facts: [],
 };
 
 /** Knowledge types each purpose may read (metadata filter on the chunk search). */
@@ -52,6 +63,16 @@ export type CompanyContext = {
   contentRules: string[];
   salesRules: string[];
   pillars: string[];
+  /** Structured layer (read before any chunk): approved facts and entities. */
+  approvedFacts: string[];
+  faqs: string[];
+  /** The best matching approved FAQ for the query (structured answer, no generation needed). */
+  faqMatch: { question: string; answer: string; coverage: number } | null;
+  objections: string[];
+  icps: string[];
+  segments: string[];
+  strategies: string[];
+  competitorThemes: string[];
   chunks: BrainChunk[];
   sources: { kind: SourceKind; count: number }[];
   /** How well the brain answers `query` (only meaningful when a query was given). */
@@ -97,16 +118,16 @@ export function estimateTokens(text: string) {
 const BOILERPLATE = [
   /(all rights reserved|copyright|©|جميع الحقوق محفوظة)/i,
   /(cookie|cookies|privacy policy|terms (of|and) (use|service)|سياسة الخصوصية|الشروط والأحكام)/i,
-  /^(home|about|contact|services|blog|menu|login|sign in|register|الرئيسية|من نحن|اتصل بنا|خدماتنا|تسجيل الدخول)(\s*[|•·\-/]\s*\S+){0,8}$/i,
+  /^(home|about|contact|services|blog|menu|login|sign in|register|الرئيسية|من نحن|اتصل بنا|خدماتنا|تسجيل الدخول)(\s*[|•·/]\s*[^|•·/]{1,30}){1,8}$/i, // a bar of links (a lone "Services" heading is content, not navigation)
   /(follow us|subscribe|newsletter|تابعنا|اشترك)/i,
 ];
 
 /** Drops navigation/footer/cookie lines and very short fragments; keeps real sentences. */
-export function stripBoilerplate(text: string) {
+export function stripBoilerplate(text: string, minLength = 25) {
   return text
     .split(/\n+/)
     .map((l) => l.trim())
-    .filter((l) => l.length >= 25 && !BOILERPLATE.some((re) => re.test(l)))
+    .filter((l) => l.length >= minLength && !BOILERPLATE.some((re) => re.test(l)))
     .join("\n")
     .trim();
 }
@@ -170,7 +191,7 @@ export async function searchBrainChunks(scope: TenantScope, query: string, opts:
              ts_rank(to_tsvector('simple', c."content"), to_tsquery('simple', ${tsq})) AS "score"
       FROM "knowledge_chunks" c JOIN "knowledge_sources" s ON s."id" = c."sourceId"
       WHERE c."organizationId" = ${scope.organizationId} AND c."workspaceId" = ${scope.workspaceId}
-        AND s."organizationId" = ${scope.organizationId} AND s."type"::text = ANY(${opts.types as string[]})
+        AND s."organizationId" = ${scope.organizationId} AND s."pausedAt" IS NULL AND s."type"::text = ANY(${opts.types as string[]})
         AND to_tsvector('simple', c."content") @@ to_tsquery('simple', ${tsq})
       ORDER BY "score" DESC LIMIT ${k}`.catch(() => [] as ChunkRow[]);
     for (const r of kw) rows.set(r.id, r);
@@ -189,7 +210,7 @@ export async function searchBrainChunks(scope: TenantScope, query: string, opts:
                  1 - (c."embedding" <=> ${vector}::vector) AS "score"
           FROM "knowledge_chunks" c JOIN "knowledge_sources" s ON s."id" = c."sourceId"
           WHERE c."organizationId" = ${scope.organizationId} AND c."workspaceId" = ${scope.workspaceId} AND c."embedding" IS NOT NULL
-            AND s."type"::text = ANY(${opts.types as string[]})
+            AND s."pausedAt" IS NULL AND s."type"::text = ANY(${opts.types as string[]})
           ORDER BY c."embedding" <=> ${vector}::vector LIMIT ${k}`;
         for (const r of vs) if (!rows.has(r.id)) rows.set(r.id, r);
       }
@@ -232,10 +253,24 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     brainVersion(scope),
     db.organization.findUniqueOrThrow({ where: { id: scope.organizationId }, select: { name: true } }),
     needProfile ? db.companyProfile.findFirst({ where, select: { name: true, industry: true, summary: true, description: true, website: true, audience: true, valueProps: true, differentiators: true, contentPillars: true } }) : null,
-    needBrand ? db.brandKit.findFirst({ where, select: { tone: true, voiceTraits: true, doSay: true, dontSay: true, forbiddenStyles: true } }) : null,
-    needOfferings ? db.offering.findMany({ where: { ...where, isActive: true }, orderBy: { createdAt: "asc" }, take: 20, select: { type: true, name: true, description: true, priceText: true } }) : [],
+    needBrand ? db.brandKit.findFirst({ where, select: { tone: true, voiceTraits: true, doSay: true, dontSay: true, forbiddenStyles: true, forbiddenClaims: true, ctaStyle: true, hashtagRules: true, topics: true, seasonalThemes: true } }) : null,
+    needOfferings ? db.offering.findMany({ where: { ...where, isActive: true }, orderBy: { createdAt: "asc" }, take: 20, select: { type: true, name: true, description: true, priceText: true, targetCustomer: true } }) : [],
     sections.has("salesRules") ? db.approvalPolicy.findMany({ where, select: { action: true, requiresApproval: true } }) : [],
   ]);
+  // 1. Structured layer — approved only (pending/critical-unapproved/rejected are never used by agents).
+  const factCats = PURPOSE_FACTS[opts.purpose];
+  const [factRows, faqRows, objectionRows, icpRows, segmentRows, strategyRows, competitorRows, salesK] = await Promise.all([
+    sections.has("facts") && factCats.length ? db.brainFact.findMany({ where: { ...where, status: "approved", category: { in: factCats } }, orderBy: { updatedAt: "desc" }, take: 25, select: { key: true, value: true } }) : [],
+    sections.has("faqs") ? db.brainFaq.findMany({ where: { ...where, status: "approved" }, orderBy: { updatedAt: "desc" }, take: 60, select: { question: true, answer: true } }) : [],
+    sections.has("objections") ? db.brainObjection.findMany({ where: { ...where, status: "approved" }, take: 8, select: { objection: true, response: true } }) : [],
+    sections.has("icp") ? db.idealCustomerProfile.findMany({ where: { ...where, status: "approved" }, take: 3 }) : [],
+    sections.has("segments") ? db.customerSegment.findMany({ where: { ...where, status: "approved" }, take: 6, select: { name: true, definition: true, size: true } }) : [],
+    sections.has("strategy") ? db.strategy.findMany({ where: { ...where, status: "APPROVED", type: { in: opts.purpose === "content" ? ["content", "marketing"] : ["sales", "business"] } }, orderBy: { approvedAt: "desc" }, take: 2 }) : [],
+    sections.has("competitors") ? db.competitor.findMany({ where, take: 5, select: { name: true, contentThemes: true } }) : [],
+    sections.has("salesRules") ? db.salesKnowledge.findFirst({ where }) : null,
+  ]);
+  // FAQs: the few that match the question (structured answers beat chunks), else the latest.
+  const rankedFaqs = opts.query ? faqRows.map((f) => ({ ...f, c: termCoverage(opts.query!, `${f.question} ${f.answer}`) })).filter((f) => f.c > 0).sort((a, b) => b.c - a.c) : faqRows.map((f) => ({ ...f, c: 0 }));
 
   const item = (o: { name: string; description: string | null; priceText: string | null }): BrainItem => ({ name: o.name, detail: o.description?.slice(0, 160) ?? null, price: o.priceText, source: "offering" });
   const services = sections.has("services") ? offerings.filter((o) => o.type === "SERVICE").map(item) : [];
@@ -246,8 +281,11 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
   const brandRules = sections.has("brandVoice") && brand ? [brand.tone && `Tone: ${brand.tone}`, brand.voiceTraits.length && `Voice: ${brand.voiceTraits.join(", ")}`, brand.doSay.length && `Always: ${brand.doSay.join("; ")}`].filter(Boolean) as string[] : [];
   const contentRules = sections.has("forbidden")
     ? [
+        ...(brand?.forbiddenClaims.length ? [`Forbidden claims: ${brand.forbiddenClaims.join("; ")}`] : []),
         ...(brand?.dontSay.length ? [`Never say: ${brand.dontSay.join("; ")}`] : []),
         ...(brand?.forbiddenStyles.length ? [`Forbidden visual styles: ${brand.forbiddenStyles.join(", ")}`] : []),
+        ...(brand?.ctaStyle ? [`CTA style: ${brand.ctaStyle}`] : []),
+        ...(brand?.hashtagRules.length ? [`Hashtags: ${brand.hashtagRules.join("; ")}`] : []),
         "No invented statistics, testimonials, prices or offers that are not listed here.",
       ]
     : [];
@@ -255,9 +293,14 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     ? [
         `Always needs human approval: ${[...new Set([...LOCKED_SALES_TOPICS, ...policies.filter((p) => p.requiresApproval).map((p) => p.action)])].join(", ")}.`,
         "Only quote prices listed here; never promise discounts, refunds, contract terms or delivery dates.",
+        ...(salesK?.pricingRules.length ? [`Pricing rules: ${salesK.pricingRules.join("; ")}`] : []),
+        ...(salesK?.discountRules.length ? [`Discount rules: ${salesK.discountRules.join("; ")}`] : []),
+        ...(salesK?.proposalRules.length ? [`Proposal rules: ${salesK.proposalRules.join("; ")}`] : []),
+        ...(salesK?.redFlags.length ? [`Red flags: ${salesK.redFlags.join("; ")}`] : []),
+        ...(salesK?.escalationRules.length ? [`Escalate when: ${salesK.escalationRules.join("; ")}`] : []),
       ]
     : [];
-  const pillars = sections.has("contentPillars") ? (profile?.contentPillars ?? []) : [];
+  const pillars = sections.has("contentPillars") ? [...(profile?.contentPillars ?? []), ...(brand?.topics ?? []).map((x) => `topic: ${x}`), ...(brand?.seasonalThemes ?? []).map((x) => `seasonal: ${x}`)] : [];
   let summary = (profile?.summary ?? profile?.description)?.slice(0, 400) ?? null;
   if (sections.has("company") && !summary) {
     // Summary-first: the compact summary saved at ingestion, before any chunk-level retrieval.
@@ -266,10 +309,12 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
   }
   const company = sections.has("company") ? { name: profile?.name || org.name, industry: profile?.industry ?? null, summary, website: profile?.website ?? null } : null;
 
-  // Knowledge chunks: only for purposes that read them, and only when there is a query.
+  // 4. Knowledge chunks — last, only for purposes that read them, only with a query, and not when a
+  //    structured FAQ already answers it.
   let chunks: BrainChunk[] = [];
   let semantic = false;
-  if (sections.has("knowledge") && opts.query) {
+  const faqAnswers = rankedFaqs[0] && rankedFaqs[0].c >= 0.6;
+  if (sections.has("knowledge") && opts.query && !faqAnswers) {
     const res = await searchBrainChunks(scope, opts.query, { types: PURPOSE_KNOWLEDGE[opts.purpose], k: opts.topK ?? TOP_K[budget], semantic: opts.semantic });
     semantic = res.semantic;
     chunks = dedupeChunks(res.rows.map((r) => ({ text: redact(stripBoilerplate(r.content), 4000) ?? "", score: Number(r.score), documentId: r.documentId, index: r.index, title: r.title ?? "", type: r.type })))
@@ -289,6 +334,14 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     contentRules,
     salesRules,
     pillars,
+    approvedFacts: factRows.map((f) => `${f.key}: ${f.value}`),
+    faqs: rankedFaqs.slice(0, opts.query ? 3 : 5).map((f) => `Q: ${f.question}\nA: ${f.answer}`),
+    faqMatch: rankedFaqs[0] ? { question: rankedFaqs[0].question, answer: rankedFaqs[0].answer, coverage: rankedFaqs[0].c } : null,
+    objections: objectionRows.map((o) => `${o.objection} → ${o.response}`),
+    icps: icpRows.map((i) => [i.name, i.industry, i.location, i.companySize, i.painPoints.length && `pains: ${i.painPoints.join(", ")}`, i.buyingTriggers.length && `triggers: ${i.buyingTriggers.join(", ")}`].filter(Boolean).join(" · ")),
+    segments: segmentRows.map((s) => `${s.name}${s.size != null ? ` (${s.size})` : ""}${s.definition ? ` — ${s.definition}` : ""}`),
+    strategies: strategyRows.map((s) => [s.title, s.objective, s.positioning && `positioning: ${s.positioning}`, s.channels.length && `channels: ${s.channels.join(", ")}`].filter(Boolean).join(" · ")),
+    competitorThemes: competitorRows.filter((c) => c.contentThemes.length).map((c) => `${c.name}: ${c.contentThemes.join(", ")}`),
     chunks,
     sources: [],
     confidence: "low",
@@ -305,12 +358,17 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
   add("offering", ctx.services.length + ctx.products.length ? 1 : 0);
   add("brand", ctx.brandRules.length || brand?.dontSay.length ? 1 : 0);
   add("policy", ctx.salesRules.length ? 1 : 0);
+  add("fact", ctx.approvedFacts.length ? 1 : 0);
+  add("faq", ctx.faqs.length ? 1 : 0);
+  add("sales", ctx.objections.length ? 1 : 0);
+  add("customers", ctx.icps.length + ctx.segments.length ? 1 : 0);
+  add("strategy", ctx.strategies.length ? 1 : 0);
   for (const c of ctx.chunks) add(c.source);
   ctx.sources = [...kinds].map(([kind, count]) => ({ kind, count }));
-  ctx.retrievedItems = ctx.services.length + ctx.products.length + ctx.audience.length + ctx.valueProps.length + ctx.pricing.length + ctx.chunks.length;
+  ctx.retrievedItems = ctx.services.length + ctx.products.length + ctx.audience.length + ctx.valueProps.length + ctx.pricing.length + ctx.approvedFacts.length + ctx.faqs.length + ctx.objections.length + ctx.icps.length + ctx.segments.length + ctx.strategies.length + ctx.chunks.length;
   ctx.facts = [...ctx.chunks.map((c) => ({ text: c.text, source: c.source }))];
   if (opts.query) {
-    const best = Math.max(0, ...ctx.chunks.map((c) => termCoverage(opts.query!, c.text)));
+    const best = Math.max(0, ctx.faqMatch?.coverage ?? 0, ...ctx.chunks.map((c) => termCoverage(opts.query!, c.text)));
     ctx.confidence = best >= 0.6 ? "high" : best >= 0.3 ? "medium" : "low";
   }
   ctx.contextTokens = estimateTokens(compactContext(ctx));
@@ -321,7 +379,7 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
 export function fitBudget(ctx: CompanyContext, maxTokens: number) {
   const size = () => estimateTokens(compactContext(ctx));
   while (size() > maxTokens && ctx.chunks.length) ctx.chunks.pop();
-  for (const list of ["pricing", "audience", "valueProps", "products", "services", "pillars"] as const) {
+  for (const list of ["competitorThemes", "strategies", "segments", "objections", "faqs", "pricing", "audience", "valueProps", "approvedFacts", "products", "services", "pillars"] as const) {
     while (size() > maxTokens && ctx[list].length > 3) (ctx[list] as unknown[]).pop();
   }
   if (size() > maxTokens && ctx.company?.summary) ctx.company.summary = ctx.company.summary.slice(0, 160);
@@ -332,7 +390,9 @@ export function fitBudget(ctx: CompanyContext, maxTokens: number) {
 export function compactContext(ctx: CompanyContext): string {
   const list = (title: string, items: string[]) => (items.length ? `${title}:\n${items.map((x) => `- ${x}`).join("\n")}` : null);
   const offering = (o: BrainItem) => [o.name, o.price && `(${o.price})`, o.detail && `— ${o.detail}`].filter(Boolean).join(" ");
+  // Order = trust/structure: approved facts → entities → summaries → chunks.
   return [
+    list("Facts", ctx.approvedFacts),
     ctx.company && `Company: ${ctx.company.name}${ctx.company.industry ? ` (${ctx.company.industry})` : ""}`,
     ctx.company?.summary && `About: ${ctx.company.summary}`,
     list("Services", ctx.services.map(offering)),
@@ -344,6 +404,12 @@ export function compactContext(ctx: CompanyContext): string {
     list("Content pillars", ctx.pillars),
     list("Content rules", ctx.contentRules),
     list("Sales rules", ctx.salesRules),
+    list("Ideal customers", ctx.icps),
+    list("Customer segments", ctx.segments),
+    list("Objections and approved responses", ctx.objections),
+    list("Approved strategy", ctx.strategies),
+    list("Competitor content themes", ctx.competitorThemes),
+    ctx.faqs.length ? `Approved FAQs:\n${ctx.faqs.join("\n")}` : null,
     ctx.chunks.length ? `Knowledge:\n${ctx.chunks.map((c, i) => `[${i + 1}] ${c.title ? `${c.title}: ` : ""}${c.text}`).join("\n")}` : null,
   ]
     .filter(Boolean)

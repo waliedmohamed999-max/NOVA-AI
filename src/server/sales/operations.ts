@@ -381,8 +381,41 @@ export const importRow = z.object({
   value: z.string().trim().max(40).optional(),
   notes: z.string().trim().max(2000).optional(),
   tags: z.string().trim().max(300).optional(),
+  // Commerce attributes (store / spreadsheet imports) — kept on the CRM customer, aggregated by the Company Brain.
+  city: z.string().trim().max(120).optional(),
+  country: z.string().trim().max(80).optional(),
+  lastOrder: z.string().trim().max(40).optional(),
+  totalSpend: z.string().trim().max(40).optional(),
+  ordersCount: z.string().trim().max(12).optional(),
+  category: z.string().trim().max(300).optional(),
+  externalId: z.string().trim().max(120).optional(),
 });
 export type ImportRow = z.infer<typeof importRow>;
+
+const num = (v?: string) => {
+  if (!v) return null;
+  const n = Number(v.replace(/[^\d.-]/g, ""));
+  return Number.isFinite(n) ? n : null;
+};
+const dateOf = (v?: string) => {
+  if (!v) return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+/** Commerce columns → lead fields (only what is actually present). */
+export function commerceFields(r: ImportRow) {
+  const spend = num(r.totalSpend);
+  const orders = num(r.ordersCount);
+  return {
+    ...(r.city ? { city: r.city } : {}),
+    ...(r.country ? { country: r.country } : {}),
+    ...(r.externalId ? { externalId: r.externalId } : {}),
+    ...(orders != null ? { ordersCount: Math.max(0, Math.round(orders)) } : {}),
+    ...(spend != null ? { totalSpendCents: Math.round(spend * 100) } : {}),
+    ...(dateOf(r.lastOrder) ? { lastOrderAt: dateOf(r.lastOrder)! } : {}),
+    ...(r.category ? { purchaseCategories: r.category.split(/[,;|،]/).map((c) => c.trim()).filter(Boolean).slice(0, 10) } : {}),
+  };
+}
 export const MAX_IMPORT = 1000;
 
 const normEmail = (e?: string) => e?.trim().toLowerCase() || null;
@@ -395,7 +428,9 @@ export async function previewImport(scope: TenantScope, rows: ImportRow[]): Prom
   if (rows.length > MAX_IMPORT) throw new UserFacingError("validation");
   const parsed = rows.map((r) => importRow.parse(r));
   const emails = [...new Set(parsed.map((r) => normEmail(r.email)).filter(Boolean))] as string[];
-  const existing = await tenantDb(scope).lead.findMany({ where: { OR: [{ email: { in: emails } }, { phone: { not: null } }] }, select: { id: true, email: true, phone: true }, take: 20_000 });
+  const externalIds = [...new Set(parsed.map((r) => r.externalId?.trim()).filter(Boolean))] as string[];
+  const existing = await tenantDb(scope).lead.findMany({ where: { OR: [{ email: { in: emails } }, { phone: { not: null } }, ...(externalIds.length ? [{ externalId: { in: externalIds } }] : [])] }, select: { id: true, email: true, phone: true, externalId: true }, take: 20_000 });
+  const byExternal = new Map(existing.filter((l) => l.externalId).map((l) => [l.externalId!, l.id]));
   const byEmail = new Map(existing.filter((l) => l.email).map((l) => [l.email!.toLowerCase(), l.id]));
   const byPhone = new Map(existing.filter((l) => l.phone).map((l) => [normPhone(l.phone!)!, l.id]));
   const seen = new Set<string>();
@@ -405,9 +440,11 @@ export async function previewImport(scope: TenantScope, rows: ImportRow[]): Prom
     if (!row.name && !row.company && !email) return { index, row, status: "invalid", reason: "missing_name" };
     if (email && !EMAIL_RE.test(email)) return { index, row, status: "invalid", reason: "bad_email" };
     if (row.value && Number.isNaN(Number(row.value.replace(/[^\d.]/g, "")))) return { index, row, status: "invalid", reason: "bad_value" };
-    const existingLeadId = (email && byEmail.get(email)) || (phone && phone.length >= 7 && byPhone.get(phone)) || undefined;
+    // Duplicate rules: external id (store/CRM id), then email, then phone.
+    const ext = row.externalId?.trim() || null;
+    const existingLeadId = (ext && byExternal.get(ext)) || (email && byEmail.get(email)) || (phone && phone.length >= 7 && byPhone.get(phone)) || undefined;
     if (existingLeadId) return { index, row, status: "duplicate", reason: "exists", existingLeadId };
-    const key = email ?? (phone && phone.length >= 7 ? `p:${phone}` : null);
+    const key = ext ? `x:${ext}` : (email ?? (phone && phone.length >= 7 ? `p:${phone}` : null));
     if (key && seen.has(key)) return { index, row, status: "duplicate", reason: "in_file" };
     if (key) seen.add(key);
     return { index, row, status: "ok" };
@@ -437,7 +474,8 @@ export async function importLeads(scope: TenantScope, rows: ImportRow[], actor: 
       actor,
       { qualify: false },
     );
-    if (opts.currency) await db.lead.update({ where: { id: lead.id }, data: { currency: opts.currency } });
+    const commerce = commerceFields(r);
+    if (opts.currency || Object.keys(commerce).length) await db.lead.update({ where: { id: lead.id }, data: { ...commerce, ...(opts.currency ? { currency: opts.currency } : {}) } });
     await addLeadEvent(scope, lead.id, { type: "IMPORTED", title: "Imported from CSV", body: r.notes || null, actor });
     created++;
   }
