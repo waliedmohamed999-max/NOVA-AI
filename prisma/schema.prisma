@@ -59,6 +59,10 @@ enum KnowledgeSourceType {
   PRICING
   POLICY
   CASE_STUDY
+  STORE
+  SPREADSHEET
+  CRM
+  API
 }
 
 enum ProcessingStatus {
@@ -653,6 +657,14 @@ model CompanyProfile {
   discoveries     Json? // onboarding "magic moment" results
   summary         String?
   completeness    Int      @default(0)
+  mission         String?
+  vision          String?
+  businessModel   String?
+  brandPromise    String?
+  whyChooseUs     String[] @default([])
+  countries       String[] @default([])
+  /// Per-field provenance: { field: { source, at, by } } — every edit is source-aware.
+  fieldSources    Json     @default("{}")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -671,6 +683,22 @@ model Offering {
   priceCents     Int?
   currency       String?
   isActive       Boolean      @default(true)
+  category       String?
+  targetCustomer String?
+  problemSolved  String?
+  benefits       String[]     @default([])
+  features       String[]     @default([])
+  deliveryModel  String?
+  salesCycle     String?
+  upsell         String[]     @default([])
+  crossSell      String[]     @default([])
+  objections     String[]     @default([])
+  proofPoints    String[]     @default([])
+  caseStudies    String[]     @default([])
+  /// active | draft | retired (isActive mirrors "active")
+  status         String       @default("active")
+  sourceKind     String       @default("manual")
+  sourceId       String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -694,6 +722,11 @@ model BrandKit {
   imageStyle      String?
   layoutRules     String[] @default([])
   forbiddenStyles String[] @default([])
+  ctaStyle        String?
+  hashtagRules    String[] @default([])
+  topics          String[] @default([])
+  seasonalThemes  String[] @default([])
+  forbiddenClaims String[] @default([])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -762,6 +795,10 @@ model KnowledgeSource {
   metadata       Json                @default("{}")
   error          String?
   lastSyncedAt   DateTime?
+  /// Paused sources are kept but excluded from retrieval and never refreshed.
+  pausedAt       DateTime?
+  language       String?
+  lastVerifiedAt DateTime?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
@@ -1303,6 +1340,14 @@ model Lead {
   aiInsight           String?
   stageChangedAt      DateTime        @default(now())
   isDemo              Boolean         @default(false)
+  /// Commerce attributes (imports / store): kept in the CRM; the Company Brain only aggregates them.
+  city                String?
+  country             String?
+  externalId          String?
+  ordersCount         Int?
+  totalSpendCents     Int?
+  lastOrderAt         DateTime?
+  purchaseCategories  String[]        @default([])
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
@@ -2069,4 +2114,249 @@ model CommandCache {
   @@unique([organizationId, workspaceId, brainVersion, intent, queryKey, locale])
   @@index([organizationId, workspaceId, createdAt])
   @@map("command_cache")
+}
+
+// ── Company Brain (Company Intelligence OS) ──
+// Structured first; every row is workspace-scoped and source-aware. CRM customers, content and
+// opportunities are referenced/aggregated, never copied here.
+
+/// Structured facts layer (key → value) with provenance, trust and approval. Retrieval reads these first.
+model BrainFact {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  key            String
+  value          String
+  category       String
+  /// manual | crm | website | document | public_web | ai
+  sourceKind     String    @default("manual")
+  sourceId       String?
+  confidence     Float     @default(1)
+  /// approved | pending | rejected — critical facts extracted by machines start as pending.
+  status         String    @default("approved")
+  critical       Boolean   @default(false)
+  verifiedAt     DateTime?
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, key])
+  @@index([organizationId, workspaceId, category])
+  @@map("brain_facts")
+}
+
+model BrainFaq {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  question       String
+  answer         String
+  category       String?
+  audience       String?
+  channel        String?
+  status         String   @default("approved")
+  sourceKind     String   @default("manual")
+  sourceId       String?
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId, workspaceId, status])
+  @@map("brain_faqs")
+}
+
+model BrainObjection {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  objection      String
+  response       String
+  proof          String?
+  /// draft_only | auto_allowed
+  automation     String   @default("draft_only")
+  status         String   @default("approved")
+  sourceKind     String   @default("manual")
+  sourceId       String?
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("brain_objections")
+}
+
+model Competitor {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  name           String
+  website        String?
+  positioning    String?
+  services       String[]  @default([])
+  pricing        String?
+  strengths      String[]  @default([])
+  weaknesses     String[]  @default([])
+  contentThemes  String[]  @default([])
+  channels       String[]  @default([])
+  notes          String?
+  sourceKind     String    @default("manual")
+  sourceId       String?
+  lastVerifiedAt DateTime?
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("competitors")
+}
+
+/// Segments are definitions over CRM customers (criteria), sized from the CRM — never a copy of customers.
+model CustomerSegment {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  name           String
+  definition     String?
+  /// { city?, country?, minOrders?, maxOrders?, minSpendCents?, category?, tag?, source? }
+  criteria       Json      @default("{}")
+  size           Int?
+  sizedAt        DateTime?
+  /// manual | rules | ai
+  source         String    @default("manual")
+  /// suggested | approved | rejected
+  status         String    @default("approved")
+  notes          String?
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, workspaceId, status])
+  @@map("customer_segments")
+}
+
+model IdealCustomerProfile {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  /// B2B | B2C
+  kind           String   @default("B2B")
+  name           String
+  industry       String?
+  companySize    String?
+  location       String?
+  budget         String?
+  painPoints     String[] @default([])
+  buyingTriggers String[] @default([])
+  decisionMaker  String?
+  objections     String[] @default([])
+  salesCycle     String?
+  channels       String[] @default([])
+  status         String   @default("approved")
+  updatedById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId, workspaceId])
+  @@map("ideal_customer_profiles")
+}
+
+model Strategy {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  /// business | marketing | sales | content | retention
+  type           String
+  title          String
+  objective      String?
+  targetAudience String?
+  positioning    String?
+  channels       String[]  @default([])
+  kpis           String[]  @default([])
+  initiatives    String[]  @default([])
+  risks          String[]  @default([])
+  timeline       String?
+  owner          String?
+  /// DRAFT | REVIEW | APPROVED | ARCHIVED — nothing generated is approved automatically.
+  status         String    @default("DRAFT")
+  /// manual | template | ai | offline
+  generatedBy    String    @default("manual")
+  inputs         Json      @default("{}")
+  approvedById   String?
+  approvedAt     DateTime?
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, workspaceId, type])
+  @@map("strategies")
+}
+
+model SalesKnowledge {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  workspaceId            String   @unique
+  playbook               String?
+  qualificationQuestions String[] @default([])
+  discoveryQuestions     String[] @default([])
+  pricingRules           String[] @default([])
+  discountRules          String[] @default([])
+  proposalRules          String[] @default([])
+  followUpCadence        String?
+  redFlags               String[] @default([])
+  escalationRules        String[] @default([])
+  updatedById            String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("sales_knowledge")
+}
+
+/// A brain import job: parse locally → (optional AI extraction) → human review → import.
+model BrainImport {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  /// website | store | csv | excel | pdf | docx | txt
+  kind           String
+  /// UPLOADED | PARSING | EXTRACTING | REVIEW | IMPORTED | FAILED
+  status         String    @default("UPLOADED")
+  title          String
+  fileId         String?
+  url            String?
+  sourceId       String?
+  /// Parsed preview: text excerpt / columns + sample rows / detected platform.
+  preview        Json      @default("{}")
+  /// Extracted candidates awaiting review: [{ id, type, data, selected, critical }]
+  candidates     Json      @default("[]")
+  mapping        Json?
+  stats          Json      @default("{}")
+  error          String?
+  createdById    String?
+  importedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, workspaceId, createdAt])
+  @@map("brain_imports")
+}
+
+/// Edit history for every Company Brain change: who, when, source, before/after.
+model BrainRevision {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  entityType     String
+  entityId       String
+  /// create | update | delete | approve | reject
+  action         String
+  before         Json?
+  after          Json?
+  sourceKind     String   @default("manual")
+  actorId        String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, workspaceId, entityType, entityId])
+  @@index([organizationId, workspaceId, createdAt])
+  @@map("brain_revisions")
 }
