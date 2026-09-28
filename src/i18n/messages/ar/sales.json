@@ -437,7 +437,14 @@
       "source": "المصدر",
       "value": "القيمة",
       "notes": "ملاحظات",
-      "tags": "وسوم"
+      "tags": "وسوم",
+      "city": "المدينة",
+      "country": "الدولة",
+      "lastOrder": "آخر طلب",
+      "totalSpend": "إجمالي المشتريات",
+      "ordersCount": "عدد الطلبات",
+      "category": "المنتج / الفئة",
+      "externalId": "رقم العميل"
     },
     "back": "السابق",
     "previewCta": "معاينة",

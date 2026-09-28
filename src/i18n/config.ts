@@ -23,5 +23,6 @@ export const namespaces = [
   "sales",
   "analytics",
   "settings",
+  "brain",
   "errors",
 ] as const;

@@ -67,5 +67,10 @@
   "nothing_due": "There are no due follow-ups to prepare.",
   "email_not_configured": "Email isn't set up for this installation yet, so the message couldn't be sent.",
   "email_invalid_recipient": "That email address isn't valid.",
-  "whatsapp_test_recipient_missing": "Set WHATSAPP_TEST_RECIPIENT before sending a test WhatsApp."
+  "whatsapp_test_recipient_missing": "Set WHATSAPP_TEST_RECIPIENT before sending a test WhatsApp.",
+  "csv_empty": "The file has no rows to import.",
+  "document_empty": "No readable text was found in this document.",
+  "requires_integration": "This needs an official connection to the platform — public data only isn't enough.",
+  "strategy_needs_answers": "Answer a few strategy questions first, or build the strategy from your data.",
+  "no_competitors": "Add at least one competitor first."
 }

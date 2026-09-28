@@ -67,5 +67,10 @@
   "nothing_due": "لا توجد متابعات مستحقة للتجهيز.",
   "email_not_configured": "البريد غير مُعد في هذا التثبيت بعد، لذلك تعذر إرسال الرسالة.",
   "email_invalid_recipient": "عنوان البريد غير صالح.",
-  "whatsapp_test_recipient_missing": "اضبط WHATSAPP_TEST_RECIPIENT قبل إرسال واتساب تجريبي."
+  "whatsapp_test_recipient_missing": "اضبط WHATSAPP_TEST_RECIPIENT قبل إرسال واتساب تجريبي.",
+  "csv_empty": "الملف لا يحتوي على صفوف للاستيراد.",
+  "document_empty": "لم نجد نصًا مقروءًا في هذا المستند.",
+  "requires_integration": "يتطلب ربطًا رسميًا بالمنصة — البيانات العامة وحدها لا تكفي.",
+  "strategy_needs_answers": "أجب على بعض الأسئلة الاستراتيجية أولًا، أو ابنِ الاستراتيجية من بياناتك.",
+  "no_competitors": "أضف منافسًا واحدًا على الأقل أولًا."
 }

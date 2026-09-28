@@ -471,7 +471,11 @@
       "brain_strengths": "What sets you apart",
       "brain_pricing": "Your prices",
       "brain_tone": "Your brand voice",
-      "brain_about": "About your company"
+      "brain_about": "About your company",
+      "brain_icp": "Your ideal customer",
+      "brain_objections": "Common customer objections",
+      "brain_content_strategy": "Your content strategy",
+      "brain_top_products": "Your highest-value products"
     },
     "stages": {
       "NEW": "New",

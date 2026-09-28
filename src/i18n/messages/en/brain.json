@@ -1,0 +1,148 @@
+{
+  "navLabel": "Company Brain sections",
+  "saved": "Saved",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "approve": "Approve",
+  "reject": "Reject",
+  "approvedToast": "Approved",
+  "deleted": "Deleted",
+  "confirmDelete": "Delete this item? This can't be undone.",
+  "history": "History",
+  "noHistory": "No changes recorded yet.",
+  "listHint": "One item per line.",
+  "lastUpdated": "Updated {when}",
+  "countItems": "{count, plural, =0 {No items} one {# item} other {# items}}",
+  "searchPlaceholder": "Search the Company Brain",
+  "searchEmpty": "Nothing found in the Company Brain.",
+  "prev": "Previous",
+  "next": "Next",
+  "tabs": { "overview": "Overview", "profile": "Company profile", "products": "Products & services", "customers": "Customers", "strategy": "Strategy", "market": "Market & competitors", "sales": "Sales knowledge", "content": "Content knowledge", "faq": "FAQs", "sources": "Knowledge sources", "imports": "Data imports", "health": "Brain health" },
+  "kinds": { "fact": "Fact", "offering": "Product", "faq": "FAQ", "objection": "Objection", "strategy": "Strategy", "competitor": "Competitor", "segment": "Segment", "icp": "ICP", "source": "Source", "chunk": "Knowledge" },
+  "status": {
+    "approved": "Approved", "pending": "Needs approval", "rejected": "Rejected", "ready": "Ready", "needs_info": "Needs info", "outdated": "Outdated", "empty": "Empty", "complete": "Complete", "weak": "Weak",
+    "healthy": "Healthy", "stale": "Needs refresh", "failed": "Failed", "paused": "Paused", "processing": "Processing", "suggested": "Suggested", "missing": "Missing", "answered": "Answered", "needs_review": "Needs review",
+    "DRAFT": "Draft", "REVIEW": "In review", "APPROVED": "Approved", "ARCHIVED": "Archived", "UPLOADED": "Uploaded", "PARSING": "Parsing", "EXTRACTING": "Extracting", "IMPORTED": "Imported", "FAILED": "Failed", "REVIEW_REQUIRED": "Review required",
+    "active": "Active", "draft": "Draft", "retired": "Retired", "create": "Created", "update": "Updated", "delete": "Deleted", "approve": "Approved", "reject": "Rejected"
+  },
+  "sourceKinds": { "manual": "Manual", "crm": "CRM", "website": "Website", "document": "Document", "public_web": "Public web", "ai": "AI-inferred", "template": "Template", "rules": "Rules" },
+  "options": { "draft_only": "Draft only", "auto_allowed": "Auto-reply allowed", "B2B": "B2B", "B2C": "B2C", "business": "Business", "marketing": "Marketing", "sales": "Sales", "content": "Content", "retention": "Retention", "SERVICE": "Service", "PRODUCT": "Product", "active": "Active", "draft": "Draft", "retired": "Retired" },
+  "add": { "faq": "Add FAQ", "objection": "Add objection", "competitor": "Add competitor", "segment": "Add segment", "icp": "Add ideal customer", "strategy": "Add strategy", "offering": "Add product / service" },
+  "edit_faq": "Edit FAQ", "edit_objection": "Edit objection", "edit_competitor": "Edit competitor", "edit_segment": "Edit segment", "edit_icp": "Edit ideal customer", "edit_strategy": "Edit strategy", "edit_offering": "Edit product / service",
+  "fields": {
+    "profile": { "name": "Company name", "industry": "Industry", "markets": "Market", "countries": "Countries", "languages": "Languages", "businessModel": "Business model", "website": "Website", "description": "Description", "mission": "Mission", "vision": "Vision", "valueProps": "Value proposition", "whyChooseUs": "Why customers choose us", "differentiators": "Differentiators", "brandPromise": "Brand promise" },
+    "offering": { "type": "Type", "name": "Name", "category": "Category", "description": "Description", "targetCustomer": "Target customer", "problemSolved": "Problem solved", "benefits": "Benefits", "features": "Features", "priceText": "Price (if known)", "currency": "Currency", "deliveryModel": "Delivery model", "salesCycle": "Sales cycle", "upsell": "Upsell opportunities", "crossSell": "Cross-sell", "objections": "Common objections", "proofPoints": "Proof points", "caseStudies": "Case studies", "status": "Status" },
+    "faq": { "question": "Question", "answer": "Answer", "category": "Category", "audience": "Audience", "channel": "Channel" },
+    "objection": { "objection": "Objection", "response": "Response", "proof": "Supporting proof", "automation": "Allowed automation" },
+    "competitor": { "name": "Name", "website": "Website", "positioning": "Positioning", "services": "Services", "pricing": "Pricing (if public)", "strengths": "Strengths", "weaknesses": "Weaknesses", "contentThemes": "Content themes", "channels": "Channels", "notes": "Notes" },
+    "segment": { "name": "Name", "definition": "Definition", "notes": "Notes" },
+    "icp": { "kind": "Type", "name": "Name", "industry": "Industry", "companySize": "Company size", "location": "Location", "budget": "Budget", "painPoints": "Pain points", "buyingTriggers": "Buying triggers", "decisionMaker": "Decision maker", "objections": "Buying objections", "salesCycle": "Sales cycle", "channels": "Best channels" },
+    "strategy": { "type": "Type", "title": "Title", "objective": "Objective", "targetAudience": "Target audience", "positioning": "Positioning", "channels": "Channels", "kpis": "KPIs", "initiatives": "Initiatives", "risks": "Risks", "timeline": "Timeline", "owner": "Owner" },
+    "sales": { "playbook": "Sales playbook", "qualificationQuestions": "Qualification questions", "discoveryQuestions": "Discovery questions", "pricingRules": "Pricing rules", "discountRules": "Discount rules", "proposalRules": "Proposal rules", "followUpCadence": "Follow-up cadence", "redFlags": "Red flags", "escalationRules": "Escalation rules" },
+    "content": { "tone": "Tone", "voiceTraits": "Brand voice", "contentPillars": "Content pillars", "topics": "Topics", "forbiddenClaims": "Forbidden claims", "dontSay": "Never say", "ctaStyle": "CTA style", "hashtagRules": "Hashtag rules", "imageStyle": "Visual direction", "seasonalThemes": "Seasonal themes" }
+  },
+  "hero": { "title": "Your company's brain, in one place.", "subtitle": "NOVA builds a living understanding of your business, customers, products and strategy — used by every NOVA team." },
+  "overall": { "complete": "Complete", "ready": "Ready", "needs_info": "Needs info", "weak": "Weak" },
+  "quick": { "addSource": "Add a source", "importData": "Import data", "buildStrategy": "Build a strategy", "completeInfo": "Complete the info" },
+  "empty": { "title": "Start building your company brain", "steps": { "website": "Add your website", "products": "Add your products", "customers": "Import your customers", "questions": "Answer the questions", "strategy": "Build your strategy" } },
+  "map": { "company": "Company", "products": "Products", "customers": "Customers", "sales": "Sales", "content": "Content", "strategy": "Strategy", "competitors": "Market" },
+  "overview": {
+    "statsTitle": "What NOVA knows",
+    "stats": { "sources": "Sources", "lastRefresh": "Last refresh", "products": "Products & services", "segments": "Customer segments", "faqs": "FAQs", "strategies": "Approved strategies", "customers": "Customers (CRM)", "documents": "Documents", "websitePages": "Website pages" },
+    "pending": "Waiting for you: {facts} facts, {faqs} FAQs and {segments} suggested segments.",
+    "missingTitle": "What's missing from the brain?",
+    "nothingMissing": "Nothing important is missing."
+  },
+  "missing": {
+    "industry": "The industry isn't set", "description": "There's no company description", "market": "No market or countries", "value_proposition": "No value proposition", "differentiators": "No differentiators",
+    "qualification_questions": "No qualification questions", "pricing_rules": "No pricing rules", "discount_rules": "No discount rules", "objections": "No sales objections yet",
+    "tone": "The brand tone isn't set", "pillars": "No content pillars", "forbidden_claims": "No forbidden claims", "cta_style": "No CTA style",
+    "segments": "No customer segments", "icp": "No ideal customer profile", "customer_data": "No customer data",
+    "strategy_needs_approval": "A strategy draft is waiting for approval", "no_strategy": "No strategy yet",
+    "product_details": "Some products lack description, target customer or benefits", "more_faqs": "Fewer than 3 approved FAQs"
+  },
+  "areas": { "profile": "Company profile", "products": "Products", "customers": "Customers", "sales": "Sales knowledge", "content": "Content knowledge", "faqs": "FAQs", "strategy": "Strategy", "competitors": "Competitors" },
+  "health": {
+    "title": "Brain health", "description": "Each area is Ready, Needs info, Outdated or Empty — based on what's actually in the brain.",
+    "outdatedCompetitors": "{count} competitors haven't been verified in 6 months.", "emptyHint": "Nothing here yet.", "readyHint": "Everything NOVA needs is here.",
+    "staleSources": "Sources that need a refresh", "failedSources": "Failed sources", "pendingApprovals": "Waiting for approval",
+    "refreshNote": "Sources are never refreshed automatically — refresh them from Knowledge sources when you choose."
+  },
+  "profile": { "description": "Structured company details. Every field shows when it was updated and from which source." },
+  "facts": {
+    "title": "Structured facts", "description": "Key facts NOVA reads before anything else. Critical facts (pricing, discounts, legal, policies) extracted automatically wait for approval.",
+    "key": "Key", "keyPlaceholder": "e.g. market.saudi", "value": "Value", "category": "Category", "add": "Add fact", "empty": "No facts yet.", "critical": "Critical", "confidence": "Confidence {value}%"
+  },
+  "factCategories": { "general": "General", "pricing": "Pricing", "discount": "Discounts", "policy": "Policy", "legal": "Legal", "positioning": "Positioning", "proof": "Proof", "catalog": "Catalog", "strategy": "Strategy", "customer_language": "Customer language", "question": "Answer", "reputation": "Reputation" },
+  "products": { "description": "Not just a name and a price: who it's for, the problem it solves, benefits, objections and proof.", "empty": "No products or services yet." },
+  "sales": {
+    "playbookTitle": "Sales playbook", "description": "What the Sales Agent follows: qualification, pricing and discount rules, cadence, red flags and escalation.",
+    "objectionsTitle": "Objection library", "objectionsDescription": "Objections with approved responses and proof. Auto-reply only where you allow it.", "objectionsEmpty": "No objections yet.",
+    "stagesTitle": "Deal stages", "stagesDescription": "From your pipeline — the brain references them, it doesn't copy them.", "openPipeline": "Open pipeline"
+  },
+  "content": { "description": "Used by Content Studio: voice, pillars, topics, forbidden claims, CTA style and hashtags.", "openBrandKit": "Visual brand kit", "competitorTopics": "Competitor topics", "competitorTopicsHint": "From the competitors you added.", "noCompetitorTopics": "Add competitors with content themes to see them here." },
+  "faq": { "description": "The support agent answers only from approved FAQs.", "import": "Import FAQs", "pendingNote": "{count, plural, one {# FAQ is} other {# FAQs are}} waiting for approval.", "empty": "No FAQs yet." },
+  "customers": {
+    "overviewTitle": "Customer overview", "overviewDescription": "Aggregated from your CRM — customer records stay in the CRM.", "import": "Import customers", "noData": "No customers yet. Import a CSV/Excel file or add customers in Sales.", "notEnoughData": "Not enough data",
+    "stats": { "total": "Customers", "repeat": "Repeat customers", "avgSpend": "Average spend", "b2b": "B2B customers" },
+    "topCities": "Top locations", "topCategories": "Top categories", "coverage": "Data coverage: city {city}% · spend {spend}% · orders {orders}% · category {category}%",
+    "insightsTitle": "Customer insights", "insightsDescription": "Computed from aggregates, only when the data supports them.", "noInsights": "No reliable insights yet — more data needed.",
+    "segmentsTitle": "Customer segments", "segmentsDescription": "Definitions over your CRM customers. NOVA may suggest segments; you approve them.", "segmentsEmpty": "No segments yet.",
+    "suggest": "Suggest segments", "suggested": "Suggestions added for review", "size": "{count} customers", "criteria": "Criteria",
+    "criteriaFields": { "city": "City", "minOrders": "Min. orders", "category": "Category", "tag": "Tag" }, "applyCriteria": "Apply criteria",
+    "icpTitle": "Ideal customer profile", "icpDescription": "B2B ICPs and B2C personas the teams target.", "icpEmpty": "No ideal customer profile yet."
+  },
+  "insights": {
+    "city_category": "Customers in {city} buy {category} more ({share}% vs {overall}% overall).",
+    "repeat_share": "{repeat} repeat customers — {share}% of customers with orders.",
+    "top_city": "{share}% of customers are in {city}."
+  },
+  "strategy": {
+    "wizardTitle": "Build a strategy with NOVA", "wizardDescription": "NOVA uses your answers, products, segments and results to draft a strategy.",
+    "type": "Strategy type", "build": "Build a strategy", "buildFromData": "Build from my data", "drafted": "Draft created — review it before approving", "draftNote": "Drafts are never approved automatically: Draft → Review → Approve.",
+    "listTitle": "Strategies", "empty": "No strategies yet.", "toReview": "Send to review", "backToDraft": "Back to draft", "archive": "Archive",
+    "questionsTitle": "Strategy questions", "questionsProgress": "{answered} of {total} answered. NOVA only asks what's missing.", "nextQuestion": "Next question from NOVA", "saveAnswer": "Save answer"
+  },
+  "questionGroups": { "business": "Business", "customers": "Customers", "sales": "Sales", "marketing": "Marketing", "content": "Content", "operations": "Operations" },
+  "questions": {
+    "goal_90d": "What's your goal for the next 90 days?", "focus_product": "Which product do you most want to push?", "biggest_challenge": "What's your biggest challenge?", "business_model": "How does the business make money?",
+    "best_customer": "Who is your most important customer?", "customer_value": "What's the average value of a customer?", "why_choose_us": "Why do customers choose you?",
+    "close_process": "How do you close deals?", "sales_cycle": "How long does a typical sale take?", "discount_policy": "When are discounts allowed?",
+    "marketing_budget": "What's your marketing budget?", "current_channels": "Which channels do you use today?", "competitors": "Who are your main competitors?",
+    "content_goal": "What should your content achieve?", "tone": "How should your brand sound?", "team_capacity": "Who does the work, and how much capacity is there?", "delivery_time": "How long does delivery take?"
+  },
+  "market": {
+    "importTitle": "Add a competitor from a link", "importDescription": "NOVA reads one public page (title, description, headings, public prices, social links). No login, no crawling.",
+    "url": "Competitor website", "importButton": "Add competitor", "imported": "Competitor added — review and complete it",
+    "description": "Competitors you added. NOVA compares against these only.", "empty": "No competitors yet.",
+    "analysisTitle": "Competitor analysis", "basis": "Analysis based on the sources you added.", "analyze": "Compare", "basisLabel": "Analysis based on the added sources — not the whole market.", "noAiAnalysis": "AI comparison isn't set up — the table above is built from your data.",
+    "analysis": { "positioning": "Positioning", "offers": "Offer structure", "messaging": "Messaging", "contentGaps": "Content themes" }
+  },
+  "sources": {
+    "description": "Everything the brain reads. Paused sources are kept but not used or refreshed.", "empty": "No sources yet.", "chunks": "{count, plural, one {# chunk} other {# chunks}}", "usedBy": "used by {agents}",
+    "refreshing": "Refresh started", "refresh": "Refresh", "resume": "Resume", "pause": "Pause", "type": "Type", "lastSync": "Last sync", "language": "Language", "usedByLabel": "Used by",
+    "raw": "Raw source", "extractedFacts": "Extracted facts", "documents": "{count, plural, one {# document} other {# documents}}", "chunksTitle": "{count, plural, one {# chunk} other {# chunks}}", "chunksNote": "10 per page."
+  },
+  "sourceTypes": { "WEBSITE": "Website", "DOCUMENT": "Document", "MANUAL": "Manual", "FAQ": "FAQ", "PRODUCT": "Product", "SERVICE": "Service", "PRICING": "Pricing", "POLICY": "Policy", "CASE_STUDY": "Case study", "STORE": "Store", "SPREADSHEET": "Spreadsheet", "CRM": "CRM", "API": "API" },
+  "agents": { "content": "Content", "sales": "Sales", "support": "Support", "command": "Command Center", "analytics": "Analytics" },
+  "imports": {
+    "title": "Import data", "description": "Local parsing first. Nothing enters the brain before you review it.",
+    "cards": { "website": "Website", "store": "Store", "sheet": "Excel / CSV", "document": "PDF / document" },
+    "cardsHint": { "website": "Pages, services, FAQs, policies", "store": "Public catalogue, prices, reviews", "sheet": "Customers → CRM (with preview)", "document": "PDF, DOCX, TXT" },
+    "uploading": "Uploading…", "jobsTitle": "Import jobs", "noJobs": "No imports yet.",
+    "kinds": { "website": "Website", "store": "Store", "csv": "CSV", "excel": "Excel", "pdf": "PDF", "docx": "Word document", "txt": "Text" },
+    "review": "Review", "storeNote": "Only publicly accessible data is read. Customer and order data require an official platform connection.", "websiteNote": "NOVA reads the home page and a few pages that describe the business.",
+    "start": "Start", "url": "Link", "done": "Added to the brain",
+    "previewButton": "Preview", "importCustomers": "{count, plural, =0 {Import} one {Import # customer} other {Import # customers}}", "addToBrain": "{count, plural, =0 {Add to brain} one {Add # item} other {Add # items}}",
+    "mapHelp": "{count} rows. Match each column to a field, then preview duplicates before importing.", "column": "Column", "sample": "Sample", "field": "Field", "skip": "— skip —",
+    "duplicateRules": "Duplicates are detected by customer ID, email, then phone. Duplicates and invalid rows are skipped, never merged.",
+    "previewStats": { "ok": "New", "duplicates": "Duplicates", "invalid": "Invalid" },
+    "piiNote": "Customers go to the CRM. Only aggregated, anonymous insights are added to the brain's search.",
+    "storeCustomers": "Customers and orders are not read from the store — that needs an official connection.",
+    "extractedText": "Extracted text", "found": "We found:", "foundItem": "{count} {type}", "nothingFound": "Nothing to add was found.",
+    "aiExtracted": "AI", "criticalNote": "Critical items (pricing, policies, discounts) are added as pending and need approval before agents use them."
+  },
+  "candidateTypes": { "offering": "Products & services", "faq": "FAQs", "policy": "Policies", "pricing": "Pricing", "case_study": "Case studies", "segment": "Customer segments", "objection": "Objections", "strategy_note": "Strategy notes", "fact": "Facts", "profile": "Company description" }
+}

@@ -471,7 +471,11 @@
       "brain_strengths": "مميزات شركتكم",
       "brain_pricing": "أسعاركم",
       "brain_tone": "نبرة علامتكم",
-      "brain_about": "عن شركتكم"
+      "brain_about": "عن شركتكم",
+      "brain_icp": "عميلكم المثالي",
+      "brain_objections": "أهم اعتراضات العملاء",
+      "brain_content_strategy": "استراتيجية المحتوى",
+      "brain_top_products": "منتجاتكم الأعلى قيمة"
     },
     "stages": {
       "NEW": "جديد",

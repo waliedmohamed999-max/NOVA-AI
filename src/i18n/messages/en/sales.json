@@ -437,7 +437,14 @@
       "source": "Source",
       "value": "Value",
       "notes": "Notes",
-      "tags": "Tags"
+      "tags": "Tags",
+      "city": "City",
+      "country": "Country",
+      "lastOrder": "Last order",
+      "totalSpend": "Total spend",
+      "ordersCount": "Orders",
+      "category": "Product / category",
+      "externalId": "Customer ID"
     },
     "back": "Back",
     "previewCta": "Preview",

@@ -1,0 +1,148 @@
+{
+  "navLabel": "أقسام عقل الشركة",
+  "saved": "تم الحفظ",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "approve": "اعتماد",
+  "reject": "رفض",
+  "approvedToast": "تم الاعتماد",
+  "deleted": "تم الحذف",
+  "confirmDelete": "حذف هذا العنصر؟ لا يمكن التراجع.",
+  "history": "السجل",
+  "noHistory": "لا توجد تعديلات مسجلة بعد.",
+  "listHint": "عنصر واحد في كل سطر.",
+  "lastUpdated": "آخر تحديث {when}",
+  "countItems": "{count, plural, =0 {لا توجد عناصر} one {عنصر واحد} two {عنصران} few {# عناصر} other {# عنصرًا}}",
+  "searchPlaceholder": "ابحث في عقل الشركة",
+  "searchEmpty": "لا توجد نتائج في عقل الشركة.",
+  "prev": "السابق",
+  "next": "التالي",
+  "tabs": { "overview": "نظرة عامة", "profile": "ملف الشركة", "products": "المنتجات والخدمات", "customers": "العملاء", "strategy": "الاستراتيجية", "market": "السوق والمنافسون", "sales": "معرفة المبيعات", "content": "معرفة المحتوى", "faq": "الأسئلة الشائعة", "sources": "مصادر المعرفة", "imports": "استيراد البيانات", "health": "صحة العقل" },
+  "kinds": { "fact": "حقيقة", "offering": "منتج", "faq": "سؤال", "objection": "اعتراض", "strategy": "استراتيجية", "competitor": "منافس", "segment": "شريحة", "icp": "عميل مثالي", "source": "مصدر", "chunk": "معرفة" },
+  "status": {
+    "approved": "معتمد", "pending": "يحتاج اعتماد", "rejected": "مرفوض", "ready": "جاهز", "needs_info": "يحتاج معلومات", "outdated": "قديم", "empty": "فارغ", "complete": "مكتمل", "weak": "ضعيف",
+    "healthy": "سليم", "stale": "يحتاج تحديث", "failed": "فشل", "paused": "متوقف", "processing": "قيد المعالجة", "suggested": "مقترح", "missing": "ناقص", "answered": "مُجاب", "needs_review": "يحتاج مراجعة",
+    "DRAFT": "مسودة", "REVIEW": "قيد المراجعة", "APPROVED": "معتمدة", "ARCHIVED": "مؤرشفة", "UPLOADED": "تم الرفع", "PARSING": "تحليل الملف", "EXTRACTING": "الاستخراج", "IMPORTED": "تم الاستيراد", "FAILED": "فشل", "REVIEW_REQUIRED": "تحتاج مراجعة",
+    "active": "نشط", "draft": "مسودة", "retired": "متوقف", "create": "إنشاء", "update": "تعديل", "delete": "حذف", "approve": "اعتماد", "reject": "رفض"
+  },
+  "sourceKinds": { "manual": "يدوي", "crm": "CRM", "website": "الموقع", "document": "مستند", "public_web": "ويب عام", "ai": "استنتاج ذكاء اصطناعي", "template": "قالب", "rules": "قواعد" },
+  "options": { "draft_only": "مسودة فقط", "auto_allowed": "الرد التلقائي مسموح", "B2B": "B2B", "B2C": "B2C", "business": "الأعمال", "marketing": "التسويق", "sales": "المبيعات", "content": "المحتوى", "retention": "الاحتفاظ بالعملاء", "SERVICE": "خدمة", "PRODUCT": "منتج", "active": "نشط", "draft": "مسودة", "retired": "متوقف" },
+  "add": { "faq": "أضف سؤالًا", "objection": "أضف اعتراضًا", "competitor": "أضف منافسًا", "segment": "أضف شريحة", "icp": "أضف عميلًا مثاليًا", "strategy": "أضف استراتيجية", "offering": "أضف منتجًا / خدمة" },
+  "edit_faq": "تعديل السؤال", "edit_objection": "تعديل الاعتراض", "edit_competitor": "تعديل المنافس", "edit_segment": "تعديل الشريحة", "edit_icp": "تعديل العميل المثالي", "edit_strategy": "تعديل الاستراتيجية", "edit_offering": "تعديل المنتج / الخدمة",
+  "fields": {
+    "profile": { "name": "اسم الشركة", "industry": "المجال", "markets": "السوق", "countries": "الدول", "languages": "اللغات", "businessModel": "نموذج العمل", "website": "الموقع", "description": "الوصف", "mission": "الرسالة", "vision": "الرؤية", "valueProps": "القيمة المقدمة", "whyChooseUs": "لماذا يختارنا العملاء", "differentiators": "ما يميزنا", "brandPromise": "وعد العلامة" },
+    "offering": { "type": "النوع", "name": "الاسم", "category": "الفئة", "description": "الوصف", "targetCustomer": "العميل المستهدف", "problemSolved": "المشكلة التي يحلها", "benefits": "الفوائد", "features": "المزايا", "priceText": "السعر (إن وُجد)", "currency": "العملة", "deliveryModel": "طريقة التقديم", "salesCycle": "دورة البيع", "upsell": "فرص البيع الأعلى", "crossSell": "البيع المتقاطع", "objections": "الاعتراضات الشائعة", "proofPoints": "أدلة الإثبات", "caseStudies": "دراسات الحالة", "status": "الحالة" },
+    "faq": { "question": "السؤال", "answer": "الإجابة", "category": "التصنيف", "audience": "الجمهور", "channel": "القناة" },
+    "objection": { "objection": "الاعتراض", "response": "الرد", "proof": "الدليل الداعم", "automation": "الأتمتة المسموحة" },
+    "competitor": { "name": "الاسم", "website": "الموقع", "positioning": "التموضع", "services": "الخدمات", "pricing": "الأسعار (إن كانت معلنة)", "strengths": "نقاط القوة", "weaknesses": "نقاط الضعف", "contentThemes": "محاور المحتوى", "channels": "القنوات", "notes": "ملاحظات" },
+    "segment": { "name": "الاسم", "definition": "التعريف", "notes": "ملاحظات" },
+    "icp": { "kind": "النوع", "name": "الاسم", "industry": "المجال", "companySize": "حجم الشركة", "location": "الموقع", "budget": "الميزانية", "painPoints": "نقاط الألم", "buyingTriggers": "محفزات الشراء", "decisionMaker": "صاحب القرار", "objections": "اعتراضات الشراء", "salesCycle": "دورة البيع", "channels": "أفضل القنوات" },
+    "strategy": { "type": "النوع", "title": "العنوان", "objective": "الهدف", "targetAudience": "الجمهور المستهدف", "positioning": "التموضع", "channels": "القنوات", "kpis": "مؤشرات الأداء", "initiatives": "المبادرات", "risks": "المخاطر", "timeline": "الجدول الزمني", "owner": "المسؤول" },
+    "sales": { "playbook": "دليل المبيعات", "qualificationQuestions": "أسئلة التأهيل", "discoveryQuestions": "أسئلة الاستكشاف", "pricingRules": "قواعد التسعير", "discountRules": "قواعد الخصومات", "proposalRules": "قواعد العروض", "followUpCadence": "إيقاع المتابعة", "redFlags": "علامات الخطر", "escalationRules": "قواعد التصعيد" },
+    "content": { "tone": "النبرة", "voiceTraits": "صوت العلامة", "contentPillars": "محاور المحتوى", "topics": "الموضوعات", "forbiddenClaims": "الادعاءات الممنوعة", "dontSay": "عبارات ممنوعة", "ctaStyle": "أسلوب الدعوة لاتخاذ إجراء", "hashtagRules": "قواعد الوسوم", "imageStyle": "التوجه البصري", "seasonalThemes": "المواسم والمناسبات" }
+  },
+  "hero": { "title": "عقل شركتك، في مكان واحد.", "subtitle": "NOVA تبني فهمًا متجددًا عن نشاطك وعملائك ومنتجاتك واستراتيجيتك — لتستخدمه كل فرق NOVA." },
+  "overall": { "complete": "مكتمل", "ready": "جاهز", "needs_info": "يحتاج معلومات", "weak": "ضعيف" },
+  "quick": { "addSource": "أضف مصدرًا", "importData": "استورد بيانات", "buildStrategy": "ابنِ استراتيجية", "completeInfo": "أكمل المعلومات" },
+  "empty": { "title": "ابدأ ببناء عقل شركتك", "steps": { "website": "أضف موقعك", "products": "أضف المنتجات", "customers": "استورد العملاء", "questions": "أجب على الأسئلة", "strategy": "ابنِ الاستراتيجية" } },
+  "map": { "company": "الشركة", "products": "المنتجات", "customers": "العملاء", "sales": "المبيعات", "content": "المحتوى", "strategy": "الاستراتيجية", "competitors": "السوق" },
+  "overview": {
+    "statsTitle": "ما تعرفه NOVA",
+    "stats": { "sources": "المصادر", "lastRefresh": "آخر تحديث", "products": "المنتجات والخدمات", "segments": "شرائح العملاء", "faqs": "الأسئلة الشائعة", "strategies": "استراتيجيات معتمدة", "customers": "العملاء (CRM)", "documents": "المستندات", "websitePages": "صفحات الموقع" },
+    "pending": "بانتظارك: {facts} حقائق، {faqs} أسئلة، و{segments} شرائح مقترحة.",
+    "missingTitle": "ما الذي ينقص عقل الشركة؟",
+    "nothingMissing": "لا ينقصه شيء مهم."
+  },
+  "missing": {
+    "industry": "لم تحدد المجال", "description": "لا يوجد وصف للشركة", "market": "لم تحدد السوق أو الدول", "value_proposition": "لا توجد قيمة مقدمة", "differentiators": "لم تحدد ما يميزك",
+    "qualification_questions": "لا توجد أسئلة تأهيل", "pricing_rules": "لا توجد قواعد تسعير", "discount_rules": "لا توجد قواعد خصومات", "objections": "لا توجد اعتراضات بيع",
+    "tone": "لم تحدد نبرة العلامة", "pillars": "لا توجد محاور محتوى", "forbidden_claims": "لا توجد ادعاءات ممنوعة", "cta_style": "لم تحدد أسلوب الدعوة لاتخاذ إجراء",
+    "segments": "لا توجد شرائح عملاء", "icp": "لا يوجد ملف العميل المثالي", "customer_data": "لا توجد بيانات عملاء",
+    "strategy_needs_approval": "مسودة استراتيجية بانتظار الاعتماد", "no_strategy": "لا توجد استراتيجية بعد",
+    "product_details": "بعض المنتجات بدون وصف أو عميل مستهدف أو فوائد", "more_faqs": "أقل من 3 أسئلة شائعة معتمدة"
+  },
+  "areas": { "profile": "ملف الشركة", "products": "المنتجات", "customers": "العملاء", "sales": "معرفة المبيعات", "content": "معرفة المحتوى", "faqs": "الأسئلة الشائعة", "strategy": "الاستراتيجية", "competitors": "المنافسون" },
+  "health": {
+    "title": "صحة العقل", "description": "كل قسم إما جاهز أو يحتاج معلومات أو قديم أو فارغ — حسب ما هو موجود فعلًا في العقل.",
+    "outdatedCompetitors": "{count} منافسين لم يتم التحقق منهم منذ 6 أشهر.", "emptyHint": "لا يوجد شيء هنا بعد.", "readyHint": "كل ما تحتاجه NOVA موجود.",
+    "staleSources": "مصادر تحتاج تحديث", "failedSources": "مصادر فشلت", "pendingApprovals": "بانتظار الاعتماد",
+    "refreshNote": "لا يتم تحديث المصادر تلقائيًا — حدّثها من مصادر المعرفة عندما تريد."
+  },
+  "profile": { "description": "بيانات الشركة المنظمة. كل حقل يوضح متى تم تحديثه ومن أي مصدر." },
+  "facts": {
+    "title": "الحقائق المنظمة", "description": "حقائق أساسية تقرأها NOVA قبل أي شيء آخر. الحقائق الحرجة (الأسعار، الخصومات، القانونية، السياسات) المستخرجة آليًا تنتظر الاعتماد.",
+    "key": "المفتاح", "keyPlaceholder": "مثال: market.saudi", "value": "القيمة", "category": "التصنيف", "add": "أضف حقيقة", "empty": "لا توجد حقائق بعد.", "critical": "حرج", "confidence": "الثقة {value}%"
+  },
+  "factCategories": { "general": "عام", "pricing": "تسعير", "discount": "خصومات", "policy": "سياسة", "legal": "قانوني", "positioning": "تموضع", "proof": "إثبات", "catalog": "كتالوج", "strategy": "استراتيجية", "customer_language": "لغة العملاء", "question": "إجابة", "reputation": "السمعة" },
+  "products": { "description": "ليست مجرد اسم وسعر: لمن هو، والمشكلة التي يحلها، وفوائده، واعتراضاته، وأدلة إثباته.", "empty": "لا توجد منتجات أو خدمات بعد." },
+  "sales": {
+    "playbookTitle": "دليل المبيعات", "description": "ما يتبعه وكيل المبيعات: التأهيل، قواعد التسعير والخصومات، إيقاع المتابعة، علامات الخطر والتصعيد.",
+    "objectionsTitle": "مكتبة الاعتراضات", "objectionsDescription": "اعتراضات مع ردود ودلائل معتمدة. الرد التلقائي فقط حيث تسمح.", "objectionsEmpty": "لا توجد اعتراضات بعد.",
+    "stagesTitle": "مراحل الصفقة", "stagesDescription": "من خط المبيعات — العقل يشير إليها ولا ينسخها.", "openPipeline": "فتح خط المبيعات"
+  },
+  "content": { "description": "يستخدمها استوديو المحتوى: الصوت، المحاور، الموضوعات، الادعاءات الممنوعة، أسلوب الدعوة لاتخاذ إجراء والوسوم.", "openBrandKit": "الهوية البصرية", "competitorTopics": "موضوعات المنافسين", "competitorTopicsHint": "من المنافسين الذين أضفتهم.", "noCompetitorTopics": "أضف منافسين بمحاور محتوى لتظهر هنا." },
+  "faq": { "description": "وكيل الدعم يجيب فقط من الأسئلة المعتمدة.", "import": "استيراد أسئلة", "pendingNote": "{count, plural, one {سؤال واحد بانتظار} two {سؤالان بانتظار} few {# أسئلة بانتظار} other {# سؤالًا بانتظار}} الاعتماد.", "empty": "لا توجد أسئلة شائعة بعد." },
+  "customers": {
+    "overviewTitle": "نظرة على العملاء", "overviewDescription": "مجمّعة من الـCRM — سجلات العملاء تبقى في الـCRM.", "import": "استورد العملاء", "noData": "لا يوجد عملاء بعد. استورد ملف CSV/Excel أو أضف عملاء من المبيعات.", "notEnoughData": "بيانات غير كافية",
+    "stats": { "total": "العملاء", "repeat": "العملاء المتكررون", "avgSpend": "متوسط الإنفاق", "b2b": "عملاء B2B" },
+    "topCities": "أهم المواقع", "topCategories": "أهم الفئات", "coverage": "تغطية البيانات: المدينة {city}% · الإنفاق {spend}% · الطلبات {orders}% · الفئة {category}%",
+    "insightsTitle": "رؤى العملاء", "insightsDescription": "محسوبة من بيانات مجمّعة، وفقط عندما تدعمها البيانات.", "noInsights": "لا توجد رؤى موثوقة بعد — نحتاج بيانات أكثر.",
+    "segmentsTitle": "شرائح العملاء", "segmentsDescription": "تعريفات على عملاء الـCRM. قد تقترح NOVA شرائح، وأنت من يعتمدها.", "segmentsEmpty": "لا توجد شرائح بعد.",
+    "suggest": "اقترح شرائح", "suggested": "تمت إضافة اقتراحات للمراجعة", "size": "{count} عميل", "criteria": "المعايير",
+    "criteriaFields": { "city": "المدينة", "minOrders": "أقل عدد طلبات", "category": "الفئة", "tag": "الوسم" }, "applyCriteria": "تطبيق المعايير",
+    "icpTitle": "ملف العميل المثالي", "icpDescription": "ملفات B2B وشخصيات B2C التي تستهدفها الفرق.", "icpEmpty": "لا يوجد ملف عميل مثالي بعد."
+  },
+  "insights": {
+    "city_category": "عملاء {city} يشترون {category} أكثر ({share}% مقابل {overall}% إجمالًا).",
+    "repeat_share": "{repeat} عملاء متكررون — {share}% من العملاء الذين لديهم طلبات.",
+    "top_city": "{share}% من العملاء في {city}."
+  },
+  "strategy": {
+    "wizardTitle": "ابنِ استراتيجية مع NOVA", "wizardDescription": "تستخدم NOVA إجاباتك ومنتجاتك وشرائحك ونتائجك لصياغة مسودة استراتيجية.",
+    "type": "نوع الاستراتيجية", "build": "ابنِ استراتيجية", "buildFromData": "ابنِ استراتيجية من بياناتي", "drafted": "تم إنشاء مسودة — راجعها قبل الاعتماد", "draftNote": "لا تُعتمد المسودات تلقائيًا أبدًا: مسودة ← مراجعة ← اعتماد.",
+    "listTitle": "الاستراتيجيات", "empty": "لا توجد استراتيجيات بعد.", "toReview": "إرسال للمراجعة", "backToDraft": "إعادة لمسودة", "archive": "أرشفة",
+    "questionsTitle": "الأسئلة الاستراتيجية", "questionsProgress": "تمت الإجابة على {answered} من {total}. NOVA تسأل فقط عمّا ينقص.", "nextQuestion": "السؤال التالي من NOVA", "saveAnswer": "حفظ الإجابة"
+  },
+  "questionGroups": { "business": "الأعمال", "customers": "العملاء", "sales": "المبيعات", "marketing": "التسويق", "content": "المحتوى", "operations": "العمليات" },
+  "questions": {
+    "goal_90d": "ما هدفك خلال 90 يومًا؟", "focus_product": "ما أهم منتج تريد دفعه؟", "biggest_challenge": "ما أكبر تحدٍّ يواجهك؟", "business_model": "كيف تحقق الشركة دخلها؟",
+    "best_customer": "من أهم عميل لديك؟", "customer_value": "ما متوسط قيمة العميل؟", "why_choose_us": "لماذا يختارك العملاء؟",
+    "close_process": "كيف تُغلق الصفقات؟", "sales_cycle": "كم تستغرق عملية البيع عادة؟", "discount_policy": "متى يُسمح بالخصومات؟",
+    "marketing_budget": "ما ميزانية التسويق؟", "current_channels": "ما القنوات التي تستخدمها حاليًا؟", "competitors": "من أهم منافسيك؟",
+    "content_goal": "ما الذي يجب أن يحققه محتواك؟", "tone": "كيف يجب أن يبدو صوت علامتك؟", "team_capacity": "من ينفذ العمل وما طاقة الفريق؟", "delivery_time": "كم يستغرق التسليم؟"
+  },
+  "market": {
+    "importTitle": "أضف منافسًا من رابط", "importDescription": "تقرأ NOVA صفحة عامة واحدة (العنوان، الوصف، العناوين، الأسعار المعلنة، روابط التواصل). بدون تسجيل دخول وبدون زحف.",
+    "url": "موقع المنافس", "importButton": "أضف المنافس", "imported": "تمت إضافة المنافس — راجعه وأكمله",
+    "description": "المنافسون الذين أضفتهم. تقارن NOVA بهم فقط.", "empty": "لا يوجد منافسون بعد.",
+    "analysisTitle": "تحليل المنافسين", "basis": "تحليل مبني على المصادر المضافة.", "analyze": "قارن", "basisLabel": "تحليل مبني على المصادر المضافة — وليس على السوق كله.", "noAiAnalysis": "المقارنة بالذكاء الاصطناعي غير مُعدة — الجدول أعلاه مبني من بياناتك.",
+    "analysis": { "positioning": "التموضع", "offers": "هيكل العروض", "messaging": "الرسائل", "contentGaps": "محاور المحتوى" }
+  },
+  "sources": {
+    "description": "كل ما يقرأه العقل. المصادر المتوقفة تُحفظ لكن لا تُستخدم ولا تُحدَّث.", "empty": "لا توجد مصادر بعد.", "chunks": "{count, plural, one {جزء واحد} two {جزءان} few {# أجزاء} other {# جزءًا}}", "usedBy": "يستخدمه {agents}",
+    "refreshing": "بدأ التحديث", "refresh": "تحديث", "resume": "استئناف", "pause": "إيقاف", "type": "النوع", "lastSync": "آخر مزامنة", "language": "اللغة", "usedByLabel": "يستخدمه",
+    "raw": "المصدر الخام", "extractedFacts": "الحقائق المستخرجة", "documents": "{count, plural, one {مستند واحد} two {مستندان} few {# مستندات} other {# مستندًا}}", "chunksTitle": "{count, plural, one {جزء واحد} two {جزءان} few {# أجزاء} other {# جزءًا}}", "chunksNote": "10 في كل صفحة."
+  },
+  "sourceTypes": { "WEBSITE": "موقع", "DOCUMENT": "مستند", "MANUAL": "يدوي", "FAQ": "أسئلة شائعة", "PRODUCT": "منتج", "SERVICE": "خدمة", "PRICING": "تسعير", "POLICY": "سياسة", "CASE_STUDY": "دراسة حالة", "STORE": "متجر", "SPREADSHEET": "جدول بيانات", "CRM": "CRM", "API": "API" },
+  "agents": { "content": "المحتوى", "sales": "المبيعات", "support": "الدعم", "command": "مركز الأوامر", "analytics": "التحليلات" },
+  "imports": {
+    "title": "استيراد البيانات", "description": "التحليل المحلي أولًا. لا يدخل شيء إلى العقل قبل مراجعتك.",
+    "cards": { "website": "موقع", "store": "متجر", "sheet": "Excel / CSV", "document": "PDF / مستند" },
+    "cardsHint": { "website": "الصفحات، الخدمات، الأسئلة، السياسات", "store": "الكتالوج العام، الأسعار، التقييمات", "sheet": "العملاء ← الـCRM (مع معاينة)", "document": "PDF و DOCX و TXT" },
+    "uploading": "جارٍ الرفع…", "jobsTitle": "عمليات الاستيراد", "noJobs": "لا توجد عمليات استيراد بعد.",
+    "kinds": { "website": "موقع", "store": "متجر", "csv": "CSV", "excel": "Excel", "pdf": "PDF", "docx": "مستند Word", "txt": "نص" },
+    "review": "مراجعة", "storeNote": "تُقرأ البيانات المتاحة للعامة فقط. بيانات العملاء والطلبات تتطلب ربطًا رسميًا بالمنصة.", "websiteNote": "تقرأ NOVA الصفحة الرئيسية وبعض الصفحات التي تصف النشاط.",
+    "start": "ابدأ", "url": "الرابط", "done": "تمت الإضافة إلى العقل",
+    "previewButton": "معاينة", "importCustomers": "{count, plural, =0 {استيراد} one {استيراد عميل واحد} two {استيراد عميلين} few {استيراد # عملاء} other {استيراد # عميلًا}}", "addToBrain": "{count, plural, =0 {أضف إلى العقل} one {أضف عنصرًا واحدًا} two {أضف عنصرين} few {أضف # عناصر} other {أضف # عنصرًا}}",
+    "mapHelp": "{count} صفًا. طابق كل عمود مع حقل، ثم عاين المكررات قبل الاستيراد.", "column": "العمود", "sample": "مثال", "field": "الحقل", "skip": "— تخطي —",
+    "duplicateRules": "تُكتشف المكررات برقم العميل ثم البريد ثم الهاتف. المكررات والصفوف غير الصالحة تُتخطى ولا تُدمج.",
+    "previewStats": { "ok": "جديد", "duplicates": "مكرر", "invalid": "غير صالح" },
+    "piiNote": "العملاء يذهبون إلى الـCRM. فقط الرؤى المجمّعة وغير الشخصية تُضاف إلى بحث العقل.",
+    "storeCustomers": "لا تُقرأ بيانات العملاء والطلبات من المتجر — يتطلب ذلك ربطًا رسميًا.",
+    "extractedText": "النص المستخرج", "found": "وجدنا:", "foundItem": "{count} {type}", "nothingFound": "لم نجد شيئًا لإضافته.",
+    "aiExtracted": "ذكاء اصطناعي", "criticalNote": "العناصر الحرجة (الأسعار، السياسات، الخصومات) تُضاف كمعلقة وتحتاج اعتمادًا قبل أن يستخدمها الوكلاء."
+  },
+  "candidateTypes": { "offering": "منتجات وخدمات", "faq": "أسئلة شائعة", "policy": "سياسات", "pricing": "أسعار", "case_study": "دراسات حالة", "segment": "شرائح عملاء", "objection": "اعتراضات", "strategy_note": "ملاحظات استراتيجية", "fact": "حقائق", "profile": "وصف الشركة" }
+}
