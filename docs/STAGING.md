@@ -4,6 +4,10 @@ Staging is where the live provider validations happen: OAuth on HTTPS, real emai
 
 ## Assumptions
 
+- **`APP_ENV=staging`.** Staging enforces the same callback audit as production:
+  - OAuth redirects that aren't public `https://` are refused before any provider is contacted;
+  - the startup log lists every callback that isn't HTTPS;
+  - `/admin/providers` shows them as blockers.
 - **Public HTTPS origin.** For example `https://staging.example.com`, with a valid certificate. `APP_URL` is exactly that origin. Every OAuth redirect, email link and webhook is derived from it.
 - **No localhost.** Meta, LinkedIn, TikTok, Google and Microsoft reject or mis-handle `http://` and `localhost` callbacks outside their development modes. `/admin/providers` → *Callback & URL matrix* flags any URL that is not public HTTPS.
 - **Reverse proxy in front.** Set `TRUST_PROXY` to match it (see DEPLOYMENT.md).
@@ -28,7 +32,7 @@ Register each URL exactly as shown: same scheme, host and path, no trailing slas
 | Auth | Sign in with Google | `https://staging.example.com/api/auth/google/callback` | Same Google OAuth client |
 | Auth | Magic link | `https://staging.example.com/magic` | Nothing to register (emails use `APP_URL`) |
 | Webhook | WhatsApp Cloud API | `https://staging.example.com/api/webhooks/whatsapp` | Meta App → WhatsApp → Configuration (+ `WHATSAPP_VERIFY_TOKEN`), subscribe to `messages` |
-| Webhook | Stripe | `https://staging.example.com/api/webhooks/stripe` | Stripe (test mode) → Webhooks. Events: see `.env.example` |
+| Webhook | Stripe | `https://staging.example.com/api/webhooks/stripe` (actual route; not `/api/billing/stripe/webhook`) | Stripe (test mode) → Webhooks. Events: see `.env.example` |
 | Legal | Privacy / Terms / Data deletion | `/privacy`, `/terms`, `/data-deletion` | Meta / LinkedIn / TikTok / Google app settings (required for app review) |
 
 Also add the staging domain to:
@@ -60,3 +64,7 @@ Run these in order and record each result. `/admin/providers` records every vali
 10. [ ] `/admin/incidents` has no unexpected failures after the run. Sentry receives a test error if `SENTRY_DSN` is set.
 
 Only when every row is checked and the blockers in the final report are closed should anyone discuss a production launch.
+
+## Readiness & live tests
+
+See [LIVE-READINESS.md](LIVE-READINESS.md) for the provider table, the manual live tests (with their confirmations) and the exact next actions.
