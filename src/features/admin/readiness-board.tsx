@@ -48,10 +48,10 @@ export function ReadinessBoard({ rows }: { rows: ReadinessRow[] }) {
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
-        <table className="w-full min-w-[980px] text-sm" data-testid="readiness">
+        <table className="w-full min-w-[1320px] text-sm" data-testid="readiness">
           <thead className="border-b border-line bg-surface-2 text-xs text-ink-3">
             <tr>
-              {["provider", "configured", "credentials", "accounts", "lastSuccess", "lastError", "capabilities", "pending", "liveTested", ""].map((h) => (
+              {["provider", "configured", "format", "credentials", "callbacks", "accounts", "lastSuccess", "lastError", "capabilities", "pending", "liveTested", "blockers", ""].map((h) => (
                 <th key={h} className="px-3 py-2.5 text-start font-medium">{h ? t(`cols.${h}`) : ""}</th>
               ))}
             </tr>
@@ -61,14 +61,31 @@ export function ReadinessBoard({ rows }: { rows: ReadinessRow[] }) {
               <tr key={r.provider} data-provider={r.provider}>
                 <td className="px-3 py-3 font-semibold">{NAMES[r.provider]}</td>
                 <td className="px-3 py-3"><YesNo v={r.configured} yes={t("yes")} no={t("no")} unknown="—" /></td>
+                <td className="px-3 py-3">
+                  <YesNo v={r.formatValid} yes={t("formatOk")} no={t("formatBad")} unknown="—" />
+                  {r.formatProblems.length > 0 && <ul className="mt-1 max-w-[200px] space-y-0.5 font-mono text-[10px] text-danger" dir="ltr">{r.formatProblems.map((p) => <li key={p}>{p}</li>)}</ul>}
+                </td>
                 <td className="px-3 py-3"><YesNo v={r.credentialsValid} yes={t("valid")} no={t("invalid")} unknown={t("notChecked")} /></td>
+                <td className="px-3 py-3 text-xs">
+                  {r.callbacks.entries.length === 0 ? "—" : r.callbacks.ok ? <span className="text-success">HTTPS</span> : (
+                    <span className={r.callbacks.blockers.length ? "text-danger" : "text-warning"}>{r.callbacks.blockers.length ? t("callbackBlocked") : t("callbackDevOnly")}</span>
+                  )}
+                </td>
                 <td className="px-3 py-3 tabular">{r.liveAccounts ?? "—"}</td>
-                <td className="px-3 py-3 text-xs text-ink-3">{r.lastSuccessAt ? format.dateTime(new Date(r.lastSuccessAt), { dateStyle: "short", timeStyle: "short" }) : "—"}</td>
+                <td className="px-3 py-3 text-xs text-ink-3">
+                  {r.lastSuccessAt ? format.dateTime(new Date(r.lastSuccessAt), { dateStyle: "short", timeStyle: "short" }) : "—"}
+                  {r.lastValidationAt && <div className="text-[10px] text-ink-4">{t("lastRun")}: {format.dateTime(new Date(r.lastValidationAt), { dateStyle: "short", timeStyle: "short" })}</div>}
+                </td>
                 <td className="max-w-[240px] px-3 py-3 text-xs">
                   {r.lastError ? (
                     <details>
                       <summary className="cursor-pointer text-danger">{r.lastError.check}</summary>
                       <p className="mt-1 break-words font-mono text-[11px] text-ink-2" dir="ltr">{r.lastError.detail ?? "—"}</p>
+                      <p className="mt-1 font-mono text-[10px] text-ink-4" dir="ltr">
+                        {r.lastError.httpStatus != null && <>HTTP {r.lastError.httpStatus} · </>}
+                        {r.lastError.errorCode && <>code {r.lastError.errorCode} · </>}
+                        {format.dateTime(new Date(r.lastError.at), { dateStyle: "short", timeStyle: "medium" })} · id {r.lastError.correlationId}
+                      </p>
                     </details>
                   ) : "—"}
                 </td>
@@ -77,9 +94,14 @@ export function ReadinessBoard({ rows }: { rows: ReadinessRow[] }) {
                 </td>
                 <td className="max-w-[260px] px-3 py-3 text-xs text-ink-2">{r.pendingApproval.length ? <ul className="list-disc space-y-1 ps-4">{r.pendingApproval.map((p) => <li key={p}>{p}</li>)}</ul> : "—"}</td>
                 <td className="px-3 py-3">
-                  <Badge tone={r.liveTested ? "success" : "outline"}>{r.liveTested ? t("yes") : t("no")}</Badge>
+                  <Badge tone={r.liveTested ? "success" : "outline"} data-live-tested={r.liveTested ? "yes" : "no"}>{r.liveTested ? t("yes") : t("no")}</Badge>
                   {r.liveTestedChecks.length > 0 && <div className="mt-1 text-[11px] text-ink-4">{r.liveTestedChecks.join(", ")}</div>}
                   {r.note && <div className="mt-1 text-[11px] text-ink-4">{t(`notes.${r.note}` as "notes.local_storage")}</div>}
+                </td>
+                <td className="px-3 py-3">
+                  {r.blockers.length === 0 ? <Badge tone="success">{t("noBlockers")}</Badge> : (
+                    <ul className="max-w-[200px] space-y-0.5 text-[11px] text-danger" data-blockers={r.blockers.join(",")}>{r.blockers.map((b) => <li key={b}>• {t(`blockers.${b}` as "blockers.missing_credentials")}</li>)}</ul>
+                  )}
                 </td>
                 <td className="px-3 py-3 text-end">
                   {r.provider === "storage" ? (

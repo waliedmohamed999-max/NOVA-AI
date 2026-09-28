@@ -16,6 +16,10 @@ import { oauthDiagnostics } from "@/server/admin/oauth-diagnostics";
 import { providerReadiness } from "@/server/admin/readiness";
 import { ReadinessBoard } from "@/features/admin/readiness-board";
 import { CallbackMatrix } from "@/features/admin/callback-matrix";
+import { LiveTestsPanel } from "@/features/admin/live-tests-panel";
+import { CALENDAR_TEST_CONFIRMATION, WHATSAPP_SEND_CONFIRMATION, workspaceAccountDiagnostics } from "@/server/admin/live-tests";
+import { getMailer } from "@/server/email/mailer";
+import { whatsappStatus } from "@/server/whatsapp/cloud-api";
 import { callbackMatrix } from "@/server/integrations/registry";
 
 export const metadata: Metadata = { title: "Admin · Providers" };
@@ -47,6 +51,19 @@ export default async function AdminProvidersPage() {
           <p className="max-w-3xl text-sm text-ink-3">{tr("intro")}</p>
         </div>
         <ReadinessBoard rows={await providerReadiness()} />
+      </section>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">{tr("liveTitle")}</h2>
+          <p className="max-w-3xl text-sm text-ink-3">{tr("liveIntro")}</p>
+        </div>
+        <LiveTestsPanel
+          emailProvider={{ name: getMailer().name, configured: getMailer().configured }}
+          accounts={tenant ? await workspaceAccountDiagnostics({ organizationId: tenant.organization.id, workspaceId: tenant.workspace.id }) : []}
+          whatsapp={{ configured: whatsappStatus().configured, testRecipient: process.env.WHATSAPP_TEST_RECIPIENT?.trim() ? `…${process.env.WHATSAPP_TEST_RECIPIENT.replace(/[^\d]/g, "").slice(-4)}` : null }}
+          stripeMode={process.env.STRIPE_SECRET_KEY?.trim() ? (process.env.STRIPE_SECRET_KEY.includes("_live_") ? "live" : "test") : null}
+          confirmations={{ whatsapp: WHATSAPP_SEND_CONFIRMATION, calendar: CALENDAR_TEST_CONFIRMATION }}
+        />
       </section>
       <div className="space-y-5">
         <p className="max-w-2xl text-sm text-ink-3">{t("intro")}</p>

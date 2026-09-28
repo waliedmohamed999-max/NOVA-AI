@@ -4,7 +4,11 @@ import { logger } from "../logger";
 import { getMailer } from "../email/mailer";
 import { storage, supportsPresign } from "../storage";
 import { whatsappStatus } from "../whatsapp/cloud-api";
+import { callbackMatrix, type CallbackEntry } from "../integrations/registry";
+import { metaCredentialProblem } from "../integrations/providers/meta";
+import { instagramCredentialProblem } from "../integrations/providers/instagram";
 import type { Provider } from "@/generated/prisma/enums";
+import { appEnvironment } from "../env";
 
 /**
  * Provider readiness for the platform admin (/admin/providers). Every "valid" / "live tested" claim is backed
@@ -22,43 +26,169 @@ type Static = {
   pendingApproval: string[];
   /** Checks that count as "live tested" — a real call that exercised the product feature. */
   liveChecks: string[];
+  /** Callback/webhook matrix entries this provider depends on. */
+  callbacks: string[];
 };
 
 const clean = (v: string | undefined) => v?.trim().replace(/^["']|["']$/g, "") ?? "";
 const has = (...keys: string[]) => keys.every((k) => clean(process.env[k]));
 
 export const PROVIDER_INFO: Record<ReadinessProvider, Static> = {
-  openai: { env: ["OPENAI_API_KEY"], integration: null, capabilities: ["text", "image", "image_edit"], pendingApproval: [], liveChecks: ["generate_text", "generate_image", "edit_image"] },
-  linkedin: { env: ["LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"], integration: ["LINKEDIN"], capabilities: ["profile", "member_publishing", "organization_publishing"], pendingApproval: ["LinkedIn Community Management API (Company Page posting + stats)"], liveChecks: ["publish_test_post"] },
-  instagram: { env: ["INSTAGRAM_APP_ID", "INSTAGRAM_APP_SECRET"], integration: ["INSTAGRAM"], capabilities: ["profile", "publishing", "insights", "comments", "messages"], pendingApproval: ["Meta App Review: instagram_business_content_publish / manage_insights / manage_comments / manage_messages (Advanced Access)"], liveChecks: ["connection", "publish_test_post", "insights", "comments", "messages"] },
-  facebook: { env: ["META_APP_ID", "META_APP_SECRET"], integration: ["FACEBOOK"], capabilities: ["identity", "pages", "page_publishing", "page_insights"], pendingApproval: ["Meta: enable the Page-management use case (pages_show_list, pages_manage_posts, pages_read_engagement) + App Review"], liveChecks: ["connection", "publish_test_post"] },
-  tiktok: { env: ["TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_SECRET"], integration: ["TIKTOK"], capabilities: ["profile", "video_publishing", "video_metrics"], pendingApproval: ["TikTok Content Posting API audit (until then posts are private-only)"], liveChecks: ["connection"] },
-  google: { env: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"], integration: ["GOOGLE"], capabilities: ["identity", "email_send", "calendar"], pendingApproval: ["Google OAuth verification for gmail.send / calendar scopes (sensitive scopes; unverified apps are limited to test users)"], liveChecks: ["connection", "send_email", "calendar"] },
-  microsoft: { env: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET"], integration: ["MICROSOFT"], capabilities: ["identity", "email_send", "calendar"], pendingApproval: ["Microsoft publisher verification (recommended for multi-tenant apps)"], liveChecks: ["connection", "send_email", "calendar"] },
-  whatsapp: { env: ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"], integration: null, capabilities: ["inbound", "outbound_24h", "templates", "status_webhooks"], pendingApproval: ["Meta Business verification + WhatsApp display name approval", "Message templates approved by Meta"], liveChecks: ["send_message", "webhook_received"] },
-  email: { env: [], integration: null, capabilities: ["send", "templates"], pendingApproval: [], liveChecks: ["send_test_email"] },
-  storage: { env: [], integration: null, capabilities: ["upload", "signed_url", "delete"], pendingApproval: [], liveChecks: ["roundtrip"] },
-  stripe: { env: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"], integration: null, capabilities: ["checkout", "portal", "subscription_sync", "invoices"], pendingApproval: [], liveChecks: ["checkout_session"] },
+  openai: { env: ["OPENAI_API_KEY"], integration: null, capabilities: ["text", "image", "image_edit"], pendingApproval: [], liveChecks: ["generate_text", "generate_image", "edit_image"], callbacks: [] },
+  linkedin: { env: ["LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"], integration: ["LINKEDIN"], capabilities: ["profile", "member_publishing", "organization_publishing"], pendingApproval: ["LinkedIn Community Management API (Company Page posting + stats)"], liveChecks: ["publish_test_post"], callbacks: ["linkedin"] },
+  instagram: { env: ["INSTAGRAM_APP_ID", "INSTAGRAM_APP_SECRET"], integration: ["INSTAGRAM"], capabilities: ["profile", "publishing", "insights", "comments", "messages"], pendingApproval: ["Meta App Review: instagram_business_content_publish / manage_insights / manage_comments / manage_messages (Advanced Access)"], liveChecks: ["connection", "publish_test_post", "insights", "comments", "messages"], callbacks: ["instagram"] },
+  facebook: { env: ["META_APP_ID", "META_APP_SECRET"], integration: ["FACEBOOK"], capabilities: ["identity", "pages", "page_publishing", "page_insights"], pendingApproval: ["Meta: enable the Page-management use case (pages_show_list, pages_manage_posts, pages_read_engagement) + App Review"], // Identity-only logins do not count: live = a manageable Page reached, or a published test post.
+    liveChecks: ["pages_connection", "publish_test_post"], callbacks: ["meta"] },
+  tiktok: { env: ["TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_SECRET"], integration: ["TIKTOK"], capabilities: ["profile", "video_publishing", "video_metrics"], pendingApproval: ["TikTok Content Posting API audit (until then posts are private-only)"], liveChecks: ["connection"], callbacks: ["tiktok"] },
+  google: { env: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"], integration: ["GOOGLE"], capabilities: ["identity", "email_send", "calendar_read", "calendar_write"], pendingApproval: ["Google OAuth verification for gmail.send / calendar scopes (sensitive scopes; unverified apps are limited to test users)"], liveChecks: ["connection", "send_email", "calendar_availability", "calendar_meeting"], callbacks: ["google", "google_sign_in"] },
+  microsoft: { env: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET"], integration: ["MICROSOFT"], capabilities: ["identity", "email_send", "calendar_read", "calendar_write"], pendingApproval: ["Microsoft publisher verification (recommended for multi-tenant apps)"], liveChecks: ["connection", "send_email", "calendar_availability", "calendar_meeting"], callbacks: ["microsoft"] },
+  whatsapp: { env: ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"], integration: null, capabilities: ["inbound", "outbound_24h", "templates", "status_webhooks"], pendingApproval: ["Meta Business verification + WhatsApp display name approval", "Message templates approved by Meta"], liveChecks: ["connection_test", "send_test"], callbacks: ["whatsapp"] },
+  email: { env: [], integration: null, capabilities: ["send", "templates"], pendingApproval: [], liveChecks: ["send_test_email"], callbacks: ["magic_link"] },
+  storage: { env: [], integration: null, capabilities: ["upload", "signed_url", "delete"], pendingApproval: [], liveChecks: ["roundtrip"], callbacks: [] },
+  stripe: { env: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"], integration: null, capabilities: ["checkout", "portal", "subscription_sync", "invoices"], pendingApproval: [], liveChecks: ["checkout_session", "webhook_received"], callbacks: ["stripe"] },
 };
+
+export { appEnvironment };
 
 export function isConfigured(p: ReadinessProvider) {
   if (p === "email") return getMailer().configured;
-  if (p === "storage") return storage.name !== "local" || process.env.NODE_ENV !== "production";
+  if (p === "storage") return storage.name !== "local" || appEnvironment() === "development";
   if (p === "whatsapp") return whatsappStatus().configured;
   return has(...PROVIDER_INFO[p].env);
+}
+
+// ── Credential format (static, no network) ──
+
+const HEX32 = /^[0-9a-f]{32}$/i;
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Problems in the *shape* of configured values (e.g. a token pasted where a secret belongs). null = nothing configured. */
+export function credentialFormat(p: ReadinessProvider, env: NodeJS.ProcessEnv = process.env): string[] | null {
+  const v = (k: string) => clean(env[k]);
+  const problems: string[] = [];
+  const need = (k: string, re: RegExp, msg: string) => {
+    if (v(k) && !re.test(v(k))) problems.push(`${k}: ${msg}`);
+  };
+  switch (p) {
+    case "openai":
+      if (!v("OPENAI_API_KEY")) return null;
+      need("OPENAI_API_KEY", /^sk-[A-Za-z0-9_-]{20,}$/, "expected an sk-… API key");
+      break;
+    case "linkedin":
+      if (!v("LINKEDIN_CLIENT_ID")) return null;
+      need("LINKEDIN_CLIENT_ID", /^[A-Za-z0-9]{8,20}$/, "expected the app's Client ID");
+      if (!v("LINKEDIN_CLIENT_SECRET")) problems.push("LINKEDIN_CLIENT_SECRET: missing");
+      break;
+    case "facebook": {
+      if (!v("META_APP_ID")) return null;
+      const m = metaCredentialProblem(env);
+      if (m && m !== "missing") problems.push(`META: ${m}`);
+      break;
+    }
+    case "instagram": {
+      if (!v("INSTAGRAM_APP_ID")) return null;
+      const m = instagramCredentialProblem(env);
+      if (m && m !== "missing") problems.push(`INSTAGRAM: ${m}`);
+      break;
+    }
+    case "tiktok":
+      if (!v("TIKTOK_CLIENT_KEY")) return null;
+      need("TIKTOK_CLIENT_KEY", /^[A-Za-z0-9]{10,40}$/, "expected the Client key");
+      break;
+    case "google":
+      if (!v("GOOGLE_CLIENT_ID")) return null;
+      need("GOOGLE_CLIENT_ID", /^[0-9]+-[A-Za-z0-9_]+\.apps\.googleusercontent\.com$/, "expected …apps.googleusercontent.com");
+      if (!v("GOOGLE_CLIENT_SECRET")) problems.push("GOOGLE_CLIENT_SECRET: missing");
+      break;
+    case "microsoft":
+      if (!v("MICROSOFT_CLIENT_ID")) return null;
+      need("MICROSOFT_CLIENT_ID", GUID, "expected the Application (client) ID GUID");
+      if (v("MICROSOFT_TENANT_ID") && !/^(common|organizations|consumers)$/i.test(v("MICROSOFT_TENANT_ID")) && !GUID.test(v("MICROSOFT_TENANT_ID")) && !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(v("MICROSOFT_TENANT_ID"))) {
+        problems.push("MICROSOFT_TENANT_ID: expected common/organizations/consumers, a tenant GUID or domain");
+      }
+      if (GUID.test(v("MICROSOFT_CLIENT_SECRET"))) problems.push("MICROSOFT_CLIENT_SECRET: looks like a secret ID, not the secret value");
+      break;
+    case "whatsapp":
+      if (!v("WHATSAPP_ACCESS_TOKEN")) return null;
+      need("WHATSAPP_ACCESS_TOKEN", /^EAA[A-Za-z0-9]{20,}$/, "expected a system-user access token (EAA…)");
+      need("WHATSAPP_APP_SECRET", HEX32, "expected the 32-character app secret");
+      need("WHATSAPP_PHONE_NUMBER_ID", /^\d{8,25}$/, "expected a numeric phone_number_id");
+      need("WHATSAPP_BUSINESS_ACCOUNT_ID", /^\d{8,25}$/, "expected a numeric WhatsApp Business Account id");
+      if (v("WHATSAPP_VERIFY_TOKEN") && v("WHATSAPP_VERIFY_TOKEN").length < 12) problems.push("WHATSAPP_VERIFY_TOKEN: use at least 12 random characters");
+      break;
+    case "email": {
+      const kind = (v("EMAIL_PROVIDER") || (v("SMTP_HOST") ? "smtp" : v("RESEND_API_KEY") ? "resend" : v("POSTMARK_SERVER_TOKEN") ? "postmark" : "")).toLowerCase();
+      if (!kind) return null;
+      if (!["smtp", "resend", "postmark", "ses"].includes(kind)) problems.push(`EMAIL_PROVIDER: unknown "${kind}"`);
+      if (kind === "resend") need("RESEND_API_KEY", /^re_[A-Za-z0-9_]{10,}$/, "expected re_…");
+      if (kind === "postmark") need("POSTMARK_SERVER_TOKEN", GUID, "expected a server token GUID");
+      if (kind === "smtp" && /^(localhost|127\.0\.0\.1|mailpit)$/i.test(v("SMTP_HOST"))) problems.push("SMTP_HOST: development mailbox (Mailpit) — not a real provider");
+      if (v("EMAIL_FROM") && !/@[^\s>]+\.[^\s>]+/.test(v("EMAIL_FROM"))) problems.push("EMAIL_FROM: no sender address");
+      break;
+    }
+    case "storage":
+      if ((v("STORAGE_DRIVER") || "local") === "local") return appEnvironment(env) === "development" ? [] : ["STORAGE_DRIVER: local disk isn't production storage"];
+      need("S3_BUCKET", /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, "invalid bucket name");
+      if (!v("S3_ACCESS_KEY_ID") || !v("S3_SECRET_ACCESS_KEY")) problems.push("S3 keys: missing");
+      break;
+    case "stripe": {
+      if (!v("STRIPE_SECRET_KEY")) return null;
+      need("STRIPE_SECRET_KEY", /^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/, "expected sk_test_… or sk_live_…");
+      need("STRIPE_WEBHOOK_SECRET", /^whsec_[A-Za-z0-9]{10,}$/, "expected whsec_…");
+      need("STRIPE_PUBLISHABLE_KEY", /^pk_(test|live)_[A-Za-z0-9]{10,}$/, "expected pk_test_… or pk_live_…");
+      for (const k of ["STRIPE_PRICE_STARTER", "STRIPE_PRICE_GROWTH", "STRIPE_PRICE_SCALE"]) need(k, /^price_[A-Za-z0-9]{8,}$/, "expected price_…");
+      const skMode = v("STRIPE_SECRET_KEY").split("_")[1];
+      const pkMode = v("STRIPE_PUBLISHABLE_KEY").split("_")[1];
+      if (pkMode && skMode && pkMode !== skMode) problems.push("STRIPE keys: secret and publishable keys are from different modes");
+      break;
+    }
+  }
+  return problems;
+}
+
+// ── Callbacks (per environment) ──
+
+export type CallbackStatus = { entries: CallbackEntry[]; ok: boolean; blockers: string[] };
+
+/** Development tolerates localhost/http; staging and production require public HTTPS. */
+export function callbackStatus(p: ReadinessProvider, env: NodeJS.ProcessEnv = process.env): CallbackStatus {
+  const names = PROVIDER_INFO[p].callbacks;
+  const entries = callbackMatrix(env.APP_URL, env).filter((e) => names.includes(e.name));
+  const dev = appEnvironment(env) === "development";
+  const blockers = entries.filter((e) => e.problem && !(dev && e.problem === "localhost")).map((e) => `${e.name}: ${e.problem}`);
+  return { entries, ok: entries.every((e) => !e.problem), blockers };
+}
+
+/** Everything that stops a provider from being production-ready (codes → i18n on the admin page). */
+export function productionBlockers(p: ReadinessProvider, r: { configured: boolean; formatProblems: string[] | null; liveTested: boolean; callbacksOk: boolean }, env: NodeJS.ProcessEnv = process.env) {
+  const b: string[] = [];
+  if (!r.configured) b.push("missing_credentials");
+  if (r.formatProblems?.length) b.push("invalid_credential_format");
+  if (r.configured && !r.liveTested) b.push("not_live_validated");
+  if (PROVIDER_INFO[p].pendingApproval.length) b.push("external_review");
+  if (PROVIDER_INFO[p].callbacks.length && !r.callbacksOk) b.push("https_callbacks");
+  if (p === "stripe" && /^(sk|rk)_test_/.test(clean(env.STRIPE_SECRET_KEY))) b.push("stripe_test_mode");
+  if (p === "storage" && (clean(env.STORAGE_DRIVER) || "local") === "local") b.push("local_storage");
+  if (p === "email" && /^(localhost|127\.0\.0\.1|mailpit)$/i.test(clean(env.SMTP_HOST)) && !clean(env.RESEND_API_KEY) && !clean(env.POSTMARK_SERVER_TOKEN)) b.push("dev_mailbox");
+  return b;
 }
 
 export type ReadinessRow = {
   provider: ReadinessProvider;
   configured: boolean;
+  formatValid: boolean | null;
+  formatProblems: string[];
   credentialsValid: boolean | null;
   liveAccounts: number | null;
+  lastValidationAt: string | null;
   lastSuccessAt: string | null;
-  lastError: { at: string; check: string; detail: string | null } | null;
+  lastError: { at: string; check: string; detail: string | null; httpStatus: number | null; errorCode: string | null; correlationId: string } | null;
   capabilities: string[];
   pendingApproval: string[];
+  callbacks: CallbackStatus;
   liveTested: boolean;
   liveTestedChecks: string[];
+  blockers: string[];
   note: string | null;
 };
 
@@ -74,41 +204,72 @@ export async function providerReadiness(): Promise<ReadinessRow[]> {
     const lastFail = mine.find((r) => !r.ok);
     const liveTestedChecks = [...new Set(mine.filter((r) => r.ok && r.live && info.liveChecks.includes(r.check)).map((r) => r.check))];
     const liveAccounts = info.integration ? counts.filter((c) => info.integration!.includes(c.provider)).reduce((a, c) => a + c._count, 0) : p === "whatsapp" ? waNumbers : null;
+    const format = credentialFormat(p);
+    const callbacks = callbackStatus(p);
+    const configured = isConfigured(p);
+    const liveTested = liveTestedChecks.length > 0;
     return {
       provider: p,
-      configured: isConfigured(p),
+      configured,
+      formatValid: format === null ? null : format.length === 0,
+      formatProblems: format ?? [],
       credentialsValid: cred ? (cred.live ? cred.ok : cred.ok ? null : false) : null,
       liveAccounts,
+      lastValidationAt: mine[0]?.createdAt.toISOString() ?? null,
       lastSuccessAt: lastOk?.createdAt.toISOString() ?? null,
-      lastError: lastFail && (!lastOk || lastFail.createdAt > lastOk.createdAt) ? { at: lastFail.createdAt.toISOString(), check: lastFail.check, detail: lastFail.detail } : null,
+      lastError:
+        lastFail && (!lastOk || lastFail.createdAt > lastOk.createdAt)
+          ? { at: lastFail.createdAt.toISOString(), check: lastFail.check, detail: lastFail.detail, httpStatus: lastFail.httpStatus, errorCode: lastFail.errorCode, correlationId: lastFail.id }
+          : null,
       capabilities: info.capabilities,
       pendingApproval: info.pendingApproval,
-      liveTested: liveTestedChecks.length > 0,
+      callbacks,
+      liveTested,
       liveTestedChecks,
+      blockers: productionBlockers(p, { configured, formatProblems: format, liveTested, callbacksOk: callbacks.ok }),
       note: p === "stripe" ? "stripe_adapter" : p === "storage" && storage.name === "local" ? "local_storage" : null,
     };
   });
 }
 
-export async function recordValidation(v: { provider: string; check: string; ok: boolean; live?: boolean; detail?: string | null; costMicro?: bigint; organizationId?: string | null; actorId?: string | null }) {
+type ValidationInput = { provider: string; check: string; ok: boolean; live?: boolean; detail?: string | null; httpStatus?: number | null; errorCode?: string | null; durationMs?: number | null; meta?: Record<string, unknown>; costMicro?: bigint; organizationId?: string | null; actorId?: string | null };
+
+export async function recordValidation(v: ValidationInput) {
   return db.providerValidation.create({
-    data: { provider: v.provider, check: v.check, ok: v.ok, live: v.live ?? true, detail: redact(v.detail ?? null), costMicro: v.costMicro ?? BigInt(0), organizationId: v.organizationId ?? null, actorId: v.actorId ?? null },
+    data: {
+      provider: v.provider,
+      check: v.check,
+      ok: v.ok,
+      live: v.live ?? true,
+      detail: redact(v.detail ?? null),
+      httpStatus: v.httpStatus ?? null,
+      errorCode: v.errorCode ? redact(v.errorCode)!.slice(0, 120) : null,
+      durationMs: v.durationMs != null ? Math.round(v.durationMs) : null,
+      meta: JSON.parse(redact(JSON.stringify(v.meta ?? {}), 8000) ?? "{}"),
+      costMicro: v.costMicro ?? BigInt(0),
+      organizationId: v.organizationId ?? null,
+      actorId: v.actorId ?? null,
+    },
   });
 }
 
-function redact(s: string | null) {
+/** Removes tokens, keys, codes and secrets from anything stored or logged for the admin. */
+export function redact(s: string | null, max = 500) {
   if (!s) return null;
   return s
-    .replace(/(access_token|client_secret|refresh_token|token|key)=([^&\s"]+)/gi, "$1=[redacted]")
+    .replace(/(access_token|client_secret|refresh_token|token|key|code|secret|password)=([^&\s"]+)/gi, "$1=[redacted]")
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/g, "Bearer [redacted]")
     .replace(/\b(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_[redacted]")
+    .replace(/\bwhsec_[A-Za-z0-9]+/g, "whsec_[redacted]")
     .replace(/\bsk-[A-Za-z0-9_-]{8,}/g, "sk-[redacted]")
     .replace(/\bEAA[A-Za-z0-9]{20,}/g, "EAA[redacted]")
-    .slice(0, 500);
+    .replace(/\bya29\.[A-Za-z0-9._-]+/g, "ya29.[redacted]")
+    .slice(0, max);
 }
 
 /** live=false: the check passed but against something that isn't a production provider (e.g. Mailpit). */
-type Check = { ok: boolean; detail: string; live?: boolean };
-async function call(url: string, init: RequestInit = {}): Promise<{ status: number; body: Record<string, unknown> }> {
+export type Check = { ok: boolean; detail: string; live?: boolean; httpStatus?: number | null; errorCode?: string | null; meta?: Record<string, unknown> };
+export async function call(url: string, init: RequestInit = {}): Promise<{ status: number; body: Record<string, unknown> }> {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(15_000) });
   const text = await res.text();
   let body: Record<string, unknown> = {};
@@ -120,11 +281,19 @@ async function call(url: string, init: RequestInit = {}): Promise<{ status: numb
   return { status: res.status, body };
 }
 const form = (d: Record<string, string>) => ({ method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(d) });
-const err = (b: Record<string, unknown>) => {
+export const errText = (b: Record<string, unknown>) => {
   const e = b.error as { message?: string; code?: string | number; type?: string } | string | undefined;
   if (typeof e === "string") return `${e}${b.error_description ? `: ${String(b.error_description).split("\n")[0]}` : ""}`;
   return e?.message ?? JSON.stringify(b).slice(0, 200);
 };
+/** Provider error code from the common error envelopes (OAuth, Graph, Stripe, OpenAI). */
+export const errCode = (b: Record<string, unknown>) => {
+  const e = b.error as { code?: string | number; type?: string; error_subcode?: number } | string | undefined;
+  if (typeof e === "string") return e;
+  if (e?.code != null) return `${e.code}${e.error_subcode ? `/${e.error_subcode}` : ""}`;
+  return e?.type ?? null;
+};
+export const failCheck = (r: { status: number; body: Record<string, unknown> }, prefix = ""): Check => ({ ok: false, detail: `${prefix}${errText(r.body)}`, httpStatus: r.status, errorCode: errCode(r.body) });
 
 /**
  * Credential checks that prove the client id/secret (or key) are accepted by the provider without
@@ -137,15 +306,18 @@ const CHECKS: Partial<Record<ReadinessProvider, () => Promise<Check>>> = {
     const missing: string[] = [];
     for (const m of [...new Set(models)]) {
       const r = await call(`https://api.openai.com/v1/models/${encodeURIComponent(m)}`, { headers: { authorization: `Bearer ${key}` } });
-      if (r.status === 401) return { ok: false, detail: `invalid_api_key: ${err(r.body)}` };
-      if (r.status !== 200) missing.push(`${m} (${r.status})`);
+      if (r.status === 401) return failCheck(r, "invalid_api_key: ");
+      if (r.status !== 200) missing.push(`${m} (${r.status}: ${errText(r.body)})`);
     }
-    return missing.length ? { ok: false, detail: `Model not available to this key: ${missing.join(", ")}` } : { ok: true, detail: `Key valid; models available: ${[...new Set(models)].join(", ")}` };
+    // Model names are never changed automatically — the admin sees exactly which one is unavailable.
+    return missing.length
+      ? { ok: false, detail: `Model not available to this key: ${missing.join("; ")}`, httpStatus: 404, errorCode: "model_not_found", meta: { models } }
+      : { ok: true, detail: `Key valid; models available: ${[...new Set(models)].join(", ")}`, meta: { models } };
   },
   async facebook() {
     const v = clean(process.env.META_GRAPH_VERSION) || "v21.0";
     const r = await call(`https://graph.facebook.com/${v}/oauth/access_token?${new URLSearchParams({ client_id: clean(process.env.META_APP_ID), client_secret: clean(process.env.META_APP_SECRET), grant_type: "client_credentials" })}`);
-    if (r.status !== 200 || !r.body.access_token) return { ok: false, detail: err(r.body) };
+    if (r.status !== 200 || !r.body.access_token) return failCheck(r);
     const app = await call(`https://graph.facebook.com/${v}/${clean(process.env.META_APP_ID)}?fields=name`, { headers: { authorization: `Bearer ${String(r.body.access_token)}` } });
     return { ok: true, detail: `App token issued${app.body.name ? ` for "${String(app.body.name)}"` : ""}` };
   },
@@ -153,52 +325,51 @@ const CHECKS: Partial<Record<ReadinessProvider, () => Promise<Check>>> = {
     // Instagram Login has no app-token grant: an invalid code with valid client credentials fails with a code
     // error (not a client error). This proves the id/secret pair without any user involvement.
     const r = await call("https://api.instagram.com/oauth/access_token", form({ client_id: clean(process.env.INSTAGRAM_APP_ID), client_secret: clean(process.env.INSTAGRAM_APP_SECRET), grant_type: "authorization_code", redirect_uri: `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/instagram/callback`, code: "nova-credential-check" }));
-    const m = err(r.body);
-    if (/invalid (platform )?app|client_id|client secret|app secret|Invalid Client/i.test(m)) return { ok: false, detail: m };
+    const m = errText(r.body);
+    if (/invalid (platform )?app|client_id|client secret|app secret|Invalid Client/i.test(m)) return failCheck(r);
     return { ok: true, detail: `Client accepted (expected code error: ${m.slice(0, 120)})` };
   },
   async linkedin() {
     const r = await call("https://www.linkedin.com/oauth/v2/accessToken", form({ grant_type: "client_credentials", client_id: clean(process.env.LINKEDIN_CLIENT_ID), client_secret: clean(process.env.LINKEDIN_CLIENT_SECRET) }));
     if (r.status === 200 && r.body.access_token) return { ok: true, detail: "Client credentials token issued" };
-    const m = err(r.body);
+    const m = errText(r.body);
     // Most apps aren't allowed the 2-legged flow; LinkedIn still authenticates the client first.
-    if (/invalid_client|client authentication failed/i.test(m)) return { ok: false, detail: m };
+    if (/invalid_client|client authentication failed/i.test(m)) return failCheck(r);
     return { ok: true, detail: `Client authenticated (2-legged flow not enabled: ${m.slice(0, 120)})` };
   },
   async tiktok() {
     const r = await call("https://open.tiktokapis.com/v2/oauth/token/", form({ client_key: clean(process.env.TIKTOK_CLIENT_KEY), client_secret: clean(process.env.TIKTOK_CLIENT_SECRET), grant_type: "client_credentials" }));
     if (r.status === 200 && r.body.access_token) return { ok: true, detail: "Client credentials token issued" };
-    return { ok: false, detail: err(r.body) };
+    return failCheck(r);
   },
   async google() {
     const r = await call("https://oauth2.googleapis.com/token", form({ client_id: clean(process.env.GOOGLE_CLIENT_ID), client_secret: clean(process.env.GOOGLE_CLIENT_SECRET), grant_type: "authorization_code", code: "nova-credential-check", redirect_uri: `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/google/callback` }));
     const e = String(r.body.error ?? "");
     if (e === "invalid_grant") return { ok: true, detail: "Client accepted (expected invalid_grant for a test code)" };
-    return { ok: false, detail: err(r.body) };
+    return failCheck(r);
   },
   async microsoft() {
     const tenant = clean(process.env.MICROSOFT_TENANT_ID) || "common";
     const r = await call(`https://login.microsoftonline.com/${encodeURIComponent(tenant)}/oauth2/v2.0/token`, form({ client_id: clean(process.env.MICROSOFT_CLIENT_ID), client_secret: clean(process.env.MICROSOFT_CLIENT_SECRET), grant_type: "authorization_code", code: "nova-credential-check", scope: "openid", redirect_uri: `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/microsoft/callback` }));
     const codes = (r.body.error_codes as number[] | undefined) ?? [];
     // 7000215/7000222 = bad or expired secret, 700016 = unknown app, 90002 = unknown tenant.
-    if (codes.some((c) => [7000215, 7000222, 700016, 90002, 900023].includes(c))) return { ok: false, detail: err(r.body) };
+    if (codes.some((c) => [7000215, 7000222, 700016, 90002, 900023].includes(c))) return { ...failCheck(r), errorCode: `AADSTS${codes[0]}` };
     if (String(r.body.error) === "invalid_grant") return { ok: true, detail: "Client accepted (expected invalid_grant for a test code)" };
-    return { ok: false, detail: err(r.body) };
+    return failCheck(r);
   },
   async whatsapp() {
-    const v = clean(process.env.WHATSAPP_API_VERSION) || "v21.0";
-    const r = await call(`https://graph.facebook.com/${v}/me?fields=id,name`, { headers: { authorization: `Bearer ${clean(process.env.WHATSAPP_ACCESS_TOKEN)}` } });
-    if (r.status !== 200) return { ok: false, detail: err(r.body) };
-    return { ok: true, detail: `Token valid (${String(r.body.name ?? r.body.id)})` };
+    const { whatsappDiagnostics } = await import("./live-tests");
+    const d = await whatsappDiagnostics();
+    return { ok: d.tokenValid, detail: d.summary, httpStatus: d.httpStatus, errorCode: d.errorCode, meta: d as unknown as Record<string, unknown> };
   },
   async email() {
     const t = await getMailer().testConnection();
     return { ok: t.ok, detail: t.detail, live: !/development mailbox/i.test(t.detail) };
   },
   async stripe() {
-    const r = await call("https://api.stripe.com/v1/balance", { headers: { authorization: `Bearer ${clean(process.env.STRIPE_SECRET_KEY)}` } });
-    if (r.status !== 200) return { ok: false, detail: err(r.body) };
-    return { ok: true, detail: `Key valid (${clean(process.env.STRIPE_SECRET_KEY).startsWith("sk_live_") ? "live" : "test"} mode)` };
+    const { stripeDiagnostics } = await import("./live-tests");
+    const d = await stripeDiagnostics();
+    return { ok: d.apiReachable && d.pricesValid && d.webhookConfigured, detail: d.summary, httpStatus: d.httpStatus, errorCode: d.errorCode, meta: d as unknown as Record<string, unknown> };
   },
 };
 
@@ -207,31 +378,48 @@ export async function validateCredentials(provider: ReadinessProvider, actor: { 
   const check = CHECKS[provider];
   if (!check) throw new Error("no credential check for this provider");
   if (!isConfigured(provider)) {
-    return recordValidation({ provider, check: "credentials", ok: false, live: false, detail: `Not configured (${PROVIDER_INFO[provider].env.filter((k) => !clean(process.env[k])).join(", ") || "provider settings"})`, actorId: actor.userId, organizationId: actor.organizationId });
+    return recordValidation({ provider, check: "credentials", ok: false, live: false, detail: `Not configured (${PROVIDER_INFO[provider].env.filter((k) => !clean(process.env[k])).join(", ") || "provider settings"})`, errorCode: "not_configured", actorId: actor.userId, organizationId: actor.organizationId });
   }
+  const format = credentialFormat(provider);
+  const started = Date.now();
   let result: Check;
   try {
     result = await check();
   } catch (e) {
-    result = { ok: false, detail: `Network error: ${e instanceof Error ? e.message : String(e)}` };
+    result = { ok: false, detail: `Network error: ${e instanceof Error ? e.message : String(e)}`, errorCode: "network_error" };
   }
-  if (!result.ok) logger.warn({ provider, detail: redact(result.detail) }, "provider credential check failed");
-  const row = await recordValidation({ provider, check: "credentials", ok: result.ok, live: result.live ?? true, detail: result.detail, actorId: actor.userId, organizationId: actor.organizationId });
+  if (format?.length) result = { ...result, detail: `${result.detail} · format: ${format.join("; ")}` };
+  if (!result.ok) logger.warn({ provider, httpStatus: result.httpStatus, errorCode: result.errorCode, detail: redact(result.detail) }, "provider credential check failed");
+  const row = await recordValidation({ provider, check: "credentials", ok: result.ok, live: result.live ?? true, detail: result.detail, httpStatus: result.httpStatus, errorCode: result.errorCode, durationMs: Date.now() - started, meta: result.meta, actorId: actor.userId, organizationId: actor.organizationId });
   await audit({ category: "SECURITY", actorType: "USER", actorId: actor.userId, action: "admin.provider_validated", summary: `Validated ${provider} credentials: ${result.ok ? "ok" : "failed"}` });
   return row;
 }
 
+const maskEndpoint = (u: string) => {
+  try {
+    const url = new URL(u);
+    const [first, ...rest] = url.hostname.split(".");
+    return `${url.protocol}//${first.length > 6 ? `${first.slice(0, 3)}…${first.slice(-2)}` : first}.${rest.join(".")}`;
+  } catch {
+    return "custom endpoint";
+  }
+};
+
 /**
- * Admin storage test: upload → signed URL → download → delete, on a dedicated test prefix. Uses whatever
- * driver is configured (local / S3 / R2); automated tests use an in-memory driver instead.
+ * Admin storage test: upload → signed URL → fetch/validate → delete → confirm deleted, on a dedicated test
+ * prefix. Uses the configured driver (local / S3 / R2); automated tests use an in-memory driver instead.
+ * The test object never outlives the test.
  */
 export async function storageRoundtrip(actor: { userId: string }) {
   const key = `_nova-admin-test/${Date.now()}-${Math.random().toString(36).slice(2)}.txt`;
   const body = Buffer.from(`NOVA storage test ${new Date().toISOString()}`);
   const steps: { step: string; ok: boolean; detail?: string }[] = [];
+  const started = Date.now();
   let ok = true;
+  let uploaded = false;
   try {
     await storage.put(key, body, "text/plain");
+    uploaded = true;
     steps.push({ step: "upload", ok: true });
     if (supportsPresign()) {
       const url = storage.presignGet!(key, 60, { contentType: "text/plain" });
@@ -247,18 +435,31 @@ export async function storageRoundtrip(actor: { userId: string }) {
     }
   } catch (e) {
     ok = false;
-    steps.push({ step: "upload", ok: false, detail: e instanceof Error ? e.message : String(e) });
+    steps.push({ step: uploaded ? "read" : "upload", ok: false, detail: e instanceof Error ? e.message : String(e) });
   } finally {
-    try {
-      await storage.delete(key);
-      steps.push({ step: "delete", ok: true });
-    } catch (e) {
-      ok = false;
-      steps.push({ step: "delete", ok: false, detail: e instanceof Error ? e.message : String(e) });
+    if (uploaded) {
+      try {
+        await storage.delete(key);
+        steps.push({ step: "delete", ok: true });
+        // Confirm it's really gone.
+        const still = await storage
+          .get(key)
+          .then((b) => Boolean(b))
+          .catch(() => false);
+        steps.push({ step: "confirm_deleted", ok: !still, detail: still ? "object still readable after delete" : undefined });
+        ok &&= !still;
+      } catch (e) {
+        ok = false;
+        steps.push({ step: "delete", ok: false, detail: e instanceof Error ? e.message : String(e) });
+      }
     }
   }
-  const detail = `${storage.name}: ${steps.map((s) => `${s.step}=${s.ok ? "ok" : `fail${s.detail ? ` (${s.detail})` : ""}`}`).join(", ")}`;
+  const durationMs = Date.now() - started;
+  const driver = storage.name;
+  const bucket = clean(process.env.S3_BUCKET) || null;
+  const endpoint = clean(process.env.S3_ENDPOINT) ? maskEndpoint(clean(process.env.S3_ENDPOINT)) : clean(process.env.S3_REGION) || null;
+  const detail = `${driver}${bucket ? ` · ${bucket}` : ""}${endpoint ? ` · ${endpoint}` : ""}: ${steps.map((s) => `${s.step}=${s.ok ? "ok" : `fail${s.detail ? ` (${s.detail})` : ""}`}`).join(", ")}`;
   // Local disk is not a production storage test: record it, but not as "live".
-  await recordValidation({ provider: "storage", check: "roundtrip", ok, live: storage.name !== "local", detail, actorId: actor.userId });
-  return { ok, driver: storage.name, steps };
+  await recordValidation({ provider: "storage", check: "roundtrip", ok, live: driver !== "local", detail, durationMs, meta: { driver, bucket, endpoint, steps }, actorId: actor.userId });
+  return { ok, driver, bucket, endpoint, durationMs, steps };
 }

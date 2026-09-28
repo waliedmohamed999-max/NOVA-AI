@@ -4,7 +4,7 @@ import { aiStructured, logRun } from "../ai";
 import { recordUsage, currentPeriod } from "../ai/budget";
 import { STUDIO_RULES, promptRef } from "../ai/prompts";
 import { enqueue, PermanentJobError } from "../jobs/queue";
-import { saveUpload, storage } from "../storage";
+import { deleteFile, saveUpload, storage } from "../storage";
 import { UserFacingError } from "../errors";
 import { logger } from "../logger";
 import { reportError } from "../observability";
@@ -266,7 +266,21 @@ export async function selectAsset(scope: TenantScope, assetId: string) {
   ]);
 }
 
-/** Admin test: one small image through the real provider, stored but never attached to a post or published. */
+/**
+ * Diagnostic-only lifecycle for admin test images: store through the StorageProvider, read it back, then
+ * delete it. The admin gets a small inline preview; nothing is left in storage or attached to a post.
+ */
+async function storeAndDiscard(scope: TenantScope, userId: string, data: Buffer, fileName: string) {
+  const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId, fileName, data, purpose: "admin_test_image" });
+  const readBack = await storage.get(file.storageKey);
+  const stored = readBack.equals(data);
+  await deleteFile(scope.organizationId, file.id);
+  const { default: sharp } = await import("sharp");
+  const preview = await sharp(data).resize(256, 256, { fit: "cover" }).jpeg({ quality: 70 }).toBuffer();
+  return { stored, deleted: true, previewDataUrl: `data:image/jpeg;base64,${preview.toString("base64")}` };
+}
+
+/** Admin test: one small image through the real provider; stored, verified and deleted — never published. */
 export async function adminTestImage(scope: TenantScope, userId: string) {
   if (!imagesConfigured()) throw new UserFacingError("image_not_configured");
   const started = Date.now();
@@ -275,14 +289,14 @@ export async function adminTestImage(scope: TenantScope, userId: string) {
     .catch((err) => {
       throw new UserFacingError(err instanceof ImageProviderError ? err.code : "image_failed", { cause: err });
     });
-  const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId, fileName: "openai-test.png", data: res.data, purpose: "admin_test_image" });
   await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_GENERATION", imageProvider().name, res, Date.now() - started, { key: "admin_test", version: "admin_test@1" });
-  return { fileId: file.id, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
+  const life = await storeAndDiscard(scope, userId, res.data, "openai-test.png");
+  return { ...life, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
 }
 
 /**
- * Admin-only live check of image *editing*: a plain generated test card is sent to the edit endpoint.
- * Private asset, never published; cost recorded like any other edit.
+ * Admin-only live check of image *editing*: the test card is sent to the edit endpoint as the reference.
+ * Stored, verified and deleted like the generation test; never published; cost recorded like any edit.
  */
 export async function adminTestImageEdit(scope: TenantScope, userId: string) {
   if (!imagesConfigured()) throw new UserFacingError("image_not_configured");
@@ -297,7 +311,7 @@ export async function adminTestImageEdit(scope: TenantScope, userId: string) {
     .catch((err) => {
       throw new UserFacingError(err instanceof ImageProviderError ? err.code : "image_failed", { cause: err });
     });
-  const file = await saveUpload({ organizationId: scope.organizationId, workspaceId: scope.workspaceId, userId, fileName: "openai-edit-test.png", data: res.data, purpose: "admin_test_image" });
   await recordImageCost({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, "IMAGE_EDIT", imageProvider().name, res, Date.now() - started, { key: "admin_test", version: "admin_test@1" });
-  return { fileId: file.id, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
+  const life = await storeAndDiscard(scope, userId, res.data, "openai-edit-test.png");
+  return { ...life, model: res.model, bytes: res.data.byteLength, cost: { basis: res.cost.basis, costMicro: res.cost.costMicro.toString(), usage: res.cost.usage, pricingVersion: res.cost.pricingVersion } };
 }

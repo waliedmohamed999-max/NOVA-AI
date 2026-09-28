@@ -52,7 +52,8 @@ describe("provider readiness", () => {
     const actor = { userId: "admin-1" };
     const openai = await validateCredentials("openai", actor);
     expect(openai.ok).toBe(false);
-    expect(openai.detail).toContain("gpt-image-1 (404)");
+    expect(openai.detail).toContain("gpt-image-1 (404: The model `gpt-image-1` does not exist)");
+    expect(openai).toMatchObject({ httpStatus: 404, errorCode: "model_not_found" });
     expect((await validateCredentials("google", actor)).ok).toBe(true);
     googleError = "invalid_client";
     const bad = await validateCredentials("google", actor);

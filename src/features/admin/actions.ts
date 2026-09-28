@@ -73,21 +73,40 @@ function providerDetail(err: unknown): string {
   return parts.join(" ← ").slice(0, 500);
 }
 
-type ImageTestData = { model: string; bytes: number; url: string; cost: { basis: string; costMicro: string; pricingVersion: string; usage: { textInputTokens: number; imageInputTokens: number; outputTokens: number } } };
+/** Provider error code / HTTP status from the error chain (AiError, ImageProviderError, OpenAI SDK errors). */
+function errorCodeOf(err: unknown): string | null {
+  for (let e: unknown = err, i = 0; e && i < 4; i++, e = (e as { cause?: unknown }).cause) {
+    const c = (e as { code?: unknown }).code;
+    if (typeof c === "string" && c) return c;
+  }
+  return null;
+}
+function httpStatusOf(err: unknown): number | null {
+  for (let e: unknown = err, i = 0; e && i < 4; i++, e = (e as { cause?: unknown }).cause) {
+    const s = (e as { status?: unknown }).status;
+    if (typeof s === "number") return s;
+  }
+  return null;
+}
+
+type ImageTestData = { model: string; bytes: number; url: string; stored: boolean; deleted: boolean; cost: { basis: string; costMicro: string; pricingVersion: string; usage: { textInputTokens: number; imageInputTokens: number; outputTokens: number } } };
 
 /** Admin-only live checks of the OpenAI configuration. Nothing is published; test images are private assets. */
-export async function openAiTestTextAction(): Promise<ActionResult<{ model: string; reply: string; inputTokens: number; outputTokens: number }>> {
+/** Structured-output text test: a tiny prompt, a schema-validated answer, usage + usage-based cost. Creates no content. */
+export async function openAiTestTextAction(): Promise<ActionResult<{ model: string; reply: string; inputTokens: number; outputTokens: number; costUsd: number }>> {
   const a = await adminScope();
   if (!a) return { ok: false, error: "forbidden" };
   const { recordValidation } = await import("@/server/admin/readiness");
   try {
-    const { aiText, contentAiConfigured } = await import("@/server/ai");
+    const { aiStructured, contentAiConfigured } = await import("@/server/ai");
     if (!contentAiConfigured()) return { ok: false, error: "content_ai_not_configured" };
-    const r = await aiText({ ...a.scope }, { task: "SUMMARIZATION", quality: "fast", realOnly: true, promptRef: { key: "admin_test", version: "admin_test@1" }, prompt: "Reply with exactly: NOVA OK", maxTokens: 200 });
-    await recordValidation({ provider: "openai", check: "generate_text", ok: true, detail: `${r.model}: ${r.usage.inputTokens} in / ${r.usage.outputTokens} out`, actorId: a.userId, organizationId: a.scope.organizationId });
-    return { ok: true, data: { model: r.model, reply: r.text.slice(0, 80), inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens } };
+    const started = Date.now();
+    const r = await aiStructured({ ...a.scope }, { task: "SUMMARIZATION", quality: "fast", realOnly: true, promptRef: { key: "admin_test", version: "admin_test@1" }, schemaName: "nova_admin_test", schema: z.object({ status: z.literal("ok"), product: z.string() }), prompt: 'Return status "ok" and product "NOVA".', maxTokens: 200 });
+    const costMicro = BigInt(r.costMicro ?? 0);
+    await recordValidation({ provider: "openai", check: "generate_text", ok: true, detail: `${r.model}: structured ${JSON.stringify(r.data)} · ${r.usage.inputTokens} in / ${r.usage.outputTokens} out`, durationMs: Date.now() - started, costMicro, meta: { model: r.model, usage: r.usage, costBasis: "usage × configured price" }, actorId: a.userId, organizationId: a.scope.organizationId });
+    return { ok: true, data: { model: r.model, reply: JSON.stringify(r.data), inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens, costUsd: Number(costMicro) / 1e6 } };
   } catch (err) {
-    await recordValidation({ provider: "openai", check: "generate_text", ok: false, detail: providerDetail(err), actorId: a.userId, organizationId: a.scope.organizationId });
+    await recordValidation({ provider: "openai", check: "generate_text", ok: false, detail: providerDetail(err), errorCode: errorCodeOf(err), httpStatus: httpStatusOf(err), actorId: a.userId, organizationId: a.scope.organizationId });
     return mapError(err, "admin.openai_text");
   }
 }
@@ -99,12 +118,11 @@ async function imageTest(kind: "generate_image" | "edit_image"): Promise<ActionR
   try {
     await enforceRateLimit(`admin-test-image:${a.userId}`, 3, 3600);
     const { adminTestImage, adminTestImageEdit } = await import("@/server/studio/images");
-    const { signedFileUrl } = await import("@/server/storage");
     const r = kind === "generate_image" ? await adminTestImage(a.scope, a.userId) : await adminTestImageEdit(a.scope, a.userId);
-    await recordValidation({ provider: "openai", check: kind, ok: true, detail: `${r.model}: ${r.bytes} bytes`, costMicro: BigInt(r.cost.costMicro), actorId: a.userId, organizationId: a.scope.organizationId });
-    return { ok: true, data: { model: r.model, bytes: r.bytes, url: signedFileUrl(r.fileId), cost: r.cost } };
+    await recordValidation({ provider: "openai", check: kind, ok: r.stored, detail: `${r.model}: ${r.bytes} bytes · storage ${r.stored ? "write/read ok" : "read-back mismatch"} · test file deleted`, costMicro: BigInt(r.cost.costMicro), meta: { model: r.model, cost: r.cost }, actorId: a.userId, organizationId: a.scope.organizationId });
+    return { ok: true, data: { model: r.model, bytes: r.bytes, url: r.previewDataUrl, stored: r.stored, deleted: r.deleted, cost: r.cost } };
   } catch (err) {
-    await recordValidation({ provider: "openai", check: kind, ok: false, detail: providerDetail(err), actorId: a.userId, organizationId: a.scope.organizationId });
+    await recordValidation({ provider: "openai", check: kind, ok: false, detail: providerDetail(err), errorCode: errorCodeOf(err), httpStatus: httpStatusOf(err), actorId: a.userId, organizationId: a.scope.organizationId });
     return mapError(err, `admin.openai_${kind}`);
   }
 }
@@ -177,5 +195,59 @@ export async function instagramFeatureTestAction(input: { accountId: string; fea
     return { ok: true, data: await instagramFeatureTest(a.scope, a.userId, accountId, feature) };
   } catch (err) {
     return mapError(err, "admin.instagram_feature");
+  }
+}
+
+// ── Manual live tests (LIVE INTEGRATIONS FINALIZATION) ──
+
+export async function testEmailAction(input: { to: string; via?: "auto" | "platform" }): Promise<ActionResult<{ provider: string; messageId: string | null; status: "accepted"; developmentMailbox: boolean }>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  try {
+    const { to, via } = z.object({ to: z.string().trim().email().max(254), via: z.enum(["auto", "platform"]).default("auto") }).parse(input);
+    await enforceRateLimit(`admin-test-email:${a.userId}`, 5, 3600);
+    const { sendTestEmail } = await import("@/server/admin/live-tests");
+    const r = await sendTestEmail(a.scope, { userId: a.userId }, to, via);
+    revalidatePath("/admin/providers");
+    return { ok: true, data: r };
+  } catch (err) {
+    return mapError(err, "admin.test_email");
+  }
+}
+
+export async function calendarTestAction(input: { integrationId: string; kind: "availability" | "meeting"; confirmation?: string }): Promise<ActionResult<{ detail: string }>> {
+  const a = await adminScope();
+  if (!a) return { ok: false, error: "forbidden" };
+  try {
+    const { integrationId, kind, confirmation } = z.object({ integrationId: z.string(), kind: z.enum(["availability", "meeting"]), confirmation: z.string().optional() }).parse(input);
+    await enforceRateLimit(`admin-calendar-test:${a.userId}`, 10, 3600);
+    const { calendarAvailabilityTest, calendarMeetingTest } = await import("@/server/admin/live-tests");
+    let detail: string;
+    if (kind === "availability") {
+      const r = await calendarAvailabilityTest(a.scope, { userId: a.userId }, integrationId);
+      detail = `${r.busy} busy · ${r.timezone} · token ${r.refreshed ? "refreshed" : "valid"}`;
+    } else {
+      const r = await calendarMeetingTest(a.scope, { userId: a.userId }, integrationId, confirmation ?? "");
+      detail = `${r.externalEventId} · ${r.start} ${r.timezone} · ${r.cancelled ? "cancelled" : "NOT cancelled"}`;
+    }
+    revalidatePath("/admin/providers");
+    return { ok: true, data: { detail } };
+  } catch (err) {
+    return mapError(err, "admin.calendar_test");
+  }
+}
+
+export async function whatsappTestAction(input: { kind: "connection" | "send"; confirmation?: string }): Promise<ActionResult<{ detail: string }>> {
+  const session = await getSession();
+  if (!session?.user.isPlatformAdmin) return { ok: false, error: "forbidden" };
+  try {
+    const { kind, confirmation } = z.object({ kind: z.enum(["connection", "send"]), confirmation: z.string().optional() }).parse(input);
+    await enforceRateLimit(`admin-whatsapp-test:${session.userId}`, kind === "send" ? 3 : 20, 3600);
+    const { whatsappConnectionTest, whatsappSendTest } = await import("@/server/admin/live-tests");
+    const detail = kind === "connection" ? (await whatsappConnectionTest({ userId: session.userId })).summary : `sent (${(await whatsappSendTest({ userId: session.userId }, confirmation ?? "")).mode})`;
+    revalidatePath("/admin/providers");
+    return { ok: true, data: { detail } };
+  } catch (err) {
+    return mapError(err, "admin.whatsapp_test");
   }
 }

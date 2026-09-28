@@ -32,7 +32,7 @@ type CommonOptions = {
   promptRef?: { key: string; version: string };
 };
 
-export type AiMeta = { provider: ProviderName; model: string; usage: Usage; generatedBy: string; offline: boolean };
+export type AiMeta = { provider: ProviderName; model: string; usage: Usage; /** Usage × configured price, micro-USD. */ costMicro?: bigint; generatedBy: string; offline: boolean };
 
 /** Real (non-offline) text AI available — required by the content studio. */
 export function contentAiConfigured() {
@@ -93,7 +93,7 @@ async function execute<T>(
       await recordUsage({ organizationId: ctx.organizationId, agentKey: ctx.agentKey, inputTokens: res.usage.inputTokens, outputTokens: res.usage.outputTokens, costMicro: cost });
       return {
         value: res.value,
-        meta: { provider: spec.provider, model: res.model, usage: res.usage, generatedBy: `ai:${spec.provider}:${res.model}`, offline: spec.provider === "offline" },
+        meta: { provider: spec.provider, model: res.model, usage: res.usage, costMicro: cost, generatedBy: `ai:${spec.provider}:${res.model}`, offline: spec.provider === "offline" },
       };
     } catch (err) {
       lastError = err;

@@ -1908,6 +1908,11 @@ model ProviderValidation {
   /// true = executed against the real provider API with real credentials.
   live           Boolean  @default(true)
   detail         String?
+  /// Admin incident detail: provider HTTP status and error code, duration, non-secret metadata (message id, bucket…).
+  httpStatus     Int?
+  errorCode      String?
+  durationMs     Int?
+  meta           Json     @default("{}")
   costMicro      BigInt   @default(0)
   organizationId String?
   actorId        String?

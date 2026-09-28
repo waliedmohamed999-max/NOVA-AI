@@ -709,7 +709,10 @@
         "lastError": "Last error",
         "capabilities": "Capabilities",
         "pending": "Pending external approval",
-        "liveTested": "Live tested"
+        "liveTested": "Live tested",
+        "format": "Credential format",
+        "callbacks": "Callbacks",
+        "blockers": "Production blockers"
       },
       "yes": "YES",
       "no": "NO",
@@ -728,7 +731,25 @@
       "waLink": "Link number",
       "waLinked": "Linked {phone}",
       "callbacksTitle": "Callback & URL matrix",
-      "callbacksIntro": "Every URL to register with providers for staging and production, derived from APP_URL and the *_REDIRECT_URI settings. See docs/STAGING.md."
+      "callbacksIntro": "Every URL to register with providers for staging and production, derived from APP_URL and the *_REDIRECT_URI settings. See docs/STAGING.md.",
+      "formatOk": "Valid",
+      "formatBad": "Invalid",
+      "callbackBlocked": "Not HTTPS",
+      "callbackDevOnly": "Localhost (dev only)",
+      "lastRun": "Last check",
+      "noBlockers": "None",
+      "blockers": {
+        "missing_credentials": "Missing credentials",
+        "invalid_credential_format": "Credential format",
+        "not_live_validated": "Not live-validated",
+        "external_review": "External review pending",
+        "https_callbacks": "Callbacks not on HTTPS",
+        "stripe_test_mode": "Stripe in test mode",
+        "local_storage": "Local disk storage",
+        "dev_mailbox": "Development mailbox"
+      },
+      "liveTitle": "Manual live tests",
+      "liveIntro": "Real calls to real providers, triggered only by you. Each result is recorded above. Nothing here runs in automated tests."
     },
     "health": {
       "counts": {
@@ -760,6 +781,43 @@
         "not_https": "Not HTTPS",
         "localhost": "Localhost — dev only",
         "invalid": "Invalid setting"
+      }
+    },
+    "live": {
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "confirm": "Confirmation",
+      "email": {
+        "title": "Email",
+        "body": "Sends ONE email (“NOVA email integration test”) to the address you enter. Uses the workspace's connected Gmail/Outlook first, then the platform provider.",
+        "to": "Recipient",
+        "send": "Send test email",
+        "note": "Providers confirm acceptance, not delivery or reading."
+      },
+      "whatsapp": {
+        "connection": "Test WhatsApp connection (sends nothing)",
+        "sendBody": "Sends one test message to the configured test number {to}. Uses an approved template outside the 24-hour window. Type {word} to enable.",
+        "noRecipient": "Set WHATSAPP_TEST_RECIPIENT to enable the send test.",
+        "send": "Send test WhatsApp"
+      },
+      "calendar": {
+        "title": "Calendar (Google / Microsoft)",
+        "none": "No Google or Microsoft account connected in your workspace.",
+        "connect": "Connect one",
+        "caps": {
+          "identity": "Identity",
+          "emailSend": "Send email",
+          "calendarRead": "Calendar read",
+          "calendarWrite": "Calendar write"
+        },
+        "reauth": "Reconnect needed",
+        "availability": "Test availability",
+        "meeting": "Create test meeting",
+        "note": "“Create test meeting” adds a 15-minute “NOVA Integration Test” event with no attendees and cancels it immediately. Type CREATE TEST MEETING to enable."
+      },
+      "stripe": {
+        "body": "Checkout, webhook, portal, upgrade/downgrade and cancel are tested from Settings → Billing in Stripe TEST mode. Plans change only when Stripe's webhook arrives.",
+        "open": "Open billing"
       }
     }
   },
@@ -851,7 +909,9 @@
       "organization_publishing": "Company page posting",
       "comments": "Comments",
       "email_send": "Send email from this inbox",
-      "calendar": "Calendar (free/busy + meetings)"
+      "calendar": "Calendar (free/busy + meetings)",
+      "calendar_read": "Calendar — see free/busy times",
+      "calendar_write": "Calendar — create meetings"
     },
     "capabilityReasons": {
       "permission_missing": "Permission not granted — reconnect and allow it",

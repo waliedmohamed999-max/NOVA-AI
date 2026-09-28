@@ -709,7 +709,10 @@
         "lastError": "آخر خطأ",
         "capabilities": "القدرات",
         "pending": "موافقة خارجية معلقة",
-        "liveTested": "مختبر حيًا"
+        "liveTested": "مختبر حيًا",
+        "format": "صيغة بيانات الاعتماد",
+        "callbacks": "روابط الاستدعاء",
+        "blockers": "عوائق الإنتاج"
       },
       "yes": "نعم",
       "no": "لا",
@@ -728,7 +731,25 @@
       "waLink": "ربط الرقم",
       "waLinked": "تم ربط {phone}",
       "callbacksTitle": "مصفوفة روابط الاستدعاء",
-      "callbacksIntro": "كل رابط يجب تسجيله لدى المزوّدين في بيئة staging والإنتاج، مشتق من APP_URL وإعدادات *_REDIRECT_URI. راجع docs/STAGING.md."
+      "callbacksIntro": "كل رابط يجب تسجيله لدى المزوّدين في بيئة staging والإنتاج، مشتق من APP_URL وإعدادات *_REDIRECT_URI. راجع docs/STAGING.md.",
+      "formatOk": "صحيحة",
+      "formatBad": "غير صحيحة",
+      "callbackBlocked": "ليست HTTPS",
+      "callbackDevOnly": "localhost (للتطوير فقط)",
+      "lastRun": "آخر فحص",
+      "noBlockers": "لا يوجد",
+      "blockers": {
+        "missing_credentials": "بيانات اعتماد ناقصة",
+        "invalid_credential_format": "صيغة بيانات الاعتماد",
+        "not_live_validated": "لم يُختبر حيًا",
+        "external_review": "مراجعة خارجية معلقة",
+        "https_callbacks": "روابط الاستدعاء ليست HTTPS",
+        "stripe_test_mode": "Stripe في وضع الاختبار",
+        "local_storage": "تخزين على القرص المحلي",
+        "dev_mailbox": "صندوق بريد للتطوير"
+      },
+      "liveTitle": "اختبارات حية يدوية",
+      "liveIntro": "اتصالات حقيقية بمزوّدين حقيقيين، لا تعمل إلا بضغطك. كل نتيجة تُسجل في الجدول أعلاه. لا شيء هنا يعمل داخل الاختبارات الآلية."
     },
     "health": {
       "counts": {
@@ -760,6 +781,43 @@
         "not_https": "ليس HTTPS",
         "localhost": "localhost — للتطوير فقط",
         "invalid": "إعداد غير صالح"
+      }
+    },
+    "live": {
+      "configured": "مُعد",
+      "notConfigured": "غير مُعد",
+      "confirm": "التأكيد",
+      "email": {
+        "title": "البريد",
+        "body": "يرسل رسالة واحدة («NOVA email integration test») إلى العنوان الذي تكتبه. يستخدم Gmail/Outlook المربوط بمساحة العمل أولًا، ثم مزوّد المنصة.",
+        "to": "المستلم",
+        "send": "إرسال رسالة اختبار",
+        "note": "المزوّدون يؤكدون القبول فقط، وليس التسليم أو القراءة."
+      },
+      "whatsapp": {
+        "connection": "اختبار اتصال واتساب (لا يرسل شيئًا)",
+        "sendBody": "يرسل رسالة اختبار واحدة إلى رقم الاختبار المُعد {to}. يستخدم قالبًا معتمدًا خارج نافذة الـ24 ساعة. اكتب {word} للتفعيل.",
+        "noRecipient": "اضبط WHATSAPP_TEST_RECIPIENT لتفعيل اختبار الإرسال.",
+        "send": "إرسال واتساب تجريبي"
+      },
+      "calendar": {
+        "title": "التقويم (Google / Microsoft)",
+        "none": "لا يوجد حساب Google أو Microsoft مربوط بمساحة عملك.",
+        "connect": "اربط حسابًا",
+        "caps": {
+          "identity": "الهوية",
+          "emailSend": "إرسال البريد",
+          "calendarRead": "قراءة التقويم",
+          "calendarWrite": "الكتابة في التقويم"
+        },
+        "reauth": "يحتاج إعادة ربط",
+        "availability": "اختبار الأوقات المتاحة",
+        "meeting": "إنشاء اجتماع تجريبي",
+        "note": "«إنشاء اجتماع تجريبي» يضيف حدثًا مدته 15 دقيقة باسم «NOVA Integration Test» بدون مدعوين ثم يلغيه فورًا. اكتب CREATE TEST MEETING للتفعيل."
+      },
+      "stripe": {
+        "body": "Checkout والـwebhook والبوابة والترقية والتخفيض والإلغاء تُختبر من الإعدادات ← الفوترة في وضع Stripe TEST. الخطة لا تتغير إلا عند وصول webhook من Stripe.",
+        "open": "فتح الفوترة"
       }
     }
   },
@@ -851,7 +909,9 @@
       "organization_publishing": "النشر على صفحة الشركة",
       "comments": "التعليقات",
       "email_send": "إرسال البريد من هذا الصندوق",
-      "calendar": "التقويم (المواعيد المتاحة والاجتماعات)"
+      "calendar": "التقويم (المواعيد المتاحة والاجتماعات)",
+      "calendar_read": "التقويم — معرفة الأوقات المتاحة",
+      "calendar_write": "التقويم — إنشاء الاجتماعات"
     },
     "capabilityReasons": {
       "permission_missing": "لم يتم منح الصلاحية — أعد الربط واسمح بها",
