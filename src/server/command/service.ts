@@ -1,4 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { Prisma } from "@/generated/prisma/client";
+import { db } from "../db/client";
+import { withCommandAttribution } from "../ai/attribution";
+import { brainVersion, PURPOSE_SECTIONS, TOKEN_BUDGETS } from "../knowledge/company-context";
 import { z } from "zod";
 import type { TenantContext } from "../context";
 import { audit } from "../audit";
@@ -8,10 +12,13 @@ import { UserFacingError, NotFoundError } from "../errors";
 import { ForbiddenError } from "../rbac";
 import { redact } from "../security/redact";
 import { localParts } from "../reports/service";
-import { detectIntent, intentDef, type IntentDef, type IntentKey } from "./registry";
+import { detectIntent, intentDef, type IntentDef, type IntentKey, type RoutingMode } from "./registry";
 import { extractEntities, normalize } from "./parse";
 import { aiRouterAvailable, routeWithAi } from "./ai-router";
-import { HANDLERS, localDay, type HandlerInput, type Outcome } from "./handlers";
+import { HANDLERS, localDay, type Handler, type HandlerInput, type Outcome } from "./handlers";
+import { BRAIN_HANDLERS } from "./brain-handlers";
+
+const ALL_HANDLERS: Record<IntentKey, Handler> = { ...HANDLERS, ...BRAIN_HANDLERS };
 import type { CommandResponse, CommandStatus, Params, Plan } from "./types";
 
 /**
@@ -38,6 +45,51 @@ export const commandReply = z.object({
 type Execution = NonNullable<Awaited<ReturnType<TenantContext["db"]["commandExecution"]["findFirst"]>>>;
 
 const scopeOf = (ctx: TenantContext) => ({ organizationId: ctx.organization.id, workspaceId: ctx.workspace.id });
+
+/** A question (vs. a free-form instruction): the Company Brain gets the first try. */
+export function looksLikeQuestion(n: string, original: string) {
+  return /[?؟]\s*$/.test(original.trim()) || /^(ما|ماذا|ايه|اي|ايش|شو|وش|مين|من|هل|كيف|ازاي|ليه|لماذا|متي|فين|اين|كم|عندنا|لدينا)(\s|$)|^(what|which|who|how|why|when|where|do|does|is|are|can)\b/.test(n);
+}
+
+/** Output ceilings per task — never a huge default. */
+const MAX_OUTPUT: Partial<Record<IntentKey, number>> = { ask_question: 500, draft_sales_message: 400, prepare_followups: 400, improve_content: 700, create_carousel: 1200, create_campaign: 3000 };
+
+export type CommandExecutionPlan = { mode: RoutingMode; intent: IntentKey | null; requiredData: string[]; requiredBrainSections: string[]; tokenBudget: number; maxOutputTokens: number };
+
+/** Decided before execution and stored with the command. */
+export function planExecution(def: IntentDef): CommandExecutionPlan {
+  const needsBrain = def.mode === "brain" || def.mode === "brain_ai";
+  return {
+    mode: def.mode,
+    intent: def.key,
+    requiredData: def.data ?? [],
+    requiredBrainSections: needsBrain ? (def.brainSections ?? (def.brain ? PURPOSE_SECTIONS[def.brain] : [])) : [],
+    tokenBudget: def.mode === "brain_ai" ? TOKEN_BUDGETS[def.budget ?? "small"] : 0,
+    maxOutputTokens: def.mode === "brain_ai" || def.mode === "ai" ? (MAX_OUTPUT[def.key] ?? 600) : 0,
+  };
+}
+
+/**
+ * Brain-only answers are cached by brain version (profile/offerings/brand/policies/knowledge fingerprint).
+ * Only complete brain answers are stored — never customer, sales, time- or permission-sensitive results.
+ */
+async function cached(ctx: TenantContext, ex: Execution, def: IntentDef, run: () => Promise<Outcome> | Outcome): Promise<Outcome> {
+  const version = await brainVersion(scopeOf(ctx));
+  const key = { organizationId: ctx.organization.id, workspaceId: ctx.workspace.id, brainVersion: version, intent: def.key, queryKey: def.key === "brain_question" ? normalize(ex.text).slice(0, 300) : "", locale: ex.locale };
+  const hit = await ctx.db.commandCache.findFirst({ where: key });
+  if (hit) {
+    await ctx.db.commandCache.update({ where: { id: hit.id }, data: { hits: { increment: 1 } } });
+    return { ...(hit.response as unknown as Outcome), cacheHit: true } as Outcome;
+  }
+  const outcome = await run();
+  if (outcome.status === "completed" && outcome.mode === "brain") {
+    const { plan, receipt, ...cacheable } = outcome;
+    void plan;
+    void receipt;
+    await ctx.db.commandCache.create({ data: { ...key, response: cacheable as unknown as Prisma.InputJsonValue } }).catch(() => undefined);
+  }
+  return outcome;
+}
 
 function base(ex: Pick<Execution, "id" | "intent" | "kind" | "aiUsed">): Pick<CommandResponse, "executionId" | "intent" | "type" | "aiUsed"> {
   return { executionId: ex.id, intent: (ex.intent as IntentKey | null) ?? null, type: (ex.kind as CommandResponse["type"]) ?? "unknown", aiUsed: ex.aiUsed };
@@ -70,18 +122,23 @@ export async function understandCommand(ctx: TenantContext, raw: CommandInput): 
   const n = normalize(colon > 0 ? text.slice(0, colon) : text);
   const weekday = localParts(ctx.organization.timezone).weekday;
   const entities: Params = { ...extractEntities(text, weekday), fileIds: input.fileIds };
-  let def: IntentDef | null = detectIntent(n, input.fileIds.length > 0);
+  let def: IntentDef | null = detectIntent(n, input.fileIds.length > 0, { name: entities.name });
   let aiUsed = false;
   let early: Omit<CommandResponse, "executionId" | "intent" | "type" | "aiUsed"> | null = null;
   let errorDetail: string | null = null;
+  // Known up front so AI calls made while routing are attributed to this command.
+  const executionId = randomUUID();
 
   if (!def) {
-    if (!aiRouterAvailable()) {
+    if (looksLikeQuestion(n, text)) {
+      // A question: the Company Brain answers first; AI only if the brain can't (decided in the handler).
+      def = intentDef("brain_question");
+    } else if (!aiRouterAvailable()) {
       early = { status: "ai_unavailable", message: { key: "aiRequired" }, reason: "ai_not_configured", actions: [{ label: "openAiSettings", href: "/settings/ai" }] };
     } else {
       aiUsed = true;
       try {
-        const r = await routeWithAi(scopeOf(ctx), text);
+        const r = await withCommandAttribution(executionId, () => routeWithAi(scopeOf(ctx), text));
         const routed = r.intent !== "unknown" && r.confidence >= 0.55 ? intentDef(r.intent) : null;
         if (!routed) early = { status: "needs_input", message: { key: "notUnderstood" } };
         else {
@@ -104,7 +161,11 @@ export async function understandCommand(ctx: TenantContext, raw: CommandInput): 
   if (def && !ctx.can(def.permission)) early = { status: "denied", message: { key: "denied" }, reason: "forbidden" };
 
   const status: CommandStatus = early?.status ?? "understood";
+  const plan = def ? planExecution(def) : aiUsed ? { mode: "ai" as const, intent: null, requiredData: [], requiredBrainSections: [], tokenBudget: 0, maxOutputTokens: 300 } : null;
   const data = {
+    id: executionId,
+    mode: plan?.mode ?? null,
+    routing: plan ? (plan as unknown as Prisma.InputJsonValue) : undefined,
     organizationId: ctx.organization.id,
     workspaceId: ctx.workspace.id,
     userId: ctx.user.id,
@@ -147,7 +208,9 @@ async function handle(ctx: TenantContext, ex: Execution, h: Omit<HandlerInput, "
   // Permission is re-checked at execution time (a role may have changed since the command was understood).
   if (!ctx.can(def.permission)) return { outcome: { status: "denied", message: { key: "denied" }, reason: "forbidden" }, errorDetail: null };
   try {
-    const outcome = await HANDLERS[def.key as IntentKey]({ ctx, scope: scopeOf(ctx), def, locale: ex.locale === "ar" ? "ar" : "en", ...h });
+    const run = () => ALL_HANDLERS[def.key as IntentKey]({ ctx, scope: scopeOf(ctx), def, locale: ex.locale === "ar" ? "ar" : "en", ...h });
+    // Every AI call made while handling (directly or deep in existing services) is tagged with this command.
+    const outcome = await withCommandAttribution(ex.id, async () => (def.cacheable && !h.plan && !h.confirmed ? cached(ctx, ex, def, run) : run()));
     return { outcome, errorDetail: null };
   } catch (err) {
     if (err instanceof UserFacingError) return { outcome: { status: "failed", message: { key: "failed" }, reason: err.code }, errorDetail: redact(err.message) };
@@ -160,13 +223,31 @@ async function handle(ctx: TenantContext, ex: Execution, h: Omit<HandlerInput, "
 }
 
 async function finish(ctx: TenantContext, ex: Execution, outcome: Outcome, t0: number, errorDetail: string | null): Promise<CommandResponse> {
-  const { plan, receipt, approvalRequired, action, ...rest } = outcome;
-  const response: CommandResponse = { ...base(ex), ...rest };
+  const { plan, receipt, approvalRequired, action, metrics, cacheHit, ...rest } = outcome as Outcome & { cacheHit?: boolean };
+  const runId = outcome.runId ?? ex.runId;
+  // Real AI usage for this command: calls tagged with it, plus its job's calls.
+  const usage = await db.aiRun.aggregate({
+    where: { organizationId: ctx.organization.id, OR: [{ commandExecutionId: ex.id }, ...(runId ? [{ agentRunId: runId }] : [])] },
+    _sum: { inputTokens: true, outputTokens: true, costMicro: true },
+    _count: true,
+  });
+  const aiUsed = ex.aiUsed || usage._count > 0;
+  const mode = outcome.mode ?? (ex.mode as CommandResponse["mode"]) ?? null;
+  const response: CommandResponse = { ...base(ex), ...rest, aiUsed, mode };
   const def = intentDef(ex.intent ?? "");
   const failed = ["failed", "denied", "ai_unavailable"].includes(outcome.status);
   await ctx.db.commandExecution.update({
     where: { id: ex.id },
     data: {
+      mode,
+      aiUsed,
+      cacheHit: Boolean(cacheHit),
+      brainVersion: metrics?.brainVersion ?? ex.brainVersion,
+      contextTokens: metrics?.contextTokens ?? ex.contextTokens,
+      retrievedItems: metrics?.retrievedItems ?? ex.retrievedItems,
+      inputTokens: usage._sum.inputTokens ?? 0,
+      outputTokens: usage._sum.outputTokens ?? 0,
+      costMicro: usage._sum.costMicro ?? BigInt(0),
       status: outcome.status,
       response: response as unknown as Prisma.InputJsonValue,
       plan: plan ? (plan as unknown as Prisma.InputJsonValue) : Prisma.DbNull,
@@ -288,6 +369,8 @@ export async function commandStatus(ctx: TenantContext, executionId: string): Pr
     return { ...current, status: "queued", message: { key: run.status === "RUNNING" ? "processing" : "started" }, progress };
   }
   const outcome = await outcomeFromRun(ctx, ex, run);
+  const p = ((run.result ?? {}) as { params?: { brainContextTokens?: number; brainItems?: number } }).params;
+  if (p?.brainContextTokens != null) outcome.metrics = { contextTokens: p.brainContextTokens, retrievedItems: p.brainItems ?? 0 };
   const t0 = Date.now();
   const res = await finish(ctx, ex, { ...outcome, runId: ex.runId, progress: { done: progress.total, total: progress.total } }, t0, run.status === "FAILED" ? run.error : null);
   return res;
@@ -316,7 +399,7 @@ export async function commandSuggestions(ctx: TenantContext): Promise<Suggestion
   const tz = ctx.organization.timezone;
   const start = localDay(tz, 0);
   const end = localDay(tz, 1);
-  const [overdue, dueToday, approvals, hot, leads, content, connected, stalled] = await Promise.all([
+  const [overdue, dueToday, approvals, hot, leads, content, connected, stalled, services] = await Promise.all([
     ctx.db.salesActivity.count({ where: { completedAt: null, pausedAt: null, dueAt: { lt: start } } }),
     ctx.db.salesActivity.count({ where: { completedAt: null, pausedAt: null, dueAt: { gte: start, lt: end } } }),
     ctx.db.approval.count({ where: { status: "PENDING" } }),
@@ -325,12 +408,14 @@ export async function commandSuggestions(ctx: TenantContext): Promise<Suggestion
     ctx.db.contentItem.count(),
     ctx.db.integration.count({ where: { status: "CONNECTED" } }),
     ctx.db.lead.count({ where: { stage: { in: ["CONTACTED", "QUALIFIED", "PROPOSAL", "NEGOTIATION"] }, stageChangedAt: { lt: new Date(Date.now() - 14 * 86_400_000) } } }),
+    ctx.db.offering.count({ where: { isActive: true, type: "SERVICE" } }),
   ]);
   const ai = aiAvailability().configured;
   const s: Suggestion[] = [];
   if (overdue && ctx.can("leads:read")) s.push({ key: "reviewOverdue" });
   if (dueToday && ctx.can("leads:read")) s.push({ key: "followupsToday" });
   if (approvals) s.push({ key: "openApprovals" });
+  if (services) s.push({ key: "ourServices" }); // answered from the Company Brain, no AI
   if (hot && ctx.can("leads:read")) s.push({ key: "hotLeads" });
   if (stalled && ctx.can("leads:read")) s.push({ key: "stalledDeals" });
   if (leads && ctx.can("leads:read")) s.push({ key: "salesSummary" });

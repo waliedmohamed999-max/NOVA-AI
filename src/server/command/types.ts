@@ -1,4 +1,4 @@
-import type { IntentKey, IntentKind } from "./registry";
+import type { IntentKey, IntentKind, RoutingMode } from "./registry";
 import type { Entities } from "./parse";
 
 /** A translatable message: the client renders `common.cmd.msg.<key>` with `values`. */
@@ -38,6 +38,8 @@ export type CommandResponse = {
   stats?: { key: string; value: string | number }[];
   /** "This will: …" lines for large or risky commands. */
   preview?: Msg[];
+  /** Quiet informational lines (e.g. a policy reminder) — no "this will" heading. */
+  notes?: Msg[];
   choices?: { index: number; title: string; subtitle?: string | null }[];
   confirmLabel?: string | null;
   actions?: ResultAction[];
@@ -45,6 +47,10 @@ export type CommandResponse = {
   runId?: string | null;
   progress?: { done: number; total: number } | null;
   aiUsed: boolean;
+  /** How it was answered: local / brain / ai / brain_ai (shown as a small, quiet label). */
+  mode?: RoutingMode | null;
+  /** Number of Company Brain sources the answer relied on. */
+  sources?: number | null;
 };
 
 export type Params = Omit<Entities, "date"> & {

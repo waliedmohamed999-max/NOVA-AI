@@ -4,7 +4,7 @@ import { extractCount, extractDate, extractEntities, extractName, normalize } fr
 import ar from "@/i18n/messages/ar/common.json";
 import en from "@/i18n/messages/en/common.json";
 
-const intent = (text: string, files = false) => detectIntent(normalize(text), files)?.key ?? null;
+const intent = (text: string, files = false) => detectIntent(normalize(text), files, { name: extractName(text) })?.key ?? null;
 
 describe("command parser — local intents (no AI)", () => {
   it.each([
@@ -57,6 +57,25 @@ describe("command parser — local intents (no AI)", () => {
     ["Create a Ramadan campaign.", "create_campaign"],
     ["Prepare next week's Instagram posts.", "prepare_week_content"],
     ["Follow up with hot leads.", "prepare_followups"],
+    // Company Brain facts (no AI)
+    ["ما الخدمات التي نقدمها؟", "brain_services"],
+    ["اي الخدمات بتاعتنا", "brain_services"],
+    ["ما المنتجات؟", "brain_products"],
+    ["ما الجمهور المستهدف؟", "brain_audience"],
+    ["ما مميزات الشركة؟", "brain_strengths"],
+    ["ما سياسة الأسعار؟", "brain_pricing"],
+    ["ما نبرة العلامة؟", "brain_tone"],
+    ["What services do we offer?", "brain_services"],
+    // local lookups (no AI)
+    ["كم قيمة الـPipeline؟", "pipeline_value"],
+    ["انقل Falcon لمرحلة التفاوض", "move_stage"],
+    ["من العملاء المتأخرين؟", "overdue_followups"],
+    ["إيه مواعيدي بكرة؟", "calendar_lookup"],
+    ["إيه حالة الحسابات المربوطة؟", "integrations_status"],
+    // brain + AI
+    ["اعمل بوست عن خدمات البرمجة", "prepare_week_content"],
+    ["اعمل بوست عن تصميم المواقع", "prepare_week_content"], // "design" is the topic here, not an image request
+    ["جهز رسالة متابعة لشركة Falcon", "draft_sales_message"],
     // high-risk
     ["ابعت العرض", "send_quote"],
     ["انشر المحتوى", "publish_content"],

@@ -20,7 +20,26 @@ export type Entities = {
   body: string | null;
   value: number | null;
   b2b: boolean;
+  /** Any pipeline stage named in the command ("move Falcon to negotiation"). */
+  targetStage: "NEW" | "CONTACTED" | "QUALIFIED" | "PROPOSAL" | "NEGOTIATION" | "WON" | "LOST" | null;
 };
+
+const STAGE_WORDS: [RegExp, NonNullable<Entities["targetStage"]>][] = [
+  [/تفاوض|negotiat/, "NEGOTIATION"],
+  [/(مرحله|stage)?\s*(العرض|عرض السعر|عرض)(\s|$)|\bproposal\b/, "PROPOSAL"],
+  [/مؤهل|تاهيل|qualified/, "QUALIFIED"],
+  [/تم التواصل|تواصل|contacted/, "CONTACTED"],
+  [/(^|\s)(ناجح|ناجحه|مكسوب|مكسوبه|كسبنا|ربحنا)(\s|$)|\bwon\b/, "WON"],
+  [/(^|\s)(خاسر|خاسره|خسرنا|خسرناها)(\s|$)|\blost\b/, "LOST"],
+  [/(^|\s)(جديد|جديده)(\s|$)|\bnew\b/, "NEW"],
+];
+
+export function extractStage(n: string): Entities["targetStage"] {
+  // Only the part after "to / ل / الى" names the target ("move Falcon to negotiation").
+  const tail = n.match(/(?:(?:^|\s)(?:لمرحله|الي مرحله|الي|ل|to|into)\s)(.*)$/)?.[1] ?? n;
+  for (const [re, stage] of STAGE_WORDS) if (re.test(tail)) return stage;
+  return null;
+}
 
 /** Arabic-aware normalization: diacritics, tatweel, alef/ya/ta-marbuta variants, Arabic digits, punctuation. */
 export function normalize(text: string) {
@@ -99,6 +118,11 @@ const STOP = new Set(
     "عرض العرض سعر اسعار الاسعار رساله الرساله رسايل واتساب واتس ايميل بريد " +
     "اسمه اسمها باسم رقمه رقمها رقم تليفون موبايل جوال بقيمه قيمه قيمتها بمبلغ " +
     "كسبنا كسبناها مكسوبه ربحنا خسرنا خسرناها خاسره ناجحه تم " +
+    "انقل حرك حول غير مرحله لمرحله المرحله مرحلة تفاوض التفاوض مؤهل المؤهل مؤهله التواصل تواصل ناجح مكسوب خاسر " +
+    "move stage to into negotiation qualified contacted " +
+    "جهزلي اكتبلي صيغ رد ردا لـ للعميل " +
+    "اخر نشاط سجل تاريخ التعامل النشاط activity history timeline last " +
+    "ايه ايش اي ما ماذا مين هل كم عندي عندنا لدينا what which who is are was the " +
     "لو سمحت فضلك من فضلك please pls اول اولي ثاني اخر my our your first another " +
     "open go to the a an for with of and create add new make schedule set up remind me follow-up follow up followup followups " +
     "lead leads customer client contact company opportunity deal b2b quote proposal send close mark as won lost named called " +
@@ -150,5 +174,6 @@ export function extractEntities(original: string, todayWeekday: number): Entitie
     body,
     value: value ? Number(value.replace(/,/g, "")) : null,
     b2b: /b2b|بي تو بي|شركات/.test(n),
+    targetStage: extractStage(n),
   };
 }

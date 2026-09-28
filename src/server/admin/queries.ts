@@ -120,3 +120,44 @@ export async function adminHealth() {
     sentry: Boolean(process.env.SENTRY_DSN?.trim()),
   };
 }
+
+/**
+ * Command Center routing this month (platform admin only): how many commands were answered locally,
+ * from the Company Brain, with AI, or with brain + AI — plus real tokens/cost/latency from the log.
+ * No "tokens saved" estimate: there is no baseline to compare against, so we report commands handled without AI.
+ */
+export async function adminCommandUsage() {
+  const since = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const where = { createdAt: { gte: since }, mode: { not: null } };
+  const [byMode, cacheHits, recent] = await Promise.all([
+    db.commandExecution.groupBy({ by: ["mode"], where, _count: true, _sum: { inputTokens: true, outputTokens: true, costMicro: true, contextTokens: true }, _avg: { latencyMs: true } }),
+    db.commandExecution.count({ where: { ...where, cacheHit: true } }),
+    db.commandExecution.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: { id: true, createdAt: true, intent: true, mode: true, status: true, cacheHit: true, contextTokens: true, retrievedItems: true, inputTokens: true, outputTokens: true, costMicro: true, latencyMs: true },
+    }),
+  ]);
+  const total = byMode.reduce((a, m) => a + m._count, 0);
+  const count = (m: string) => byMode.find((x) => x.mode === m)?._count ?? 0;
+  const withoutAi = count("local") + count("brain");
+  return {
+    total,
+    withoutAi,
+    cacheHits,
+    modes: (["local", "brain", "ai", "brain_ai"] as const).map((m) => {
+      const row = byMode.find((x) => x.mode === m);
+      return {
+        mode: m,
+        count: row?._count ?? 0,
+        share: total ? Math.round(((row?._count ?? 0) / total) * 100) : 0,
+        tokens: (row?._sum.inputTokens ?? 0) + (row?._sum.outputTokens ?? 0),
+        contextTokens: row?._sum.contextTokens ?? 0,
+        costMicro: row?._sum.costMicro ?? BigInt(0),
+        avgLatency: Math.round(row?._avg.latencyMs ?? 0),
+      };
+    }),
+    recent,
+  };
+}

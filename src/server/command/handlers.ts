@@ -15,7 +15,7 @@ import { performanceDigest, loadMetricRows } from "../analytics/digest";
 import { formatPct } from "../analytics/compare";
 import { localParts } from "../reports/service";
 import { storage } from "../storage";
-import type { IntentDef, IntentKey } from "./registry";
+import type { IntentDef, IntentKey, RoutingMode } from "./registry";
 import type { CommandResponse, Msg, Params, Plan, Receipt, ResultAction, ResultItem } from "./types";
 
 const DAY = 86_400_000;
@@ -36,11 +36,15 @@ export type Outcome = Omit<CommandResponse, "executionId" | "intent" | "type" | 
   approvalRequired?: boolean;
   /** The approval-gated action this command resolved to (activity log). */
   action?: string | null;
+  /** Routing actually used (a brain question may escalate to brain_ai). */
+  mode?: RoutingMode;
+  /** Company Brain retrieval metrics for the activity log. */
+  metrics?: { contextTokens?: number; retrievedItems?: number; brainVersion?: string };
 };
 
-const actor = (ctx: TenantContext) => ({ type: "USER" as const, id: ctx.user.id, label: ctx.user.name ?? ctx.user.email });
-const receipt = (action: string, entity: string, entityId: string, status = "done"): Receipt => ({ action, entity, entityId, status, at: new Date().toISOString() });
-const msg = (key: string, values?: Msg["values"]): Msg => ({ key, values });
+export const actor = (ctx: TenantContext) => ({ type: "USER" as const, id: ctx.user.id, label: ctx.user.name ?? ctx.user.email });
+export const receipt = (action: string, entity: string, entityId: string, status = "done"): Receipt => ({ action, entity, entityId, status, at: new Date().toISOString() });
+export const msg = (key: string, values?: Msg["values"]): Msg => ({ key, values });
 
 /** Start of the organization's local day (UTC instant), offset by `days`, at `hour` local time. */
 export function localDay(tz: string, days = 0, hour = 0) {
@@ -50,11 +54,11 @@ export function localDay(tz: string, days = 0, hour = 0) {
   return new Date(Date.parse(`${local.date}T00:00:00.000Z`) - offsetHours * 3_600_000 + days * DAY + hour * 3_600_000);
 }
 
-function formatWhen(d: Date, tz: string, locale: "ar" | "en") {
+export function formatWhen(d: Date, tz: string, locale: "ar" | "en") {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en-US", { weekday: "long", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: tz }).format(d);
 }
 
-function money(cents: number, currency: string, locale: "ar" | "en") {
+export function money(cents: number, currency: string, locale: "ar" | "en") {
   return new Intl.NumberFormat(locale === "ar" ? "ar" : "en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
 }
 
@@ -82,7 +86,7 @@ export async function findLeads(ctx: TenantContext, name: string): Promise<LeadR
 }
 
 /** Resolves the customer the command is about: one match → continue; several → ask; none → say so. No guessing. */
-async function withLead(h: HandlerInput, next: (lead: LeadRow) => Promise<Outcome>, opts: { askKey?: string } = {}): Promise<Outcome> {
+export async function withLead(h: HandlerInput, next: (lead: LeadRow) => Promise<Outcome>, opts: { askKey?: string } = {}): Promise<Outcome> {
   if (h.params.leadId) {
     const lead = await h.ctx.db.lead.findUnique({ where: { id: h.params.leadId }, select: { id: true, name: true, company: true, stage: true, email: true } });
     if (!lead) return { status: "failed", message: msg("leadGone"), reason: "lead_not_found" };
@@ -101,7 +105,8 @@ async function withLead(h: HandlerInput, next: (lead: LeadRow) => Promise<Outcom
   };
 }
 
-const aiUnavailable = (reason = "ai_not_configured"): Outcome => ({ status: "ai_unavailable", message: msg("aiUnavailable"), reason, actions: [{ label: "openAiSettings", href: "/settings/ai" }] });
+/** Generation was needed and no real AI provider is set up — local and brain commands keep working. */
+export const aiUnavailable = (reason = "ai_not_configured"): Outcome => ({ status: "ai_unavailable", message: msg("aiGenerationRequired"), reason, actions: [{ label: "openAiSettings", href: "/settings/ai" }] });
 
 // ── Reads ──
 
@@ -619,7 +624,10 @@ function navigate(h: HandlerInput): Outcome {
   return { status: "completed", message: msg("opening", { page: h.def.key }), navigation: h.def.route ?? "/home" };
 }
 
-export const HANDLERS: Record<IntentKey, (h: HandlerInput) => Promise<Outcome> | Outcome> = {
+export type Handler = (h: HandlerInput) => Promise<Outcome> | Outcome;
+
+/** Core handlers; Company Brain / no-AI lookups live in brain-handlers.ts (combined in service.ts). */
+export const HANDLERS: Record<Exclude<IntentKey, import("./brain-handlers").BrainHandlerKey>, Handler> = {
   delete_anything: () => ({ status: "denied", message: msg("deleteNotAllowed"), reason: "forbidden" }),
   approve_all: approveAll,
   approve_item: () => ({ status: "needs_approval", message: msg("approveInCenter"), navigation: "/approvals", approvalRequired: true }),
