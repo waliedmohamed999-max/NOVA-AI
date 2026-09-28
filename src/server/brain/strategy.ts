@@ -4,7 +4,7 @@ import { aiAvailability, aiStructured } from "../ai";
 import { tenantDb, type TenantScope } from "../db/tenant";
 import { NotFoundError, UserFacingError } from "../errors";
 import { performanceDigest } from "../analytics/digest";
-import { compactContext, retrieveCompanyContext } from "../knowledge/company-context";
+import { brainMeta, compactContext, retrieveCompanyContext } from "../knowledge/company-context";
 import { STRATEGY_TYPES } from "@/lib/brain-fields";
 import { recordRevision, upsertFact } from "./core";
 import { customerOverview } from "./customers";
@@ -93,6 +93,7 @@ export async function draftStrategy(scope: TenantScope, actor: Actor, opts: { ty
         schemaName: "strategy_draft",
         schema: strategySchema,
         maxTokens: 1200,
+        brain: brainMeta(brain),
         system: [
           `Draft a ${opts.type} strategy for the company below. Use only the facts, answers and aggregates given — no invented numbers, market sizes or competitors.`,
           "KPIs must be measurable. Initiatives are concrete actions for the next 90 days.",

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { db } from "../db/client";
 import type { TenantScope } from "../db/tenant";
-import { brainPrompt, loadBrain, type BrainSnapshot } from "../agents/brain";
+import { loadBrain, type BrainSnapshot } from "../agents/brain";
+import { compactContext } from "../knowledge/company-context";
+import { contentContext } from "../knowledge/use-cases";
 import { loadMetricRows } from "../analytics/digest";
 import { groupBy } from "../analytics/compare";
 
@@ -123,21 +125,30 @@ export async function performanceLearning(scope: TenantScope) {
 }
 
 /** Everything the model needs to write for this company — assembled here, never in components. */
-export async function studioContext(scope: TenantScope, item?: { id: string; campaignId: string | null }) {
-  const [brain, learning, recent, approved, campaign] = await Promise.all([
+export async function studioContext(scope: TenantScope, item?: { id: string; campaignId: string | null; title?: string | null; pillar?: string | null; hook?: string | null; caption?: string | null }) {
+  // Company context is selective: the product/service this post is about, audience, voice and content rules.
+  const about = item ? [item.title, item.pillar, item.hook, item.caption?.slice(0, 400)].filter(Boolean).join(" ") : undefined;
+  const [brain, brainCtx, learning, recent, approved, campaign] = await Promise.all([
     loadBrain(scope),
+    // relevantTo only (no query): product/audience/voice/rules — no knowledge-chunk search for studio edits.
+    contentContext(scope, { relevantTo: about }),
     performanceLearning(scope),
     recentContent(scope, item?.id),
     db.contentItem.findMany({ where: { ...scope, status: { in: ["APPROVED", "SCHEDULED", "PUBLISHED"] }, ...(item ? { id: { not: item.id } } : {}) }, orderBy: { updatedAt: "desc" }, take: 4, select: { hook: true, caption: true, platform: true } }),
     item?.campaignId ? db.campaign.findFirst({ where: { id: item.campaignId, ...scope }, select: { name: true, objective: true, offer: true, audience: true } }) : null,
   ]);
-  return { brain, learning, recent, approved, campaign };
+  return { brain, brainCtx, learning, recent, approved, campaign };
 }
 
+/**
+ * Prompt block for Content Studio calls. Company knowledge is the selective content context (never the full
+ * profile); the recent hooks/approved posts are the task's own data (anti-repetition), bounded to 15 and 4.
+ */
 export function contextBlock(c: Awaited<ReturnType<typeof studioContext>>) {
   const b: BrainSnapshot = c.brain;
   return [
-    brainPrompt(b),
+    compactContext(c.brainCtx),
+    `Write customer-facing copy in ${b.locale === "ar" ? "Arabic (natural Modern Standard Arabic suited to the region)" : "English"}.`,
     c.campaign && `Campaign: ${c.campaign.name}. Objective: ${c.campaign.objective ?? "—"}.${c.campaign.offer ? ` Offer: ${c.campaign.offer}.` : ""}${c.campaign.audience ? ` Audience: ${c.campaign.audience}.` : ""}`,
     `Performance context:\n${c.learning.text}`,
     c.approved.length && `Recently approved posts (match this quality and voice, don't copy them):\n${c.approved.map((a) => `- [${a.platform}] ${a.hook ?? a.caption.slice(0, 120)}`).join("\n")}`,

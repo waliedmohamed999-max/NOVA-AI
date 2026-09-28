@@ -1679,6 +1679,11 @@ model AiRun {
   pricingVersion String?
   /// The Command Center execution that caused this call (null for other callers).
   commandExecutionId String?
+  /// Company Brain context sent with this call (selective retrieval audit): size, items, source types, brain version.
+  contextTokens      Int?
+  retrievedItems     Int?
+  sourceTypes        String[] @default([])
+  brainVersion       String?
   createdAt      DateTime    @default(now())
 
   @@index([organizationId, createdAt])

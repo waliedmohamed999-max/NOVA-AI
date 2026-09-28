@@ -1,21 +1,22 @@
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { retrieveKnowledge, formatContext } from "../../knowledge/service";
 import { addLeadEvent, draftLeadMessage, notifyHotLead, scheduleFollowUp } from "../../sales/service";
 import { temperatureFor } from "../../sales/scoring";
 import { notify } from "../../notifications/service";
 import { defineWorkflow } from "../runtime";
-import { brainPrompt, loadBrain, type BrainSnapshot } from "../brain";
+import { loadBrain, type BrainSnapshot } from "../brain";
 import { followUpSchema, leadQualificationSchema, type LeadQualification } from "../schemas";
-import { compactContext, retrieveCompanyContext, type CompanyContext } from "../../knowledge/company-context";
+import { brainMeta, compactContext, relevantOfferings, type CompanyContext } from "../../knowledge/company-context";
+import { salesContext } from "../../knowledge/use-cases";
 
-const SALES_SYSTEM = (b: BrainSnapshot) =>
+/** Qualification: sales rules, objections and only the products this lead is about (no other customers, no content). */
+const QUALIFY_SYSTEM = (brain: CompanyContext) =>
   [
     "You are the AI Sales Agent of this company. You qualify inbound leads and draft helpful, honest replies.",
     "Never promise discounts, custom prices, refunds, legal terms, contract terms or delivery dates that are not in the company information. If the lead asks about them, flag the matching sensitive topic and propose that a human confirms.",
     "Replies are short, warm, specific to what the lead wrote, and end with one clear next step.",
     "",
-    brainPrompt(b),
+    compactContext(brain),
   ].join("\n");
 
 /** Follow-up drafting: a compact sales context instead of the whole company profile. */
@@ -79,10 +80,11 @@ defineWorkflow("lead_qualify", {
       const msgs = await db.message.findMany({ where: { ...ctx.scope, conversation: { leadId } }, orderBy: { createdAt: "asc" }, take: 20 });
       return { lead, message: msgs.filter((m) => m.direction === "INBOUND").map((m) => m.body).join("\n\n") };
     });
-    const { b, knowledge } = await ctx.step("reviewing_business", async () => {
+    const { b, brain } = await ctx.step("reviewing_business", async () => {
       const b = await loadBrain(ctx.scope);
-      const chunks = await retrieveKnowledge(ctx.scope, `${message} ${lead.interests.join(" ")}`, 4);
-      return { b, knowledge: formatContext(chunks) };
+      // Selective: relevant products for what the lead asked + sales rules; knowledge only if no FAQ/fact answers it.
+      const brain = await salesContext(ctx.scope, { query: `${message} ${lead.interests.join(" ")}`.trim() || undefined, relevantTo: `${message} ${lead.interests.join(" ")}` });
+      return { b, brain };
     });
 
     const q = await ctx.step("qualifying", () =>
@@ -90,14 +92,15 @@ defineWorkflow("lead_qualify", {
         task: "SALES",
         schemaName: "lead_qualification",
         schema: leadQualificationSchema,
-        system: SALES_SYSTEM(b),
+        system: QUALIFY_SYSTEM(brain),
+        maxTokens: 900,
+        brain: brainMeta(brain),
         prompt: [
           `Lead: ${lead.name}${lead.company ? `, ${lead.company}` : ""}`,
           `Channel: ${lead.channel}; source: ${lead.source ?? "unknown"}`,
           lead.email && `Email: ${lead.email}`,
           `Rules-based score so far: ${lead.score}/100`,
           `Their messages:\n${message || "(no message)"}`,
-          `Relevant company knowledge:\n${knowledge}`,
           `Write the draft reply in ${b.locale === "ar" ? "Arabic" : "the language the lead wrote in"}. estimatedValue is in ${lead.currency} and must be null unless the pricing in the company knowledge supports it.`,
         ]
           .filter(Boolean)
@@ -189,18 +192,21 @@ defineWorkflow("leads_followup", {
       const out: { leadId: string; name: string; disposition: string }[] = [];
       // Sales context is retrieved once for the whole job and shared by every draft (offerings, ICP, pricing,
       // sales rules only — no other customers, no content history).
-      const brain = await retrieveCompanyContext(ctx.scope, { purpose: "sales", budget: "small" });
+      // Shared by every draft: sales rules + objections only (relevantTo "" → no product catalogue in the system prompt).
+      const brain = await salesContext(ctx.scope, { relevantTo: "" });
       const system = salesSystem(brain, b.locale);
       Object.assign(ctx.params, { brainContextTokens: brain.contextTokens, brainItems: brain.retrievedItems });
+      const catalogue = await db.offering.findMany({ where: { ...ctx.scope, isActive: true }, select: { name: true, category: true, description: true, priceText: true }, take: 100 });
       for (const { lead, history } of convos) {
-        // Only the offerings this customer showed interest in (fall back to none rather than the whole catalogue).
-        const relevant = [...brain.services, ...brain.products].filter((o) => lead.interests.some((i) => o.name.toLowerCase().includes(i.toLowerCase()) || i.toLowerCase().includes(o.name.toLowerCase())));
+        // Only the offerings this customer showed interest in — never the whole catalogue.
+        const relevant = relevantOfferings(catalogue, `${lead.interests.join(" ")} ${lead.intent ?? ""}`).map((o) => ({ name: o.name, price: o.priceText })).slice(0, 3);
         const res = await aiStructured(ctx.ai, {
           task: "SALES",
           schemaName: "follow_up",
           schema: followUpSchema,
           system,
           maxTokens: 400,
+          brain: brainMeta(brain),
           prompt: [
             `Write a short follow-up to ${lead.name}${lead.company ? ` (${lead.company})` : ""}.`,
             `Stage: ${lead.stage}. Last known intent: ${lead.intent ?? "unknown"}. Objections: ${lead.objections.join(", ") || "none"}.`,

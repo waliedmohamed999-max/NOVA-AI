@@ -1,7 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { compactContext, retrieveCompanyContext, type Budget, type CompanyContext } from "../../knowledge/company-context";
+import { brainMeta, compactContext, retrieveCompanyContext, type Budget, type CompanyContext } from "../../knowledge/company-context";
 import { createContentFromPlan, notifyContentReady } from "../../content/service";
 import { audit } from "../../audit";
 import { defineWorkflow, type RunContext } from "../runtime";
@@ -94,6 +94,7 @@ defineWorkflow("content_plan", {
         maxTokens: Math.min(8000, 400 + count * 450),
         schema: contentPlanSchema,
         system: WRITER_SYSTEM(b, brain),
+        brain: brainMeta(brain),
         prompt: [
           `Request from the business owner: "${ctx.input || `Create ${count} posts for next week`}"`,
           `Create exactly ${count} posts${platform ? ` for ${platform}` : " across the recommended channels"}.`,
@@ -165,6 +166,7 @@ defineWorkflow("campaign", {
         schemaName: "campaign_plan",
         schema: campaignPlanSchema,
         system: WRITER_SYSTEM(b, brain),
+        brain: brainMeta(brain),
         prompt: [
           `Request from the business owner: "${ctx.input}"`,
           topic && `Campaign subject: ${topic}`,
@@ -269,6 +271,7 @@ defineWorkflow("content_rewrite", {
         schemaName: "rewrite",
         schema: plannedPostSchema,
         system: WRITER_SYSTEM(b, brain),
+        brain: brainMeta(brain),
         prompt: [
           `Rewrite this ${item.platform} ${item.format} post with a fresh angle and a stronger hook. Keep the same pillar ("${item.pillar ?? ""}") and intent.`,
           ctx.input && `Owner's note: ${ctx.input}`,

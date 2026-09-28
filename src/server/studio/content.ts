@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { brainMeta } from "../knowledge/company-context";
 import type { Prisma } from "@/generated/prisma/client";
 import type { SocialPlatform } from "@/generated/prisma/enums";
 import { db } from "../db/client";
@@ -47,6 +48,7 @@ export async function improveContent(scope: TenantScope, id: string, opts: { ins
       schemaName: "improved_content",
       schema: improvedContentSchema,
       system,
+      brain: brainMeta(ctx.brainCtx),
       prompt: [
         `Improve this ${item.platform} ${item.format} post. Keep its intent and pillar ("${item.pillar ?? "—"}"); make the hook stronger, the caption clearer and the CTA specific.`,
         PLATFORM_GUIDE[item.platform] ?? "",
@@ -97,6 +99,7 @@ export async function qualityCheck(
     schemaName: "quality_check",
     schema: qualityCheckSchema,
     system: ["You review social posts before approval for a brand. Be strict and specific. Reply in the brand's language.", STUDIO_RULES, contextBlock(c)].join("\n\n"),
+    brain: brainMeta(c.brainCtx),
     prompt: [
       `Check this ${post.platform} ${post.format} post on: brand_fit, clarity, cta, platform_fit, repetition, claim_safety. Use "needs_attention" only with a concrete reason.`,
       `claim_safety: flag any statistic, guarantee, medical/financial promise, price or discount not present in the company information.`,
@@ -172,6 +175,7 @@ export async function adaptForPlatforms(scope: TenantScope, id: string, platform
       schemaName: "platform_adaptation",
       schema: adaptationSchema,
       system: writerSystem(contextBlock(ctx), ctx.brain.locale, ctx.brain.brandKit?.tone),
+      brain: brainMeta(ctx.brainCtx),
       prompt: [
         `Rewrite this ${item.platform} post natively for ${platform}. Same message and offer, different writing — do not reuse the caption.`,
         PLATFORM_GUIDE[platform],
@@ -260,6 +264,7 @@ export async function proposeWeek(scope: TenantScope, opts: { topic?: string | n
     schemaName: "week_proposal",
     schema: weekProposalSchema,
     system: ["You are NOVA's content strategist planning next week's posts.", STUDIO_RULES, arabicGuide(ctx.brain.locale), contextBlock(ctx)].join("\n\n"),
+    brain: brainMeta(ctx.brainCtx),
     prompt: [
       `Propose ${Math.min(7, Math.max(3, opts.count ?? 5))} posts for next week: one per chosen day, a balanced mix (educational, case study, offer, authority, engagement …).`,
       opts.topic && `Focus: ${opts.topic}`,

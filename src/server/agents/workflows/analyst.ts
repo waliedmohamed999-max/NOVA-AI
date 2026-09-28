@@ -5,7 +5,9 @@ import { aiStructured } from "../../ai";
 import { compareToRecent, formatPct, type Comparison, type Finding } from "../../analytics/compare";
 import { loadMetricRows, performanceDigest } from "../../analytics/digest";
 import { defineWorkflow } from "../runtime";
-import { brainPrompt, loadBrain } from "../brain";
+import { loadBrain } from "../brain";
+import { brainMeta, compactContext } from "../../knowledge/company-context";
+import { analyticsContext } from "../../knowledge/use-cases";
 import { narrativeSchema, postInsightSchema, type PostInsight } from "../schemas";
 
 /**
@@ -103,6 +105,8 @@ export async function analyzePost(scope: TenantScope, socialPostId: string, ai: 
   const { comparisons, sample, baselineLabel } = compareToRecent(post, rows);
   const facts = comparisonSentences(comparisons, sample, b.locale);
   const sp = await db.socialPost.findFirst({ where: { id: socialPostId, ...scope } });
+  // Only the approved strategy and the products this post is about — no CRM, no other content.
+  const brain = await analyticsContext(scope, `${post.pillar ?? ""} ${sp?.caption ?? ""}`);
   const insight = await aiStructured(ai, {
     task: "ANALYSIS",
     schemaName: "post_insight",
@@ -111,8 +115,11 @@ export async function analyzePost(scope: TenantScope, socialPostId: string, ai: 
       "You are the Performance Analyst of an AI growth team.",
       "Explain post performance ONLY using the computed comparisons given. Never invent numbers. If data is thin, say so.",
       "Suggestions in tryNext must be concrete and testable.",
-      brainPrompt(b),
+      `Write in ${b.locale === "ar" ? "Arabic" : "English"}.`,
+      compactContext(brain),
     ].join("\n"),
+    maxTokens: 600,
+    brain: brainMeta(brain),
     prompt: [
       `Post (${post.platform}, ${post.format ?? "unknown format"}, pillar: ${post.pillar ?? "unknown"}), published ${post.publishedAt.toISOString()}:`,
       sp?.caption ? `Caption:\n${sp.caption.slice(0, 1500)}` : null,
@@ -168,13 +175,16 @@ defineWorkflow("performance_review", {
         });
       }
     });
+    const brain = await analyticsContext(ctx.scope, ctx.input ?? "");
     const narrative = await ctx.step("writing_insights", () =>
       digest.hasData
         ? aiStructured(ctx.ai, {
             task: "ANALYSIS",
             schemaName: "performance_narrative",
             schema: narrativeSchema,
-            system: ["You are the Performance Analyst. Summarize performance for a busy business owner in 3–4 sentences, using only the facts given. Recommend what to do next.", brainPrompt(b)].join("\n"),
+            system: ["You are the Performance Analyst. Summarize performance for a busy business owner in 3–4 sentences, using only the facts given. Recommend what to do next.", `Write in ${b.locale === "ar" ? "Arabic" : "English"}.`, compactContext(brain)].join("\n"),
+            maxTokens: 500,
+            brain: brainMeta(brain),
             prompt: `Question: ${ctx.input || "How is our content performing?"}\n\nFacts:\n${digest.text}\n${facts.join("\n")}`,
             offline: () => ({ narrative: [digest.text.split("\n")[0], ...facts.slice(0, 2)].join(" "), highlights: facts.slice(0, 3) }),
           })

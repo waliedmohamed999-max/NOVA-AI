@@ -13,7 +13,7 @@ import { similarity } from "../studio/context";
  * Nothing from integrations, credentials or CRM records ever enters this context.
  */
 
-export type BrainPurpose = "sales" | "content" | "support" | "facts";
+export type BrainPurpose = "sales" | "content" | "support" | "facts" | "brief" | "analytics";
 export type BrainSection =
   | "company" | "services" | "products" | "audience" | "valueProps" | "pricing" | "brandVoice" | "contentPillars" | "forbidden" | "salesRules" | "knowledge"
   // Company Intelligence entities (structured, approved only)
@@ -30,6 +30,10 @@ export const PURPOSE_SECTIONS: Record<BrainPurpose, BrainSection[]> = {
   content: ["facts", "company", "brandVoice", "services", "products", "audience", "icp", "segments", "contentPillars", "forbidden", "strategy", "competitors", "knowledge"],
   support: ["facts", "company", "services", "products", "faqs", "knowledge"],
   facts: ["company", "services", "products", "audience", "valueProps", "pricing", "brandVoice", "contentPillars"],
+  // Daily brief: priorities come from the brief's own data; the brain adds only a short summary + approved strategy.
+  brief: ["company", "strategy"],
+  // Analytics: approved strategy and only the products relevant to what is being analysed.
+  analytics: ["company", "strategy", "services", "products"],
 };
 
 /** Fact categories each purpose may read (approved facts only). */
@@ -38,6 +42,8 @@ const PURPOSE_FACTS: Record<BrainPurpose, string[]> = {
   content: ["positioning", "proof", "customer_language", "catalog", "reputation", "strategy"],
   support: ["policy", "pricing", "catalog", "general"],
   facts: [],
+  brief: [],
+  analytics: ["positioning"],
 };
 
 /** Knowledge types each purpose may read (metadata filter on the chunk search). */
@@ -46,7 +52,25 @@ const PURPOSE_KNOWLEDGE: Record<BrainPurpose, KnowledgeSourceType[]> = {
   content: ["SERVICE", "PRODUCT", "CASE_STUDY", "WEBSITE", "MANUAL", "DOCUMENT"],
   support: ["FAQ", "POLICY", "PRODUCT", "SERVICE", "PRICING", "WEBSITE", "DOCUMENT", "MANUAL"],
   facts: ["FAQ", "POLICY", "PRODUCT", "SERVICE", "PRICING", "WEBSITE", "DOCUMENT", "MANUAL", "CASE_STUDY"],
+  brief: [],
+  analytics: [],
 };
+
+/** Which approved strategies each purpose reads. */
+const PURPOSE_STRATEGY: Record<BrainPurpose, string[]> = {
+  sales: ["sales", "business"],
+  content: ["content", "marketing"],
+  support: [],
+  facts: [],
+  brief: ["business", "marketing"],
+  analytics: ["marketing", "content"],
+};
+
+/** Offerings relevant to a text (name/category/description terms) — never the whole catalogue when a filter is asked for. */
+export function relevantOfferings<T extends { name: string; category?: string | null; description?: string | null }>(rows: T[], relevantTo: string): T[] {
+  const text = relevantTo.toLowerCase();
+  return rows.filter((o) => text.includes(o.name.toLowerCase()) || termCoverage(`${o.name} ${o.category ?? ""}`, relevantTo) > 0 || termCoverage(relevantTo, `${o.name} ${o.category ?? ""} ${o.description ?? ""}`) >= 0.34);
+}
 
 export type BrainItem = { name: string; detail?: string | null; price?: string | null; source: SourceKind };
 export type BrainChunk = { text: string; title: string; source: SourceKind; score: number };
@@ -68,6 +92,8 @@ export type CompanyContext = {
   faqs: string[];
   /** The best matching approved FAQ for the query (structured answer, no generation needed). */
   faqMatch: { question: string; answer: string; coverage: number } | null;
+  /** The best matching approved fact for the query. */
+  factMatch: { key: string; value: string; coverage: number } | null;
   objections: string[];
   icps: string[];
   segments: string[];
@@ -237,6 +263,10 @@ export type RetrieveOptions = {
   budget?: Budget;
   /** Allow an embedding call when keyword search finds too little. Never for brain-only answers. */
   semantic?: boolean;
+  /** Only offerings relevant to this text (sales: the customer's interests; content: the post; analytics: the metric subject). */
+  relevantTo?: string;
+  /** Hard context ceiling for a use case (overrides the budget's token limit, never raises it above "large"). */
+  maxTokens?: number;
   /** Override top-K (clamped to 1–8). */
   topK?: number;
 };
@@ -254,7 +284,7 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     db.organization.findUniqueOrThrow({ where: { id: scope.organizationId }, select: { name: true } }),
     needProfile ? db.companyProfile.findFirst({ where, select: { name: true, industry: true, summary: true, description: true, website: true, audience: true, valueProps: true, differentiators: true, contentPillars: true } }) : null,
     needBrand ? db.brandKit.findFirst({ where, select: { tone: true, voiceTraits: true, doSay: true, dontSay: true, forbiddenStyles: true, forbiddenClaims: true, ctaStyle: true, hashtagRules: true, topics: true, seasonalThemes: true } }) : null,
-    needOfferings ? db.offering.findMany({ where: { ...where, isActive: true }, orderBy: { createdAt: "asc" }, take: 20, select: { type: true, name: true, description: true, priceText: true, targetCustomer: true } }) : [],
+    needOfferings ? db.offering.findMany({ where: { ...where, isActive: true }, orderBy: { createdAt: "asc" }, take: 20, select: { type: true, name: true, description: true, priceText: true, targetCustomer: true, category: true } }) : [],
     sections.has("salesRules") ? db.approvalPolicy.findMany({ where, select: { action: true, requiresApproval: true } }) : [],
   ]);
   // 1. Structured layer — approved only (pending/critical-unapproved/rejected are never used by agents).
@@ -265,19 +295,20 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     sections.has("objections") ? db.brainObjection.findMany({ where: { ...where, status: "approved" }, take: 8, select: { objection: true, response: true } }) : [],
     sections.has("icp") ? db.idealCustomerProfile.findMany({ where: { ...where, status: "approved" }, take: 3 }) : [],
     sections.has("segments") ? db.customerSegment.findMany({ where: { ...where, status: "approved" }, take: 6, select: { name: true, definition: true, size: true } }) : [],
-    sections.has("strategy") ? db.strategy.findMany({ where: { ...where, status: "APPROVED", type: { in: opts.purpose === "content" ? ["content", "marketing"] : ["sales", "business"] } }, orderBy: { approvedAt: "desc" }, take: 2 }) : [],
+    sections.has("strategy") ? db.strategy.findMany({ where: { ...where, status: "APPROVED", type: { in: PURPOSE_STRATEGY[opts.purpose].length ? PURPOSE_STRATEGY[opts.purpose] : ["business"] } }, orderBy: { approvedAt: "desc" }, take: 2 }) : [],
     sections.has("competitors") ? db.competitor.findMany({ where, take: 5, select: { name: true, contentThemes: true } }) : [],
     sections.has("salesRules") ? db.salesKnowledge.findFirst({ where }) : null,
   ]);
   // FAQs: the few that match the question (structured answers beat chunks), else the latest.
   const rankedFaqs = opts.query ? faqRows.map((f) => ({ ...f, c: termCoverage(opts.query!, `${f.question} ${f.answer}`) })).filter((f) => f.c > 0).sort((a, b) => b.c - a.c) : faqRows.map((f) => ({ ...f, c: 0 }));
 
+  const pool = opts.relevantTo !== undefined ? relevantOfferings(offerings, opts.relevantTo) : offerings;
   const item = (o: { name: string; description: string | null; priceText: string | null }): BrainItem => ({ name: o.name, detail: o.description?.slice(0, 160) ?? null, price: o.priceText, source: "offering" });
-  const services = sections.has("services") ? offerings.filter((o) => o.type === "SERVICE").map(item) : [];
-  const products = sections.has("products") ? offerings.filter((o) => o.type === "PRODUCT").map(item) : [];
+  const services = sections.has("services") ? pool.filter((o) => o.type === "SERVICE").map(item) : [];
+  const products = sections.has("products") ? pool.filter((o) => o.type === "PRODUCT").map(item) : [];
   const audience = sections.has("audience") && Array.isArray(profile?.audience) ? (profile!.audience as { name?: string; description?: string }[]).map((a) => [a.name, a.description].filter(Boolean).join(" — ")).filter(Boolean) : [];
   const valueProps = sections.has("valueProps") ? [...(profile?.valueProps ?? []), ...(profile?.differentiators ?? [])] : [];
-  const pricing = sections.has("pricing") ? offerings.filter((o) => o.priceText).map((o) => `${o.name}: ${o.priceText}`) : [];
+  const pricing = sections.has("pricing") ? pool.filter((o) => o.priceText).map((o) => `${o.name}: ${o.priceText}`) : [];
   const brandRules = sections.has("brandVoice") && brand ? [brand.tone && `Tone: ${brand.tone}`, brand.voiceTraits.length && `Voice: ${brand.voiceTraits.join(", ")}`, brand.doSay.length && `Always: ${brand.doSay.join("; ")}`].filter(Boolean) as string[] : [];
   const contentRules = sections.has("forbidden")
     ? [
@@ -313,7 +344,10 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
   //    structured FAQ already answers it.
   let chunks: BrainChunk[] = [];
   let semantic = false;
-  const faqAnswers = rankedFaqs[0] && rankedFaqs[0].c >= 0.6;
+  // A structured answer (approved FAQ or approved fact) makes the vector/keyword chunk search unnecessary.
+  const rankedFacts = opts.query ? factRows.map((f) => ({ ...f, c: termCoverage(opts.query!, `${f.key.replace(/[._:-]/g, " ")} ${f.value}`) })).sort((a, b) => b.c - a.c) : [];
+  const factMatch = rankedFacts[0] && rankedFacts[0].c >= 0.6 ? { key: rankedFacts[0].key, value: rankedFacts[0].value, coverage: rankedFacts[0].c } : null;
+  const faqAnswers = (rankedFaqs[0] && rankedFaqs[0].c >= 0.6) || Boolean(factMatch);
   if (sections.has("knowledge") && opts.query && !faqAnswers) {
     const res = await searchBrainChunks(scope, opts.query, { types: PURPOSE_KNOWLEDGE[opts.purpose], k: opts.topK ?? TOP_K[budget], semantic: opts.semantic });
     semantic = res.semantic;
@@ -335,6 +369,7 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     salesRules,
     pillars,
     approvedFacts: factRows.map((f) => `${f.key}: ${f.value}`),
+    factMatch,
     faqs: rankedFaqs.slice(0, opts.query ? 3 : 5).map((f) => `Q: ${f.question}\nA: ${f.answer}`),
     faqMatch: rankedFaqs[0] ? { question: rankedFaqs[0].question, answer: rankedFaqs[0].answer, coverage: rankedFaqs[0].c } : null,
     objections: objectionRows.map((o) => `${o.objection} → ${o.response}`),
@@ -350,7 +385,7 @@ export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveO
     brainVersion: version,
     semantic,
   };
-  fitBudget(ctx, TOKEN_BUDGETS[budget]);
+  fitBudget(ctx, Math.min(TOKEN_BUDGETS.large, opts.maxTokens ?? TOKEN_BUDGETS[budget]));
 
   const kinds = new Map<SourceKind, number>();
   const add = (k: SourceKind, n = 1) => n > 0 && kinds.set(k, (kinds.get(k) ?? 0) + n);
@@ -414,4 +449,9 @@ export function compactContext(ctx: CompanyContext): string {
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+/** Audit metadata for an AI call made with this context (stored on ai_runs). */
+export function brainMeta(ctx: CompanyContext) {
+  return { contextTokens: ctx.contextTokens, retrievedItems: ctx.retrievedItems, sourceTypes: ctx.sources.map((x) => x.kind), brainVersion: ctx.brainVersion };
 }

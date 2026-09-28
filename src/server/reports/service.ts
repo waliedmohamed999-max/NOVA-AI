@@ -2,7 +2,9 @@ import { Prisma } from "@/generated/prisma/client";
 import { db } from "../db/client";
 import type { TenantScope } from "../db/tenant";
 import { aiStructured } from "../ai";
-import { brainPrompt, loadBrain } from "../agents/brain";
+import { loadBrain } from "../agents/brain";
+import { brainMeta, compactContext } from "../knowledge/company-context";
+import { analyticsContext, briefContext } from "../knowledge/use-cases";
 import { narrativeSchema } from "../agents/schemas";
 import { engagementRate, mean, pctChange } from "../analytics/compare";
 import { loadMetricRows } from "../analytics/digest";
@@ -98,6 +100,8 @@ export async function generateDailyBrief(scope: TenantScope, now = new Date()) {
   const periodStart = new Date(`${day}T00:00:00.000Z`);
   const data = await collectBriefData(scope, now);
   const factual = factualBrief(data, b.locale);
+  // Selective: a short summary + approved priorities (the brief's own data carries approvals, follow-ups, campaigns).
+  const brain = await briefContext(scope);
   let narrative = factual;
   let generatedBy = "rules";
   try {
@@ -107,7 +111,9 @@ export async function generateDailyBrief(scope: TenantScope, now = new Date()) {
         task: "SUMMARIZATION",
         schemaName: "daily_brief",
         schema: narrativeSchema,
-        system: ["Write a calm, 2–4 sentence morning brief for a business owner. Use ONLY the facts provided; do not add numbers.", brainPrompt(b)].join("\n"),
+        system: ["Write a calm, 2–4 sentence morning brief for a business owner. Use ONLY the facts provided; do not add numbers.", `Write in ${b.locale === "ar" ? "Arabic" : "English"}.`, compactContext(brain)].join("\n"),
+        maxTokens: 400,
+        brain: brainMeta(brain),
         prompt: `Facts:\n${factual}\n\nStructured data:\n${JSON.stringify({ ...data, upcomingPosts: data.upcomingPosts.length })}`,
         offline: () => ({ narrative: factual, highlights: [] }),
       },
@@ -176,13 +182,17 @@ export async function generateWeeklyReport(scope: TenantScope, now = new Date())
     learned: learned.map((l) => ({ title: l.title })),
     recommendations: [],
   };
+  // Analytics context: approved strategy + only products mentioned by this week's best/worst posts (no CRM records).
+  const brain = await analyticsContext(scope, [data.best?.caption, data.worst?.caption].filter(Boolean).join(" "));
   const res = await aiStructured(
     { ...scope, agentKey: "PERFORMANCE_ANALYST" },
     {
       task: "ANALYSIS",
       schemaName: "weekly_report",
       schema: narrativeSchema,
-      system: ["You are the Performance Analyst writing the weekly growth report. Use only the data given. 'highlights' = up to 4 concrete recommended actions for next week.", brainPrompt(b)].join("\n"),
+      system: ["You are the Performance Analyst writing the weekly growth report. Use only the data given. 'highlights' = up to 4 concrete recommended actions for next week.", `Write in ${b.locale === "ar" ? "Arabic" : "English"}.`, compactContext(brain)].join("\n"),
+      maxTokens: 800,
+      brain: brainMeta(brain),
       prompt: JSON.stringify(data),
       offline: () => ({
         narrative:

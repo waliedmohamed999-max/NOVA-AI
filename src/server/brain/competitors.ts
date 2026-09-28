@@ -4,7 +4,7 @@ import { tenantDb, type TenantScope } from "../db/tenant";
 import { UserFacingError } from "../errors";
 import { normalizeUrl } from "../net/safe-fetch";
 import { extractPage } from "../knowledge/extract";
-import { compactContext, retrieveCompanyContext } from "../knowledge/company-context";
+import { brainMeta, compactContext, retrieveCompanyContext } from "../knowledge/company-context";
 import { recordRevision } from "./core";
 import { structuredSignals } from "./extract";
 import { publicFetch } from "./imports";
@@ -79,6 +79,7 @@ export async function analyzeCompetitors(scope: TenantScope, locale: "ar" | "en"
       task: "ANALYSIS",
       realOnly: true,
       maxTokens: 800,
+      brain: brainMeta(ours),
       schemaName: "competitor_analysis",
       schema: analysisSchema,
       system: `Compare the company with ONLY the competitors listed (positioning, offer structure, messaging, content themes). Do not claim anything about the wider market. Write in ${locale === "ar" ? "Arabic" : "English"}.\n\n${compactContext(ours)}`,

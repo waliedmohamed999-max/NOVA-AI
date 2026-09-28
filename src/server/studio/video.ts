@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { brainMeta } from "../knowledge/company-context";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "../db/client";
 import type { TenantScope } from "../db/tenant";
@@ -89,6 +90,7 @@ export async function generateVideoPlan(scope: TenantScope, contentItemId: strin
       schemaName: "video_plan",
       schema: videoPlanSchema,
       system: ["You are NOVA's short-video producer planning a vertical video the owner can film with a phone.", STUDIO_RULES, arabicGuide(ctx.brain.locale, ctx.brain.brandKit?.tone), contextBlock(ctx)].join("\n\n"),
+      brain: brainMeta(ctx.brainCtx),
       prompt: [
         `Plan a ${target}-second ${item.platform} ${item.format} for "${item.title}".`,
         PLATFORM_GUIDE[item.platform] ?? PLATFORM_GUIDE.TIKTOK,

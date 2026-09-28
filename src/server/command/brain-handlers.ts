@@ -109,7 +109,10 @@ export async function brainQuestion(h: HandlerInput): Promise<Outcome> {
   const query = h.params.input ?? "";
   const c = await retrieveCompanyContext(h.scope, { purpose: "support", query, budget: "small", topK: 3 });
   const src = c.chunks.map((x) => ({ title: x.title || "—", subtitle: x.text.slice(0, 140), badge: x.source }));
-  // An approved FAQ that answers the question is the most trusted structured answer.
+  // Structured answers first: an approved fact, then an approved FAQ — no chunk search, no AI.
+  if (c.factMatch) {
+    return { status: "completed", message: msg("brainAnswer"), text: c.factMatch.value.slice(0, 800), items: [{ title: c.factMatch.key, badge: "fact" }], mode: "brain", sources: sourceCount(c), metrics: metrics(c) };
+  }
   if (c.faqMatch && c.faqMatch.coverage >= 0.6) {
     return { status: "completed", message: msg("brainAnswer"), text: c.faqMatch.answer.slice(0, 800), items: [{ title: c.faqMatch.question, badge: "faq" }], mode: "brain", sources: sourceCount(c), metrics: metrics(c) };
   }

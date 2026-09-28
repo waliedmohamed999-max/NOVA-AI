@@ -31,7 +31,11 @@ type CommonOptions = {
   realOnly?: boolean;
   /** Prompt registry key + version, recorded on the ai_runs row. */
   promptRef?: { key: string; version: string };
+  /** Company Brain context sent with this call (audit: size, items, source types, brain version). */
+  brain?: BrainMeta;
 };
+
+export type BrainMeta = { contextTokens: number; retrievedItems: number; sourceTypes: string[]; brainVersion: string };
 
 export type AiMeta = { provider: ProviderName; model: string; usage: Usage; /** Usage × configured price, micro-USD. */ costMicro?: bigint; generatedBy: string; offline: boolean };
 
@@ -90,7 +94,7 @@ async function execute<T>(
       const res = await fn(spec, req);
       const cost = costMicro(spec, res.usage.inputTokens, res.usage.outputTokens);
       reportSuccess(spec.provider);
-      await logRun(ctx, o.task, spec.provider, res.model, res.usage, cost, Date.now() - started, "SUCCESS", i > 0, undefined, o.promptRef);
+      await logRun(ctx, o.task, spec.provider, res.model, res.usage, cost, Date.now() - started, "SUCCESS", i > 0, undefined, o.promptRef, undefined, o.brain);
       await recordUsage({ organizationId: ctx.organizationId, agentKey: ctx.agentKey, inputTokens: res.usage.inputTokens, outputTokens: res.usage.outputTokens, costMicro: cost });
       return {
         value: res.value,
@@ -100,7 +104,7 @@ async function execute<T>(
       lastError = err;
       reportFailure(spec.provider);
       const message = err instanceof Error ? err.message : String(err);
-      await logRun(ctx, o.task, spec.provider, spec.model, { inputTokens: 0, outputTokens: 0 }, 0n, Date.now() - started, "ERROR", i > 0, message.slice(0, 500), o.promptRef);
+      await logRun(ctx, o.task, spec.provider, spec.model, { inputTokens: 0, outputTokens: 0 }, 0n, Date.now() - started, "ERROR", i > 0, message.slice(0, 500), o.promptRef, undefined, o.brain);
       logger.warn({ provider: spec.provider, model: spec.model, task: o.task, err: message }, "AI call failed, trying fallback");
       if (err instanceof AiError && err.code === "ai_refused") break; // don't retry refusals elsewhere
     }
@@ -121,6 +125,7 @@ export async function logRun(
   error?: string,
   promptRef?: { key: string; version: string },
   costMeta?: { basis: "actual_usage" | "estimated"; pricingVersion: string },
+  brain?: BrainMeta,
 ) {
   await db.aiRun
     .create({
@@ -130,6 +135,7 @@ export async function logRun(
         agentKey: ctx.agentKey ?? null,
         agentRunId: ctx.agentRunId ?? null,
         commandExecutionId: currentCommandExecutionId(),
+        ...(brain ? { contextTokens: brain.contextTokens, retrievedItems: brain.retrievedItems, sourceTypes: brain.sourceTypes, brainVersion: brain.brainVersion } : {}),
         task,
         provider,
         model,

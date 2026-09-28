@@ -1,7 +1,9 @@
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { ingestSource, retrieveKnowledge, formatContext, type WebsiteSignals } from "../../knowledge/service";
+import { ingestSource, type WebsiteSignals } from "../../knowledge/service";
+import { brainMeta } from "../../knowledge/company-context";
+import { onboardingContext } from "../../knowledge/use-cases";
 import { notify } from "../../notifications/service";
 import { audit } from "../../audit";
 import { defineWorkflow } from "../runtime";
@@ -36,7 +38,8 @@ defineWorkflow("onboarding_analysis", {
 
     // 2–5. One structured analysis grounded in the answers + retrieved website text.
     const analysis = await ctx.step("analyzing_brand", async () => {
-      const chunks = await retrieveKnowledge(scope, [answers.sells, answers.description, answers.customers, org.name].filter(Boolean).join(" "), 8);
+      // The one use case that needs page text: the owner's own website, top-8 cleaned/deduped chunks within a fixed budget.
+      const site8 = await onboardingContext(scope, [answers.sells, answers.description, answers.customers, org.name].filter(Boolean).join(" "));
       const prompt = [
         `Company name: ${org.name}`,
         answers.website && `Website: ${answers.website}`,
@@ -50,7 +53,7 @@ defineWorkflow("onboarding_analysis", {
         answers.goals?.length && `Goals: ${answers.goals.join(", ")}`,
         site && `Website title: ${site.title}\nWebsite description: ${site.description ?? "n/a"}\nWebsite headings: ${site.headings.join(" | ")}`,
         site && Object.keys(site.social).length && `Existing social accounts: ${Object.keys(site.social).join(", ")}`,
-        `Relevant website content:\n${formatContext(chunks)}`,
+        site8.chunks.length ? `Relevant website content:\n${site8.chunks.map((c, i) => `[${i + 1}] ${c.title ? `${c.title}: ` : ""}${c.text}`).join("\n")}` : "Relevant website content: none found.",
       ]
         .filter(Boolean)
         .join("\n\n");
@@ -58,6 +61,7 @@ defineWorkflow("onboarding_analysis", {
       return aiStructured(ctx.ai, {
         task: "STRATEGY",
         schemaName: "company_analysis",
+        brain: brainMeta(site8),
         schema: companyAnalysisSchema,
         system: [
           "You are the strategy lead of an AI growth team onboarding a new client company.",

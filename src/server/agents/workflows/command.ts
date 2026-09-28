@@ -1,8 +1,8 @@
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { compactContext, retrieveCompanyContext } from "../../knowledge/company-context";
+import { brainMeta, compactContext, retrieveCompanyContext } from "../../knowledge/company-context";
 import { defineWorkflow, getWorkflow, type RunContext } from "../runtime";
-import { brainPrompt, loadBrain } from "../brain";
+import { loadBrain } from "../brain";
 import { answerSchema, commandIntentSchema, type CommandIntent } from "../schemas";
 import { storage } from "../../storage";
 import type { ImageInput } from "../../ai/types";
@@ -68,6 +68,7 @@ async function answerQuestion(ctx: RunContext) {
       ].join("\n"),
       prompt: `Question: ${ctx.input}\n\n${compactContext(brain)}`,
       maxTokens: 500,
+      brain: brainMeta(brain),
       images,
       task: images.length ? "VISION" : "ANALYSIS",
       offline: () => ({
@@ -163,7 +164,8 @@ defineWorkflow("command", {
           "Route a business owner's request to the right AI team workflow.",
           "create_content_plan: posts/captions/weekly content. create_campaign: a campaign or launch. analyze_performance: how content performed, why, best/worst. leads_followup: follow up with leads. pipeline_summary: deals, pipeline, stalled. find_opportunities: what to do next / opportunities. ask_question: anything answerable from company knowledge.",
           "Extract count, platform, topic and days when stated. The request may be in Arabic or English.",
-          brainPrompt(b).split("\n")[0],
+          // Routing needs no company knowledge — only the name.
+          `Company: ${b.org.name}`,
         ].join("\n"),
         prompt: ctx.input,
         offline: () => offlineIntent(ctx.input),

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { brainMeta } from "../knowledge/company-context";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "../db/client";
 import { tenantDb, type TenantScope } from "../db/tenant";
@@ -67,6 +68,7 @@ export async function generateCarousel(scope: TenantScope, contentItemId: string
     schemaName: "carousel",
     schema: carouselSchema,
     system: ["You are NOVA's content team designing an educational social carousel for the company below.", STUDIO_RULES, arabicGuide(ctx.brain.locale, ctx.brain.brandKit?.tone), contextBlock(ctx)].join("\n\n"),
+    brain: brainMeta(ctx.brainCtx),
     prompt: [
       `Create a ${count}-slide ${item.platform} carousel${opts.topic ? ` about: ${opts.topic}` : ` for the post "${item.title}" (pillar: ${item.pillar ?? "—"})`}.`,
       `outline: exactly ${count} short lines, one per slide. slides: exactly ${count}, in the same order.`,
@@ -118,6 +120,7 @@ export async function regenerateSlide(scope: TenantScope, slideId: string, opts:
     schemaName: "carousel_slide",
     schema: slideSchema,
     system: ["You are NOVA's content team editing one slide of a carousel.", STUDIO_RULES, arabicGuide(ctx.brain.locale, ctx.brain.brandKit?.tone), contextBlock(ctx)].join("\n\n"),
+    brain: brainMeta(ctx.brainCtx),
     prompt: [
       `Rewrite slide ${slide.position} of ${all.length}. Keep it consistent with the other slides; don't repeat their points.`,
       `All slides:\n${all.map((s) => `${s.position}. ${s.headline} — ${s.body}`).join("\n")}`,
