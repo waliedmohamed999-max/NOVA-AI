@@ -325,7 +325,23 @@
       "followupsPrepared": "تم تجهيز {count} رسائل متابعة.",
       "answerReady": "الإجابة:",
       "done": "تم.",
-      "campaignReady": "الحملة «{name}» جاهزة لمراجعتك."
+      "campaignReady": "الحملة «{name}» جاهزة لمراجعتك.",
+      "aiGenerationRequired": "هذا الطلب يحتاج توليدًا بالذكاء الاصطناعي، وهو غير مُعد حاليًا.",
+      "brainMissing": "عقل الشركة لا يحتوي بعد على {topic} — أضفه وستستخدمه NOVA في كل مكان.",
+      "brainFound": "{topic}:",
+      "brainAnswer": "من عقل الشركة:",
+      "brainPartial": "وجدت معلومات مرتبطة في عقل الشركة لكن بدون إجابة واضحة — أحتاج تحديدًا أكثر.",
+      "pricingPolicyNote": "الخصومات والأسعار الخاصة تحتاج موافقة دائمًا قبل وصولها للعميل",
+      "needStage": "لأي مرحلة؟ مثال: «انقل Falcon لمرحلة التفاوض».",
+      "stageMoved": "تم نقل {name} إلى مرحلة {stage}.",
+      "noPipelineValue": "{open} فرص مفتوحة، لكن لا توجد قيمة مسجلة لأي منها بعد — أضف القيم لترى إجمالي الـPipeline.",
+      "pipelineValue": "قيمة الـPipeline {value} ({withValue} من {open} فرص مفتوحة لها قيمة).",
+      "calendarFound": "{count} اجتماعات ومكالمات يوم {day}.",
+      "calendarEmpty": "لا يوجد شيء محجوز يوم {day}.",
+      "activityFound": "آخر نشاط مع {name}:",
+      "activityEmpty": "لا يوجد نشاط مسجل مع {name} بعد.",
+      "noIntegrations": "لا توجد حسابات مربوطة بعد.",
+      "integrationsStatus": "{connected} من {total} حسابات مربوطة تعمل."
     },
     "pages": {
       "open_hot_leads": "العملاء الساخنين",
@@ -380,7 +396,9 @@
       "approveAll": "وافق على الكل",
       "send": "إرسال",
       "markWon": "سجّل كناجحة",
-      "markLost": "سجّل كخاسرة"
+      "markLost": "سجّل كخاسرة",
+      "openKnowledge": "فتح عقل الشركة",
+      "openIntegrations": "الحسابات المرتبطة"
     },
     "commands": {
       "reviewOverdue": "راجع المتابعات المتأخرة",
@@ -393,7 +411,8 @@
       "firstWeek": "جهز أول أسبوع محتوى",
       "addFirstCustomer": "أضف أول عميل",
       "connectAccounts": "اربط حساباتك",
-      "prepareFollowups": "جهز رسائل المتابعة"
+      "prepareFollowups": "جهز رسائل المتابعة",
+      "ourServices": "ما الخدمات التي نقدمها؟"
     },
     "stats": {
       "overdue": "متأخرة",
@@ -411,7 +430,9 @@
       "approval_PUBLISHING": "النشر",
       "approval_CAMPAIGNS": "الحملات",
       "approval_SALES": "المبيعات",
-      "approval_PRICING": "التسعير"
+      "approval_PRICING": "التسعير",
+      "weighted": "القيمة المرجحة",
+      "withValue": "لها قيمة"
     },
     "badges": {
       "overdue": "متأخرة",
@@ -421,7 +442,45 @@
       "underperforming": "أقل من المتوسط",
       "approval": "بانتظار الموافقة",
       "draft": "مسودة",
-      "send": "أُرسلت"
+      "send": "أُرسلت",
+      "meeting": "اجتماع",
+      "call": "مكالمة",
+      "CONNECTED": "مربوط",
+      "DISCONNECTED": "غير مربوط",
+      "EXPIRED": "منتهي",
+      "ERROR": "خطأ",
+      "ACTION_REQUIRED": "يحتاج إجراء",
+      "website": "الموقع",
+      "document": "مستند",
+      "manual": "إدخال يدوي",
+      "faq": "أسئلة شائعة",
+      "pricing": "تسعير",
+      "policy": "سياسة",
+      "case_study": "دراسة حالة"
+    },
+    "modes": {
+      "brain": "تم الاعتماد على عقل الشركة",
+      "ai": "تم التوليد بالذكاء الاصطناعي",
+      "brain_ai": "عقل الشركة + الذكاء الاصطناعي"
+    },
+    "sourcesUsed": "{count, plural, one {مصدر واحد} two {مصدران} few {# مصادر} other {# مصدرًا}}",
+    "topics": {
+      "brain_services": "خدماتكم",
+      "brain_products": "منتجاتكم",
+      "brain_audience": "جمهوركم المستهدف",
+      "brain_strengths": "مميزات شركتكم",
+      "brain_pricing": "أسعاركم",
+      "brain_tone": "نبرة علامتكم",
+      "brain_about": "عن شركتكم"
+    },
+    "stages": {
+      "NEW": "جديد",
+      "CONTACTED": "تم التواصل",
+      "QUALIFIED": "مؤهل",
+      "PROPOSAL": "عرض سعر",
+      "NEGOTIATION": "تفاوض",
+      "WON": "ناجحة",
+      "LOST": "خاسرة"
     }
   }
 }

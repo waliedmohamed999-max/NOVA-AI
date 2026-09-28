@@ -819,6 +819,21 @@
         "body": "Checkout, webhook, portal, upgrade/downgrade and cancel are tested from Settings → Billing in Stripe TEST mode. Plans change only when Stripe's webhook arrives.",
         "open": "Open billing"
       }
+    },
+    "cmdUsage": {
+      "title": "Command Center routing (this month)",
+      "summary": "{total} commands · {withoutAi} handled without AI · {cacheHits} served from the brain cache",
+      "mode": "Mode",
+      "intent": "Intent",
+      "when": "When",
+      "contextTokens": "Brain context tokens",
+      "cached": "cached",
+      "modes": {
+        "local": "Local",
+        "brain": "Company Brain",
+        "ai": "AI",
+        "brain_ai": "Brain + AI"
+      }
     }
   },
   "connect": {

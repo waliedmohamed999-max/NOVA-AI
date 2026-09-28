@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Ban, CircleAlert, CircleCheck, Info, Lock, ShieldAlert, Sparkles, X } from "lucide-react";
+import { Ban, Brain, CircleAlert, CircleCheck, Info, Lock, ShieldAlert, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -67,6 +67,8 @@ export function CommandResult({
     if (typeof values.page === "string" && t.has(`pages.${values.page}`)) values.page = t(`pages.${values.page}`);
     if (typeof values.category === "string" && t.has(`stats.approval_${values.category}`)) values.category = t(`stats.approval_${values.category}`);
     if (typeof values.platform === "string" && values.platform && tp.has(values.platform)) values.platform = tp(values.platform);
+    if (typeof values.topic === "string" && t.has(`topics.${values.topic}`)) values.topic = t(`topics.${values.topic}`);
+    if (typeof values.stage === "string" && t.has(`stages.${values.stage}`)) values.stage = t(`stages.${values.stage}`);
     return t.has(`msg.${m.key}`) ? t(`msg.${m.key}`, values) : m.key;
   };
   const statLabel = (key: string) => {
@@ -124,6 +126,14 @@ export function CommandResult({
         </div>
       </div>
 
+      {result.mode && result.mode !== "local" && !["failed", "denied", "ai_unavailable", "cancelled"].includes(result.status) && (
+        <p data-command-mode={result.mode} className="mt-2 flex items-center gap-1.5 ps-[30px] text-xs text-ink-4">
+          {result.mode === "brain" ? <Brain className="size-3.5" aria-hidden /> : <Sparkles className="size-3.5" aria-hidden />}
+          <span>{t(`modes.${result.mode}`)}</span>
+          {!!result.sources && <span>· {t("sourcesUsed", { count: result.sources })}</span>}
+        </p>
+      )}
+
       {result.text && <p className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl bg-sunken px-3 py-2.5 text-sm leading-relaxed text-ink-2" dir="auto">{result.text}</p>}
 
       {!!result.stats?.length && (
@@ -146,6 +156,17 @@ export function CommandResult({
             ))}
           </ul>
         </div>
+      )}
+
+      {!!result.notes?.length && (
+        <ul className="mt-2 space-y-0.5 text-sm text-ink-3">
+          {result.notes.map((m, i) => (
+            <li key={i} className="flex items-start gap-1.5">
+              <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+              <span>{text(m)}</span>
+            </li>
+          ))}
+        </ul>
       )}
 
       {!!result.items?.length && (

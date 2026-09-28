@@ -325,7 +325,23 @@
       "followupsPrepared": "{count} follow-up messages prepared.",
       "answerReady": "Answer:",
       "done": "Done.",
-      "campaignReady": "Campaign “{name}” is ready for your review."
+      "campaignReady": "Campaign “{name}” is ready for your review.",
+      "aiGenerationRequired": "This request needs AI generation, and AI isn't set up yet.",
+      "brainMissing": "Your Company Brain doesn't have {topic} yet — add it and NOVA will use it everywhere.",
+      "brainFound": "{topic}:",
+      "brainAnswer": "From your Company Brain:",
+      "brainPartial": "I found related information in your Company Brain but not a clear answer — can you be more specific?",
+      "pricingPolicyNote": "Discounts and custom prices always need approval before they reach a customer",
+      "needStage": "Which stage? e.g. “Move Falcon to negotiation”.",
+      "stageMoved": "{name} moved to {stage}.",
+      "noPipelineValue": "{open} open opportunities, but none has a value yet — add values to see the pipeline total.",
+      "pipelineValue": "Pipeline value {value} ({withValue} of {open} open opportunities have a value).",
+      "calendarFound": "{count} meetings and calls on {day}.",
+      "calendarEmpty": "Nothing booked on {day}.",
+      "activityFound": "Latest activity with {name}:",
+      "activityEmpty": "No activity recorded with {name} yet.",
+      "noIntegrations": "No accounts connected yet.",
+      "integrationsStatus": "{connected} of {total} connected accounts are working."
     },
     "pages": {
       "open_hot_leads": "hot customers",
@@ -380,7 +396,9 @@
       "approveAll": "Approve all",
       "send": "Send",
       "markWon": "Mark as won",
-      "markLost": "Mark as lost"
+      "markLost": "Mark as lost",
+      "openKnowledge": "Open Company Brain",
+      "openIntegrations": "Connected accounts"
     },
     "commands": {
       "reviewOverdue": "Review overdue follow-ups",
@@ -393,7 +411,8 @@
       "firstWeek": "Prepare my first week of content",
       "addFirstCustomer": "Add my first customer",
       "connectAccounts": "Connect your accounts",
-      "prepareFollowups": "Prepare follow-up messages"
+      "prepareFollowups": "Prepare follow-up messages",
+      "ourServices": "What services do we offer?"
     },
     "stats": {
       "overdue": "Overdue",
@@ -411,7 +430,9 @@
       "approval_PUBLISHING": "Publishing",
       "approval_CAMPAIGNS": "Campaigns",
       "approval_SALES": "Sales",
-      "approval_PRICING": "Pricing"
+      "approval_PRICING": "Pricing",
+      "weighted": "Weighted",
+      "withValue": "With a value"
     },
     "badges": {
       "overdue": "Overdue",
@@ -421,7 +442,45 @@
       "underperforming": "Below average",
       "approval": "Needs approval",
       "draft": "Draft",
-      "send": "Sent"
+      "send": "Sent",
+      "meeting": "Meeting",
+      "call": "Call",
+      "CONNECTED": "Connected",
+      "DISCONNECTED": "Disconnected",
+      "EXPIRED": "Expired",
+      "ERROR": "Error",
+      "ACTION_REQUIRED": "Action needed",
+      "website": "Website",
+      "document": "Document",
+      "manual": "Manual entry",
+      "faq": "FAQ",
+      "pricing": "Pricing",
+      "policy": "Policy",
+      "case_study": "Case study"
+    },
+    "modes": {
+      "brain": "Based on your Company Brain",
+      "ai": "Generated with AI",
+      "brain_ai": "Company Brain + AI"
+    },
+    "sourcesUsed": "{count, plural, one {# source} other {# sources}}",
+    "topics": {
+      "brain_services": "Your services",
+      "brain_products": "Your products",
+      "brain_audience": "Your target audience",
+      "brain_strengths": "What sets you apart",
+      "brain_pricing": "Your prices",
+      "brain_tone": "Your brand voice",
+      "brain_about": "About your company"
+    },
+    "stages": {
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "QUALIFIED": "Qualified",
+      "PROPOSAL": "Proposal",
+      "NEGOTIATION": "Negotiation",
+      "WON": "Won",
+      "LOST": "Lost"
     }
   }
 }

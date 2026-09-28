@@ -59,6 +59,47 @@ test.describe("Home command center (demo workspace)", () => {
     await expect(card(page)).toContainText("Open");
   });
 
+  // ── Company-Brain-first routing ──
+  async function lastExecution(intent: string) {
+    const rows = await sql(
+      `SELECT e."id", e."mode", e."aiUsed", coalesce(e."inputTokens", 0) AS "inputTokens", (SELECT count(*)::int FROM "ai_runs" r WHERE r."commandExecutionId" = e."id") AS "aiRuns"
+       FROM "command_executions" e JOIN "users" u ON u."id" = e."userId" WHERE u."email" = 'demo@nova.local' AND e."intent" = $1 ORDER BY e."createdAt" DESC LIMIT 1`,
+      [intent],
+    );
+    return rows[0] as { mode: string; aiUsed: boolean; inputTokens: number; aiRuns: number };
+  }
+
+  test("brain: 'ما الخدمات التي نقدمها؟' answers from the Company Brain with zero AI calls", async () => {
+    await command(page, "ما الخدمات التي نقدمها؟");
+    await expect(card(page)).toHaveAttribute("data-command-status", "completed");
+    await expect(card(page)).toContainText("Signature Hydra Facial");
+    await expect(card(page)).toContainText("AED 450");
+    await expect(card(page).locator("[data-command-mode='brain']")).toContainText("Based on your Company Brain");
+    expect(await lastExecution("brain_services")).toMatchObject({ mode: "brain", aiUsed: false, inputTokens: 0, aiRuns: 0 });
+  });
+
+  test("local: 'كم صفقة مفتوحة؟' is computed locally with zero AI calls (no AI label)", async () => {
+    await command(page, "كم صفقة مفتوحة؟");
+    await expect(card(page)).toHaveAttribute("data-command-status", "completed");
+    await expect(card(page)).toContainText(/open opportunities/);
+    await expect(card(page).locator("[data-command-mode]")).toHaveCount(0);
+    expect(await lastExecution("sales_summary")).toMatchObject({ mode: "local", aiUsed: false, aiRuns: 0 });
+  });
+
+  test("local: 'افتح المبيعات' navigates", async () => {
+    await command(page, "افتح المبيعات");
+    await page.waitForURL(/\/sales$/);
+    expect(await lastExecution("open_sales")).toMatchObject({ mode: "local", aiRuns: 0 });
+  });
+
+  test("brain + AI: 'اعمل بوست عن تصميم المواقع' uses selective brain context + generation (dev AI here)", async () => {
+    await command(page, "اعمل بوست عن تصميم المواقع");
+    await expect(card(page)).toHaveAttribute("data-command-status", /queued|completed/);
+    await expect(card(page)).toHaveAttribute("data-command-status", "completed", { timeout: 60_000 });
+    await expect(card(page).locator("[data-command-mode='brain_ai']")).toContainText("Company Brain + AI");
+    expect(await lastExecution("prepare_week_content")).toMatchObject({ mode: "brain_ai" });
+  });
+
   test("5. 'افتح الموافقات' navigates; history offers it again", async () => {
     await command(page, "افتح الموافقات");
     await page.waitForURL(/\/approvals/);
