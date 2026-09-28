@@ -28,12 +28,13 @@ test.describe("first customer journey", () => {
     await expect(page.getByText("Create your first week of content").first()).toBeVisible();
 
     // Sales: first lead by hand.
-    await page.goto("/leads");
-    await expect(page.getByText("Add your first lead").first()).toBeVisible();
-    await page.getByRole("button", { name: "Add lead" }).first().click();
-    await page.getByLabel("Name").fill("Omar Buyer");
-    await page.getByLabel("Email").fill("omar@buyer.test");
-    await page.getByRole("dialog").getByRole("button", { name: "Add lead" }).click();
+    await page.goto("/sales");
+    await expect(page.getByText("Add your first customer").first()).toBeVisible();
+    await page.getByTestId("start-add-customer").click();
+    await page.getByTestId("add-customer-form").getByLabel("Name").fill("Omar Buyer");
+    await page.getByTestId("add-customer-form").getByLabel("Email").fill("omar@buyer.test");
+    await page.getByTestId("add-customer-form").getByRole("button", { name: "Save customer" }).click();
+    await page.getByTestId("open-profile").click();
     await page.waitForURL(/\/leads\/[a-z0-9]+$/);
     await expect(page.getByRole("heading", { name: "Omar Buyer" })).toBeVisible();
 

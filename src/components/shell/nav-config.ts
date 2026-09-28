@@ -11,7 +11,6 @@ import {
   PenSquare,
   Settings,
   Share2,
-  Users,
   Brain,
   Inbox,
   FileText,
@@ -26,8 +25,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/content", key: "content", icon: PenSquare },
   { href: "/calendar", key: "calendar", icon: CalendarDays },
   { href: "/social", key: "social", icon: Share2 },
-  { href: "/leads", key: "leads", icon: Users, badge: "leads" },
-  { href: "/sales", key: "sales", icon: Handshake },
+  { href: "/sales", key: "sales", icon: Handshake, badge: "leads" },
   { href: "/analytics", key: "analytics", icon: BarChart3 },
 ];
 
@@ -48,7 +46,7 @@ export const FOOTER_NAV: NavItem[] = [
 export const MOBILE_TABS: NavItem[] = [
   { href: "/home", key: "home", icon: Home },
   { href: "/approvals", key: "approvals", icon: CheckCheck, badge: "approvals" },
-  { href: "/leads", key: "leads", icon: Users, badge: "leads" },
+  { href: "/sales", key: "sales", icon: Handshake, badge: "leads" },
 ];
 
 export const MORE_ICON = LayoutGrid;

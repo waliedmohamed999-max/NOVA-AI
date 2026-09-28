@@ -36,12 +36,15 @@ test.describe("content, calendar, sales and approvals (fresh workspace)", () => 
   });
 
   test("add lead → Sales Agent qualifies → move stage → timeline", async ({ page }) => {
-    await page.goto("/leads");
-    await page.getByRole("button", { name: "Add lead" }).first().click();
-    await page.getByLabel("Name").fill("Karim Test");
-    await page.getByLabel("Email").fill("karim@example.com");
-    await page.getByLabel("What did they ask?").fill("Can you send a quote for barista training for 5 people? Urgent.");
-    await page.getByRole("button", { name: "Add lead" }).last().click();
+    await page.goto("/sales");
+    await page.getByTestId("add-customer").click();
+    const form = page.getByTestId("add-customer-form");
+    await form.getByLabel("Name").fill("Karim Test");
+    await form.getByLabel("Email").fill("karim@example.com");
+    await form.getByRole("button", { name: /More options/ }).click();
+    await form.getByLabel(/Notes \/ what they asked/).fill("Can you send a quote for barista training for 5 people? Urgent.");
+    await form.getByRole("button", { name: "Save customer" }).click();
+    await page.getByTestId("open-profile").click();
     await page.waitForURL(/\/leads\/c/);
     await expect(page.getByRole("heading", { name: "Karim Test" })).toBeVisible();
 
@@ -112,7 +115,7 @@ test.describe("demo workspace", () => {
     await page.goto("/home");
     await expect(page.getByRole("heading", { name: "Approvals & alerts" })).toBeVisible();
     await page.getByRole("link", { name: "Leads", exact: true }).first().click();
-    await page.waitForURL(/\/leads/);
+    await page.waitForURL(/\/(leads|sales)/);
     await page.goto("/home");
     await page.getByLabel("Ask NOVA").fill("Summarize our pipeline");
     await page.getByRole("button", { name: "Send to your AI team" }).click();

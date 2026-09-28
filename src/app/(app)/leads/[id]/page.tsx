@@ -5,6 +5,9 @@ import { LeadDetail } from "@/features/sales/lead-detail";
 import { stageLabels } from "@/server/sales/queries";
 import { channelFor } from "@/server/sales/channels";
 import { calendarConnected } from "@/server/calendar/service";
+import { leadDrawer, teamMembers } from "@/server/sales/desk";
+import { aiAvailability } from "@/server/ai";
+import { DeskProvider } from "@/features/sales/desk/shell";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -31,12 +34,16 @@ export default async function LeadPage(props: PageProps<"/leads/[id]">) {
     if (needs && (await channelFor(c.channel)?.isConfigured(scope))) sendable = true;
   }
 
-  const [calendar, meetings] = await Promise.all([
+  const [calendar, meetings, profile, members] = await Promise.all([
     calendarConnected(scope),
     ctx.db.meeting.findMany({ where: { leadId: lead.id }, orderBy: { createdAt: "desc" }, take: 5 }),
+    leadDrawer(ctx, lead.id),
+    teamMembers(ctx),
   ]);
+  if (!profile) notFound();
 
   return (
+    <DeskProvider currency={lead.currency} members={members} stages={profile.stages} canManage={ctx.can("leads:manage")} aiReady={aiAvailability().configured}>
     <LeadDetail
       lead={{
         id: lead.id,
@@ -60,7 +67,14 @@ export default async function LeadPage(props: PageProps<"/leads/[id]">) {
         nextActionAt: lead.nextActionAt?.toISOString() ?? null,
         campaign: lead.campaign,
         createdAt: lead.createdAt.toISOString(),
+        value: profile.value,
+        owner: profile.owner,
+        reasons: profile.reasons,
+        signals: profile.signals,
+        attribution: { utmSource: lead.utmSource, medium: lead.medium, utmCampaign: lead.utmCampaign, utmContent: lead.utmContent, landingUrl: lead.landingUrl, socialPostId: lead.socialPostId },
       }}
+      opportunities={profile.opportunities}
+      quotes={profile.quotes}
       events={lead.events.map((e) => ({ id: e.id, type: e.type, title: e.title, body: e.body, actorType: e.actorType, at: e.createdAt.toISOString() }))}
       messages={messages}
       activities={lead.activities.map((a) => ({ id: a.id, title: a.title, type: a.type, lead: { id: lead.id, name: lead.name, company: lead.company }, dueAt: a.dueAt?.toISOString() ?? null, byAgent: Boolean(a.createdByAgent) }))}
@@ -70,5 +84,6 @@ export default async function LeadPage(props: PageProps<"/leads/[id]">) {
       calendar={calendar}
       meetings={meetings.map((m) => ({ id: m.id, status: m.status, title: m.title, startAt: m.startAt?.toISOString() ?? null, slots: (m.proposedSlots as { start: string }[]).map((s) => s.start), timezone: m.timezone, joinUrl: m.joinUrl }))}
     />
+    </DeskProvider>
   );
 }

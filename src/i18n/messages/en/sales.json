@@ -1,0 +1,644 @@
+{
+  "title": "Customers & Sales",
+  "subtitle": "Follow every opportunity from the first conversation to the closed deal.",
+  "tabsLabel": "Sales workspace",
+  "hero": {
+    "headline": "Stronger relationships. Closer deals.",
+    "supporting": "From first contact to closing the deal — every detail in one place.",
+    "customers": "Customers",
+    "openOpportunities": "Open opportunities",
+    "overdue": "Overdue follow-ups"
+  },
+  "actions": {
+    "addCustomer": "Add customer",
+    "addB2B": "Add B2B opportunity",
+    "followUps": "Follow-up center",
+    "conversations": "Open conversations",
+    "runCycle": "Run NOVA sales cycle",
+    "more": "More actions",
+    "import": "Import customers"
+  },
+  "kpi": {
+    "newWeek": "New customers",
+    "newWeekHint": "This week",
+    "qualified": "Qualified",
+    "qualifiedHint": "Past the “new” stage",
+    "hot": "Hot",
+    "hotHint": "Need urgent follow-up",
+    "quotesSent": "Quotes sent",
+    "quotesSentHint": "From the quotes record",
+    "pipelineValue": "Pipeline value",
+    "pipelineValueHint": "Active opportunities only",
+    "won": "Deals won",
+    "lost": "Deals lost",
+    "overdue": "Overdue follow-ups",
+    "overdueHint": "Past their due time"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "pipeline": "Pipeline",
+    "hot": "Promising",
+    "followups": "Follow-ups",
+    "conversations": "Conversations",
+    "b2b": "B2B",
+    "quotes": "Quotes",
+    "forecast": "Revenue forecast",
+    "activity": "Activity",
+    "customers": "Customer log"
+  },
+  "status": {
+    "label": "Channels and agent status",
+    "names": {
+      "crm": "CRM",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "linkedin": "LinkedIn",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "sales_ai": "Sales AI"
+    },
+    "states": {
+      "connected": "Connected",
+      "not_connected": "Not connected",
+      "reconnect": "Needs reconnecting",
+      "not_configured": "Not set up",
+      "ready": "Ready",
+      "running": "Working now"
+    },
+    "platformEmail": "NOVA email",
+    "connect": "Connect",
+    "reconnect": "Reconnect"
+  },
+  "command": {
+    "placeholder": "Ask NOVA about your sales…",
+    "ask": "Ask",
+    "runTitle": "Sales assistant",
+    "examples": {
+      "today": "Who needs a follow-up today?",
+      "prepare": "Prepare messages for hot customers",
+      "stalled": "Which deals are stalled?",
+      "summarize": "Summarize the pipeline",
+      "closest": "Who is closest to closing?"
+    },
+    "aiOff": "AI isn't set up — questions that need AI are unavailable; filters and the sales cycle still work."
+  },
+  "filters": {
+    "search": "Search customer, company, email, phone…",
+    "mine": "Mine",
+    "unassigned": "Unassigned",
+    "owner": "Owner",
+    "stage": "Stage",
+    "temperature": "Temperature",
+    "temp": {
+      "HOT": "Hot",
+      "WARM": "Warm",
+      "COLD": "Cold"
+    },
+    "source": "Source",
+    "channel": "Channel",
+    "period": "Period",
+    "periods": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days"
+    },
+    "clear": "Clear ({count})",
+    "channels": {
+      "WEBSITE": "Website",
+      "EMAIL": "Email",
+      "WHATSAPP": "WhatsApp",
+      "LINKEDIN": "LinkedIn",
+      "INSTAGRAM_DM": "Instagram",
+      "FACEBOOK_DM": "Facebook",
+      "PHONE": "Phone",
+      "MANUAL": "Manual"
+    }
+  },
+  "channels": {
+    "WEBSITE": "Website",
+    "EMAIL": "Email",
+    "WHATSAPP": "WhatsApp",
+    "LINKEDIN": "LinkedIn",
+    "INSTAGRAM_DM": "Instagram",
+    "FACEBOOK_DM": "Facebook",
+    "PHONE": "Phone",
+    "MANUAL": "Manual"
+  },
+  "cycle": {
+    "title": "NOVA sales cycle",
+    "description": "Analysis of your open customers. Nothing was sent — follow-up tasks were created where a next step was missing.",
+    "analyzed": "Customers analysed",
+    "followUpsCreated": "Follow-ups created",
+    "hot": "Hot",
+    "stalled": "Stalled",
+    "nothing": "Nothing needs attention right now.",
+    "note": "Messages are only drafted when you ask, and each one follows your approval rules."
+  },
+  "signals": {
+    "followup_overdue": "A follow-up is {days, plural, =0 {due today} one {# day overdue} other {# days overdue}}.",
+    "unanswered_question": "The customer wrote {days, plural, =0 {today} one {# day ago} other {# days ago}} and hasn't had a reply.",
+    "proposal_no_response": "The quote was sent {days, plural, one {# day ago} other {# days ago}} and no reply has been recorded.",
+    "hot_no_next_step": "Hot customer with no next step planned.",
+    "no_contact": "No contact for {days} days.",
+    "stalled": "The deal hasn't moved for {days} days."
+  },
+  "temp": {
+    "HOT": "High",
+    "WARM": "Medium",
+    "COLD": "Low"
+  },
+  "reasons": {
+    "recent_reply": "replied recently",
+    "buying_intent": "asked about buying",
+    "quote_requested": "wants a quote",
+    "meeting": "meeting planned",
+    "urgency": "urgent request",
+    "repeat_contact": "contacted more than once",
+    "business_email": "business email",
+    "value_known": "budget known",
+    "no_recent_activity": "no recent activity"
+  },
+  "drawer": {
+    "loading": "Loading…",
+    "why": "Why:",
+    "nextBest": "Next best action",
+    "noNextAction": "No next step yet — schedule a follow-up.",
+    "planned": "Planned",
+    "sendMessage": "Send message",
+    "followUp": "Follow-up",
+    "bookMeeting": "Book meeting",
+    "createOpportunity": "Opportunity",
+    "createQuote": "Quote",
+    "moveStage": "Move stage",
+    "markWon": "Mark won",
+    "markLost": "Mark lost",
+    "contact": "Contact",
+    "noContact": "No email or phone yet.",
+    "aiSummary": "AI summary",
+    "opportunities": "Opportunities",
+    "noOpportunities": "No opportunity yet.",
+    "tasks": "Open follow-ups",
+    "noTasks": "No open follow-ups.",
+    "conversation": "Conversation",
+    "noConversation": "No messages yet.",
+    "quotes": "Quotes",
+    "notes": "Notes",
+    "noNotes": "No notes yet.",
+    "timeline": "Timeline",
+    "openProfile": "Open full profile"
+  },
+  "pipeline": {
+    "title": "Pipeline — stage board",
+    "description": "Drag a card to another stage to update it for real.",
+    "moved": "{name} → {stage}",
+    "noValue": "No value yet",
+    "partial": "some values unknown",
+    "last30": "last 30 days",
+    "more": "+{count} more — use filters",
+    "dropHere": "Drop a card here",
+    "emptyStage": "Empty",
+    "stages": "Stages",
+    "open": "Open {name}",
+    "valueUnknown": "Value not set",
+    "lastContact": "Last contact",
+    "next": "Next",
+    "today": "today",
+    "actions": "Actions for {name}",
+    "menu": {
+      "open": "Open",
+      "followUp": "Schedule follow-up",
+      "quote": "Create quote",
+      "move": "Move to"
+    }
+  },
+  "oppStatus": {
+    "OPEN": "Open",
+    "WON": "Won",
+    "LOST": "Lost"
+  },
+  "inbox": {
+    "eyebrow": "Latest contact with your customers",
+    "title": "Conversation inbox",
+    "openInbox": "Open inbox",
+    "empty": "Every conversation has a place",
+    "emptyBody": "Your customers' latest messages and reply status will appear here once conversations are recorded.",
+    "unknown": "Unknown contact",
+    "unread": "Unread",
+    "needsHuman": "Needs you",
+    "draft": "Draft",
+    "draftReady": "AI draft ready"
+  },
+  "followups": {
+    "eyebrow": "Follow-up rhythm",
+    "title": "Follow-up center",
+    "tabs": {
+      "today": "Today",
+      "overdue": "Overdue",
+      "week": "This week",
+      "paused": "Paused",
+      "done": "Done"
+    },
+    "prev": "← Previous",
+    "next": "Next →",
+    "empty": "Nothing in this category.",
+    "why": "Why:",
+    "doneAt": "Done {when}",
+    "paused": "Paused",
+    "did": {
+      "done": "Marked done",
+      "snooze_tomorrow": "Postponed to tomorrow",
+      "snooze_3d": "Postponed 3 days",
+      "snooze_week": "Postponed a week",
+      "pause": "Paused",
+      "resume": "Resumed"
+    },
+    "markDone": "Mark done",
+    "done": "Done",
+    "more": "More",
+    "snoozeTomorrow": "Postpone to tomorrow",
+    "snooze3d": "Postpone 3 days",
+    "snoozeWeek": "Postpone a week",
+    "resume": "Resume",
+    "pause": "Pause",
+    "openCustomer": "Open customer",
+    "prepareMessage": "Prepare a message (draft)",
+    "aiOff": "AI isn't set up",
+    "new": "Schedule follow-up",
+    "reason": "What's the follow-up about?",
+    "when": "When",
+    "channel": "Channel",
+    "save": "Schedule",
+    "created": "Follow-up scheduled"
+  },
+  "quotes": {
+    "eyebrow": "Buying decisions",
+    "title": "Quotes",
+    "description": "Quotes live in their own record. Pricing, discounts and special terms go to the Approval Center before they can be sent.",
+    "empty": "No quotes yet",
+    "emptyBody": "Create a quote from a customer (open the customer → Quote).",
+    "status": {
+      "DRAFT": "Draft",
+      "NEEDS_APPROVAL": "Needs approval",
+      "SENT": "Sent",
+      "VIEWED": "Viewed",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
+    },
+    "sentWhen": "Sent {when} · {via}",
+    "manual": "outside NOVA",
+    "validUntil": "Valid until {when}",
+    "approved": "approved",
+    "review": "Review",
+    "send": "Send",
+    "sent": "Quote marked as sent",
+    "sendEmail": "Send by email",
+    "markSent": "I sent it outside NOVA",
+    "outcome": "Customer response",
+    "new": "New quote",
+    "newDescription": "Line items, discount and terms. It isn't an invoice.",
+    "titleField": "Title",
+    "items": "Items",
+    "itemDescription": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "removeItem": "Remove item",
+    "addItem": "Add item",
+    "discount": "Discount ({currency})",
+    "tax": "Tax %",
+    "validDays": "Valid for (days)",
+    "terms": "Special terms",
+    "optional": "optional",
+    "total": "Total",
+    "approvalNote": "Discounts and special terms need approval in the Approval Center before this quote can be sent.",
+    "created": "Quote {number} created",
+    "createdNeedsApproval": "Quote {number} created — waiting for approval",
+    "save": "Create quote"
+  },
+  "events": {
+    "CREATED": "Customer added",
+    "FORM_SUBMITTED": "Form submitted",
+    "MESSAGE_RECEIVED": "Message received",
+    "MESSAGE_SENT": "AI sent a message",
+    "AI_ANALYSIS": "Sales Agent analysis",
+    "HUMAN_REPLY": "Reply sent",
+    "FOLLOW_UP": "Follow-up",
+    "MEETING": "Meeting",
+    "PROPOSAL": "Proposal",
+    "STATUS_CHANGE": "Stage changed",
+    "SCORE_CHANGE": "Score changed",
+    "NOTE": "Note added",
+    "OPPORTUNITY": "Opportunity",
+    "QUOTE": "Quote",
+    "IMPORTED": "Imported"
+  },
+  "addCustomer": {
+    "title": "Add customer",
+    "description": "The essentials now — details can come later.",
+    "created": "Customer added",
+    "name": "Name",
+    "company": "Company",
+    "optional": "optional",
+    "channel": "Channel",
+    "phone": "Phone",
+    "email": "Email",
+    "interest": "Interested in",
+    "interestPlaceholder": "e.g. Monthly marketing package",
+    "lessOptions": "Fewer options",
+    "moreOptions": "More options (value, source, owner, tags, notes)",
+    "value": "Estimated value ({currency})",
+    "source": "Source",
+    "owner": "Owner",
+    "ownerMe": "Me",
+    "tags": "Tags",
+    "tagsHint": "Separate with commas",
+    "notes": "Notes / what they asked",
+    "notesHint": "Saved as their first message so the Sales Agent can use it.",
+    "aiQualifies": "The Sales Agent will qualify this customer in the background.",
+    "aiOff": "AI isn't set up — the customer is saved and you can work manually.",
+    "save": "Save customer"
+  },
+  "b2b": {
+    "created": "B2B opportunity created",
+    "title": "New B2B opportunity",
+    "titleForLead": "New opportunity",
+    "description": "Company, contact, need, value and next step in one card.",
+    "progress": "Progress",
+    "steps": {
+      "company": "Company",
+      "contact": "Contact person",
+      "need": "The need",
+      "value": "Opportunity value",
+      "stage": "Stage & next step"
+    },
+    "stepOf": "Step {n} of {total}",
+    "company": "Company",
+    "optional": "optional",
+    "industry": "Industry",
+    "source": "Source",
+    "contactName": "Contact person",
+    "decisionMaker": "Decision maker",
+    "email": "Email",
+    "phone": "Phone",
+    "opportunityTitle": "Opportunity title",
+    "titlePlaceholder": "e.g. ERP implementation",
+    "need": "What do they need?",
+    "value": "Estimated value ({currency})",
+    "unknownOk": "leave empty if unknown",
+    "expectedClose": "Expected close",
+    "valueNote": "An unknown value stays unknown — it is never counted as 0 in your pipeline.",
+    "stage": "Stage",
+    "owner": "Owner",
+    "ownerMe": "Me",
+    "nextStep": "Next step",
+    "nextStepAt": "Next step date",
+    "assistTitle": "Let NOVA help me",
+    "assist": "Draft summary & questions",
+    "aiOff": "AI isn't set up — you can still save the opportunity manually.",
+    "summary": "Summary",
+    "questions": "Qualification questions",
+    "missing": "Missing information",
+    "assistNote": "NOVA uses only what you entered — it doesn't invent budgets, dates or facts.",
+    "back": "Back",
+    "next": "Next",
+    "save": "Create opportunity",
+    "eyebrow": "Company opportunities",
+    "listTitle": "B2B opportunities",
+    "cta": "Add company opportunity",
+    "empty": "Build relationships with companies",
+    "emptyBody": "Track the company, the need, the value and the next step in one card.",
+    "fields": {
+      "contact": "Contact",
+      "decisionMaker": "Decision maker",
+      "industry": "Industry",
+      "owner": "Owner",
+      "source": "Source",
+      "expectedClose": "Expected close"
+    },
+    "noNext": "No next step yet",
+    "createdDeal": "Opportunity created"
+  },
+  "import": {
+    "title": "Import customers",
+    "description": "Upload a CSV → map columns → review duplicates → import. Nothing is imported before you confirm.",
+    "choose": "Choose a CSV file",
+    "hint": "Up to {max} rows. The first row must be the column names.",
+    "tooMany": "Too many rows — up to {max} per import.",
+    "mappingHelp": "{file}: {count} rows. Match each column to a field.",
+    "column": "Column",
+    "sample": "Example",
+    "field": "Field",
+    "skip": "Don't import",
+    "fields": {
+      "name": "Name",
+      "company": "Company",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source",
+      "value": "Value",
+      "notes": "Notes",
+      "tags": "Tags"
+    },
+    "back": "Back",
+    "previewCta": "Preview",
+    "okCount": "{count} to import",
+    "dupCount": "{count} duplicates",
+    "badCount": "{count} invalid",
+    "result": "Result",
+    "willImport": "Will be imported",
+    "reasons": {
+      "exists": "Already a customer (same email/phone)",
+      "in_file": "Duplicate in this file",
+      "missing_name": "No name, company or email",
+      "bad_email": "Invalid email",
+      "bad_value": "Invalid value"
+    },
+    "dupNote": "Duplicates and invalid rows are skipped — existing customers are never overwritten.",
+    "done": "{created} imported, {skipped} skipped",
+    "importCta": "Import {count}"
+  },
+  "start": {
+    "title": "Start your Sales Desk",
+    "body": "Four steps and NOVA starts following up with every customer.",
+    "primary": "Add your first customer",
+    "secondary": "Import customers",
+    "lead": {
+      "title": "Add your first customer",
+      "body": "By hand, from your website form, or by importing a CSV.",
+      "cta": "Add"
+    },
+    "channel": {
+      "title": "Connect a channel",
+      "body": "Email, WhatsApp or LinkedIn — reply to customers from NOVA.",
+      "cta": "Connect"
+    },
+    "opportunity": {
+      "title": "Create your first opportunity",
+      "body": "A deal with a value and a next step.",
+      "cta": "Create"
+    },
+    "agent": {
+      "title": "Enable the Sales Agent",
+      "body": "Qualifies customers and drafts follow-ups under your approval rules.",
+      "cta": "Set up AI"
+    },
+    "previewLabel": "What you'll see here",
+    "preview": {
+      "pipeline": {
+        "title": "Pipeline board",
+        "body": "Every deal by stage, with values you entered."
+      },
+      "followups": {
+        "title": "Follow-up center",
+        "body": "Who to contact today and why."
+      },
+      "forecast": {
+        "title": "Revenue forecast",
+        "body": "Pipeline and weighted value — from real deals only."
+      }
+    }
+  },
+  "brief": {
+    "title": "Today",
+    "dueToday": "{count, plural, one {follow-up} other {follow-ups}}",
+    "hot": "hot {count, plural, one {customer} other {customers}}",
+    "pendingApprovals": "waiting for your approval",
+    "stalled": "{count, plural, one {deal} other {deals}} didn't move this week",
+    "start": "Start the sales day"
+  },
+  "funnel": {
+    "title": "Sales funnel",
+    "description": "A current snapshot of all active opportunities — not historical conversion tracking.",
+    "empty": "The sales funnel will appear here once your CRM has enough data.",
+    "cta": "Add your first customer",
+    "note": "Counts by current stage. Not a conversion rate."
+  },
+  "hot": {
+    "eyebrow": "Contact priority",
+    "title": "Hot customers",
+    "empty": "The next opportunity starts with a conversation",
+    "emptyBody": "Customers with high interest will appear here so you know who to start with.",
+    "cta": "Add a customer",
+    "level": {
+      "high": "High interest",
+      "medium": "Medium interest",
+      "low": "Low interest"
+    },
+    "noNext": "No next step yet"
+  },
+  "forecast": {
+    "eyebrow": "Financial view",
+    "title": "Revenue forecast",
+    "description": "Figures start when opportunities have values and stages. The weighted forecast is an estimate by stage — not confirmed revenue.",
+    "headline": "Know the value of the opportunities you're working on",
+    "total": "Total pipeline",
+    "weighted": "Probability-weighted pipeline",
+    "won": "Won revenue",
+    "noData": "No data yet",
+    "coverage": "{known} of {total} with a value",
+    "weightedNote": "Estimate by stage probability — not confirmed revenue.",
+    "stage": "Stage",
+    "probability": "Probability",
+    "deals": "Deals",
+    "value": "Value",
+    "weightedShort": "Weighted",
+    "withValue": "{count} with value",
+    "otherCurrencies": "Deals in {list} aren't included in the {currency} totals.",
+    "disclaimer": "Only deals with a recorded value are counted. Probabilities come from your pipeline stage settings."
+  },
+  "insights": {
+    "eyebrow": "Signals from your data",
+    "title": "Sales Agent insights",
+    "empty": "Insights come from real work",
+    "emptyBody": "Demand patterns and stalled deals appear once there is enough data.",
+    "stale_open": {
+      "finding": "{count, plural, one {# opportunity has} other {# opportunities have}} had no contact for {days}+ days.",
+      "why": "Customers you don't follow up with go cold.",
+      "action": "Open follow-ups"
+    },
+    "overdue_followups": {
+      "finding": "{count, plural, one {# customer has} other {# customers have}} overdue follow-ups.",
+      "why": "Follow-ups past their due date.",
+      "action": "Open overdue"
+    },
+    "hot_without_step": {
+      "finding": "{count, plural, one {# hot customer has} other {# hot customers have}} no next step.",
+      "why": "High interest, but nothing is planned.",
+      "action": "Open hot customers"
+    },
+    "top_source": {
+      "finding": "Most qualified customers this month came from {source} ({count} of {total}).",
+      "why": "Based on qualified customers created in the last 30 days.",
+      "action": "Open customers"
+    },
+    "high_value_slower": {
+      "finding": "Quotes above {threshold} stay longer in the Proposal stage ({highDays} vs {lowDays} days).",
+      "why": "Compared across current deals in Proposal with a value.",
+      "action": "Open pipeline"
+    }
+  },
+  "activity": {
+    "eyebrow": "Sales log",
+    "title": "Recent activity",
+    "empty": "A clear record of every step",
+    "emptyBody": "Added customers, stage changes and follow-ups appear here in time order.",
+    "byAgent": "Sales Agent",
+    "bySystem": "System"
+  },
+  "log": {
+    "eyebrow": "Opportunity log",
+    "title": "Opportunity log",
+    "empty": "No stage or value changes yet.",
+    "cols": {
+      "date": "Date",
+      "customer": "Customer",
+      "opportunity": "Opportunity",
+      "action": "Action",
+      "owner": "By",
+      "fromStage": "From",
+      "toStage": "To",
+      "value": "Value change"
+    }
+  },
+  "customers": {
+    "eyebrow": "Customer log",
+    "title": "Customers",
+    "count": "{count, plural, one {# customer} other {# customers}}",
+    "empty": "No customers match these filters.",
+    "cols": {
+      "name": "Customer",
+      "stage": "Stage",
+      "temperature": "Interest",
+      "value": "Value",
+      "source": "Source",
+      "owner": "Owner",
+      "lastContact": "Last contact"
+    }
+  },
+  "due": {
+    "eyebrow": "Prepare due follow-ups",
+    "title": "Due follow-ups",
+    "empty": "No opportunities recorded yet.",
+    "suggest": "{count, plural, one {# follow-up is} other {# follow-ups are}} due",
+    "flow": "NOVA drafts the messages only → you review → approve → send. Your approval rules apply.",
+    "prepare": "Prepare messages",
+    "aiOff": "AI isn't set up"
+  },
+  "profile": {
+    "prepare": "Prepare the follow-up",
+    "addOpportunity": "Add",
+    "documents": "Documents & quotes",
+    "noDocuments": "No quotes yet.",
+    "attribution": "Attribution",
+    "campaign": "Campaign",
+    "noAttribution": "No attribution recorded for this customer.",
+    "attr": {
+      "utmSource": "Source",
+      "medium": "Medium",
+      "utmCampaign": "Campaign (UTM)",
+      "utmContent": "Content",
+      "landingUrl": "Landing page",
+      "socialPostId": "Post"
+    }
+  }
+}

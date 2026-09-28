@@ -20,6 +20,7 @@ export const namespaces = [
   "app",
   "content",
   "leads",
+  "sales",
   "analytics",
   "settings",
   "errors",

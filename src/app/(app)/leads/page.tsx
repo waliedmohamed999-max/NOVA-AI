@@ -1,21 +1,10 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { requireTenant } from "@/server/context";
-import { PageHeader } from "@/components/ui/card";
-import { LeadBoard } from "@/features/sales/board";
-import { loadLeadCards, stageLabels } from "@/server/sales/queries";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Leads" };
-
+/** Customers and sales are one workspace: /leads is the Sales Desk's customer view. */
 export default async function LeadsPage(props: PageProps<"/leads">) {
-  const ctx = await requireTenant({ permission: "leads:read" });
-  const t = await getTranslations("leads");
   const sp = await props.searchParams;
-  const [leads, labels] = await Promise.all([loadLeadCards(ctx), stageLabels(ctx)]);
-  return (
-    <>
-      <PageHeader title={t("title")} description={t("description")} />
-      <LeadBoard leads={leads} stageLabels={labels} mode={sp.view === "board" ? "board" : "table"} canManage={ctx.can("leads:manage")} />
-    </>
-  );
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) if (typeof v === "string" && k !== "view") p.set(k, v);
+  p.set("view", sp.view === "board" ? "pipeline" : "customers");
+  redirect(`/sales?${p}`);
 }
