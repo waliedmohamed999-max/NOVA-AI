@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireTenant } from "@/server/context";
 import { loadCommandCenter } from "@/server/home";
+import { commandHistory, commandSuggestions } from "@/server/command/service";
 import { HomeCommandCenter } from "@/features/home/command-center";
 import { AttentionPanel, DealsPanel, MessagesPanel, TodayPanel } from "@/features/home/rail";
 import { DailyBriefCard, QuickActionsCard } from "@/features/home/bottom-cards";
@@ -15,13 +16,13 @@ export const metadata: Metadata = { title: "Home" };
  */
 export default async function HomePage() {
   const ctx = await requireTenant();
-  const data = await loadCommandCenter(ctx);
+  const [data, suggestions, history] = await Promise.all([loadCommandCenter(ctx), commandSuggestions(ctx), commandHistory(ctx)]);
   const first = (ctx.user.name ?? ctx.user.email.split("@")[0]).split(" ")[0];
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_352px] xl:grid-rows-[auto_minmax(0,1fr)]">
       <div className="min-w-0 xl:col-start-1 xl:row-start-1">
-        <HomeCommandCenter name={first} period={data.period} agentsWorking={data.agentsWorking} />
+        <HomeCommandCenter name={first} period={data.period} agentsWorking={data.agentsWorking} suggestions={suggestions} history={history} />
       </div>
 
       <aside className="grid grid-cols-[minmax(0,1fr)] content-start gap-4 sm:grid-cols-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:grid-cols-1" aria-label="Operations">

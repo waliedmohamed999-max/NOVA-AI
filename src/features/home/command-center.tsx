@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { BarChart3, CalendarDays, CircleCheck, FileText, Megaphone, Users } from "lucide-react";
 import { NovaOrb } from "./nova-orb";
 import { OrbitDot, OrbitModule, type OrbitColor } from "./orbit-module";
-import { GlobalCommandInput } from "./global-command-input";
+import { GlobalCommandInput, type CommandHistoryItem } from "./global-command-input";
 
 type Module = { key: string; href: string; icon: typeof CalendarDays; color: OrbitColor; dot: OrbitColor };
 
@@ -27,8 +27,21 @@ const ROWS = [
 // Where each connector meets its module (percent of the orbit area width, measured from the side's edge).
 const DOT_X = [32, 26, 32];
 
-export async function HomeCommandCenter({ name, period, agentsWorking }: { name: string; period: "morning" | "afternoon" | "evening"; agentsWorking: number }) {
+export async function HomeCommandCenter({
+  name,
+  period,
+  agentsWorking,
+  suggestions = [],
+  history = [],
+}: {
+  name: string;
+  period: "morning" | "afternoon" | "evening";
+  agentsWorking: number;
+  suggestions?: { key: string }[];
+  history?: CommandHistoryItem[];
+}) {
   const t = await getTranslations("app.home");
+  const tc = await getTranslations("common.cmd");
   return (
     <section
       aria-labelledby="home-greeting"
@@ -100,7 +113,7 @@ export async function HomeCommandCenter({ name, period, agentsWorking }: { name:
         <p className="mx-auto mt-2 max-w-2xl text-[15px] text-[#5b6b85] sm:text-[17px]">{t("hero.body")}</p>
       </div>
       <div className="relative mx-auto mt-6 max-w-[820px]">
-        <GlobalCommandInput />
+        <GlobalCommandInput suggestions={suggestions.map((s) => tc(`commands.${s.key}`))} history={history} />
       </div>
     </section>
   );

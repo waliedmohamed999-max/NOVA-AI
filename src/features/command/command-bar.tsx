@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import * as D from "@radix-ui/react-dialog";
 import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Sparkles, X, History } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Spinner } from "@/components/ui/spinner";
-import { RunView } from "@/features/agents/run-view";
 import { closeCommand, openCommand, useCommandState } from "./store";
-import { recentRuns, runCommand, type RunDTO } from "./actions";
+import { commandContextAction } from "./center-actions";
+import { useCommandCenter } from "./use-command-center";
+import { CommandResult } from "./command-result";
 
 type Attachment = { id: string; name: string; mimeType: string; uploading?: boolean };
 
@@ -38,11 +39,12 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
   const state = useCommandState();
   const [text, setText] = useState("");
   const [files, setFiles] = useState<Attachment[]>([]);
-  const [runId, setRunId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [recent, setRecent] = useState<RunDTO[]>([]);
+  const [recent, setRecent] = useState<{ id: string; text: string }[]>([]);
   const [listening, setListening] = useState(false);
-  const [pending, start] = useTransition();
+  // Same pipeline as the Home command center: typed, spoken and attached commands all go through it.
+  const cc = useCommandCenter({ onNavigate: closeCommand });
+  const pending = cc.pending;
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const recognition = useRef<SpeechRecognitionLike | null>(null);
@@ -64,15 +66,12 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
       const v = value.trim();
       if (v.length < 2 || files.some((f) => f.uploading)) return;
       setError(null);
-      start(async () => {
-        const res = await runCommand({ text: v, fileIds: files.map((f) => f.id) });
-        if (res.ok) {
-          setRunId(res.data.runId);
-          setFiles([]);
-        } else setError(res.error);
-      });
+      const ids = files.map((f) => f.id);
+      setFiles([]);
+      setText("");
+      void cc.submit(v, ids);
     },
-    [files],
+    [files, cc],
   );
 
   // Reset / prefill when opened
@@ -82,13 +81,13 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
     // Deferred so the reset doesn't cascade synchronously inside the effect.
     queueMicrotask(() => {
       if (cancelled) return;
-      setRunId(null);
+      cc.reset();
       setError(null);
       setText(state.text);
       if (state.autoSubmit && state.text) submit(state.text);
       else setTimeout(() => inputRef.current?.focus(), 50);
     });
-    void recentRuns({ limit: 4 }).then((r) => !cancelled && r.ok && setRecent(r.data));
+    void commandContextAction({}).then((r) => !cancelled && r.ok && setRecent(r.data.history.slice(0, 4)));
     return () => {
       cancelled = true;
     };
@@ -224,8 +223,23 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
           )}
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-6">
-            {runId ? (
-              <RunView runId={runId} onNavigate={closeCommand} />
+            {cc.phase !== "idle" ? (
+              <div className="pt-1">
+                <CommandResult
+                  phase={cc.phase}
+                  result={cc.result}
+                  error={cc.error}
+                  onReply={(a) => void cc.reply(a)}
+                  onCommand={(v) => submit(v)}
+                  onEdit={() => {
+                    setText(cc.lastText ?? "");
+                    cc.reset();
+                    inputRef.current?.focus();
+                  }}
+                  onDismiss={cc.reset}
+                  onLinkClick={closeCommand}
+                />
+              </div>
             ) : (
               <div className="grid gap-6 pt-2 sm:grid-cols-[1.4fr_1fr]">
                 <section>
@@ -253,9 +267,9 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
                     <ul className="space-y-1">
                       {recent.map((r) => (
                         <li key={r.id}>
-                          <button type="button" onClick={() => setRunId(r.id)} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-[13px] text-ink-3 transition hover:bg-surface hover:text-ink">
+                          <button type="button" onClick={() => submit(r.text)} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-start text-[13px] text-ink-3 transition hover:bg-surface hover:text-ink">
                             <History className="size-3.5 shrink-0" />
-                            <span className="truncate">{r.input}</span>
+                            <span className="truncate" dir="auto">{r.text}</span>
                           </button>
                         </li>
                       ))}
