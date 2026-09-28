@@ -56,7 +56,7 @@
   "image_failed": "We couldn't create the design. Your content is saved — you can try again.",
   "image_refused": "This design request couldn't be created under the image provider's safety rules. Try describing it differently.",
   "image_rate_limited": "The image service is busy. Try again in a minute.",
-  "calendar_not_connected": "Connect a Google or Microsoft calendar first. No meeting was booked.",
+  "calendar_not_connected": "Connect a calendar to complete the booking. No meeting was booked.",
   "calendar_no_free_slots": "Your calendar has no free working-hour slots in the next 10 days.",
   "calendar_slot_taken": "That time is no longer free in your calendar. Propose new times.",
   "meeting_needs_email": "Add the customer's email before booking so they receive the invite.",
@@ -64,5 +64,8 @@
   "oauth_invalid_scope": "We couldn't finish connecting because a permission isn't enabled in the app yet.",
   "policy_locked": "Pricing, discounts, proposals and contract language always need approval.",
   "video_not_configured": "Automatic video generation isn't connected yet.",
-  "nothing_due": "There are no due follow-ups to prepare."
+  "nothing_due": "There are no due follow-ups to prepare.",
+  "email_not_configured": "Email isn't set up for this installation yet, so the message couldn't be sent.",
+  "email_invalid_recipient": "That email address isn't valid.",
+  "whatsapp_test_recipient_missing": "Set WHATSAPP_TEST_RECIPIENT before sending a test WhatsApp."
 }

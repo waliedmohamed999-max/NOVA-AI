@@ -7,6 +7,7 @@ import { RateLimitError, enforceRateLimit } from "./rate-limit";
 import { TenantScopeError } from "./db/tenant";
 import { logger } from "./logger";
 import { UserFacingError } from "./errors";
+import { EmailConfigError } from "./email/mailer";
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }
@@ -51,6 +52,7 @@ export function tenantAction<S extends z.ZodType, R>(
 export function mapError(err: unknown, name: string): { ok: false; error: string } {
   if (err instanceof UserFacingError) return { ok: false, error: err.code };
   if (err instanceof z.ZodError) return { ok: false, error: "validation" };
+  if (err instanceof EmailConfigError) return { ok: false, error: err.code };
   if (err instanceof ForbiddenError) return { ok: false, error: "forbidden" };
   if (err instanceof RateLimitError) return { ok: false, error: "rate_limited" };
   if (err instanceof TenantScopeError) {
