@@ -143,6 +143,12 @@ defineWorkflow("command", {
   agent: "SOCIAL_MANAGER",
   steps: ["understanding_goal"],
   async run(ctx) {
+    // The Command Center already classified this as a knowledge question (server-validated) — don't classify twice.
+    if (ctx.params.intent === "ask_question") {
+      await ctx.skip("understanding_goal");
+      await ctx.plan(["searching_knowledge", "writing_answer"]);
+      return answerQuestion(ctx);
+    }
     const b = await loadBrain(ctx.scope);
     const intent = await ctx.step("understanding_goal", async () => {
       const res = await aiStructured(ctx.ai, {

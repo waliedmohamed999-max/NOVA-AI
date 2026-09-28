@@ -6,6 +6,7 @@ import "./workflows/content";
 import "./workflows/sales";
 import "./workflows/analyst";
 import "./workflows/command";
+import "./workflows/carousel";
 
 export function registerAgentJobs() {
   registerJob("agent.run", async (p) => executeRun(scopeOf(p), String(p.runId)));

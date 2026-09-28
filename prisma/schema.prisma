@@ -2004,3 +2004,35 @@ model Quote {
   @@index([leadId])
   @@map("quotes")
 }
+
+/// Home Command Center: one row per command (activity log, history, idempotency, pending confirmations).
+/// `plan` holds the server-resolved action awaiting a choice/confirmation — the client never sends entity ids.
+model CommandExecution {
+  id               String   @id @default(cuid())
+  organizationId   String
+  workspaceId      String
+  userId           String
+  idempotencyKey   String
+  text             String // redacted
+  locale           String   @default("en")
+  intent           String?
+  kind             String? // navigation | read | action | high_risk | unknown
+  entities         Json     @default("{}")
+  action           String?
+  status           String // understood | completed | failed | denied | needs_choice | needs_confirmation | needs_approval | needs_input | queued | partial | ai_unavailable
+  response         Json     @default("{}")
+  plan             Json?
+  receipt          Json?
+  runId            String?
+  aiUsed           Boolean  @default(false)
+  approvalRequired Boolean  @default(false)
+  errorCode        String?
+  errorDetail      String?
+  latencyMs        Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([organizationId, userId, idempotencyKey])
+  @@index([organizationId, workspaceId, userId, createdAt])
+  @@map("command_executions")
+}
