@@ -7,6 +7,7 @@ import { notify } from "../../notifications/service";
 import { defineWorkflow } from "../runtime";
 import { brainPrompt, loadBrain, type BrainSnapshot } from "../brain";
 import { followUpSchema, leadQualificationSchema, type LeadQualification } from "../schemas";
+import { compactContext, retrieveCompanyContext, type CompanyContext } from "../../knowledge/company-context";
 
 const SALES_SYSTEM = (b: BrainSnapshot) =>
   [
@@ -15,6 +16,16 @@ const SALES_SYSTEM = (b: BrainSnapshot) =>
     "Replies are short, warm, specific to what the lead wrote, and end with one clear next step.",
     "",
     brainPrompt(b),
+  ].join("\n");
+
+/** Follow-up drafting: a compact sales context instead of the whole company profile. */
+const salesSystem = (brain: CompanyContext, locale: "ar" | "en") =>
+  [
+    "You are the AI Sales Agent of this company. Draft a short, warm, specific follow-up that ends with one clear next step.",
+    "Never promise discounts, custom prices, refunds, legal terms, contract terms or delivery dates that are not listed below. If they come up, flag the matching sensitive topic.",
+    `Write in ${locale === "ar" ? "Arabic" : "English"}.`,
+    "",
+    compactContext(brain),
   ].join("\n");
 
 /** Keyword intent for offline mode. Anything unclear is "other" — never auto-answered. */
@@ -167,7 +178,7 @@ defineWorkflow("leads_followup", {
       Promise.all(
         leads.map(async (l) => ({
           lead: l,
-          history: (await db.message.findMany({ where: { ...ctx.scope, conversation: { leadId: l.id } }, orderBy: { createdAt: "desc" }, take: 6 }))
+          history: (await db.message.findMany({ where: { ...ctx.scope, conversation: { leadId: l.id } }, orderBy: { createdAt: "desc" }, take: 3 }))
             .reverse()
             .map((m) => `${m.direction === "INBOUND" ? l.name : b.org.name}: ${m.body}`)
             .join("\n"),
@@ -176,13 +187,28 @@ defineWorkflow("leads_followup", {
     );
     const drafted = await ctx.step("drafting_followups", async () => {
       const out: { leadId: string; name: string; disposition: string }[] = [];
+      // Sales context is retrieved once for the whole job and shared by every draft (offerings, ICP, pricing,
+      // sales rules only — no other customers, no content history).
+      const brain = await retrieveCompanyContext(ctx.scope, { purpose: "sales", budget: "small" });
+      const system = salesSystem(brain, b.locale);
+      Object.assign(ctx.params, { brainContextTokens: brain.contextTokens, brainItems: brain.retrievedItems });
       for (const { lead, history } of convos) {
+        // Only the offerings this customer showed interest in (fall back to none rather than the whole catalogue).
+        const relevant = [...brain.services, ...brain.products].filter((o) => lead.interests.some((i) => o.name.toLowerCase().includes(i.toLowerCase()) || i.toLowerCase().includes(o.name.toLowerCase())));
         const res = await aiStructured(ctx.ai, {
           task: "SALES",
           schemaName: "follow_up",
           schema: followUpSchema,
-          system: SALES_SYSTEM(b),
-          prompt: `Write a short follow-up to ${lead.name}${lead.company ? ` (${lead.company})` : ""}. Stage: ${lead.stage}. Last known intent: ${lead.intent ?? "unknown"}. Objections: ${lead.objections.join(", ") || "none"}.\nConversation so far:\n${history || "(no messages yet)"}`,
+          system,
+          maxTokens: 400,
+          prompt: [
+            `Write a short follow-up to ${lead.name}${lead.company ? ` (${lead.company})` : ""}.`,
+            `Stage: ${lead.stage}. Last known intent: ${lead.intent ?? "unknown"}. Objections: ${lead.objections.join(", ") || "none"}.`,
+            relevant.length ? `Relevant offering: ${relevant.map((o) => `${o.name}${o.price ? ` (${o.price})` : ""}`).join("; ")}` : null,
+            `Last messages:\n${history || "(no messages yet)"}`,
+          ]
+            .filter(Boolean)
+            .join("\n"),
           offline: () => ({
             subject: null,
             message:

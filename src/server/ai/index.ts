@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { currentCommandExecutionId } from "./attribution";
 import type { AgentKey, AiTaskType } from "@/generated/prisma/enums";
 import { db } from "../db/client";
 import { logger } from "../logger";
@@ -128,6 +129,7 @@ export async function logRun(
         workspaceId: ctx.workspaceId ?? null,
         agentKey: ctx.agentKey ?? null,
         agentRunId: ctx.agentRunId ?? null,
+        commandExecutionId: currentCommandExecutionId(),
         task,
         provider,
         model,

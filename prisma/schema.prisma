@@ -1632,6 +1632,8 @@ model AiRun {
   /// Image runs: how costMicro was derived ("actual_usage" | "estimated") and which pricing table.
   costBasis      String?
   pricingVersion String?
+  /// The Command Center execution that caused this call (null for other callers).
+  commandExecutionId String?
   createdAt      DateTime    @default(now())
 
   @@index([organizationId, createdAt])
@@ -2029,10 +2031,42 @@ model CommandExecution {
   errorCode        String?
   errorDetail      String?
   latencyMs        Int?
+  /// Routing decided before execution: local | brain | ai | brain_ai.
+  mode             String?
+  /// { requiredData[], requiredBrainSections[], tokenBudget, maxOutputTokens }
+  routing          Json?
+  brainVersion     String?
+  cacheHit         Boolean  @default(false)
+  contextTokens    Int?
+  retrievedItems   Int?
+  inputTokens      Int?
+  outputTokens     Int?
+  costMicro        BigInt?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@unique([organizationId, userId, idempotencyKey])
+  @@index([organizationId, createdAt])
   @@index([organizationId, workspaceId, userId, createdAt])
   @@map("command_executions")
+}
+
+/// Answers built only from the Company Brain (no customer data, no time-sensitive data), keyed by the
+/// brain fingerprint: any change to profile, offerings, brand, policies or knowledge makes old rows unreachable.
+model CommandCache {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  brainVersion   String
+  intent         String
+  queryKey       String
+  locale         String
+  response       Json
+  hits           Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, workspaceId, brainVersion, intent, queryKey, locale])
+  @@index([organizationId, workspaceId, createdAt])
+  @@map("command_cache")
 }

@@ -8,6 +8,7 @@ import { logger } from "../logger";
 import { safeFetchText, UnsafeUrlError } from "../net/safe-fetch";
 import { chunkText, extractPage, pickInterestingLinks, type ExtractedPage } from "./extract";
 import { enqueue } from "../jobs/queue";
+import { stripBoilerplate } from "./company-context";
 
 export type WebsiteSignals = {
   title: string;
@@ -124,7 +125,8 @@ export async function ingestSource(scope: TenantScope, sourceId: string) {
       data: {
         status: "READY",
         lastSyncedAt: new Date(),
-        metadata: { ...(source.metadata as object), ...extraMeta, documents: docs.length, newChunks: chunkCount } as Prisma.InputJsonValue,
+        // A compact extractive summary (no AI) for summary-first retrieval; the brain fingerprint changes with this update.
+        metadata: { ...(source.metadata as object), ...extraMeta, documents: docs.length, newChunks: chunkCount, summary: summarizeDocs(docs) } as Prisma.InputJsonValue,
       },
     });
     return { documents: docs.length, chunks: chunkCount };
@@ -134,6 +136,17 @@ export async function ingestSource(scope: TenantScope, sourceId: string) {
     if (friendly === "website_unreachable") return { failed: friendly };
     throw err;
   }
+}
+
+/** First meaningful sentences of each document, boilerplate removed — bounded to ~600 characters. */
+export function summarizeDocs(docs: { title: string; content: string }[]) {
+  const parts: string[] = [];
+  for (const d of docs) {
+    const sentence = stripBoilerplate(d.content).split(/(?<=[.!?؟])\s+|\n+/).find((s) => s.trim().length > 40);
+    if (sentence) parts.push(`${d.title ? `${d.title}: ` : ""}${sentence.trim().slice(0, 200)}`);
+    if (parts.join(" ").length > 600) break;
+  }
+  return parts.join("\n").slice(0, 600);
 }
 
 async function embedDocumentChunks(scope: TenantScope, documentId: string) {

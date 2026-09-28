@@ -24,6 +24,7 @@ export type TenantScope = {
 export const WORKSPACE_MODELS = new Set<string>([
   "WorkspaceSettings",
   "CommandExecution",
+  "CommandCache",
   "Meeting",
   "CarouselSlide",
   "WhatsAppNumber",

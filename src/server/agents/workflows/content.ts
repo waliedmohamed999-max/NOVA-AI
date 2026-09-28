@@ -1,11 +1,11 @@
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { retrieveKnowledge, formatContext } from "../../knowledge/service";
+import { compactContext, retrieveCompanyContext, type Budget, type CompanyContext } from "../../knowledge/company-context";
 import { createContentFromPlan, notifyContentReady } from "../../content/service";
 import { audit } from "../../audit";
 import { defineWorkflow, type RunContext } from "../runtime";
-import { brainPrompt, loadBrain, pillarsOf, type BrainSnapshot } from "../brain";
+import { loadBrain, pillarsOf, type BrainSnapshot } from "../brain";
 import { campaignPlanSchema, contentPlanSchema, plannedPostSchema, type PlannedPost } from "../schemas";
 import { offlineCampaign, offlineContentPlan, offlinePost } from "../offline-content";
 import { performanceDigest } from "../../analytics/digest";
@@ -49,19 +49,24 @@ function tomorrow() {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1));
 }
 
-const WRITER_SYSTEM = (b: BrainSnapshot) =>
+/** The content team's system prompt with a compact, content-only Company Brain context (no CRM, no full profile). */
+const WRITER_SYSTEM = (b: BrainSnapshot, brain: CompanyContext) =>
   [
     "You are the content team of an AI growth team: a social media manager, a content strategist and a designer working together.",
     "Write on-brand, specific, useful social content for the company below. Vary hooks and formats. No generic filler, no fake statistics, no invented testimonials, no promises the company hasn't made.",
     "Hashtags: few and relevant. Each post needs a design brief the designer can execute using the brand kit.",
     "Only reference prices, discounts or offers that appear in the company information.",
+    `Write customer-facing copy in ${b.locale === "ar" ? "Arabic (natural Modern Standard Arabic suited to the region)" : "English"}.`,
     "",
-    brainPrompt(b),
+    compactContext(brain),
   ].join("\n");
 
-async function gatherContext(ctx: RunContext, b: BrainSnapshot, focus: string) {
-  const [chunks, perf] = await Promise.all([retrieveKnowledge(ctx.scope, focus, 5), performanceDigest(ctx.scope)]);
-  return { knowledge: formatContext(chunks), perf };
+/** Budget grows with the batch size; one retrieval is shared by every post in the job. */
+const budgetFor = (count: number): Budget => (count <= 3 ? "small" : count <= 7 ? "medium" : "large");
+
+async function gatherContext(ctx: RunContext, focus: string, budget: Budget = "small") {
+  const [brain, perf] = await Promise.all([retrieveCompanyContext(ctx.scope, { purpose: "content", query: focus, budget, semantic: true }), performanceDigest(ctx.scope)]);
+  return { brain, perf };
 }
 
 defineWorkflow("content_plan", {
@@ -76,7 +81,8 @@ defineWorkflow("content_plan", {
     const withDesigns = ctx.params.withDesigns === true;
 
     const b = await ctx.step("understanding_goal", () => loadBrain(ctx.scope));
-    const { knowledge, perf } = await ctx.step("reviewing_business", () => gatherContext(ctx, b, topic ?? ctx.input));
+    const { brain, perf } = await ctx.step("reviewing_business", () => gatherContext(ctx, topic ?? ctx.input, budgetFor(count)));
+    Object.assign(ctx.params, { brainContextTokens: brain.contextTokens, brainItems: brain.retrievedItems });
     await ctx.step("analyzing_performance", async () => perf);
     const recentHooks = await recentContent(ctx.scope);
 
@@ -84,8 +90,10 @@ defineWorkflow("content_plan", {
       aiStructured(ctx.ai, {
         task: "COPYWRITING",
         schemaName: "content_plan",
+        // One call for the whole batch; output sized to the number of posts, never a huge fixed default.
+        maxTokens: Math.min(8000, 400 + count * 450),
         schema: contentPlanSchema,
-        system: WRITER_SYSTEM(b),
+        system: WRITER_SYSTEM(b, brain),
         prompt: [
           `Request from the business owner: "${ctx.input || `Create ${count} posts for next week`}"`,
           `Create exactly ${count} posts${platform ? ` for ${platform}` : " across the recommended channels"}.`,
@@ -96,7 +104,6 @@ defineWorkflow("content_plan", {
           `Recent hooks — do not repeat these or their angles:\n${recentHooks.slice(0, 15).map((r) => `- ${r.hook ?? r.title}`).join("\n") || "- (none yet)"}`,
           `dayOffset 0 = the first day of the plan (a Monday). Spread posts sensibly across the week; choose realistic posting times.`,
           `Real performance data (use it to decide themes and formats; don't cite numbers that aren't here):\n${perf.text}`,
-          `Company knowledge:\n${knowledge}`,
         ]
           .filter(Boolean)
           .join("\n\n"),
@@ -149,7 +156,7 @@ defineWorkflow("campaign", {
   async run(ctx) {
     const topic = (ctx.params.topic as string | null) ?? null;
     const b = await ctx.step("understanding_goal", () => loadBrain(ctx.scope));
-    const { knowledge, perf } = await ctx.step("reviewing_business", () => gatherContext(ctx, b, topic ?? ctx.input));
+    const { brain, perf } = await ctx.step("reviewing_business", () => gatherContext(ctx, topic ?? ctx.input, "medium"));
     await ctx.step("analyzing_performance", async () => perf);
 
     const plan = await ctx.step("creating_strategy", () =>
@@ -157,14 +164,13 @@ defineWorkflow("campaign", {
         task: "STRATEGY",
         schemaName: "campaign_plan",
         schema: campaignPlanSchema,
-        system: WRITER_SYSTEM(b),
+        system: WRITER_SYSTEM(b, brain),
         prompt: [
           `Request from the business owner: "${ctx.input}"`,
           topic && `Campaign subject: ${topic}`,
           "Design a complete campaign: concept, key message, creative direction, CTA, KPIs, channels, and 5–9 posts (include at least one carousel and one short video).",
           "dayOffset 0 = campaign start date.",
           `Real performance data:\n${perf.text}`,
-          `Company knowledge:\n${knowledge}`,
         ]
           .filter(Boolean)
           .join("\n\n"),
@@ -256,12 +262,13 @@ defineWorkflow("content_rewrite", {
     const id = String(ctx.params.contentItemId);
     const item = await db.contentItem.findFirstOrThrow({ where: { id, ...ctx.scope } });
     const b = await ctx.step("reviewing_business", () => loadBrain(ctx.scope));
+    const brain = await retrieveCompanyContext(ctx.scope, { purpose: "content", query: `${item.title} ${item.pillar ?? ""}`, budget: "small" });
     const res = await ctx.step("writing_content", () =>
       aiStructured(ctx.ai, {
         task: "COPYWRITING",
         schemaName: "rewrite",
         schema: plannedPostSchema,
-        system: WRITER_SYSTEM(b),
+        system: WRITER_SYSTEM(b, brain),
         prompt: [
           `Rewrite this ${item.platform} ${item.format} post with a fresh angle and a stronger hook. Keep the same pillar ("${item.pillar ?? ""}") and intent.`,
           ctx.input && `Owner's note: ${ctx.input}`,

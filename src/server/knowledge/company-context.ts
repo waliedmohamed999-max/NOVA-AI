@@ -1,0 +1,351 @@
+import type { KnowledgeSourceType } from "@/generated/prisma/enums";
+import { db } from "../db/client";
+import type { TenantScope } from "../db/tenant";
+import { aiEmbed } from "../ai";
+import { redact } from "../security/redact";
+import { LOCKED_SALES_TOPICS } from "../approvals/policies";
+import { similarity } from "../studio/context";
+
+/**
+ * Company Brain retrieval for the Command Center and the agents — selective by purpose, bounded by a
+ * token budget, tenant-scoped. It never returns the whole brain: each purpose reads only the sections it
+ * needs, and knowledge chunks are keyword-first (semantic search only when asked for and needed).
+ * Nothing from integrations, credentials or CRM records ever enters this context.
+ */
+
+export type BrainPurpose = "sales" | "content" | "support" | "facts";
+export type BrainSection = "company" | "services" | "products" | "audience" | "valueProps" | "pricing" | "brandVoice" | "contentPillars" | "forbidden" | "salesRules" | "knowledge";
+export type SourceKind = "profile" | "offering" | "brand" | "policy" | "website" | "document" | "manual" | "faq" | "pricing" | "case_study";
+export type Budget = "small" | "medium" | "large";
+
+/** Context-token ceilings and top-K per budget. Default is small. */
+export const TOKEN_BUDGETS: Record<Budget, number> = { small: 1000, medium: 3000, large: 6000 };
+export const TOP_K: Record<Budget, number> = { small: 3, medium: 5, large: 8 };
+
+export const PURPOSE_SECTIONS: Record<BrainPurpose, BrainSection[]> = {
+  sales: ["company", "services", "products", "audience", "pricing", "salesRules", "knowledge"],
+  content: ["company", "brandVoice", "services", "products", "audience", "contentPillars", "forbidden", "knowledge"],
+  support: ["company", "services", "products", "knowledge"],
+  facts: ["company", "services", "products", "audience", "valueProps", "pricing", "brandVoice", "contentPillars"],
+};
+
+/** Knowledge types each purpose may read (metadata filter on the chunk search). */
+const PURPOSE_KNOWLEDGE: Record<BrainPurpose, KnowledgeSourceType[]> = {
+  sales: ["PRICING", "POLICY", "SERVICE", "PRODUCT", "FAQ", "CASE_STUDY"],
+  content: ["SERVICE", "PRODUCT", "CASE_STUDY", "WEBSITE", "MANUAL", "DOCUMENT"],
+  support: ["FAQ", "POLICY", "PRODUCT", "SERVICE", "PRICING", "WEBSITE", "DOCUMENT", "MANUAL"],
+  facts: ["FAQ", "POLICY", "PRODUCT", "SERVICE", "PRICING", "WEBSITE", "DOCUMENT", "MANUAL", "CASE_STUDY"],
+};
+
+export type BrainItem = { name: string; detail?: string | null; price?: string | null; source: SourceKind };
+export type BrainChunk = { text: string; title: string; source: SourceKind; score: number };
+
+export type CompanyContext = {
+  company: { name: string; industry: string | null; summary: string | null; website: string | null } | null;
+  facts: { text: string; source: SourceKind }[];
+  services: BrainItem[];
+  products: BrainItem[];
+  audience: string[];
+  valueProps: string[];
+  pricing: string[];
+  brandRules: string[];
+  contentRules: string[];
+  salesRules: string[];
+  pillars: string[];
+  chunks: BrainChunk[];
+  sources: { kind: SourceKind; count: number }[];
+  /** How well the brain answers `query` (only meaningful when a query was given). */
+  confidence: "high" | "medium" | "low";
+  contextTokens: number;
+  retrievedItems: number;
+  brainVersion: string;
+  semantic: boolean;
+};
+
+// ── Brain version: a fingerprint of everything the brain is made of ──
+
+/**
+ * Changes whenever the profile, brand kit, offerings, approval policies or knowledge sources/chunks
+ * change (edits, additions, deletions, re-ingestion). Used as the cache key, so no explicit invalidation.
+ */
+export async function brainVersion(scope: TenantScope): Promise<string> {
+  const o = scope.organizationId;
+  const w = scope.workspaceId;
+  const [row] = await db.$queryRaw<{ v: string }[]>`
+    SELECT md5(concat_ws('|',
+      (SELECT max("updatedAt")::text FROM "company_profiles" WHERE "organizationId" = ${o} AND "workspaceId" = ${w}),
+      (SELECT max("updatedAt")::text FROM "brand_kits" WHERE "organizationId" = ${o} AND "workspaceId" = ${w}),
+      (SELECT count(*)::text || ':' || coalesce(max("updatedAt")::text, '') FROM "offerings" WHERE "organizationId" = ${o} AND "workspaceId" = ${w}),
+      (SELECT count(*)::text || ':' || coalesce(max("updatedAt")::text, '') FROM "approval_policies" WHERE "organizationId" = ${o} AND "workspaceId" = ${w}),
+      (SELECT count(*)::text || ':' || coalesce(max(greatest("updatedAt", coalesce("lastSyncedAt", "updatedAt")))::text, '') FROM "knowledge_sources" WHERE "organizationId" = ${o} AND "workspaceId" = ${w}),
+      (SELECT count(*)::text FROM "knowledge_chunks" WHERE "organizationId" = ${o} AND "workspaceId" = ${w})
+    )) AS v`;
+  return row.v;
+}
+
+// ── Token estimate & text hygiene ──
+
+/** Conservative estimate: ~4 chars/token for Latin text, ~2.5 for Arabic and other scripts. */
+export function estimateTokens(text: string) {
+  let latin = 0;
+  let other = 0;
+  for (const ch of text) if (ch.charCodeAt(0) < 0x0250) latin++;
+  else other++;
+  return Math.ceil(latin / 4 + other / 2.5);
+}
+
+const BOILERPLATE = [
+  /(all rights reserved|copyright|©|جميع الحقوق محفوظة)/i,
+  /(cookie|cookies|privacy policy|terms (of|and) (use|service)|سياسة الخصوصية|الشروط والأحكام)/i,
+  /^(home|about|contact|services|blog|menu|login|sign in|register|الرئيسية|من نحن|اتصل بنا|خدماتنا|تسجيل الدخول)(\s*[|•·\-/]\s*\S+){0,8}$/i,
+  /(follow us|subscribe|newsletter|تابعنا|اشترك)/i,
+];
+
+/** Drops navigation/footer/cookie lines and very short fragments; keeps real sentences. */
+export function stripBoilerplate(text: string) {
+  return text
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter((l) => l.length >= 25 && !BOILERPLATE.some((re) => re.test(l)))
+    .join("\n")
+    .trim();
+}
+
+/** Removes near-duplicate chunks and merges overlapping neighbours from the same document. */
+export function dedupeChunks<T extends { text: string; score: number; documentId?: string; index?: number }>(chunks: T[]): T[] {
+  const sorted = [...chunks].sort((a, b) => (a.documentId ?? "").localeCompare(b.documentId ?? "") || (a.index ?? 0) - (b.index ?? 0));
+  const merged: T[] = [];
+  for (const c of sorted) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.documentId && prev.documentId === c.documentId && c.index === (prev.index ?? -2) + 1) {
+      // chunkText() overlaps neighbours by ~60 tokens: join on the longest shared boundary.
+      let cut = 0;
+      for (let n = Math.min(600, prev.text.length, c.text.length); n >= 20; n--) {
+        if (prev.text.endsWith(c.text.slice(0, n))) {
+          cut = n;
+          break;
+        }
+      }
+      prev.text = `${prev.text}${cut ? "" : "\n"}${c.text.slice(cut)}`;
+      prev.score = Math.max(prev.score, c.score);
+      prev.index = c.index;
+      continue;
+    }
+    merged.push({ ...c });
+  }
+  const out: T[] = [];
+  for (const c of merged.sort((a, b) => b.score - a.score)) if (!out.some((o) => similarity(o.text, c.text) > 0.8)) out.push(c);
+  return out;
+}
+
+// ── Chunk search: tenant-scoped, type-filtered, keyword first ──
+
+const SOURCE_OF: Record<string, SourceKind> = { WEBSITE: "website", DOCUMENT: "document", MANUAL: "manual", FAQ: "faq", PRODUCT: "document", SERVICE: "document", PRICING: "pricing", POLICY: "policy", CASE_STUDY: "case_study" };
+
+type ChunkRow = { id: string; content: string; documentId: string; index: number; title: string | null; type: string; score: number };
+
+// Function words carry no meaning for matching (they'd only dilute coverage / widen the keyword search).
+const STOPWORDS = new Set(
+  (
+    "the and for are you your our with what which who how does did can will this that from have has was were about into they them there here when where why " +
+    "هل ما ماذا ايه ايش اي مين كيف ازاي ليه لماذا متى فين اين كم هو هي هم انت انتم عندكم عندنا لديكم لدينا في من على الى عن مع التي الذي اللي هذا هذه ذلك تلك او ثم كل بعض"
+  ).split(" "),
+);
+
+function queryTerms(q: string) {
+  return [...new Set(q.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter((w) => w.length > 2 && !STOPWORDS.has(w)))].slice(0, 10);
+}
+
+export async function searchBrainChunks(scope: TenantScope, query: string, opts: { types: KnowledgeSourceType[]; k: number; semantic?: boolean }) {
+  const q = query.trim().slice(0, 500);
+  const k = Math.max(1, Math.min(8, opts.k));
+  if (!q) return { rows: [] as ChunkRow[], semantic: false };
+  const terms = queryTerms(q);
+  const rows = new Map<string, ChunkRow>();
+  if (terms.length) {
+    // Any-term full-text match, ranked; restricted to this tenant and to the purpose's knowledge types.
+    const tsq = terms.map((t) => t.replace(/[':&|!()]/g, "")).filter(Boolean).join(" | ");
+    const kw = await db.$queryRaw<ChunkRow[]>`
+      SELECT c."id", c."content", c."documentId", c."index", c."metadata"->>'title' AS "title", s."type"::text AS "type",
+             ts_rank(to_tsvector('simple', c."content"), to_tsquery('simple', ${tsq})) AS "score"
+      FROM "knowledge_chunks" c JOIN "knowledge_sources" s ON s."id" = c."sourceId"
+      WHERE c."organizationId" = ${scope.organizationId} AND c."workspaceId" = ${scope.workspaceId}
+        AND s."organizationId" = ${scope.organizationId} AND s."type"::text = ANY(${opts.types as string[]})
+        AND to_tsvector('simple', c."content") @@ to_tsquery('simple', ${tsq})
+      ORDER BY "score" DESC LIMIT ${k}`.catch(() => [] as ChunkRow[]);
+    for (const r of kw) rows.set(r.id, r);
+  }
+  let semantic = false;
+  // Semantic search costs an embedding call: only when explicitly allowed and keyword recall is poor.
+  if (opts.semantic && rows.size < 2) {
+    const has = await db.$queryRaw<{ n: number }[]>`SELECT count(*)::int AS n FROM "knowledge_chunks" WHERE "organizationId" = ${scope.organizationId} AND "workspaceId" = ${scope.workspaceId} AND "embedding" IS NOT NULL`;
+    if (has[0]?.n) {
+      const e = await aiEmbed({ organizationId: scope.organizationId, workspaceId: scope.workspaceId }, [q]).catch(() => null);
+      if (e) {
+        semantic = true;
+        const vector = `[${e.vectors[0].join(",")}]`;
+        const vs = await db.$queryRaw<ChunkRow[]>`
+          SELECT c."id", c."content", c."documentId", c."index", c."metadata"->>'title' AS "title", s."type"::text AS "type",
+                 1 - (c."embedding" <=> ${vector}::vector) AS "score"
+          FROM "knowledge_chunks" c JOIN "knowledge_sources" s ON s."id" = c."sourceId"
+          WHERE c."organizationId" = ${scope.organizationId} AND c."workspaceId" = ${scope.workspaceId} AND c."embedding" IS NOT NULL
+            AND s."type"::text = ANY(${opts.types as string[]})
+          ORDER BY c."embedding" <=> ${vector}::vector LIMIT ${k}`;
+        for (const r of vs) if (!rows.has(r.id)) rows.set(r.id, r);
+      }
+    }
+  }
+  return { rows: [...rows.values()].sort((a, b) => Number(b.score) - Number(a.score)).slice(0, k), semantic };
+}
+
+/** Share of the query's meaningful terms that appear in `text` (0–1). */
+export function termCoverage(query: string, text: string) {
+  const terms = queryTerms(query);
+  if (!terms.length) return 0;
+  const t = text.toLowerCase();
+  return terms.filter((w) => t.includes(w)).length / terms.length;
+}
+
+// ── The service ──
+
+export type RetrieveOptions = {
+  purpose: BrainPurpose;
+  query?: string;
+  /** Narrow the sections further (e.g. a brain question about services only). */
+  sections?: BrainSection[];
+  budget?: Budget;
+  /** Allow an embedding call when keyword search finds too little. Never for brain-only answers. */
+  semantic?: boolean;
+  /** Override top-K (clamped to 1–8). */
+  topK?: number;
+};
+
+export async function retrieveCompanyContext(scope: TenantScope, opts: RetrieveOptions): Promise<CompanyContext> {
+  const budget = opts.budget ?? "small";
+  const sections = new Set(opts.sections ?? PURPOSE_SECTIONS[opts.purpose]);
+  const where = { organizationId: scope.organizationId, workspaceId: scope.workspaceId };
+  const needProfile = ["company", "audience", "valueProps", "contentPillars"].some((s) => sections.has(s as BrainSection));
+  const needBrand = sections.has("brandVoice") || sections.has("forbidden");
+  const needOfferings = sections.has("services") || sections.has("products") || sections.has("pricing");
+
+  const [version, org, profile, brand, offerings, policies] = await Promise.all([
+    brainVersion(scope),
+    db.organization.findUniqueOrThrow({ where: { id: scope.organizationId }, select: { name: true } }),
+    needProfile ? db.companyProfile.findFirst({ where, select: { name: true, industry: true, summary: true, description: true, website: true, audience: true, valueProps: true, differentiators: true, contentPillars: true } }) : null,
+    needBrand ? db.brandKit.findFirst({ where, select: { tone: true, voiceTraits: true, doSay: true, dontSay: true, forbiddenStyles: true } }) : null,
+    needOfferings ? db.offering.findMany({ where: { ...where, isActive: true }, orderBy: { createdAt: "asc" }, take: 20, select: { type: true, name: true, description: true, priceText: true } }) : [],
+    sections.has("salesRules") ? db.approvalPolicy.findMany({ where, select: { action: true, requiresApproval: true } }) : [],
+  ]);
+
+  const item = (o: { name: string; description: string | null; priceText: string | null }): BrainItem => ({ name: o.name, detail: o.description?.slice(0, 160) ?? null, price: o.priceText, source: "offering" });
+  const services = sections.has("services") ? offerings.filter((o) => o.type === "SERVICE").map(item) : [];
+  const products = sections.has("products") ? offerings.filter((o) => o.type === "PRODUCT").map(item) : [];
+  const audience = sections.has("audience") && Array.isArray(profile?.audience) ? (profile!.audience as { name?: string; description?: string }[]).map((a) => [a.name, a.description].filter(Boolean).join(" — ")).filter(Boolean) : [];
+  const valueProps = sections.has("valueProps") ? [...(profile?.valueProps ?? []), ...(profile?.differentiators ?? [])] : [];
+  const pricing = sections.has("pricing") ? offerings.filter((o) => o.priceText).map((o) => `${o.name}: ${o.priceText}`) : [];
+  const brandRules = sections.has("brandVoice") && brand ? [brand.tone && `Tone: ${brand.tone}`, brand.voiceTraits.length && `Voice: ${brand.voiceTraits.join(", ")}`, brand.doSay.length && `Always: ${brand.doSay.join("; ")}`].filter(Boolean) as string[] : [];
+  const contentRules = sections.has("forbidden")
+    ? [
+        ...(brand?.dontSay.length ? [`Never say: ${brand.dontSay.join("; ")}`] : []),
+        ...(brand?.forbiddenStyles.length ? [`Forbidden visual styles: ${brand.forbiddenStyles.join(", ")}`] : []),
+        "No invented statistics, testimonials, prices or offers that are not listed here.",
+      ]
+    : [];
+  const salesRules = sections.has("salesRules")
+    ? [
+        `Always needs human approval: ${[...new Set([...LOCKED_SALES_TOPICS, ...policies.filter((p) => p.requiresApproval).map((p) => p.action)])].join(", ")}.`,
+        "Only quote prices listed here; never promise discounts, refunds, contract terms or delivery dates.",
+      ]
+    : [];
+  const pillars = sections.has("contentPillars") ? (profile?.contentPillars ?? []) : [];
+  let summary = (profile?.summary ?? profile?.description)?.slice(0, 400) ?? null;
+  if (sections.has("company") && !summary) {
+    // Summary-first: the compact summary saved at ingestion, before any chunk-level retrieval.
+    const src = await db.knowledgeSource.findFirst({ where: { ...where, status: "READY" }, orderBy: { lastSyncedAt: "desc" }, select: { metadata: true } });
+    summary = ((src?.metadata as { summary?: string } | null)?.summary ?? "").slice(0, 400) || null;
+  }
+  const company = sections.has("company") ? { name: profile?.name || org.name, industry: profile?.industry ?? null, summary, website: profile?.website ?? null } : null;
+
+  // Knowledge chunks: only for purposes that read them, and only when there is a query.
+  let chunks: BrainChunk[] = [];
+  let semantic = false;
+  if (sections.has("knowledge") && opts.query) {
+    const res = await searchBrainChunks(scope, opts.query, { types: PURPOSE_KNOWLEDGE[opts.purpose], k: opts.topK ?? TOP_K[budget], semantic: opts.semantic });
+    semantic = res.semantic;
+    chunks = dedupeChunks(res.rows.map((r) => ({ text: redact(stripBoilerplate(r.content), 4000) ?? "", score: Number(r.score), documentId: r.documentId, index: r.index, title: r.title ?? "", type: r.type })))
+      .filter((c) => c.text.length > 0)
+      .map((c) => ({ text: c.text, title: c.title, source: SOURCE_OF[c.type] ?? "document", score: c.score }));
+  }
+
+  const ctx: CompanyContext = {
+    company,
+    facts: [],
+    services,
+    products,
+    audience,
+    valueProps,
+    pricing,
+    brandRules,
+    contentRules,
+    salesRules,
+    pillars,
+    chunks,
+    sources: [],
+    confidence: "low",
+    contextTokens: 0,
+    retrievedItems: 0,
+    brainVersion: version,
+    semantic,
+  };
+  fitBudget(ctx, TOKEN_BUDGETS[budget]);
+
+  const kinds = new Map<SourceKind, number>();
+  const add = (k: SourceKind, n = 1) => n > 0 && kinds.set(k, (kinds.get(k) ?? 0) + n);
+  if (ctx.company?.summary || ctx.audience.length || ctx.valueProps.length || ctx.pillars.length) add("profile");
+  add("offering", ctx.services.length + ctx.products.length ? 1 : 0);
+  add("brand", ctx.brandRules.length || brand?.dontSay.length ? 1 : 0);
+  add("policy", ctx.salesRules.length ? 1 : 0);
+  for (const c of ctx.chunks) add(c.source);
+  ctx.sources = [...kinds].map(([kind, count]) => ({ kind, count }));
+  ctx.retrievedItems = ctx.services.length + ctx.products.length + ctx.audience.length + ctx.valueProps.length + ctx.pricing.length + ctx.chunks.length;
+  ctx.facts = [...ctx.chunks.map((c) => ({ text: c.text, source: c.source }))];
+  if (opts.query) {
+    const best = Math.max(0, ...ctx.chunks.map((c) => termCoverage(opts.query!, c.text)));
+    ctx.confidence = best >= 0.6 ? "high" : best >= 0.3 ? "medium" : "low";
+  }
+  ctx.contextTokens = estimateTokens(compactContext(ctx));
+  return ctx;
+}
+
+/** Trims the context until its compact form fits the budget: lowest-score chunks first, then long lists. */
+export function fitBudget(ctx: CompanyContext, maxTokens: number) {
+  const size = () => estimateTokens(compactContext(ctx));
+  while (size() > maxTokens && ctx.chunks.length) ctx.chunks.pop();
+  for (const list of ["pricing", "audience", "valueProps", "products", "services", "pillars"] as const) {
+    while (size() > maxTokens && ctx[list].length > 3) (ctx[list] as unknown[]).pop();
+  }
+  if (size() > maxTokens && ctx.company?.summary) ctx.company.summary = ctx.company.summary.slice(0, 160);
+  return ctx;
+}
+
+/** Compact, structured prompt form — never raw JSON or whole pages. */
+export function compactContext(ctx: CompanyContext): string {
+  const list = (title: string, items: string[]) => (items.length ? `${title}:\n${items.map((x) => `- ${x}`).join("\n")}` : null);
+  const offering = (o: BrainItem) => [o.name, o.price && `(${o.price})`, o.detail && `— ${o.detail}`].filter(Boolean).join(" ");
+  return [
+    ctx.company && `Company: ${ctx.company.name}${ctx.company.industry ? ` (${ctx.company.industry})` : ""}`,
+    ctx.company?.summary && `About: ${ctx.company.summary}`,
+    list("Services", ctx.services.map(offering)),
+    list("Products", ctx.products.map(offering)),
+    list("Audience", ctx.audience),
+    list("Strengths", ctx.valueProps),
+    list("Prices", ctx.pricing),
+    list("Brand voice", ctx.brandRules),
+    list("Content pillars", ctx.pillars),
+    list("Content rules", ctx.contentRules),
+    list("Sales rules", ctx.salesRules),
+    ctx.chunks.length ? `Knowledge:\n${ctx.chunks.map((c, i) => `[${i + 1}] ${c.title ? `${c.title}: ` : ""}${c.text}`).join("\n")}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}

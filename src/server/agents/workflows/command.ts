@@ -1,6 +1,6 @@
 import { db } from "../../db/client";
 import { aiStructured } from "../../ai";
-import { retrieveKnowledge, formatContext } from "../../knowledge/service";
+import { compactContext, retrieveCompanyContext } from "../../knowledge/company-context";
 import { defineWorkflow, getWorkflow, type RunContext } from "../runtime";
 import { brainPrompt, loadBrain } from "../brain";
 import { answerSchema, commandIntentSchema, type CommandIntent } from "../schemas";
@@ -52,7 +52,10 @@ const INTENT_TO_WORKFLOW: Partial<Record<CommandIntent["intent"], string>> = {
 
 async function answerQuestion(ctx: RunContext) {
   const b = await loadBrain(ctx.scope);
-  const chunks = await ctx.step("searching_knowledge", () => retrieveKnowledge(ctx.scope, ctx.input, 6));
+  // Selective Company Brain context (support purpose, small budget, top-3) — never the whole brain.
+  const brain = await ctx.step("searching_knowledge", () => retrieveCompanyContext(ctx.scope, { purpose: "support", query: ctx.input, budget: "small", topK: 3, semantic: true }));
+  const chunks = brain.chunks;
+  Object.assign(ctx.params, { brainContextTokens: brain.contextTokens, brainItems: brain.retrievedItems });
   const images = await loadImages(ctx);
   const res = await ctx.step("writing_answer", () =>
     aiStructured(ctx.ai, {
@@ -61,14 +64,15 @@ async function answerQuestion(ctx: RunContext) {
       system: [
         "You are the AI Growth Team answering the business owner. Answer using the company knowledge and profile provided; cite source numbers you used.",
         "If the knowledge does not contain the answer, say so briefly and suggest what to add to the Company Brain.",
-        brainPrompt(b),
+        `Answer in ${b.locale === "ar" ? "Arabic" : "English"}, in at most 4 sentences.`,
       ].join("\n"),
-      prompt: `Question: ${ctx.input}\n\nCompany knowledge:\n${formatContext(chunks)}`,
+      prompt: `Question: ${ctx.input}\n\n${compactContext(brain)}`,
+      maxTokens: 500,
       images,
       task: images.length ? "VISION" : "ANALYSIS",
       offline: () => ({
         answer: chunks.length
-          ? chunks[0].content.slice(0, 600)
+          ? chunks[0].text.slice(0, 600)
           : b.locale === "ar"
             ? "لم أجد إجابة في عقل الشركة بعد. أضف المعلومة من صفحة عقل الشركة وسأستخدمها في المرات القادمة."
             : "I couldn't find this in your Company Brain yet. Add it on the Company Brain page and I'll use it from now on.",
@@ -81,7 +85,7 @@ async function answerQuestion(ctx: RunContext) {
     type: "answer" as const,
     title: ctx.input.slice(0, 120),
     summary: res.data.answer,
-    items: res.data.usedSources.map((i) => chunks[i - 1]).filter(Boolean).map((c) => ({ title: c.title || c.sourceType, subtitle: c.url ?? undefined })),
+    items: res.data.usedSources.map((i) => chunks[i - 1]).filter(Boolean).map((c) => ({ title: c.title || c.source })),
     actions: chunks.length ? [] : [{ label: "open_knowledge", href: "/knowledge", primary: true }],
     offline: res.offline,
   };
