@@ -1,6 +1,6 @@
 # Live readiness
 
-**Status (2026-09-30): NOT production-ready.** Every production blocker below must be closed first. The live, always-current version of this table is on `/admin/providers` → *Provider readiness*. In that view, "Live tested = YES" only appears after a recorded, successful call to the real provider.
+**Status (2026-09-28): NOT production-ready.** Every production blocker below must be closed first. The live, always-current version of this table is on `/admin/providers` → *Provider readiness*. In that view, "Live tested = YES" only appears after a recorded, successful call to the real provider.
 
 ## Provider table
 
@@ -25,12 +25,12 @@ All of these were read-only. Nothing was published, sent, charged or created.
 
 | When (UTC) | Test | Result |
 | --- | --- | --- |
-| 2026-09-30 | LinkedIn app credentials (client authentication) | PASS: client authenticated (2-legged flow not enabled for this app, which is expected) |
-| 2026-09-30 | Meta app credentials (app access token) | PASS: token issued for "NOVA — AI Growth Platform" |
-| 2026-09-30 | LinkedIn connection (introspection + profile) | PASS: valid; `w_member_social` granted, so member publishing is available |
-| 2026-09-30 | Facebook connection | Identity only (`public_profile`). `pages_show_list` not granted, so no Pages. PENDING META PERMISSION |
-| 2026-09-30 | Email connection | Reachable, but it's Mailpit (development mailbox). Recorded as **not live** |
-| 2026-09-30 | OpenAI, Google, Microsoft, WhatsApp, Stripe, Instagram, TikTok | Not configured. Recorded as pending |
+| 2026-09-28 | LinkedIn app credentials (client authentication) | PASS: client authenticated (2-legged flow not enabled for this app, which is expected) |
+| 2026-09-28 | Meta app credentials (app access token) | PASS: token issued for "NOVA — AI Growth Platform" |
+| 2026-09-28 | LinkedIn connection (introspection + profile) | PASS: valid; `w_member_social` granted, so member publishing is available |
+| 2026-09-28 | Facebook connection | Identity only (`public_profile`). `pages_show_list` not granted, so no Pages. PENDING META PERMISSION |
+| 2026-09-28 | Email connection | Reachable, but it's Mailpit (development mailbox). Recorded as **not live** |
+| 2026-09-28 | OpenAI, Google, Microsoft, WhatsApp, Stripe, Instagram, TikTok | Not configured. Recorded as pending |
 
 **Not run:** the LinkedIn publish test. It posts publicly, so it needs your explicit approval (type `PUBLISH` in `/admin/providers` → Connection tests).
 
