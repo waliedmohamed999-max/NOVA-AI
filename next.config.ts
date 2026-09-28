@@ -12,6 +12,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Dev only: the app is also opened as http://127.0.0.1:3000 locally. Without this, Next blocks the
+  // dev JS/HMR for that host and the page renders without any interactivity (no-op in production).
+  allowedDevOrigins: ["127.0.0.1"],
   serverExternalPackages: ["@node-rs/argon2", "pino", "pino-pretty", "sharp"],
   experimental: {
     serverActions: { bodySizeLimit: "8mb" },
