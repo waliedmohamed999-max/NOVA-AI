@@ -66,6 +66,12 @@ async function handleInbound(m: WaInbound) {
   await db.conversation.update({ where: { id: conv.id }, data: { lastMessageAt: m.timestamp, status: "OPEN" } });
   await addLeadEvent(scope, lead.id, { type: "MESSAGE_RECEIVED", title: "WhatsApp message received", body: text.slice(0, 2000), actor: { type: "SYSTEM", label: "WhatsApp" } });
 
+  // Existing customer replied: tell the owner (new leads are announced by qualification instead).
+  if (!isNew) {
+    const { notify } = await import("../notifications/service");
+    const owner = await db.lead.findUnique({ where: { id: lead.id }, select: { ownerId: true } });
+    await notify({ ...scope, type: "HOT_OPPORTUNITY", title: `${lead.name} replied on WhatsApp`, body: text.slice(0, 140), link: `/leads/${lead.id}`, ...(owner?.ownerId ? { userIds: [owner.ownerId] } : {}) });
+  }
   // The Sales Agent qualifies new leads (draft reply → approval policy decides whether it goes out).
   if (isNew && aiAvailability().configured) {
     const { startRun } = await import("../agents/runtime");

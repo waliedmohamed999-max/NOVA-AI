@@ -26,6 +26,7 @@ export const WORKSPACE_MODELS = new Set<string>([
   "Meeting",
   "CarouselSlide",
   "WhatsAppNumber",
+  "Quote",
   "CompanyProfile",
   "Offering",
   "BrandKit",

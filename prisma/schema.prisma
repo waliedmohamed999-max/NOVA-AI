@@ -234,6 +234,9 @@ enum LeadEventType {
   STATUS_CHANGE
   SCORE_CHANGE
   NOTE
+  OPPORTUNITY
+  QUOTE
+  IMPORTED
 }
 
 enum ActorType {
@@ -1470,19 +1473,31 @@ model PipelineStage {
 }
 
 model SalesOpportunity {
-  id              String            @id @default(cuid())
-  organizationId  String
-  workspaceId     String
-  leadId          String
-  title           String
-  valueCents      Int
-  currency        String            @default("USD")
-  status          OpportunityStatus @default(OPEN)
-  expectedCloseAt DateTime?
-  proposal        Json?
-  closedAt        DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  organizationId         String
+  workspaceId            String
+  leadId                 String
+  title                  String
+  /// null = value not known yet (never shown as 0).
+  valueCents             Int?
+  currency               String            @default("USD")
+  status                 OpportunityStatus @default(OPEN)
+  /// "DEAL" (from a customer) or "B2B" (a company opportunity).
+  kind                   String            @default("DEAL")
+  industry               String?
+  need                   String?
+  decisionMaker          String?
+  nextStep               String?
+  nextStepAt             DateTime?
+  ownerId                String?
+  source                 String?
+  summary                String?
+  qualificationQuestions String[]          @default([])
+  expectedCloseAt        DateTime?
+  proposal               Json?
+  closedAt               DateTime?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -1501,6 +1516,9 @@ model SalesActivity {
   dueAt          DateTime?
   completedAt    DateTime?
   remindedAt     DateTime?
+  /// Paused follow-ups are kept but not due.
+  pausedAt       DateTime?
+  channel        Channel?
   assignedToId   String?
   createdByAgent AgentKey?
   createdById    String?
@@ -1935,4 +1953,49 @@ model ProviderCall {
   @@index([createdAt])
   @@index([host, createdAt])
   @@map("provider_calls")
+}
+
+// ───────────────────────────── Quotes ─────────────────────────────
+
+enum QuoteStatus {
+  DRAFT
+  NEEDS_APPROVAL
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+/// A price quote / proposal for a lead (optionally tied to an opportunity). Not an invoice.
+model Quote {
+  id             String      @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  leadId         String
+  opportunityId  String?
+  number         String
+  title          String
+  /// [{ description, quantity, unitCents }]
+  items          Json        @default("[]")
+  subtotalCents  Int
+  discountCents  Int         @default(0)
+  taxCents       Int         @default(0)
+  totalCents     Int
+  currency       String      @default("USD")
+  terms          String?
+  status         QuoteStatus @default(DRAFT)
+  validUntil     DateTime?
+  createdById    String?
+  createdByAgent Boolean     @default(false)
+  approvedById   String?
+  approvedAt     DateTime?
+  sentAt         DateTime?
+  sentVia        String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([organizationId, workspaceId, status])
+  @@index([leadId])
+  @@map("quotes")
 }

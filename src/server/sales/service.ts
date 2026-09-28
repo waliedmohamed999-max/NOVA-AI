@@ -259,9 +259,15 @@ export async function sendMessage(scope: TenantScope, messageId: string, actor: 
   return sent;
 }
 
-export async function scheduleFollowUp(scope: TenantScope, leadId: string, f: { title: string; body?: string; dueAt: Date; agent?: boolean; createdById?: string | null }) {
+export async function scheduleFollowUp(
+  scope: TenantScope,
+  leadId: string,
+  f: { title: string; body?: string; dueAt: Date; agent?: boolean; createdById?: string | null; channel?: Channel | null; type?: "FOLLOW_UP" | "CALL" | "EMAIL" | "MEETING" | "TASK" | "PROPOSAL"; assignedToId?: string | null },
+) {
+  // The lead must belong to this workspace (never attach a follow-up to another tenant's lead).
+  if (!(await db.lead.findFirst({ where: { ...scope, id: leadId }, select: { id: true } }))) throw new NotFoundError("lead");
   const activity = await db.salesActivity.create({
-    data: { ...scope, leadId, type: "FOLLOW_UP", title: f.title.slice(0, 200), body: f.body ?? null, dueAt: f.dueAt, createdByAgent: f.agent ? "SALES_ASSISTANT" : null, createdById: f.createdById ?? null },
+    data: { ...scope, leadId, type: f.type ?? "FOLLOW_UP", title: f.title.slice(0, 200), body: f.body ?? null, dueAt: f.dueAt, channel: f.channel ?? null, assignedToId: f.assignedToId ?? null, createdByAgent: f.agent ? "SALES_ASSISTANT" : null, createdById: f.createdById ?? null },
   });
   await db.lead.updateMany({ where: { ...scope, id: leadId }, data: { nextAction: f.title.slice(0, 200), nextActionAt: f.dueAt } });
   await addLeadEvent(scope, leadId, { type: "FOLLOW_UP", title: `Follow-up scheduled: ${f.title}`, data: { dueAt: f.dueAt.toISOString() }, actor: f.agent ? { type: "AGENT", label: "Sales Assistant" } : { type: "USER", id: f.createdById } });

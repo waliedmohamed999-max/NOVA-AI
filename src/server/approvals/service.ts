@@ -32,6 +32,9 @@ export async function decideApproval(scope: TenantScope, id: string, decision: "
   } else if (approval.entityType === "Campaign" && approval.entityId) {
     if (decision === "APPROVED") await approveCampaign(scope, approval.entityId, actor);
     else await setCampaignStatus(scope, approval.entityId, "DRAFT", actor);
+  } else if (approval.entityType === "Quote" && approval.entityId) {
+    const { decideQuote } = await import("../sales/operations");
+    await decideQuote(scope, approval.entityId, decision, actor);
   } else if (approval.entityType === "Message" && approval.entityId) {
     const msg = await t.message.findUnique({ where: { id: approval.entityId }, include: { conversation: true } });
     if (msg && decision === "APPROVED") {

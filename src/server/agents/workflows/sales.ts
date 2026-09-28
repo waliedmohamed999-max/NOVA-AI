@@ -154,11 +154,13 @@ defineWorkflow("leads_followup", {
   steps: FOLLOWUP_STEPS,
   async run(ctx) {
     const b = await loadBrain(ctx.scope);
+    // Specific leads (e.g. "prepare the due follow-ups") or, by default, the hottest open leads.
+    const onlyIds = Array.isArray(ctx.params.leadIds) ? (ctx.params.leadIds as unknown[]).filter((x): x is string => typeof x === "string").slice(0, 10) : null;
     const leads = await ctx.step("finding_leads", () =>
       db.lead.findMany({
-        where: { ...ctx.scope, stage: { notIn: ["WON", "LOST"] }, temperature: { in: ["HOT", "WARM"] } },
+        where: onlyIds ? { ...ctx.scope, id: { in: onlyIds }, stage: { notIn: ["WON", "LOST"] } } : { ...ctx.scope, stage: { notIn: ["WON", "LOST"] }, temperature: { in: ["HOT", "WARM"] } },
         orderBy: [{ score: "desc" }, { lastContactAt: "asc" }],
-        take: 5,
+        take: onlyIds ? 10 : 5,
       }),
     );
     const convos = await ctx.step("reviewing_conversations", async () =>
