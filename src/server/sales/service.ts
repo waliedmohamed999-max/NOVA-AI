@@ -251,9 +251,12 @@ export async function sendMessage(scope: TenantScope, messageId: string, actor: 
   const sent = await t.message.update({ where: { id: messageId }, data: { status: "SENT", sentAt: new Date(), externalId: result.externalId ?? null, deliveryStatus: "accepted" } });
   await t.conversation.update({ where: { id: message.conversationId }, data: { lastMessageAt: new Date() } });
   if (lead) {
-    await t.lead.update({ where: { id: lead.id }, data: { lastContactAt: new Date(), stage: lead.stage === "NEW" ? "CONTACTED" : lead.stage } });
+    await t.lead.update({ where: { id: lead.id }, data: { lastContactAt: new Date() } });
     await addLeadEvent(scope, lead.id, { type: actor.type === "AGENT" ? "MESSAGE_SENT" : "HUMAN_REPLY", title: actor.type === "AGENT" ? "AI sent a reply" : "Reply sent", body: message.body.slice(0, 2000), actor });
-    if (lead.stage === "NEW") await addLeadEvent(scope, lead.id, { type: "STATUS_CHANGE", title: "NEW → CONTACTED", data: { from: "NEW", to: "CONTACTED" }, actor });
+    // Only a lead that is *still* NEW at write time becomes CONTACTED: the stage read above may be stale
+    // (e.g. an opportunity just moved it to QUALIFIED while this reply was being sent).
+    const moved = await t.lead.updateMany({ where: { id: lead.id, stage: "NEW" }, data: { stage: "CONTACTED", stageChangedAt: new Date() } });
+    if (moved.count) await addLeadEvent(scope, lead.id, { type: "STATUS_CHANGE", title: "NEW → CONTACTED", data: { from: "NEW", to: "CONTACTED" }, actor });
   }
   await audit({ ...scope, actorType: actor.type, actorId: actor.id, actorLabel: actor.label, action: "message.sent", entityType: "Message", entityId: messageId, summary: `Message sent to ${lead?.name ?? "contact"} via ${result.via}` });
   return sent;
