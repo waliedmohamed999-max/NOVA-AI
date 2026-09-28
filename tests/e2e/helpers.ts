@@ -19,6 +19,9 @@ export async function signIn(page: Page, email = DEMO.email, password = DEMO.pas
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(/\/(home|onboarding)/);
+  // Sign-in applies the account's saved language (the demo account may have been switched to Arabic by a
+  // person using it); the suite asserts English copy, so pin the UI language again after signing in.
+  await setEnglish(page);
 }
 
 export async function signUp(page: Page, name: string, email: string, next?: string) {

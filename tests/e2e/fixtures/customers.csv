@@ -1,0 +1,15 @@
+Customer ID,Name,Email,Phone,City,Orders,Total spend,Category
+E2E-R0,Riyadh Buyer 0,riyadh0@e2e.test,055500000,Riyadh,3,900,Serums
+E2E-R1,Riyadh Buyer 1,riyadh1@e2e.test,055500001,Riyadh,3,950,Serums
+E2E-R2,Riyadh Buyer 2,riyadh2@e2e.test,055500002,Riyadh,3,1000,Serums
+E2E-R3,Riyadh Buyer 3,riyadh3@e2e.test,055500003,Riyadh,3,1050,Serums
+E2E-R4,Riyadh Buyer 4,riyadh4@e2e.test,055500004,Riyadh,3,1100,Serums
+E2E-R5,Riyadh Buyer 5,riyadh5@e2e.test,055500005,Riyadh,3,1150,Serums
+E2E-R6,Riyadh Buyer 6,riyadh6@e2e.test,055500006,Riyadh,1,1200,Serums
+E2E-R7,Riyadh Buyer 7,riyadh7@e2e.test,055500007,Riyadh,1,1250,Serums
+E2E-J0,Jeddah Buyer 0,jeddah0@e2e.test,055600000,Jeddah,1,200,Cleansers
+E2E-J1,Jeddah Buyer 1,jeddah1@e2e.test,055600001,Jeddah,1,200,Cleansers
+E2E-J2,Jeddah Buyer 2,jeddah2@e2e.test,055600002,Jeddah,1,200,Cleansers
+E2E-J3,Jeddah Buyer 3,jeddah3@e2e.test,055600003,Jeddah,1,200,Cleansers
+E2E-J4,Jeddah Buyer 4,jeddah4@e2e.test,055600004,Jeddah,1,200,Cleansers
+E2E-R0,Duplicate Row,dup@e2e.test,0557000000,Riyadh,1,100,Serums
