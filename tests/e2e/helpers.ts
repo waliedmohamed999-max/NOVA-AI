@@ -72,3 +72,18 @@ export async function completeOnboarding(page: Page, company: string) {
   await page.waitForURL(/\/onboarding\/ready/, { timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "Your AI Growth Team is ready." })).toBeVisible();
 }
+
+/**
+ * The suite signs up many accounts from one IP, which (correctly) trips the production auth rate limits.
+ * Like global-setup, specs that sign up repeatedly reset the auth buckets instead of weakening the limits.
+ */
+export async function resetAuthRateLimits() {
+  const { default: pg } = await import("pg");
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query(`DELETE FROM "rate_limit_buckets" WHERE "key" LIKE 'auth:%'`);
+  } finally {
+    await client.end();
+  }
+}

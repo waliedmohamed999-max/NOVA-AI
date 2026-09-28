@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { completeOnboarding, emailLink, signIn, signUp, uniqueEmail } from "./helpers";
+import "dotenv/config";
+import { completeOnboarding, emailLink, resetAuthRateLimits, signIn, signUp, uniqueEmail } from "./helpers";
 
 test.describe("content, calendar, sales and approvals (fresh workspace)", () => {
   test.beforeEach(async ({ page }) => {
+    await resetAuthRateLimits();
     await signUp(page, "Ops Owner", uniqueEmail("ops"));
     await completeOnboarding(page, "Ops Studio");
   });
@@ -59,11 +61,12 @@ test.describe("content, calendar, sales and approvals (fresh workspace)", () => 
   });
 
   test("command bar: one sentence creates a campaign that can be approved in the Approval Center", async ({ page }) => {
-    await page.goto("/home");
+    // ⌘K opens the command dialog on every page except Home (Home focuses its own command input).
+    await page.goto("/campaigns");
     await page.keyboard.press("Control+k");
     await page.getByRole("dialog").getByRole("textbox").fill("Create a launch campaign for our barista course");
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("dialog").getByText("Campaign created")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("dialog").locator("[data-command-intent='create_campaign']")).toContainText("is ready for your review", { timeout: 60_000 });
     await page.keyboard.press("Escape");
 
     await page.goto("/approvals?tab=CAMPAIGNS");
@@ -119,7 +122,8 @@ test.describe("demo workspace", () => {
     await page.goto("/home");
     await page.getByLabel("Ask NOVA").fill("Summarize our pipeline");
     await page.getByRole("button", { name: "Send to your AI team" }).click();
-    await expect(page.getByRole("dialog").getByText("Pipeline summary")).toBeVisible({ timeout: 60_000 });
+    // The Home command center answers in place (no dialog) from the real pipeline.
+    await expect(page.locator("[data-command-intent='sales_summary']")).toContainText(/open opportunities/, { timeout: 60_000 });
   });
 });
 
