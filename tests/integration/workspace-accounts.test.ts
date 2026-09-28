@@ -84,7 +84,7 @@ describe("Google account connection", () => {
     const card = view.accounts.find((a) => a.provider === "GOOGLE")!;
     expect(card.state).toBe("missing_permission");
     expect(card.email).toBe("sales@acme.test");
-    expect(card.capabilities).toEqual([{ key: "email_send", status: "missing" }, { key: "calendar", status: "missing" }]);
+    expect(card.capabilities).toEqual([{ key: "email_send", status: "missing" }, { key: "calendar_read", status: "missing" }, { key: "calendar_write", status: "missing" }]);
     // Account connections are not social channels: the plan's channel counter is untouched.
     expect(view.plan.used).toBe(0);
     expect(await mailboxFor(t.scope)).toBeNull();
@@ -112,7 +112,7 @@ describe("Google account connection", () => {
   it("refuses an upgrade the operator didn't enable (GOOGLE_OPTIONAL_SCOPES)", async () => {
     env({ GOOGLE_CLIENT_ID: "g-client", GOOGLE_CLIENT_SECRET: "g-secret", GOOGLE_OPTIONAL_SCOPES: GMAIL_SEND });
     const t = await makeTenant();
-    await expect(startConnect(t.scope, t.user.id, "google", "settings", { platform: "GOOGLE", capability: "calendar" })).rejects.toMatchObject({ code: "capability_unavailable" });
+    await expect(startConnect(t.scope, t.user.id, "google", "settings", { platform: "GOOGLE", capability: "calendar_write" })).rejects.toMatchObject({ code: "capability_unavailable" });
   });
 });
 
@@ -140,7 +140,7 @@ describe("Microsoft account + calendar booking", () => {
     const t = await makeTenant();
     await db.workspaceSettings.updateMany({ where: t.scope, data: { timezone: "Africa/Cairo" } });
     mockFetch(microsoft());
-    const { url, res } = await connect(t, "microsoft", { platform: "MICROSOFT", capability: "calendar" });
+    const { url, res } = await connect(t, "microsoft", { platform: "MICROSOFT", capability: "calendar_write" });
     expect(url.searchParams.get("scope")).toContain("Calendars.ReadWrite");
     expect(res.connected).toEqual(["MICROSOFT"]);
     expect((await calendarFor(t.scope))?.provider).toBe("MICROSOFT");
@@ -179,7 +179,7 @@ describe("Microsoft account + calendar booking", () => {
     env({ MICROSOFT_CLIENT_ID: "ms-client", MICROSOFT_CLIENT_SECRET: "ms-secret" });
     const t = await makeTenant();
     mockFetch(microsoft());
-    await connect(t, "microsoft", { platform: "MICROSOFT", capability: "calendar" });
+    await connect(t, "microsoft", { platform: "MICROSOFT", capability: "calendar_write" });
     const lead = await createLead(t.scope, { name: "Omar", email: "omar@customer.test" }, { type: "SYSTEM" }, { qualify: false });
     const p = await proposeSlots(t.scope, lead.id, { type: "SYSTEM" }, { now: new Date("2026-10-05T06:00:00Z") });
     const s = p.slots[0];
@@ -193,7 +193,7 @@ describe("Microsoft account + calendar booking", () => {
     const a = await makeTenant();
     const b = await makeTenant();
     mockFetch(microsoft());
-    await connect(a, "microsoft", { platform: "MICROSOFT", capability: "calendar" });
+    await connect(a, "microsoft", { platform: "MICROSOFT", capability: "calendar_write" });
     const lead = await createLead(a.scope, { name: "Lina", email: "lina@customer.test" }, { type: "SYSTEM" }, { qualify: false });
     const p = await proposeSlots(a.scope, lead.id, { type: "SYSTEM" }, { now: new Date("2026-10-05T06:00:00Z") });
     await expect(bookMeeting(b.scope, p.meeting.id, p.slots[0].start.toISOString(), { type: "SYSTEM" })).rejects.toBeInstanceOf(UserFacingError);

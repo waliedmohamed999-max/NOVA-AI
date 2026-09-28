@@ -46,7 +46,7 @@ export type AccountConnectionCard = {
   email: string | null;
   healthKey: string | null;
   /** Per capability: granted, missing (can be requested now) or not enabled for the app. */
-  capabilities: { key: "email_send" | "calendar"; status: "granted" | "missing" | "not_enabled" }[];
+  capabilities: { key: "email_send" | "calendar_read" | "calendar_write"; status: "granted" | "missing" | "not_enabled" }[];
 };
 
 export type ConnectionsView = {
@@ -116,7 +116,7 @@ export async function loadConnections(scope: TenantScope, isDemo: boolean): Prom
     const available = provider.isConfigured();
     const row = rows.find((r) => r.provider === p && r.status !== "DISCONNECTED");
     const granted = row?.scopes ?? [];
-    const capabilities = (["email_send", "calendar"] as const).map((key) => {
+    const capabilities = (["email_send", "calendar_read", "calendar_write"] as const).map((key) => {
       const has = provider.capabilities?.({ platform: p }, granted).find((c) => c.key === key)?.available;
       return { key, status: has ? ("granted" as const) : provider.upgradeScopes?.(p, key, granted) ? ("missing" as const) : ("not_enabled" as const) };
     });

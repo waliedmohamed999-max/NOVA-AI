@@ -1,4 +1,5 @@
 import type { Provider } from "@/generated/prisma/enums";
+import { appEnvironment, isPublicHttps } from "../env";
 import { MetaProvider } from "./providers/meta";
 import { InstagramProvider } from "./providers/instagram";
 import { GoogleProvider } from "./providers/google";
@@ -60,9 +61,17 @@ export function redirectUriFor(id: SocialProvider["id"]) {
     if (!/^https?:$/.test(u.protocol) || u.search || u.hash || u.pathname !== `/api/integrations/${id}/callback`) {
       throw new Error(`${REDIRECT_ENV[id]} must be <origin>/api/integrations/${id}/callback with no query or fragment`);
     }
-    return explicit;
+    return requireHttpsOutsideDev(id, explicit);
   }
-  return `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/${id}/callback`;
+  return requireHttpsOutsideDev(id, `${process.env.APP_URL ?? "http://localhost:3000"}/api/integrations/${id}/callback`);
+}
+
+/** Staging/production never send a provider a localhost or http callback. */
+function requireHttpsOutsideDev(id: SocialProvider["id"], url: string) {
+  if (appEnvironment() !== "development" && !isPublicHttps(url)) {
+    throw new Error(`${REDIRECT_ENV[id]} / APP_URL must be a public https:// URL outside development`);
+  }
+  return url;
 }
 
 export type RegistryEntry = {
@@ -109,8 +118,8 @@ export type CallbackEntry = { kind: "oauth" | "webhook" | "auth" | "legal"; name
  * Every URL that must be registered with an external provider (or reviewed by one) for staging/production.
  * Flags anything that is not public HTTPS — providers reject or silently break on localhost/http.
  */
-export function callbackMatrix(appUrl = process.env.APP_URL ?? "http://localhost:3000"): CallbackEntry[] {
-  const base = appUrl.replace(/\/$/, "");
+export function callbackMatrix(appUrl?: string, env: NodeJS.ProcessEnv = process.env): CallbackEntry[] {
+  const base = (appUrl ?? env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const judge = (u: string): CallbackEntry["problem"] => {
     try {
       const url = new URL(u);
@@ -120,12 +129,18 @@ export function callbackMatrix(appUrl = process.env.APP_URL ?? "http://localhost
       return "invalid";
     }
   };
+  // Audit only: derive the URL the provider would receive (an explicit *_REDIRECT_URI wins) and report
+  // problems — never throw here, so the admin page and the startup audit always render.
   const oauth = (id: SocialProvider["id"], registerAt: string): CallbackEntry => {
-    let url: string;
-    try {
-      url = redirectUriFor(id);
-    } catch {
-      return { kind: "oauth", name: id, url: process.env[REDIRECT_ENV[id]] ?? "", registerAt, problem: "invalid" };
+    const explicit = env[REDIRECT_ENV[id]]?.trim().replace(/^["']|["']$/g, "");
+    const url = explicit || `${base}/api/integrations/${id}/callback`;
+    if (explicit) {
+      try {
+        const u = new URL(explicit);
+        if (u.pathname !== `/api/integrations/${id}/callback` || u.search || u.hash) return { kind: "oauth", name: id, url, registerAt, problem: "invalid" };
+      } catch {
+        return { kind: "oauth", name: id, url, registerAt, problem: "invalid" };
+      }
     }
     return { kind: "oauth", name: id, url, registerAt, problem: judge(url) };
   };

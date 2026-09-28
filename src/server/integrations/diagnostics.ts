@@ -35,6 +35,11 @@ export type ConnectionTestResult = {
 export async function testConnection(scope: TenantScope, integrationId: string, actorId?: string): Promise<ConnectionTestResult> {
   const r = await runConnectionTest(scope, integrationId);
   await recordValidation({ provider: readinessKey(r.provider), check: "connection", ok: r.valid, detail: r.valid ? `${r.profile?.name ?? "ok"}; scopes: ${r.scopes.join(" ")}` : r.error, organizationId: scope.organizationId, actorId });
+  // Meta: a valid identity login is not a live Pages integration — record that separately.
+  if (r.provider === "meta") {
+    const pages = r.accounts.filter((a) => a.platform === "FACEBOOK");
+    await recordValidation({ provider: "facebook", check: "pages_connection", ok: r.valid && pages.length > 0, detail: pages.length ? `${pages.length} Page(s): ${pages.map((p) => p.name).join(", ")}` : "PENDING META PERMISSION: no Page accessible (pages_show_list not granted)", errorCode: pages.length ? null : "pages_permission_pending", organizationId: scope.organizationId, actorId });
+  }
   return r;
 }
 

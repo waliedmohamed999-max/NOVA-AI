@@ -50,6 +50,15 @@ export async function startConnect(
 ) {
   const provider = SOCIAL_PROVIDERS[providerId];
   if (!provider?.isConfigured()) throw new UserFacingError("integration_not_configured");
+  // Refuse before creating any state: an invalid callback (e.g. http/localhost outside development) never
+  // reaches the provider. The admin sees the reason on /admin/providers.
+  let redirectUri: string;
+  try {
+    redirectUri = redirectUriFor(providerId);
+  } catch (err) {
+    logger.error({ provider: providerId, err: err instanceof Error ? err.message : String(err) }, "oauth callback rejected by callback audit");
+    throw new UserFacingError("integration_not_configured", { cause: err });
+  }
   const already = await db.integration.count({ where: { ...scope, provider: { in: provider.platforms as never[] }, status: { not: "DISCONNECTED" } } });
   if (!already && provider.countsAsChannel !== false) await assertWithinLimit(scope.organizationId, "socialChannels");
   let scopes: string[] | undefined;
@@ -77,7 +86,7 @@ export async function startConnect(
     },
   });
   const challenge = createHash("sha256").update(verifier).digest("base64url");
-  return provider.connect({ state, redirectUri: redirectUriFor(providerId), codeChallenge: challenge, scopes, rerequest: Boolean(upgrade) });
+  return provider.connect({ state, redirectUri, codeChallenge: challenge, scopes, rerequest: Boolean(upgrade) });
 }
 
 export type ConnectResult = {
@@ -269,6 +278,31 @@ export async function tokenForAccount(integrationId: string, accountId: string):
     expiresAt: row.expiresAt,
     refreshExpiresAt: row.refreshExpiresAt,
   };
+}
+
+/**
+ * A usable token: refreshed (and re-encrypted) when it expires within 2 minutes, or always when `force`.
+ * Short-lived tokens (Google/Microsoft ≈ 1 hour) must not wait for the refresh job.
+ */
+export async function freshToken(integrationId: string, accountId: string, opts: { force?: boolean } = {}): Promise<{ token: TokenSet; refreshed: boolean } | null> {
+  const token = await tokenForAccount(integrationId, accountId);
+  if (!token) return null;
+  const expiring = token.expiresAt != null && token.expiresAt.getTime() < Date.now() + 120_000;
+  if (!opts.force && !expiring) return { token, refreshed: false };
+  if (!token.refreshToken) return expiring ? null : { token, refreshed: false };
+  const integration = await db.integration.findUniqueOrThrow({ where: { id: integrationId } });
+  const scope = { organizationId: integration.organizationId, workspaceId: integration.workspaceId };
+  const provider = SOCIAL_PROVIDERS[providerIdFor(integration.provider)];
+  try {
+    const next = await provider.refreshToken(token);
+    if (!next) return expiring ? null : { token, refreshed: false };
+    const cred = await db.integrationCredential.findFirst({ where: { integrationId, OR: [{ accountId }, { accountId: null }] }, orderBy: { accountId: { sort: "desc", nulls: "last" } } });
+    await saveCredential(scope, integrationId, cred?.accountId ?? null, next);
+    return { token: next, refreshed: true };
+  } catch (err) {
+    await markIntegrationError(scope, integrationId, err);
+    return null;
+  }
 }
 
 export function accountRef(a: { externalId: string; accountType: string | null; metadata: unknown }): AccountRef {

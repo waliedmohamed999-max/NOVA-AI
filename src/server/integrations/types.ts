@@ -68,7 +68,8 @@ export type CapabilityKey =
   | "messages"
   | "comments"
   | "email_send"
-  | "calendar"
+  | "calendar_read"
+  | "calendar_write"
   | "leads"
   | "member_publishing"
   | "organization_publishing";

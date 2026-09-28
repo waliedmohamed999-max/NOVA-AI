@@ -1,6 +1,7 @@
 import { form, providerFetch } from "../http";
 import { ProviderError, type ConnectedAccount, type ConnectionCheck, type ProviderProfile, type SocialProvider, type TokenSet } from "../types";
 import { accountCapabilities, accountUpgradeScopes, type AccountScopeSpec } from "./account-scopes";
+import { safeMessage } from "../../email/mailer";
 import type { BusyInterval, CalendarApi, CalendarEventInput, MailboxApi, OutgoingEmail } from "./workspace-apis";
 
 /**
@@ -11,8 +12,9 @@ import type { BusyInterval, CalendarApi, CalendarEventInput, MailboxApi, Outgoin
 export const MICROSOFT_SCOPES: AccountScopeSpec = {
   envPrefix: "MICROSOFT",
   base: ["openid", "email", "profile", "offline_access", "User.Read"],
-  capabilities: { identity: ["openid", "User.Read"], email_send: ["Mail.Send"], calendar: ["Calendars.ReadWrite"] },
-  defaultOptional: ["Mail.Send", "Calendars.ReadWrite"],
+  capabilities: { identity: ["openid", "User.Read"], email_send: ["Mail.Send"], calendar_read: ["Calendars.Read"], calendar_write: ["Calendars.ReadWrite"] },
+  implies: { "Calendars.ReadWrite": ["Calendars.Read"] },
+  defaultOptional: ["Mail.Send", "Calendars.Read", "Calendars.ReadWrite"],
 };
 
 const GRAPH = "https://graph.microsoft.com/v1.0";
@@ -93,7 +95,8 @@ export class MicrosoftProvider implements SocialProvider, MailboxApi, CalendarAp
   async disconnect() {}
 
   // ── Mailbox ──
-  async sendEmail(t: TokenSet, m: OutgoingEmail) {
+  async sendEmail(t: TokenSet, message: OutgoingEmail) {
+    const m = { ...message, ...safeMessage({ to: message.to, subject: message.subject, text: message.text, replyTo: message.replyTo }) };
     await providerFetch(`${GRAPH}/me/sendMail`, {
       method: "POST",
       headers: headers(t.accessToken),

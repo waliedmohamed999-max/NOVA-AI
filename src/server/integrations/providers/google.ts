@@ -1,6 +1,7 @@
 import { form, providerFetch } from "../http";
 import { ProviderError, type ConnectedAccount, type ConnectionCheck, type ProviderProfile, type SocialProvider, type TokenSet } from "../types";
 import { accountCapabilities, accountUpgradeScopes, type AccountScopeSpec } from "./account-scopes";
+import { safeMessage } from "../../email/mailer";
 import type { BusyInterval, CalendarApi, CalendarEventInput, MailboxApi, OutgoingEmail } from "./workspace-apis";
 
 /**
@@ -10,10 +11,12 @@ import type { BusyInterval, CalendarApi, CalendarEventInput, MailboxApi, Outgoin
 export const GOOGLE_SCOPES: AccountScopeSpec = {
   envPrefix: "GOOGLE",
   base: ["openid", "email", "profile"],
+  // Progressive consent: identity first; each capability is requested only when a feature needs it.
   capabilities: {
     identity: ["openid", "email"],
     email_send: ["https://www.googleapis.com/auth/gmail.send"],
-    calendar: ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy"],
+    calendar_read: ["https://www.googleapis.com/auth/calendar.freebusy"],
+    calendar_write: ["https://www.googleapis.com/auth/calendar.events"],
   },
   defaultOptional: ["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.freebusy"],
 };
@@ -127,7 +130,9 @@ export class GoogleProvider implements SocialProvider, MailboxApi, CalendarApi {
   }
 
   // ── Mailbox ──
-  async sendEmail(t: TokenSet, m: OutgoingEmail) {
+  async sendEmail(t: TokenSet, message: OutgoingEmail) {
+    // Same header-injection guard as the platform mailer: the raw RFC 822 headers are built here.
+    const m = { ...message, ...safeMessage({ to: message.to, subject: message.subject, text: message.text, replyTo: message.replyTo }) };
     const r = await providerFetch<{ id: string; threadId?: string }>("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
       method: "POST",
       headers: { ...bearer(t.accessToken), "content-type": "application/json" },

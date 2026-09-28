@@ -21,14 +21,15 @@ async function workspaceTimezone(scope: TenantScope) {
   return org?.timezone ?? "UTC";
 }
 
-async function requireCalendar(scope: TenantScope) {
-  const cal = await calendarFor(scope);
+async function requireCalendar(scope: TenantScope, access: "read" | "write" = "write") {
+  const cal = await calendarFor(scope, access);
   if (!cal) throw new UserFacingError("calendar_not_connected");
   return cal;
 }
 
+/** A calendar that can book (read + write). Read-only calendars can propose times but not book. */
 export async function calendarConnected(scope: TenantScope) {
-  const cal = await calendarFor(scope);
+  const cal = await calendarFor(scope, "write");
   return cal ? { provider: cal.provider, email: cal.email } : null;
 }
 
@@ -36,7 +37,7 @@ export async function proposeSlots(scope: TenantScope, leadId: string, actor: Ac
   const t = tenantDb(scope);
   const lead = await t.lead.findUnique({ where: { id: leadId } });
   if (!lead) throw new NotFoundError("lead");
-  const cal = await requireCalendar(scope);
+  const cal = await requireCalendar(scope, "read");
   const timezone = await workspaceTimezone(scope);
   const durationMin = opts.durationMin ?? 30;
   const from = opts.now ?? new Date();

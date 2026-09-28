@@ -20,6 +20,16 @@ export async function register() {
     const ig = instagramCredentialProblem();
     if (ig && ig !== "missing") console.warn(`[nova] Instagram app credentials: INVALID (${ig}) — see /admin/providers`);
   }
+  {
+    // Callback audit: outside development every provider callback/webhook must be public HTTPS.
+    const { appEnvironment } = await import("./server/env");
+    if (appEnvironment() !== "development") {
+      const { callbackMatrix } = await import("./server/integrations/registry");
+      const bad = callbackMatrix().filter((e) => e.problem);
+      for (const e of bad) console.error(`[nova] callback audit (${appEnvironment()}): ${e.name} → ${e.problem} (${e.url || "unset"}) — fix APP_URL / *_REDIRECT_URI; see /admin/providers`);
+      if (!bad.length) console.info(`[nova] callback audit (${appEnvironment()}): all callbacks are public HTTPS`);
+    }
+  }
   if (process.env.NOVA_INLINE_WORKER !== "true") return;
   const { startWorker } = await import("./server/jobs/runner");
   void startWorker({ concurrency: 2 });
