@@ -55,3 +55,6 @@ dev-server*.log
 /.backups/
 *.dump
 *.dump.sha256
+
+# local server logs
+/prod-start.log

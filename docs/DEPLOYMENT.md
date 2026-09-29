@@ -117,6 +117,23 @@ The public `/api/ready` returns statuses only. `Authorization: Bearer $READY_TOK
 - **Reconciliation (`system.reconcile`, every 10 min):** a publication stuck in `PUBLISHING` for 30 min, or a WhatsApp campaign recipient stuck in `SENDING` for 10 min, is marked FAILED "outcome unknown". The team is notified and it is **never retried automatically**, because a blind retry could post or message twice.
 - **Request IDs:** every request carries `x-request-id`, which is echoed in the response and in logs and Sentry events for server actions and webhooks.
 
+## Load & chaos testing
+
+- **Load smoke:** `BASE_URL=http://localhost:3100 node scripts/load/smoke-load.mjs`. It hits read-only or rejecting endpoints only and refuses hosted URLs unless `I_KNOW_THIS_IS_STAGING=true`. Never run it against production.
+  - Last run: 2026-09-30, `next start` locally with `APP_ENV=staging`, 20 concurrent, one machine acting as both client and server.
+  - Results: health ~1,070 rps (p95 30 ms), ready ~550 rps (p95 45 ms), SSR pages ~70 rps (p95 ≤ 390 ms), 0 errors / 0 5xx.
+  - Not measured: authenticated pages, AI calls, a hosted database. Repeat on staging against the real database.
+- **Chaos (automated, `tests/integration/chaos.test.ts`):**
+  - AI provider down → failover plus circuit breaker; all down → an honest `ai_failed`, never an offline answer;
+  - storage down → upload refused with no orphan record, readiness `fail`.
+- **Chaos (automated, elsewhere):** duplicate webhooks, expired tokens and rate limits are covered by the webhook, connection and platform tests.
+- **Database outage drill (manual, local):** stop Postgres. Expected, and seen on 2026-09-30:
+  - `/api/health` stays 200;
+  - `/api/ready` returns 503;
+  - public pages render;
+  - the worker loop logs errors and keeps running;
+  - after a restart, readiness returns to 200 with no restart of the app.
+
 ## Blockers
 
 - **Payments (Stripe): implemented, not live-validated.**
