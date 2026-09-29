@@ -1,69 +1,180 @@
 {
   "progress": "Setup progress",
-  "welcome": {
-    "title": "Hi {name}, I'm your AI Growth Team.",
-    "body": "Answer a few quick questions and we'll learn your business, build your brand profile and prepare your first strategy. It takes about two minutes.",
-    "cta": "Let's go"
-  },
-  "company": {
-    "q": "What's your company called?",
-    "placeholder": "e.g. Bloom Bakery"
-  },
-  "website": {
-    "q": "Do you have a website?",
-    "hint": "Paste it and I'll read it to understand what you do.",
-    "cta": "Read my website",
-    "none": "I don't have a website"
-  },
-  "sells": {
-    "q": "What do you mainly sell?",
-    "placeholder": "e.g. Custom celebration cakes and fresh bread",
-    "offeringPlaceholder": "Add a product or service",
-    "descriptionPlaceholder": "Anything else we should know? (optional)"
-  },
-  "customers": {
-    "q": "Who are your customers?",
-    "placeholder": "e.g. Families and offices ordering for events",
-    "markets": "Where are they? (city, country or region)",
-    "types": {
-      "B2B": "Businesses",
-      "B2C": "Consumers",
-      "BOTH": "Both"
-    }
-  },
-  "connect": {
-    "q": "Now let's connect your company's accounts.",
-    "hint": "NOVA publishes and learns from real performance on the channels you connect. You sign in on each platform — NOVA never sees your password.",
-    "unavailable": "Coming soon",
-    "later": "Skip for now",
-    "done": "Skipped for now — you can connect later in Settings",
-    "open": "Connect accounts",
-    "count": "{count, plural, one {# channel connected} other {# channels connected}}"
-  },
-  "brand": {
-    "q": "How should your brand sound?",
-    "colors": "Brand colors",
-    "tones": {
-      "friendly": "Friendly",
-      "professional": "Professional",
-      "bold": "Bold",
-      "luxury": "Luxury",
-      "playful": "Playful",
-      "warm": "Warm",
-      "expert": "Expert",
-      "calm": "Calm"
-    }
-  },
-  "goals": {
-    "q": "What do you mainly want us to help you with?",
-    "cta": "Build my AI team",
-    "options": {
-      "customers": "Get more customers",
-      "content": "Improve content",
-      "awareness": "Build brand awareness",
-      "leads": "Generate leads",
-      "sales": "Increase sales",
-      "everything": "Manage everything"
+  "setup": {
+    "stepOf": "Step {n} of {total}",
+    "openProgress": "Show setup progress",
+    "hero": {
+      "title": "Hi {name}, I'm your company's AI Growth Team.",
+      "subtitle": "Answer these quick questions and I'll learn your business, build your company profile and prepare your first strategy in a few minutes.",
+      "nodes": { "analysis": "Analysis", "strategy": "Strategy", "growth": "Growth", "content": "Content", "sales": "Sales" }
+    },
+    "steps": {
+      "business": { "label": "Business", "title": "Business details", "desc": "Your company and what it does" },
+      "audience": { "label": "Audience", "title": "Target audience", "desc": "Who your key customers are" },
+      "brand": { "label": "Brand", "title": "Brand", "desc": "How you want to come across" },
+      "goals": { "label": "Goals", "title": "Goals", "desc": "What you want to achieve" },
+      "review": { "label": "Review", "title": "Review", "desc": "Check everything and launch" }
+    },
+    "state": { "done": "Completed", "active": "Current step", "upcoming": "Not started" },
+    "sidebar": {
+      "partner": "Your AI growth partner",
+      "title": "Setup progress",
+      "done": "{done} of {total} steps completed",
+      "willDo": "What will NOVA set up?",
+      "tasks": {
+        "website": { "title": "Read your website", "desc": "Understand your business from your site" },
+        "profile": { "title": "Build the company profile", "desc": "A complete profile from your answers" },
+        "strategy": { "title": "Suggest a first strategy", "desc": "A draft plan tailored to your goals" }
+      },
+      "taskState": { "done": "Done", "working": "In progress", "pending": "Waiting for your answers", "skipped": "No website", "failed": "Couldn't read it" }
+    },
+    "chips": {
+      "websiteAnalyzed": "Website analyzed",
+      "brainUpdated": "Company Brain updated",
+      "audienceDetected": "Audience detected",
+      "strategyReady": "Strategy draft ready"
+    },
+    "save": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Couldn't save",
+      "retry": "Retry",
+      "draft": "Save draft",
+      "draftSaved": "Draft saved — you can come back any time."
+    },
+    "nav": {
+      "continue": "Continue",
+      "back": "Back",
+      "next": "Next: {step}",
+      "missing": "Fill in the required fields to continue."
+    },
+    "required": "Required",
+    "optional": "Optional",
+    "aiOptional": "You can finish the setup without AI.",
+    "business": {
+      "title": "Your business details",
+      "subtitle": "Let's start by getting to know your company and what it offers.",
+      "needName": "Enter your company name first so we can save your answers.",
+      "name": { "q": "What's your company called?", "hint": "The name used across all your strategies.", "placeholder": "e.g. Bloom Bakery" },
+      "website": {
+        "q": "Do you have a website?",
+        "hint": "Paste the link and I'll analyze what you offer.",
+        "placeholder": "yourcompany.com",
+        "analyze": "Analyze website",
+        "none": "I don't have a website",
+        "has": "I have a website",
+        "invalid": "Enter a valid address, like example.com"
+      },
+      "type": { "q": "What do you mainly sell?", "hint": "Choose your company's main activity." },
+      "typeDesc": { "PRODUCTS": "Physical or digital goods", "SERVICES": "Work you deliver for clients", "BOTH": "Products and services" },
+      "customerType": { "q": "Who are your customers?", "hint": "Choose the groups you target." },
+      "customerDesc": { "B2C": "People buying for themselves", "B2B": "Companies and organizations", "BOTH": "People and companies" },
+      "industry": {
+        "q": "Industry",
+        "hint": "Search or type your own.",
+        "placeholder": "e.g. Information technology",
+        "suggest": "NOVA suggests: {value}",
+        "accept": "Accept",
+        "edit": "Edit"
+      },
+      "country": { "q": "Country", "placeholder": "Choose a country" },
+      "markets": { "q": "Primary market", "placeholder": "e.g. Riyadh, the Gulf, Egypt" },
+      "description": { "q": "Describe your business in a sentence", "placeholder": "What you do and for whom" },
+      "offerings": { "q": "Main products or services", "hint": "Press Enter after each one.", "placeholder": "Add a product or service", "add": "Add", "remove": "Remove {name}" }
+    },
+    "site": {
+      "analyzing": "Analyzing your website…",
+      "fetch": "Reading the website's pages",
+      "detect": "Understanding the business",
+      "extract": "Finding products and services",
+      "activity": "Business identified",
+      "services": "{count, plural, =0 {No clear services found} one {Found 1 service} other {Found # services}}",
+      "pages": "{count, plural, one {Read 1 page} other {Read # pages}}",
+      "platform": "Platform: {name}",
+      "pick": "Choose what to add to your Company Brain",
+      "critical": "{count, plural, one {1 sensitive item (price or policy) stays} other {# sensitive items (prices or policies) stay}} pending your approval in the Company Brain.",
+      "apply": "Add to Company Brain",
+      "applied": "Company Brain updated",
+      "failed": "We couldn't analyze the website. You can continue manually.",
+      "retry": "Try again",
+      "noneFound": "No clear services found — add them manually below."
+    },
+    "audience": {
+      "title": "Your target audience",
+      "subtitle": "Tell NOVA who buys from you — sales and content will be built around them.",
+      "known": "Customer type: {value}",
+      "change": "Change",
+      "detected": "From your website, your likely audience is: {value}",
+      "who": { "q": "Who are your customers?", "placeholder": "e.g. Small companies in Riyadh that need a website" },
+      "locations": { "q": "Where are they?", "placeholder": "City, country or region" },
+      "more": "Add more detail",
+      "b2b": { "title": "Business customers", "industries": { "q": "Their industries", "placeholder": "Add an industry" }, "size": { "q": "Company size" }, "decision": { "q": "Who makes the decision?", "placeholder": "e.g. Marketing manager, owner" } },
+      "b2c": { "title": "Individual customers", "age": { "q": "Age range", "min": "From", "max": "To", "error": "Ages are 13–100 and \"from\" can't be above \"to\"." } },
+      "budget": { "q": "Their budget" },
+      "pains": { "q": "Their main problems", "placeholder": "Add a problem" },
+      "triggers": { "q": "What makes them buy?", "placeholder": "Add a trigger" },
+      "suggest": {
+        "cta": "Suggest with AI",
+        "title": "NOVA's suggestions",
+        "hint": "Add only what fits — nothing is saved until you choose it.",
+        "decisionMaker": "Decision maker: {value}",
+        "none": "No suggestions this time."
+      }
+    },
+    "brand": {
+      "title": "Your brand",
+      "subtitle": "How NOVA writes and designs for you.",
+      "prefilled": "Pre-filled from your brand kit.",
+      "voice": { "q": "How should your brand sound?", "hint": "Pick all that fit." },
+      "colors": { "q": "Brand colors", "add": "Add color", "remove": "Remove color", "color": "Color {n}" },
+      "logo": { "q": "Logo", "hint": "PNG, JPG or WebP, up to 2 MB.", "upload": "Upload logo", "replace": "Replace", "uploading": "Uploading…", "alt": "Your logo" },
+      "visual": { "q": "Visual style" },
+      "contentStyle": { "q": "Content style" },
+      "cta": { "q": "Call-to-action style" }
+    },
+    "goals": {
+      "title": "Your goals",
+      "subtitle": "What should your AI team focus on first?",
+      "goals": { "q": "Business goals", "hint": "Pick one or more." },
+      "goal90": { "q": "Your 90-day goal", "placeholder": "e.g. 50 qualified leads in 90 days" },
+      "channels": { "q": "Channels you use today" },
+      "focus": { "q": "Product or service to focus on first", "none": "No preference" },
+      "strategy": {
+        "title": "NOVA's first proposal",
+        "build": "Build the first proposal",
+        "rebuild": "Rebuild",
+        "building": "Building…",
+        "target": "Target",
+        "channels": "Channels",
+        "content": "Content direction",
+        "sales": "Sales focus",
+        "next": "Next actions",
+        "empty": "Not set yet — you can add it in the Company Brain.",
+        "draft": "Draft — never approved automatically",
+        "review": "Review",
+        "later": "Approve later",
+        "laterDone": "Kept as a draft in your Company Brain.",
+        "byAi": "Drafted with AI from your answers",
+        "byTemplate": "Built from your answers only"
+      }
+    },
+    "review": {
+      "title": "Review & launch",
+      "subtitle": "Everything below is already saved in your Company Brain.",
+      "edit": "Edit",
+      "notSet": "Not set",
+      "sections": { "company": "Company", "website": "Website", "businessType": "Business type", "audience": "Audience", "brand": "Brand", "goals": "Goals", "strategy": "Strategy" },
+      "connect": { "title": "Connect accounts (optional)", "body": "Publish and learn from real performance. You can also do it later from Settings.", "cta": "Connect accounts" },
+      "ready": { "title": "Your team is ready", "body": "NOVA will finish your company profile and prepare your team." },
+      "incomplete": "Still missing: {steps}",
+      "enter": "Enter NOVA",
+      "again": "Review again"
+    },
+    "finish": {
+      "title": "Preparing your team…",
+      "subtitle": "Building your company profile and strategy from your answers.",
+      "done": "Your team is ready.",
+      "noAi": "AI isn't set up, so the profile was built from your answers only. You can add AI later in Settings."
     }
   },
   "analysis": {
@@ -78,8 +189,8 @@
     "contentOpportunities": "Content opportunities",
     "salesOpportunities": "Sales opportunities",
     "channels": "Recommended channels",
-    "strategy": "Initial strategy",
-    "cta": "Meet your AI team",
+    "strategy": "First strategy",
+    "cta": "Meet your team",
     "firstWeek": "Create my first week"
   }
 }

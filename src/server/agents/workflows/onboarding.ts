@@ -81,9 +81,12 @@ defineWorkflow("onboarding_analysis", {
     const a = analysis.data;
 
     await ctx.step("building_audience", async () => {
+      // The owner's own audience (saved during setup) stays first; the analysis only adds to it.
+      const current = await db.companyProfile.findFirst({ where: scope, select: { audience: true } });
+      const owner = ((current?.audience ?? []) as { source?: string }[]).filter((x) => x.source === "owner");
       await db.companyProfile.updateMany({
         where: scope,
-        data: { audience: a.audience as Prisma.InputJsonValue, markets: answers.markets ? [answers.markets] : [] },
+        data: { audience: [...owner, ...a.audience].slice(0, 5) as Prisma.InputJsonValue, markets: answers.markets ? [answers.markets] : [] },
       });
     });
 
@@ -98,11 +101,13 @@ defineWorkflow("onboarding_analysis", {
 
     await ctx.step("creating_strategy", async () => {
       const kit = await db.brandKit.findFirst({ where: scope });
+      const current = await db.companyProfile.findFirst({ where: scope, select: { industry: true, description: true } });
       await db.brandKit.updateMany({
         where: scope,
         data: {
-          tone: a.brandVoice.tone,
-          voiceTraits: a.brandVoice.traits,
+          // The voice the owner picked wins over any inferred one.
+          tone: answers.tone?.length ? answers.tone.join(lang === "ar" ? "، " : ", ") : a.brandVoice.tone,
+          voiceTraits: answers.tone?.length ? answers.tone : a.brandVoice.traits,
           doSay: a.brandVoice.doSay,
           dontSay: a.brandVoice.dontSay,
           primaryColors: kit?.primaryColors.length ? kit.primaryColors : (answers.colors?.length ? answers.colors : site?.themeColor ? [site.themeColor] : []),
@@ -112,9 +117,9 @@ defineWorkflow("onboarding_analysis", {
         where: scope,
         data: {
           summary: a.summary,
-          description: answers.description ?? a.summary,
+          description: current?.description || answers.description || a.summary,
           tagline: a.tagline,
-          industry: a.industry,
+          industry: current?.industry || a.industry,
           valueProps: a.valueProps,
           contentPillars: a.contentPillars.map((p) => p.name),
           goals: answers.goals ?? [],

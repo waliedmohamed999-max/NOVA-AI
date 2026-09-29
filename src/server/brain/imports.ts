@@ -135,7 +135,7 @@ async function runWebsite(scope: TenantScope, id: string, url: string) {
     const r = await fetcher(link).catch(() => null);
     if (r && r.status < 400 && r.contentType.includes("html")) pages.push({ page: extractPage(r.body, r.url), html: r.body });
   }
-  await setStatus(scope, id, { status: "EXTRACTING", preview: { title: first.title, description: first.description, language: first.language ?? detectLanguage(first.text), pages: pages.map((p) => ({ url: p.page.url, title: p.page.title })) } as Prisma.InputJsonValue });
+  await setStatus(scope, id, { status: "EXTRACTING", preview: { title: first.title, description: first.description, language: first.language ?? detectLanguage(first.text), platform: detectPlatform(home.body, home.url), pages: pages.map((p) => ({ url: p.page.url, title: p.page.title })) } as Prisma.InputJsonValue });
   const structured = pages.flatMap((p) => candidatesFromStructured(structuredSignals(p.html)));
   const local = pages.flatMap((p) => extractLocal(p.page.text));
   const text = pages.map((p) => `${p.page.title}\n${p.page.text}`).join("\n\n");
@@ -304,7 +304,11 @@ export async function applyImport(scope: TenantScope, actor: Actor, importId: st
     const chosen = candidates.filter((c) => (input.selectedIds ? input.selectedIds.includes(c.id) : c.selected));
     // Every accepted item keeps a link to its source.
     let sourceId: string;
-    if (imp.kind === "website") sourceId = (await addKnowledgeSource(scope, { type: "WEBSITE", title: imp.title, url: imp.url })).id;
+    if (imp.kind === "website") {
+      // One source per site: re-importing the same website reuses its source instead of adding a duplicate.
+      const same = await t.knowledgeSource.findFirst({ where: { type: "WEBSITE", url: imp.url } });
+      sourceId = same?.id ?? (await addKnowledgeSource(scope, { type: "WEBSITE", title: imp.title, url: imp.url })).id;
+    }
     else if (imp.kind === "store") {
       const p = imp.preview as { title?: string; positioning?: string; categories?: { name: string }[]; priceRange?: { min: number; max: number; currency: string | null } | null };
       const text = [p.title, p.positioning, p.categories?.length ? `Categories: ${p.categories.map((c) => c.name).join(", ")}` : null, p.priceRange ? `Price range: ${p.priceRange.min} – ${p.priceRange.max} ${p.priceRange.currency ?? ""}` : null].filter(Boolean).join("\n");

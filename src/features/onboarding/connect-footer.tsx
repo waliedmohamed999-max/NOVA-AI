@@ -6,9 +6,9 @@ import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { saveAnswers } from "./actions";
+import { setStepAction } from "./actions";
 
-/** Continue (or skip) back into the conversational onboarding at the goals step. */
+/** Continue (or skip) back into the guided setup at the review step. */
 export function ConnectStepFooter({ done, anyConnected }: { done: boolean; anyConnected: boolean }) {
   const t = useTranslations("settings.connect");
   const te = useTranslations("errors");
@@ -17,7 +17,7 @@ export function ConnectStepFooter({ done, anyConnected }: { done: boolean; anyCo
   const next = () =>
     start(async () => {
       if (done) return router.push("/home");
-      const r = await saveAnswers({ step: 7 });
+      const r = await setStepAction("review");
       if (!r.ok) return void toast.error(te(r.error as "unexpected"));
       router.push("/onboarding");
     });

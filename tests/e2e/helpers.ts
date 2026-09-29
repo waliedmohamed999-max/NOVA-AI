@@ -48,32 +48,33 @@ export async function emailLink(to: string, fragment: string): Promise<string> {
   throw new Error(`No email with ${fragment} for ${to}`);
 }
 
-/** Completes the conversational onboarding with offline AI and lands on the reveal page. */
+/** Step 1 of the guided setup: company, industry, business + customer type (no website). */
+export async function fillBusiness(page: Page, company: string) {
+  await page.getByLabel("What's your company called?").fill(company);
+  await page.getByLabel("Industry").fill("Food & restaurants");
+  await page.getByRole("radio", { name: /^Products/ }).click();
+  await page.getByRole("radio", { name: /^Individuals/ }).click();
+}
+
+/** Completes the guided setup (every answer saved live) and enters NOVA. */
 export async function completeOnboarding(page: Page, company: string) {
   await page.waitForURL(/\/onboarding/);
-  await page.getByRole("button", { name: "Let's go" }).click();
-  await page.getByPlaceholder("e.g. Bloom Bakery").fill(company);
-  await page.getByRole("button", { name: "Continue" }).click();
+  await fillBusiness(page, company);
   await page.getByRole("button", { name: "I don't have a website" }).click();
-  await page.getByPlaceholder("e.g. Custom celebration cakes and fresh bread").fill("Specialty coffee beans and barista training");
   await page.getByPlaceholder("Add a product or service").fill("Barista course");
-  await page.getByRole("button", { name: "Add" }).click();
-  await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Consumers" }).click();
-  await page.getByPlaceholder("e.g. Families and offices ordering for events").fill("Home coffee lovers in Cairo");
-  await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Warm" }).click();
-  await page.getByRole("button", { name: "Continue" }).click();
-  // Brand → connect accounts (its own page) → skip → back to the conversation at goals.
-  await page.waitForURL(/\/onboarding\/connect/);
-  await expect(page.getByRole("heading", { name: "Connect your company's accounts" })).toBeVisible();
-  await page.getByRole("button", { name: "Skip for now" }).click();
-  await page.waitForURL(/\/onboarding$/);
-  await page.getByRole("button", { name: "Get more customers" }).click();
-  await page.getByRole("button", { name: "Build my AI team" }).click();
-  await expect(page.getByText("Getting to know your business…").or(page.getByText("Your AI Growth Team is ready.")).first()).toBeVisible();
-  await page.waitForURL(/\/onboarding\/ready/, { timeout: 60_000 });
-  await expect(page.getByRole("heading", { name: "Your AI Growth Team is ready." })).toBeVisible();
+  await page.getByPlaceholder("Add a product or service").press("Enter");
+  await page.getByTestId("setup-continue").click();
+  await page.getByRole("textbox", { name: "Who are your customers?" }).fill("Home coffee lovers in Cairo");
+  await page.getByLabel("Where are they?").fill("Cairo");
+  await page.getByTestId("setup-continue").click();
+  await page.getByRole("checkbox", { name: "Warm", exact: true }).click();
+  await page.getByTestId("setup-continue").click();
+  await page.getByRole("checkbox", { name: "More leads" }).click();
+  await page.getByTestId("setup-continue").click();
+  await expect(page.getByRole("heading", { name: "Your team is ready" })).toBeVisible();
+  await page.getByTestId("enter-nova").click();
+  await expect(page.getByText("Preparing your team…").or(page.getByText("Your team is ready.")).first()).toBeVisible();
+  await page.waitForURL(/\/home/, { timeout: 60_000 });
 }
 
 /**

@@ -79,6 +79,7 @@
   --nova-hero-from: #ffffff;
   --nova-hero-to: #e8f2fe;
   --nova-line: #e3eaf4;
+  --setup-bg: #f4f6fa;
   --orbit-blue: #2f80ed;
   --orbit-cyan: #14b8c9;
   --orbit-green: #12b981;
@@ -123,6 +124,7 @@
   --nova-hero-from: #17171b;
   --nova-hero-to: #14203a;
   --nova-line: #2a2a31;
+  --setup-bg: #0e0e11;
 }
 
 @theme inline {
@@ -156,6 +158,7 @@
   --color-nova-blue-line: var(--nova-blue-line);
   --color-nova-navy: var(--nova-navy);
   --color-nova-line: var(--nova-line);
+  --color-setup-bg: var(--setup-bg);
   --color-agent-social: var(--agent-social);
   --color-agent-content: var(--agent-content);
   --color-agent-design: var(--agent-design);

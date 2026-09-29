@@ -6,7 +6,7 @@ test.describe("first-user journey", () => {
     const email = uniqueEmail("owner");
     await signUp(page, "Nadia Owner", email);
     await completeOnboarding(page, "Roast & Co");
-    await expect(page.getByText("Brand profile")).toBeVisible();
+    await expect(page).toHaveURL(/\/home/);
 
     const verify = await emailLink(email, "/verify-email");
     await page.goto(verify.replace(/^https?:\/\/[^/]+/, ""));

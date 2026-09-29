@@ -10,7 +10,7 @@ import { ConnectStepFooter } from "@/features/onboarding/connect-footer";
 
 export const metadata: Metadata = { title: "Connect your accounts" };
 
-/** Onboarding step: company → offerings → brand → **accounts** → goals → analysis → ready. */
+/** Optional side step of the guided setup (linked from Review): connect accounts, then back to Review. */
 export default async function OnboardingConnectPage(props: PageProps<"/onboarding/connect">) {
   const ctx = await requireTenant({ allowIncompleteOnboarding: true });
   const t = await getTranslations("settings.connect");
@@ -23,7 +23,7 @@ export default async function OnboardingConnectPage(props: PageProps<"/onboardin
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-4 px-5">
           <Logo />
           <div className="hidden flex-1 px-6 sm:block">
-            <Progress value={(6 / 8) * 100} label={to("progress")} />
+            <Progress value={90} label={to("progress")} />
           </div>
           <LocaleSwitch compact />
         </div>
