@@ -6,6 +6,10 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  {
+    // Strict configuration check: production refuses to start with a missing/unsafe setting.
+    (await import("./server/startup")).enforceStartupConfig("web");
+  }
   if (process.env.NODE_ENV !== "production") {
     // OAuth setup diagnostic: status only — no client secrets, tokens or URIs in the log.
     const { oauthSetupSummary } = await import("./server/integrations/registry");
