@@ -48,4 +48,5 @@ next-env.d.ts
 /coverage
 !.env.example
 !.env.staging.example
+!.env.production.example
 dev-server*.log
