@@ -702,6 +702,7 @@
       "intro": "What is configured, what the provider actually accepted, and what has been tested live. YES only appears after a real call succeeded and was recorded.",
       "cols": {
         "provider": "Provider",
+        "status": "Status",
         "configured": "Configured",
         "credentials": "Credentials",
         "accounts": "Live accounts",
@@ -749,7 +750,13 @@
         "dev_mailbox": "Development mailbox"
       },
       "liveTitle": "Manual live tests",
-      "liveIntro": "Real calls to real providers, triggered only by you. Each result is recorded above. Nothing here runs in automated tests."
+      "liveIntro": "Real calls to real providers, triggered only by you. Each result is recorded above. Nothing here runs in automated tests.",
+      "status": {
+        "READY": "Ready",
+        "READY_FOR_STAGING": "Ready for staging",
+        "WAITING_EXTERNAL_APPROVAL": "Waiting external approval",
+        "BLOCKED": "Blocked"
+      }
     },
     "health": {
       "counts": {

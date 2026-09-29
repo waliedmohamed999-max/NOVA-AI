@@ -16,7 +16,7 @@ import { appEnvironment } from "../env";
  * by a ProviderValidation row written by a real call — nothing is assumed from configuration alone.
  * Secrets never appear in results: details are provider error codes/messages with tokens redacted.
  */
-export const READINESS_PROVIDERS = ["openai", "linkedin", "instagram", "facebook", "tiktok", "google", "microsoft", "whatsapp", "email", "storage", "stripe"] as const;
+export const READINESS_PROVIDERS = ["openai", "anthropic", "linkedin", "instagram", "facebook", "tiktok", "google", "microsoft", "whatsapp", "email", "storage", "stripe"] as const;
 export type ReadinessProvider = (typeof READINESS_PROVIDERS)[number];
 
 type Static = {
@@ -36,6 +36,7 @@ const has = (...keys: string[]) => keys.every((k) => clean(process.env[k]));
 
 export const PROVIDER_INFO: Record<ReadinessProvider, Static> = {
   openai: { env: ["OPENAI_API_KEY"], integration: null, capabilities: ["text", "image", "image_edit"], pendingApproval: [], liveChecks: ["generate_text", "generate_image", "edit_image"], callbacks: [] },
+  anthropic: { env: ["ANTHROPIC_API_KEY"], integration: null, capabilities: ["text", "structured_output", "vision"], pendingApproval: [], liveChecks: ["generate_text"], callbacks: [] },
   linkedin: { env: ["LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"], integration: ["LINKEDIN"], capabilities: ["profile", "member_publishing", "organization_publishing"], pendingApproval: ["LinkedIn Community Management API (Company Page posting + stats)"], liveChecks: ["publish_test_post"], callbacks: ["linkedin"] },
   instagram: { env: ["INSTAGRAM_APP_ID", "INSTAGRAM_APP_SECRET"], integration: ["INSTAGRAM"], capabilities: ["profile", "publishing", "insights", "comments", "messages"], pendingApproval: ["Meta App Review: instagram_business_content_publish / manage_insights / manage_comments / manage_messages (Advanced Access)"], liveChecks: ["connection", "publish_test_post", "insights", "comments", "messages"], callbacks: ["instagram"] },
   facebook: { env: ["META_APP_ID", "META_APP_SECRET"], integration: ["FACEBOOK"], capabilities: ["identity", "pages", "page_publishing", "page_insights"], pendingApproval: ["Meta: enable the Page-management use case (pages_show_list, pages_manage_posts, pages_read_engagement) + App Review"], // Identity-only logins do not count: live = a manageable Page reached, or a published test post.
@@ -74,6 +75,10 @@ export function credentialFormat(p: ReadinessProvider, env: NodeJS.ProcessEnv = 
     case "openai":
       if (!v("OPENAI_API_KEY")) return null;
       need("OPENAI_API_KEY", /^sk-[A-Za-z0-9_-]{20,}$/, "expected an sk-… API key");
+      break;
+    case "anthropic":
+      if (!v("ANTHROPIC_API_KEY")) return null;
+      need("ANTHROPIC_API_KEY", /^sk-ant-[A-Za-z0-9_-]{20,}$/, "expected an sk-ant-… API key");
       break;
     case "linkedin":
       if (!v("LINKEDIN_CLIENT_ID")) return null;
@@ -174,8 +179,26 @@ export function productionBlockers(p: ReadinessProvider, r: { configured: boolea
   return b;
 }
 
+/**
+ * One honest status per provider, derived only from configuration + recorded validations:
+ * - BLOCKED: missing/invalid credentials, a failed credential check, or the latest result is an error.
+ * - WAITING_EXTERNAL_APPROVAL: works as far as we can test, but depends on a provider review/approval.
+ * - READY: live-validated with no production blocker left.
+ * - READY_FOR_STAGING: configured and valid, but not yet live-validated or still on test/dev settings
+ *   (test keys, local disk, development mailbox, non-HTTPS callbacks).
+ */
+export const READINESS_STATUSES = ["READY", "READY_FOR_STAGING", "WAITING_EXTERNAL_APPROVAL", "BLOCKED"] as const;
+export type ReadinessStatus = (typeof READINESS_STATUSES)[number];
+
+export function readinessStatus(r: { configured: boolean; formatProblems: string[]; credentialsValid: boolean | null; lastError: unknown; blockers: string[] }): ReadinessStatus {
+  if (!r.configured || r.formatProblems.length || r.credentialsValid === false || r.lastError) return "BLOCKED";
+  if (r.blockers.includes("external_review")) return "WAITING_EXTERNAL_APPROVAL";
+  return r.blockers.length === 0 ? "READY" : "READY_FOR_STAGING";
+}
+
 export type ReadinessRow = {
   provider: ReadinessProvider;
+  status: ReadinessStatus;
   configured: boolean;
   formatValid: boolean | null;
   formatProblems: string[];
@@ -209,25 +232,29 @@ export async function providerReadiness(): Promise<ReadinessRow[]> {
     const callbacks = callbackStatus(p);
     const configured = isConfigured(p);
     const liveTested = liveTestedChecks.length > 0;
+    const credentialsValid = cred ? (cred.live ? cred.ok : cred.ok ? null : false) : null;
+    const lastError =
+      lastFail && (!lastOk || lastFail.createdAt > lastOk.createdAt)
+        ? { at: lastFail.createdAt.toISOString(), check: lastFail.check, detail: lastFail.detail, httpStatus: lastFail.httpStatus, errorCode: lastFail.errorCode, correlationId: lastFail.id }
+        : null;
+    const blockers = productionBlockers(p, { configured, formatProblems: format, liveTested, callbacksOk: callbacks.ok });
     return {
       provider: p,
+      status: readinessStatus({ configured, formatProblems: format ?? [], credentialsValid, lastError, blockers }),
       configured,
       formatValid: format === null ? null : format.length === 0,
       formatProblems: format ?? [],
-      credentialsValid: cred ? (cred.live ? cred.ok : cred.ok ? null : false) : null,
+      credentialsValid,
       liveAccounts,
       lastValidationAt: mine[0]?.createdAt.toISOString() ?? null,
       lastSuccessAt: lastOk?.createdAt.toISOString() ?? null,
-      lastError:
-        lastFail && (!lastOk || lastFail.createdAt > lastOk.createdAt)
-          ? { at: lastFail.createdAt.toISOString(), check: lastFail.check, detail: lastFail.detail, httpStatus: lastFail.httpStatus, errorCode: lastFail.errorCode, correlationId: lastFail.id }
-          : null,
+      lastError,
       capabilities: info.capabilities,
       pendingApproval: info.pendingApproval,
       callbacks,
       liveTested,
       liveTestedChecks,
-      blockers: productionBlockers(p, { configured, formatProblems: format, liveTested, callbacksOk: callbacks.ok }),
+      blockers,
       note: p === "stripe" ? "stripe_adapter" : p === "storage" && storage.name === "local" ? "local_storage" : null,
     };
   });
@@ -302,6 +329,26 @@ const CHECKS: Partial<Record<ReadinessProvider, () => Promise<Check>>> = {
     return missing.length
       ? { ok: false, detail: `Model not available to this key: ${missing.join("; ")}`, httpStatus: 404, errorCode: "model_not_found", meta: { models } }
       : { ok: true, detail: `Key valid; models available: ${[...new Set(models)].join(", ")}`, meta: { models } };
+  },
+  async anthropic() {
+    // models.retrieve spends no tokens: proves the key and that the configured models are available to it.
+    const { default: Anthropic } = await import("@anthropic-ai/sdk");
+    const client = new Anthropic({ apiKey: clean(process.env.ANTHROPIC_API_KEY), maxRetries: 0, timeout: 15_000 });
+    const models = ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"];
+    const missing: string[] = [];
+    for (const m of models) {
+      try {
+        await client.models.retrieve(m);
+      } catch (e) {
+        const status = (e as { status?: number }).status ?? null;
+        if (status === 401) return { ok: false, detail: "invalid_api_key", httpStatus: 401, errorCode: "authentication_error" };
+        if (status == null) throw e;
+        missing.push(`${m} (${status})`);
+      }
+    }
+    return missing.length
+      ? { ok: false, detail: `Model not available to this key: ${missing.join("; ")}`, httpStatus: 404, errorCode: "model_not_found", meta: { models } }
+      : { ok: true, detail: `Key valid; models available: ${models.join(", ")}`, meta: { models } };
   },
   async facebook() {
     const v = clean(process.env.META_GRAPH_VERSION) || "v21.0";

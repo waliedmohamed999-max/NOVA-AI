@@ -103,10 +103,13 @@ export async function openAiTestTextAction(): Promise<ActionResult<{ model: stri
     const started = Date.now();
     const r = await aiStructured({ ...a.scope }, { task: "SUMMARIZATION", quality: "fast", realOnly: true, promptRef: { key: "admin_test", version: "admin_test@1" }, schemaName: "nova_admin_test", schema: z.object({ status: z.literal("ok"), product: z.string() }), prompt: 'Return status "ok" and product "NOVA".', maxTokens: 200 });
     const costMicro = BigInt(r.costMicro ?? 0);
-    await recordValidation({ provider: "openai", check: "generate_text", ok: true, detail: `${r.model}: structured ${JSON.stringify(r.data)} · ${r.usage.inputTokens} in / ${r.usage.outputTokens} out`, durationMs: Date.now() - started, costMicro, meta: { model: r.model, usage: r.usage, costBasis: "usage × configured price" }, actorId: a.userId, organizationId: a.scope.organizationId });
+    // Recorded against the provider that actually answered (the router may pick Anthropic or OpenAI).
+    await recordValidation({ provider: r.model.startsWith("claude") ? "anthropic" : "openai", check: "generate_text", ok: true, detail: `${r.model}: structured ${JSON.stringify(r.data)} · ${r.usage.inputTokens} in / ${r.usage.outputTokens} out`, durationMs: Date.now() - started, costMicro, meta: { model: r.model, usage: r.usage, costBasis: "usage × configured price" }, actorId: a.userId, organizationId: a.scope.organizationId });
     return { ok: true, data: { model: r.model, reply: JSON.stringify(r.data), inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens, costUsd: Number(costMicro) / 1e6 } };
   } catch (err) {
-    await recordValidation({ provider: "openai", check: "generate_text", ok: false, detail: providerDetail(err), errorCode: errorCodeOf(err), httpStatus: httpStatusOf(err), actorId: a.userId, organizationId: a.scope.organizationId });
+    const { routeModels } = await import("@/server/ai/router");
+    const attempted = routeModels({ task: "SUMMARIZATION", quality: "fast" })[0]?.provider;
+    await recordValidation({ provider: attempted === "anthropic" ? "anthropic" : "openai", check: "generate_text", ok: false, detail: providerDetail(err), errorCode: errorCodeOf(err), httpStatus: httpStatusOf(err), actorId: a.userId, organizationId: a.scope.organizationId });
     return mapError(err, "admin.openai_text");
   }
 }

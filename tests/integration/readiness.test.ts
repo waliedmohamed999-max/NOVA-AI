@@ -30,7 +30,7 @@ afterEach(() => {
 describe("provider readiness", () => {
   it("nothing is valid or live tested until a real check succeeded", async () => {
     const rows = await providerReadiness();
-    expect(rows.map((r) => r.provider)).toEqual(["openai", "linkedin", "instagram", "facebook", "tiktok", "google", "microsoft", "whatsapp", "email", "storage", "stripe"]);
+    expect(rows.map((r) => r.provider)).toEqual(["openai", "anthropic", "linkedin", "instagram", "facebook", "tiktok", "google", "microsoft", "whatsapp", "email", "storage", "stripe"]);
     for (const r of rows) {
       expect(r.credentialsValid).toBeNull();
       expect(r.liveTested).toBe(false);
@@ -65,6 +65,53 @@ describe("provider readiness", () => {
     const rows = await providerReadiness();
     expect(rows.find((r) => r.provider === "google")).toMatchObject({ credentialsValid: false, lastError: { check: "credentials" } });
     expect(rows.find((r) => r.provider === "tiktok")).toMatchObject({ credentialsValid: true, liveTested: false });
+  });
+
+  it("validates the Anthropic key via models.retrieve (no tokens spent) and reports missing models", async () => {
+    env({ ANTHROPIC_API_KEY: "sk-ant-api03-abcdefghijklmnopqrstuvwxyz" });
+    const seen: string[] = [];
+    let haiku = 200;
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      const url = input instanceof Request ? input.url : String(input);
+      seen.push(url);
+      if (url.startsWith("https://api.anthropic.com/v1/models/")) {
+        const id = decodeURIComponent(url.split("/").pop()!.split("?")[0]);
+        if (id === "claude-haiku-4-5" && haiku !== 200) return json({ type: "error", error: { type: "not_found_error", message: "model not found" } }, haiku);
+        return json({ type: "model", id, display_name: id, created_at: "2026-01-01T00:00:00Z" });
+      }
+      return json({ error: "unmocked" }, 500);
+    }));
+    const ok = await validateCredentials("anthropic", { userId: "admin-1" });
+    expect(ok.ok).toBe(true);
+    expect(seen.every((u) => u.startsWith("https://api.anthropic.com/v1/models/"))).toBe(true);
+    expect(seen.some((u) => u.includes("/messages"))).toBe(false);
+    haiku = 404;
+    const bad = await validateCredentials("anthropic", { userId: "admin-1" });
+    expect(bad).toMatchObject({ ok: false, errorCode: "model_not_found" });
+    expect(bad.detail).toContain("claude-haiku-4-5 (404)");
+    expect(JSON.stringify(bad, (_k, v) => (typeof v === "bigint" ? String(v) : v))).not.toContain("sk-ant-api03");
+  });
+
+  it("derives one honest status per provider from configuration and recorded validations", async () => {
+    // Nothing configured → BLOCKED; nothing is READY without a recorded live success.
+    env({ OPENAI_API_KEY: "", TIKTOK_CLIENT_KEY: "aw1b2c3d4e5f6g7h8", TIKTOK_CLIENT_SECRET: "s", ANTHROPIC_API_KEY: "sk-ant-api03-abcdefghijklmnopqrstuvwxyz" });
+    let rows = await providerReadiness();
+    expect(rows.find((r) => r.provider === "openai")!.status).toBe("BLOCKED");
+    expect(rows.every((r) => r.status !== "READY")).toBe(true);
+    // Configured but external review pending → WAITING_EXTERNAL_APPROVAL, even with valid credentials.
+    await recordValidation({ provider: "tiktok", check: "credentials", ok: true, live: true, detail: "ok" });
+    rows = await providerReadiness();
+    expect(rows.find((r) => r.provider === "tiktok")!.status).toBe("WAITING_EXTERNAL_APPROVAL");
+    // Configured, valid, no review needed, not yet live-tested → READY_FOR_STAGING.
+    expect(rows.find((r) => r.provider === "anthropic")!.status).toBe("READY_FOR_STAGING");
+    // A real generation recorded → READY. A newer failure → BLOCKED again.
+    await recordValidation({ provider: "anthropic", check: "generate_text", ok: true, live: true, detail: "claude-haiku-4-5" });
+    rows = await providerReadiness();
+    expect(rows.find((r) => r.provider === "anthropic")!.status).toBe("READY");
+    await new Promise((r) => setTimeout(r, 5));
+    await recordValidation({ provider: "anthropic", check: "generate_text", ok: false, detail: "overloaded", httpStatus: 529 });
+    rows = await providerReadiness();
+    expect(rows.find((r) => r.provider === "anthropic")!.status).toBe("BLOCKED");
   });
 
   it("an unconfigured provider is recorded as not configured, without calling anyone", async () => {

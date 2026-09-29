@@ -12,7 +12,9 @@ import { toast } from "@/components/ui/toast";
 import type { ReadinessRow } from "@/server/admin/readiness";
 import { linkWhatsAppNumberAction, storageTestAction, validateProviderAction } from "./actions";
 
-const NAMES: Record<string, string> = { openai: "OpenAI", linkedin: "LinkedIn", instagram: "Instagram Direct", facebook: "Facebook Pages", tiktok: "TikTok", google: "Google", microsoft: "Microsoft", whatsapp: "WhatsApp Business", email: "Email", storage: "Storage", stripe: "Stripe" };
+const NAMES: Record<string, string> = { openai: "OpenAI", anthropic: "Anthropic (Claude)", linkedin: "LinkedIn", instagram: "Instagram Direct", facebook: "Facebook Pages", tiktok: "TikTok", google: "Google", microsoft: "Microsoft", whatsapp: "WhatsApp Business", email: "Email", storage: "Storage", stripe: "Stripe" };
+
+const STATUS_TONE = { READY: "success", READY_FOR_STAGING: "info", WAITING_EXTERNAL_APPROVAL: "warning", BLOCKED: "danger" } as const;
 
 function YesNo({ v, yes, no, unknown }: { v: boolean | null; yes: string; no: string; unknown: string }) {
   if (v == null) return <span className="inline-flex items-center gap-1 text-ink-4"><CircleDashed className="size-3.5" /> {unknown}</span>;
@@ -51,7 +53,7 @@ export function ReadinessBoard({ rows }: { rows: ReadinessRow[] }) {
         <table className="w-full min-w-[1320px] text-sm" data-testid="readiness">
           <thead className="border-b border-line bg-surface-2 text-xs text-ink-3">
             <tr>
-              {["provider", "configured", "format", "credentials", "callbacks", "accounts", "lastSuccess", "lastError", "capabilities", "pending", "liveTested", "blockers", ""].map((h) => (
+              {["provider", "status", "configured", "format", "credentials", "callbacks", "accounts", "lastSuccess", "lastError", "capabilities", "pending", "liveTested", "blockers", ""].map((h) => (
                 <th key={h} className="px-3 py-2.5 text-start font-medium">{h ? t(`cols.${h}`) : ""}</th>
               ))}
             </tr>
@@ -60,6 +62,9 @@ export function ReadinessBoard({ rows }: { rows: ReadinessRow[] }) {
             {rows.map((r) => (
               <tr key={r.provider} data-provider={r.provider}>
                 <td className="px-3 py-3 font-semibold">{NAMES[r.provider]}</td>
+                <td className="px-3 py-3" data-status={r.status}>
+                  <Badge tone={STATUS_TONE[r.status]} className="whitespace-nowrap">{t(`status.${r.status}`)}</Badge>
+                </td>
                 <td className="px-3 py-3"><YesNo v={r.configured} yes={t("yes")} no={t("no")} unknown="—" /></td>
                 <td className="px-3 py-3">
                   <YesNo v={r.formatValid} yes={t("formatOk")} no={t("formatBad")} unknown="—" />
