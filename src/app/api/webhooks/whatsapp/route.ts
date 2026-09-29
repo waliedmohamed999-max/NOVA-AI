@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifySignature, verifyWebhookChallenge } from "@/server/whatsapp/cloud-api";
 import { processWebhook } from "@/server/whatsapp/service";
 import { logger } from "@/server/logger";
+import { reportError } from "@/server/observability";
+import { requestIdFrom } from "@/server/request-id";
 
 /** Meta webhook subscription check: echo hub.challenge only when hub.verify_token matches WHATSAPP_VERIFY_TOKEN. */
 export async function GET(req: NextRequest) {
@@ -12,10 +14,11 @@ export async function GET(req: NextRequest) {
 
 /** Inbound messages + delivery statuses. Rejects anything without a valid X-Hub-Signature-256. */
 export async function POST(req: NextRequest) {
+  const requestId = requestIdFrom(req.headers.get("x-request-id"));
   if ((Number(req.headers.get("content-length")) || 0) > 1_000_000) return new NextResponse("too large", { status: 413 });
   const raw = await req.text();
   if (!verifySignature(raw, req.headers.get("x-hub-signature-256"))) {
-    logger.warn("whatsapp webhook: invalid signature");
+    logger.warn({ requestId }, "whatsapp webhook: invalid signature");
     return new NextResponse("invalid signature", { status: 401 });
   }
   let body: unknown;
@@ -26,10 +29,11 @@ export async function POST(req: NextRequest) {
   }
   try {
     const r = await processWebhook(body);
-    return NextResponse.json({ ok: true, ...r });
+    logger.info({ requestId, ...r }, "whatsapp webhook processed");
+    return NextResponse.json({ ok: true, ...r }, { headers: { "x-request-id": requestId } });
   } catch (err) {
     // 500 → Meta retries; processing is idempotent by message id.
-    logger.error({ err }, "whatsapp webhook processing failed");
-    return NextResponse.json({ ok: false }, { status: 500 });
+    reportError(err, "webhook", { provider: "whatsapp", requestId });
+    return NextResponse.json({ ok: false }, { status: 500, headers: { "x-request-id": requestId } });
   }
 }

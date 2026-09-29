@@ -61,6 +61,14 @@ export function mapError(err: unknown, name: string): { ok: false; error: string
   }
   // Re-throw Next.js control flow (redirect / notFound).
   if (err && typeof err === "object" && "digest" in err && String((err as { digest: unknown }).digest).startsWith("NEXT_")) throw err;
-  logger.error({ err, action: name }, "action failed");
+  // Unexpected failures: structured log + error tracker, tagged with the request's correlation id.
+  void import("./request-id")
+    .then((m) => m.currentRequestId())
+    .catch(() => null)
+    .then(async (requestId) => {
+      logger.error({ err, action: name, requestId }, "action failed");
+      const { reportError } = await import("./observability");
+      reportError(err, "request", { action: name, requestId });
+    });
   return { ok: false, error: "unexpected" };
 }

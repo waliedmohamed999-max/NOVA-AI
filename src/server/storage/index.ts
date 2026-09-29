@@ -16,6 +16,8 @@ export interface StorageDriver {
   delete(key: string): Promise<void>;
   /** Optional: a short-lived direct URL for the object (S3 presigned GET). */
   presignGet?(key: string, ttlSeconds: number, opts: { contentType?: string; disposition?: string }): string;
+  /** Optional: cheap reachability probe used by /api/ready. */
+  check?(): Promise<{ ok: boolean; detail: string }>;
 }
 
 export class LocalDriver implements StorageDriver {
@@ -64,6 +66,10 @@ export const storage: StorageDriver = {
     const d = (driver ??= createDriver());
     if (!d.presignGet) throw new Error("presign not supported by this driver");
     return d.presignGet(k, ttl, o);
+  },
+  check: async () => {
+    const d = (driver ??= createDriver());
+    return d.check ? d.check() : { ok: true, detail: d.name };
   },
 };
 

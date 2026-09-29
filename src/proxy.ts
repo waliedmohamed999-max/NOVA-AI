@@ -66,8 +66,13 @@ function withCsp(request: NextRequest, embed: boolean, facebookSdk = false) {
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);
   headers.set("content-security-policy", csp);
+  // Correlation id for logs / error reports of this request (reuses a well-formed id from a load balancer).
+  const incoming = request.headers.get("x-request-id");
+  const requestId = incoming && /^[A-Za-z0-9._-]{8,64}$/.test(incoming) ? incoming : crypto.randomUUID();
+  headers.set("x-request-id", requestId);
   const res = NextResponse.next({ request: { headers } });
   res.headers.set("content-security-policy", csp);
+  res.headers.set("x-request-id", requestId);
   return res;
 }
 

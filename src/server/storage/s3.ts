@@ -126,6 +126,21 @@ export class S3Driver implements StorageDriver {
   async delete(key: string) {
     await this.send("DELETE", key);
   }
+
+  /**
+   * Cheap reachability probe for readiness: one signed HEAD on a sentinel key (no body, no listing).
+   * 200/404 = bucket reachable with valid credentials; 403 = credentials/permissions problem.
+   */
+  async check(): Promise<{ ok: boolean; detail: string }> {
+    const { url, headers } = this.signRequest("HEAD", "health/.probe");
+    try {
+      const res = await (this.deps.fetch ?? fetch)(url, { method: "HEAD", headers, signal: AbortSignal.timeout(5_000) });
+      if (res.ok || res.status === 404) return { ok: true, detail: "reachable" };
+      return { ok: false, detail: `HTTP ${res.status}` };
+    } catch {
+      return { ok: false, detail: "unreachable" };
+    }
+  }
 }
 
 export function s3ConfigFromEnv(env: NodeJS.ProcessEnv = process.env): S3Config {
