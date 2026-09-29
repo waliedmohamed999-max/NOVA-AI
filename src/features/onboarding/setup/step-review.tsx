@@ -150,9 +150,9 @@ function FinishOverlay({ runId, onRetry }: { runId: string; onRetry: () => void 
   }, [run?.status, router]);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-setup-bg/95 px-4 backdrop-blur" role="dialog" aria-modal="true" aria-labelledby="finish-title">
-      <div className="w-full max-w-md space-y-6 rounded-[28px] border border-nova-line bg-surface p-7 shadow-lg">
+      <div className="w-full max-w-md space-y-6 rounded-[20px] border border-nova-line bg-surface p-7 shadow-lg">
         <div className="space-y-2 text-center">
-          <span className="mx-auto flex size-16 items-center justify-center rounded-[22px] bg-accent text-white shadow-[0_0_60px_var(--accent-glow)] motion-safe:animate-[nova-glow_2.4s_ease-in-out_infinite]">
+          <span className="mx-auto flex size-16 items-center justify-center rounded-[20px] bg-accent text-white shadow-[0_0_60px_var(--accent-glow)] motion-safe:animate-[nova-glow_2.4s_ease-in-out_infinite]">
             <Sparkles className="size-7" />
           </span>
           <h2 id="finish-title" className="pt-2 text-2xl font-bold tracking-tight text-ink">

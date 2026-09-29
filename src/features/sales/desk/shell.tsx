@@ -128,7 +128,7 @@ function DeskBody({ summary, view, filters, pipelineValue, members, stages, sour
     <>
       <div className="space-y-7" data-testid="sales-desk">
         {/* ── Hero ── */}
-        <header className="relative overflow-hidden rounded-[28px] border border-line bg-surface px-5 py-6 shadow-xs sm:px-8 sm:py-8">
+        <header className="relative overflow-hidden rounded-[20px] border border-line bg-surface px-5 py-6 shadow-xs sm:px-8 sm:py-8">
           <div className="pointer-events-none absolute -top-24 end-[-6rem] size-72 rounded-full bg-[radial-gradient(circle,var(--nova-blue,#3b5bdb)_0%,transparent_65%)] opacity-[0.07]" aria-hidden />
           <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-xl space-y-3">
@@ -199,7 +199,7 @@ function DeskBody({ summary, view, filters, pipelineValue, members, stages, sour
         {!summary.gettingStarted.show && (
           <>
             {/* ── KPI strip ── */}
-            <dl className="grid grid-cols-2 overflow-hidden rounded-[22px] border border-line bg-surface sm:grid-cols-4 xl:grid-cols-8" data-testid="kpis">
+            <dl className="grid grid-cols-2 overflow-hidden rounded-[20px] border border-line bg-surface sm:grid-cols-4 xl:grid-cols-8" data-testid="kpis">
               {(
                 [
                   ["newWeek", kpis.newWeek, "newWeekHint", href({ view: "customers", period: "7d" })],

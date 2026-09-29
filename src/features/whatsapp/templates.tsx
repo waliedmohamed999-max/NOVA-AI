@@ -47,7 +47,7 @@ export function TemplatesView({ rows, canManage, connected, aiReady }: { rows: T
       </div>
       {tab === "DRAFT" && <p className="text-xs text-ink-3">{t("draftNote")}</p>}
       {shown.length === 0 ? (
-        <p className="rounded-[24px] border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
+        <p className="rounded-[20px] border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-testid="wa-templates">
           {shown.map((r) => (

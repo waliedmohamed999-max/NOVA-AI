@@ -69,7 +69,7 @@ export function PartnerCard() {
     { Icon: Users, x: "78%", y: "82%" },
   ];
   return (
-    <div className="relative h-[210px] overflow-hidden rounded-t-[28px] bg-[linear-gradient(160deg,#0b1224_0%,#101a36_60%,#172447_100%)]" aria-hidden={false}>
+    <div className="relative h-[210px] overflow-hidden rounded-t-[20px] bg-[linear-gradient(160deg,#0b1224_0%,#101a36_60%,#172447_100%)]" aria-hidden={false}>
       <p className="relative z-10 pt-5 text-center text-sm font-semibold text-white/90">{t("partner")}</p>
       <svg viewBox="0 0 340 200" className="absolute inset-0 size-full" aria-hidden>
         <defs>
@@ -86,8 +86,8 @@ export function PartnerCard() {
             <stop offset="100%" stopColor="#0c1636" />
           </linearGradient>
           <radialGradient id="pc-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ff7a3d" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#ff7a3d" stopOpacity="0" />
+            <stop offset="0%" stopColor="#8b73ff" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#8b73ff" stopOpacity="0" />
           </radialGradient>
         </defs>
         {/* floor grid */}
@@ -104,7 +104,7 @@ export function PartnerCard() {
           [75, 164],
           [265, 164],
         ].map(([x, y], i) => (
-          <path key={i} d={`M170 118 L${x} ${y}`} stroke="#ff7a3d" strokeOpacity="0.55" strokeWidth="1.2" strokeDasharray="3 4" className="motion-safe:animate-[nova-twinkle_4s_ease-in-out_infinite]" style={{ animationDelay: `${i * 0.6}s` }} />
+          <path key={i} d={`M170 118 L${x} ${y}`} stroke="#8b73ff" strokeOpacity="0.55" strokeWidth="1.2" strokeDasharray="3 4" className="motion-safe:animate-[nova-twinkle_4s_ease-in-out_infinite]" style={{ animationDelay: `${i * 0.6}s` }} />
         ))}
         <circle cx="170" cy="112" r="58" fill="url(#pc-glow)" />
         {/* cube */}
@@ -113,7 +113,7 @@ export function PartnerCard() {
           <polygon points="128,94 170,116 170,160 128,138" fill="url(#pc-left)" />
           <polygon points="212,94 170,116 170,160 212,138" fill="url(#pc-right)" />
           <polyline points="128,94 170,72 212,94" fill="none" stroke="#9cc0ff" strokeOpacity="0.8" />
-          <path d="M170 84c1.1 6.9 4.5 10.3 11.4 11.4-6.9 1.1-10.3 4.5-11.4 11.4-1.1-6.9-4.5-10.3-11.4-11.4 6.9-1.1 10.3-4.5 11.4-11.4Z" fill="#ff7a3d" />
+          <path d="M170 84c1.1 6.9 4.5 10.3 11.4 11.4-6.9 1.1-10.3 4.5-11.4 11.4-1.1-6.9-4.5-10.3-11.4-11.4 6.9-1.1 10.3-4.5 11.4-11.4Z" fill="#8b73ff" />
         </g>
       </svg>
       {tiles.map(({ Icon, x, y }, i) => (

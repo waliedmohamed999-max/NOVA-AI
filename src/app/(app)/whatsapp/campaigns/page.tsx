@@ -24,7 +24,7 @@ export default async function WhatsAppCampaigns() {
         </div>
       )}
       {rows.length === 0 ? (
-        <div className="rounded-[24px] border border-dashed border-line-strong bg-surface-2 p-10 text-center">
+        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2 p-10 text-center">
           <p className="font-bold">{t("empty.title")}</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-ink-3">{t("empty.body")}</p>
         </div>

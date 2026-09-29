@@ -6,13 +6,13 @@ export type ButtonVariant = "primary" | "accent" | "secondary" | "ghost" | "outl
 export type ButtonSize = "xs" | "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "bg-ink text-ink-inverse hover:bg-ink/88 shadow-sm active:translate-y-px",
-  accent: "bg-accent text-white hover:bg-accent-strong shadow-sm shadow-accent/20 active:translate-y-px",
-  secondary: "bg-surface text-ink border border-line hover:border-line-strong hover:bg-surface-2 shadow-xs",
-  outline: "border border-line-strong text-ink hover:bg-sunken",
-  ghost: "text-ink-2 hover:text-ink hover:bg-sunken",
-  danger: "bg-danger text-white hover:bg-danger/90 shadow-sm",
-  link: "text-accent-ink underline-offset-4 hover:underline px-0 h-auto",
+  primary: "bg-ink text-ink-inverse hover:bg-ink/85 active:translate-y-px",
+  accent: "bg-accent text-white hover:bg-accent-strong active:translate-y-px",
+  secondary: "bg-surface text-ink border border-line hover:border-line-strong hover:bg-surface-2",
+  outline: "border border-line text-ink hover:border-nova-blue hover:text-nova-blue",
+  ghost: "text-ink-2 hover:text-ink hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
+  danger: "bg-danger text-white hover:bg-danger/90",
+  link: "text-nova-blue underline-offset-4 hover:underline px-0 h-auto",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -34,7 +34,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export const buttonClass = (variant: ButtonVariant = "primary", size: ButtonSize = "md", className?: string) =>
   cn(
-    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out disabled:opacity-50 disabled:pointer-events-none select-none",
+    "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-bold tracking-[-0.01em] transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out disabled:opacity-50 disabled:pointer-events-none select-none",
     variants[variant],
     sizes[size],
     className,

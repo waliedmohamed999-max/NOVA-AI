@@ -68,7 +68,7 @@ export function BrandStep() {
               </span>
             ))}
             {colors.length < 4 && (
-              <button type="button" onClick={() => s.update("brand", { colors: [...colors, colors.length ? "#1f5fd6" : "#ef5a2a"] }, { immediate: true })} className="flex size-12 items-center justify-center rounded-2xl border border-dashed border-line-strong text-ink-3 hover:text-ink" aria-label={t("colors.add")}>
+              <button type="button" onClick={() => s.update("brand", { colors: [...colors, colors.length ? "#0091ff" : "#6647f0"] }, { immediate: true })} className="flex size-12 items-center justify-center rounded-2xl border border-dashed border-line-strong text-ink-3 hover:text-ink" aria-label={t("colors.add")}>
                 <Plus className="size-4" />
               </button>
             )}

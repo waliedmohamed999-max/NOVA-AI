@@ -65,13 +65,13 @@ export function ApprovalCenter({ tab, counts, items, recent }: { tab: string; co
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
           <EmptyState icon={<ShieldCheck />} title={t("empty.title")} description={t("empty.body")} />
         </div>
       ) : (
         <ul className="grid gap-4 lg:grid-cols-2">
           {items.map((a) => (
-            <li key={a.id} className="flex flex-col rounded-[24px] border border-line bg-surface p-5 shadow-xs">
+            <li key={a.id} className="flex flex-col rounded-[20px] border border-line bg-surface p-5 shadow-xs">
               <div className="flex items-start gap-3">
                 {a.agent ? <AgentMark agent={a.agent} size={38} /> : <span className="size-[38px] rounded-2xl bg-sunken" />}
                 <div className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ export function ApprovalCenter({ tab, counts, items, recent }: { tab: string; co
       {recent.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold">{t("recent")}</h2>
-          <ul className="divide-y divide-line rounded-[22px] border border-line bg-surface">
+          <ul className="divide-y divide-line rounded-[20px] border border-line bg-surface">
             {recent.map((a) => (
               <li key={a.id} className="flex items-center gap-3 px-5 py-3 text-sm">
                 <Badge tone={a.status === "APPROVED" ? "success" : "neutral"}>{t(`status.${a.status}` as "status.APPROVED")}</Badge>

@@ -30,7 +30,7 @@ export default async function SocialPage() {
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("accounts")}</h2>
         {accounts.length === 0 ? (
-          <div className="rounded-[26px] border border-dashed border-line-strong bg-surface-2">
+          <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
             <EmptyState compact icon={<Share2 />} title={t("noAccounts")} description={t("noAccountsBody")} action={<Link href="/settings/connected-accounts" className={buttonClass("primary", "md")}>{tc("actions.connect")}</Link>} />
           </div>
         ) : (

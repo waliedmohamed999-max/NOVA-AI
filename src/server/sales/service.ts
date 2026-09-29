@@ -193,6 +193,9 @@ export async function draftLeadMessage(
   const recipientKnown = conv.channel === "WHATSAPP" ? Boolean(lead.phone) : conv.channel === "EMAIL" || conv.channel === "WEBSITE" ? Boolean(lead.email) : true;
   const canSend = Boolean(await channel?.isConfigured(scope)) && recipientKnown;
   if (disposition === "send" && !canSend) disposition = "draft";
+  // WhatsApp: AI-written text is never sent without a human (only approved Company Brain answers to safe
+  // questions may go out automatically, through the WhatsApp reply policy — not through the sales agent).
+  if (disposition === "send" && conv.channel === "WHATSAPP") disposition = "approval";
 
   const message = await t.message.create({
     data: {

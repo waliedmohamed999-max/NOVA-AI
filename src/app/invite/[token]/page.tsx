@@ -21,7 +21,7 @@ export default async function InvitePage(props: PageProps<"/invite/[token]">) {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-5 py-12">
       <Logo className="mb-10" />
-      <div className="w-full max-w-md rounded-[28px] border border-line bg-surface p-8 text-center shadow-md">
+      <div className="w-full max-w-md rounded-[20px] border border-line bg-surface p-8 text-center shadow-md">
         {state !== "valid" || !invitation ? (
           <>
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-warning-soft text-warning"><MailWarning className="size-6" /></div>

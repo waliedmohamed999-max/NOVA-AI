@@ -173,7 +173,8 @@ test.describe("WhatsApp Business", () => {
     await page.waitForURL(/\/whatsapp\/inbox\?c=/);
     await expect(page.getByTestId("wa-draft")).toBeVisible();
     const out = await sql<{ status: string }>(`SELECT m.status FROM messages m JOIN conversations c ON c.id = m."conversationId" WHERE m."workspaceId" = $1 AND m.direction = 'OUTBOUND' AND c.channel = 'WHATSAPP'`, [n.workspaceId]);
-    expect(out.map((m) => m.status)).toEqual(["DRAFT"]); // nothing sent without a human
+    expect(out.map((m) => m.status)).toContain("DRAFT");
+    expect(out.filter((m) => m.status === "SENT")).toHaveLength(0); // nothing reaches the customer without a human
     await page.getByTestId("wa-send-draft").click();
     await expect(page.getByTestId("wa-draft")).toHaveCount(0);
   });

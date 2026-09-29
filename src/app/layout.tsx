@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Instrument_Serif } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Inter, Plus_Jakarta_Sans, Sometype_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTimeZone } from "next-intl/server";
@@ -8,21 +8,17 @@ import { dirFor, isLocale } from "@/i18n/config";
 import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"], display: "swap" });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
+/** Plus Jakarta Sans for display + UI, Inter for supporting copy, Sometype Mono for meta labels; Arabic: IBM Plex Sans Arabic. */
+const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"], display: "swap" });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
+const sometype = Sometype_Mono({ variable: "--font-sometype", subsets: ["latin"], weight: ["400", "500"], display: "swap" });
 const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-const instrument = Instrument_Serif({
-  variable: "--font-instrument",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  display: "swap",
-});
+
 
 export const metadata: Metadata = {
   title: { default: `${brand.name} — ${brand.subtitle.en}`, template: `%s · ${brand.name}` },
@@ -32,8 +28,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f5f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e0e11" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0e" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -51,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang={locale}
       dir={dir}
       data-theme={theme}
-      className={`${geist.variable} ${geistMono.variable} ${plexArabic.variable} ${instrument.variable} h-full`}
+      className={`${jakarta.variable} ${inter.variable} ${sometype.variable} ${plexArabic.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full">

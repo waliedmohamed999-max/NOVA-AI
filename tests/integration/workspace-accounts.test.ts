@@ -284,6 +284,21 @@ describe("WhatsApp Business Platform (Cloud API)", () => {
     expect(disposition).toBe("draft");
     expect(message.status).toBe("DRAFT");
   });
+
+  it("even on AUTOPILOT with a connected number and an open window, the Sales Agent never auto-sends on WhatsApp", async () => {
+    env({ WHATSAPP_ACCESS_TOKEN: "EAAG-test", WHATSAPP_APP_SECRET: SECRET, WHATSAPP_VERIFY_TOKEN: "v" });
+    const t = await makeTenant();
+    await db.whatsAppNumber.create({ data: { ...t.scope, phoneNumberId: "PN-AUTO", displayPhone: "+20 100 000 0001" } });
+    await db.workspaceSettings.updateMany({ where: t.scope, data: { salesAutonomy: "AUTOPILOT", autopilotAllowedTasks: ["send_follow_up"] } });
+    await db.approvalPolicy.updateMany({ where: { ...t.scope, action: "send_message" }, data: { requiresApproval: false } });
+    await processWebhook({ ...inbound("wamid.AUTO"), entry: [{ changes: [{ value: { ...inbound("wamid.AUTO").entry[0].changes[0].value, metadata: { phone_number_id: "PN-AUTO" } } }] }] });
+    const lead = await db.lead.findFirstOrThrow({ where: t.scope });
+    mockFetch((url) => (url.endsWith("/PN-AUTO/messages") ? json({ messages: [{ id: "wamid.SHOULD-NOT-SEND" }] }) : null));
+    const { disposition, message } = await draftLeadMessage(t.scope, lead.id, { body: "Hello from the agent", sensitiveTopics: [] }, { reason: "test", locale: "en" });
+    expect(disposition).toBe("approval");
+    expect(message.status).toBe("PENDING_APPROVAL");
+    expect(calls.filter((c) => c.url.endsWith("/PN-AUTO/messages"))).toHaveLength(0); // nothing reached WhatsApp
+  });
 });
 
 describe("lead attribution", () => {

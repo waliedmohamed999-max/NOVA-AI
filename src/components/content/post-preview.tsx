@@ -55,7 +55,7 @@ export function PostPreview({ post, brandName, device = "mobile" }: { post: Prev
   const avatar = (
     <span className="flex size-8 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-ink-inverse">{brandName.slice(0, 2).toUpperCase()}</span>
   );
-  const frame = device === "mobile" ? "w-full max-w-[360px] rounded-[28px] border-[6px] border-ink/90 shadow-lg" : "w-full max-w-[560px] rounded-2xl border border-line shadow-md";
+  const frame = device === "mobile" ? "w-full max-w-[360px] rounded-[20px] border-[6px] border-ink/90 shadow-lg" : "w-full max-w-[560px] rounded-2xl border border-line shadow-md";
 
   if (post.platform === "LINKEDIN") {
     return (

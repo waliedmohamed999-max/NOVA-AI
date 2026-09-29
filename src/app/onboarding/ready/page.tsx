@@ -23,7 +23,7 @@ type Discoveries = {
 
 function Section({ icon: Icon, title, children, delay }: { icon: typeof Sparkles; title: string; children: React.ReactNode; delay: number }) {
   return (
-    <section className="animate-fade-up rounded-[24px] border border-line bg-surface p-6 shadow-xs" style={{ animationDelay: `${delay}ms` }}>
+    <section className="animate-fade-up rounded-[20px] border border-line bg-surface p-6 shadow-xs" style={{ animationDelay: `${delay}ms` }}>
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-ink-3">
         <Icon className="size-4 text-accent" /> {title}
       </h2>
@@ -45,7 +45,7 @@ export default async function ReadyPage() {
   return (
     <main className="mx-auto max-w-5xl px-5 py-14 sm:py-20">
       <div className="animate-fade-up space-y-4 text-center">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-[22px] bg-ink text-accent shadow-lg">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-[20px] bg-ink text-accent shadow-lg">
           <Sparkles className="size-7" />
         </div>
         <h1 className="text-display font-semibold text-balance">{t("title")}</h1>

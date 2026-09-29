@@ -191,7 +191,7 @@ export function renderEmail(opts: { heading: string; body: string; ctaLabel?: st
   const cta = opts.ctaUrl
     ? `<p style="margin:28px 0"><a href="${escapeHtml(opts.ctaUrl)}" style="background:#17161c;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:600">${escapeHtml(opts.ctaLabel ?? "Continue")}</a></p>`
     : "";
-  const html = `<!doctype html><html dir="${dir}"><body style="margin:0;background:#f7f5f1;font-family:-apple-system,Segoe UI,Tahoma,sans-serif;color:#17161c">
+  const html = `<!doctype html><html dir="${dir}"><body style="margin:0;background:#f8f9fa;font-family:-apple-system,Segoe UI,Tahoma,sans-serif;color:#17161c">
 <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:20px;padding:36px;border:1px solid #ece8e1">
 <div style="font-weight:800;letter-spacing:.08em;font-size:14px">${escapeHtml(brand.name)}</div>
 <h1 style="font-size:22px;margin:24px 0 12px">${escapeHtml(opts.heading)}</h1>

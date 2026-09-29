@@ -4,7 +4,7 @@ import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type Selec
 import { cn } from "@/lib/cn";
 
 const fieldBase =
-  "w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink placeholder:text-ink-4 shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-line-strong focus:border-accent focus:outline-none focus:shadow-[var(--ring)] disabled:opacity-60 aria-[invalid=true]:border-danger";
+  "w-full rounded-[9px] border border-line bg-surface px-3.5 text-[15px] text-ink placeholder:text-ink-4 transition-[border-color,box-shadow] duration-150 hover:border-line-strong focus:border-nova-blue focus:outline-none focus:shadow-[var(--ring)] disabled:opacity-60 aria-[invalid=true]:border-danger";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...props }, ref) {
   return <input ref={ref} className={cn(fieldBase, "h-11", className)} {...props} />;

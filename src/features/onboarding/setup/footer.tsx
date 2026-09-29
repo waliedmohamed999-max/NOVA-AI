@@ -34,7 +34,7 @@ export function StepFooter({ step }: { step: Exclude<SetupStep, "review"> }) {
     });
 
   return (
-    <div className="max-md:sticky max-md:bottom-0 max-md:-mx-5 max-md:-mb-5 max-md:rounded-b-[28px] max-md:border-t max-md:border-nova-line max-md:bg-surface/95 max-md:px-5 max-md:py-4 max-md:backdrop-blur">
+    <div className="max-md:sticky max-md:bottom-0 max-md:-mx-5 max-md:-mb-5 max-md:rounded-b-[20px] max-md:border-t max-md:border-nova-line max-md:bg-surface/95 max-md:px-5 max-md:py-4 max-md:backdrop-blur">
       {tried && !ready && (
         <p role="alert" className="mb-3 text-sm font-medium text-danger">
           {t("nav.missing")}

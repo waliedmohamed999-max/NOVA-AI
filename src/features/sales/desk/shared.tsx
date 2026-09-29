@@ -63,7 +63,7 @@ export function Section({ n, eyebrow, title, description, actions, children, cla
 
 export function Panel({ children, className, ...rest }: { children: ReactNode; className?: string } & Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "children">) {
   return (
-    <div className={cn("rounded-[22px] border border-line bg-surface shadow-xs", className)} {...rest}>
+    <div className={cn("rounded-[20px] border border-line bg-surface shadow-xs", className)} {...rest}>
       {children}
     </div>
   );
@@ -71,7 +71,7 @@ export function Panel({ children, className, ...rest }: { children: ReactNode; c
 
 export function QuietEmpty({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[22px] border border-dashed border-line-strong bg-surface-2 px-6 py-8 text-center">
+    <div className="flex flex-col items-center gap-2 rounded-[20px] border border-dashed border-line-strong bg-surface-2 px-6 py-8 text-center">
       <p className="font-semibold">{title}</p>
       {body && <p className="max-w-md text-sm text-ink-3">{body}</p>}
       {action && <div className="pt-2">{action}</div>}

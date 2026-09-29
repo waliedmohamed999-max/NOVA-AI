@@ -45,7 +45,7 @@ export async function HomeCommandCenter({
   return (
     <section
       aria-labelledby="home-greeting"
-      className="relative overflow-hidden rounded-[24px] border border-[var(--nova-line)] px-5 pb-6 pt-8 shadow-[0_18px_50px_-30px_rgba(30,70,140,.35)] sm:px-8"
+      className="relative overflow-hidden rounded-[20px] border border-[var(--nova-line)] px-5 pb-6 pt-8 shadow-[0_18px_50px_-30px_rgba(30,70,140,.35)] sm:px-8"
       style={{ background: "linear-gradient(180deg, var(--nova-hero-from) 0%, var(--nova-hero-to) 100%)" }}
     >
       <div className="pointer-events-none absolute inset-x-0 top-[28%] h-[55%] bg-[radial-gradient(ellipse_at_center,rgba(120,180,255,.28),transparent_65%)]" aria-hidden />

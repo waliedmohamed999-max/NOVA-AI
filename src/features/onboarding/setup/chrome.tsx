@@ -38,7 +38,7 @@ export function TopBar({ user, unread }: { user: { name: string | null; email: s
         <div className="mx-auto hidden w-full max-w-md items-center gap-3 md:flex">
           <span className="shrink-0 text-xs font-semibold text-ink-3">{t("stepOf", { n, total: SETUP_STEPS.length })}</span>
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-sunken" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={s.progress.percent} aria-label={t("stepOf", { n, total: SETUP_STEPS.length })}>
-            <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),#ff8a4c)] transition-[width] duration-700 ease-out" style={{ width: `${s.progress.percent}%` }} />
+            <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),var(--nova-blue))] transition-[width] duration-700 ease-out" style={{ width: `${s.progress.percent}%` }} />
           </div>
           <span className="w-10 shrink-0 text-end text-xs font-bold text-ink" dir="ltr">
             {s.progress.percent}%
@@ -87,7 +87,7 @@ export function Stepper() {
     ol.scrollBy({ left: r.left + r.width / 2 - (box.left + box.width / 2), behavior: "smooth" });
   }, [s.step]);
   return (
-    <nav aria-label={t("sidebar.title")} className="rounded-[28px] border border-nova-line bg-surface px-3 py-5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:px-6">
+    <nav aria-label={t("sidebar.title")} className="rounded-[20px] border border-nova-line bg-surface px-3 py-5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:px-6">
       <ol ref={list} className="-mx-1 flex snap-x items-start overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
         {SETUP_STEPS.map((step, i) => {
           const { state, reachable } = status(step);
@@ -217,7 +217,7 @@ export function SidebarBody({ compact }: { compact?: boolean }) {
 export function Sidebar() {
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-[88px] overflow-hidden rounded-[28px] border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
+      <div className="sticky top-[88px] overflow-hidden rounded-[20px] border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
         <PartnerCard />
         <SidebarBody />
       </div>

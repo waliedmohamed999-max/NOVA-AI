@@ -37,7 +37,7 @@ export async function BrainOverview({ state, areas, overall, missing, canManage 
     <div className="space-y-5">
       {/* Hero */}
       <section
-        className="relative overflow-hidden rounded-[24px] border border-[var(--nova-line)] px-5 py-7 shadow-[0_18px_50px_-30px_rgba(30,70,140,.35)] sm:px-8"
+        className="relative overflow-hidden rounded-[20px] border border-[var(--nova-line)] px-5 py-7 shadow-[0_18px_50px_-30px_rgba(30,70,140,.35)] sm:px-8"
         style={{ background: "linear-gradient(180deg, var(--nova-hero-from) 0%, var(--nova-hero-to) 100%)" }}
       >
         <div className="flex flex-wrap items-start justify-between gap-4">

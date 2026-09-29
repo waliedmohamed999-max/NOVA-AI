@@ -34,7 +34,7 @@ export default async function LandingPage() {
             <h1 className="text-display font-semibold text-balance">
               {t("hero.line1")}
               <br />
-              <span className="font-display font-normal italic text-accent-ink">{t("hero.line2")}</span>
+              <span className="text-gradient font-extrabold">{t("hero.line2")}</span>
             </h1>
             <p className="max-w-xl text-lg leading-relaxed text-ink-2 text-pretty">{t("hero.body")}</p>
             <div className="flex flex-wrap gap-3">
@@ -61,7 +61,7 @@ export default async function LandingPage() {
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AGENTS.map((a) => (
-            <article key={a.key} className="group rounded-[26px] border border-line bg-surface p-7 shadow-xs transition hover:-translate-y-1 hover:shadow-md">
+            <article key={a.key} className="group rounded-[20px] border border-line bg-surface p-7 shadow-xs transition hover:-translate-y-1 hover:shadow-md">
               <AgentMark agent={a.key} size={48} />
               <h3 className="mt-6 text-lg font-semibold tracking-tight">{tc(`agents.${a.key}.name`)}</h3>
               <p className="mt-1.5 text-[15px] text-ink-3">{tc(`agents.${a.key}.role`)}</p>
@@ -93,8 +93,8 @@ export default async function LandingPage() {
         <h2 className="max-w-2xl text-4xl font-semibold tracking-[-0.03em] text-balance sm:text-5xl">{t("how.title")}</h2>
         <ol className="mt-14 grid gap-4 md:grid-cols-4">
           {(["connect", "understand", "create", "grow"] as const).map((k, i) => (
-            <li key={k} className="rounded-[26px] border border-line bg-surface p-7">
-              <span className="font-display text-5xl italic text-accent-ink">{i + 1}</span>
+            <li key={k} className="rounded-[20px] border border-line bg-surface p-7">
+              <span className="font-display text-5xl font-extrabold tracking-[-0.04em] text-accent">{i + 1}</span>
               <h3 className="mt-6 text-lg font-semibold">{t(`how.steps.${k}.title`)}</h3>
               <p className="mt-2 text-[15px] text-ink-3">{t(`how.steps.${k}.body`)}</p>
             </li>
@@ -111,7 +111,7 @@ export default async function LandingPage() {
           </div>
           <div className="mt-14 grid gap-4 lg:grid-cols-3">
             {PLAN_ORDER.map((p) => (
-              <div key={p} className={`rounded-[28px] border p-8 ${p === "GROWTH" ? "border-ink bg-ink text-ink-inverse shadow-lg" : "border-line bg-surface"}`}>
+              <div key={p} className={`rounded-[20px] border p-8 ${p === "GROWTH" ? "border-ink bg-ink text-ink-inverse shadow-lg" : "border-line bg-surface"}`}>
                 <h3 className="text-xl font-semibold">{t(`pricing.plans.${p}.name`)}</h3>
                 <p className={`mt-2 text-sm ${p === "GROWTH" ? "opacity-70" : "text-ink-3"}`}>{t(`pricing.plans.${p}.tagline`)}</p>
                 <ul className="mt-8 space-y-3 text-[15px]">
@@ -130,7 +130,7 @@ export default async function LandingPage() {
 
       {/* Final CTA */}
       <section className="mx-auto max-w-7xl px-5 py-24 lg:px-8">
-        <div className="relative overflow-hidden rounded-[36px] bg-ink px-8 py-16 text-center text-ink-inverse sm:px-16">
+        <div className="relative overflow-hidden rounded-[20px] bg-ink px-8 py-16 text-center text-ink-inverse sm:px-16">
           <div className="absolute inset-0 ai-aura opacity-90" aria-hidden />
           <div className="relative mx-auto max-w-2xl space-y-6">
             <h2 className="text-4xl font-semibold tracking-[-0.03em] text-balance sm:text-5xl">{t("final.title")}</h2>
