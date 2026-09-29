@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import pino from "pino";
 import { assertStartupConfig, validateConfig } from "@/server/config/validate";
 
 const key32 = Buffer.alloc(32, 7).toString("base64");
@@ -69,5 +70,16 @@ describe("startup configuration validation", () => {
     expect(() => assertStartupConfig(log, { ...good, APP_ENV: "staging", AUTH_SECRET: "" })).not.toThrow();
     expect(lines.join("\n")).not.toContain(good.RESEND_API_KEY!);
     expect(lines.join("\n")).not.toContain(key32);
+  });
+
+  it("works with a real pino logger (log methods keep their `this`) and reports every issue", () => {
+    const lines: string[] = [];
+    const log = pino({ level: "info" }, { write: (l: string) => void lines.push(l) });
+    const bad = { ...good, APP_ENV: "staging", AI_DEMO_MODE: "true" };
+    expect(() => assertStartupConfig(log, bad)).not.toThrow();
+    expect(() => assertStartupConfig(log, { ...good, AI_DEMO_MODE: "true" })).toThrow(/Refusing to start in production/);
+    expect(lines.some((l) => l.includes("[config] AI_DEMO_MODE"))).toBe(true);
+    // Values never reach the log, only names.
+    expect(lines.join("")).not.toContain(good.RESEND_API_KEY!);
   });
 });

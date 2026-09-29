@@ -113,7 +113,11 @@ export type ConfigReport = ReturnType<typeof validateConfig>;
 /** Called at server / worker start. Production refuses to start with errors; other environments only log. */
 export function assertStartupConfig(log: { error: (o: object, m: string) => void; warn: (o: object, m: string) => void; info: (o: object, m: string) => void }, env: NodeJS.ProcessEnv = process.env) {
   const r = validateConfig(env);
-  for (const i of r.issues) (i.level === "error" ? log.error : log.warn)({ key: i.key, category: i.category }, `[config] ${i.key}: ${i.message}`);
+  for (const i of r.issues) {
+    // Called as methods: pino's log functions need their logger as `this`.
+    if (i.level === "error") log.error({ key: i.key, category: i.category }, `[config] ${i.key}: ${i.message}`);
+    else log.warn({ key: i.key, category: i.category }, `[config] ${i.key}: ${i.message}`);
+  }
   if (r.ok) log.info({ environment: r.environment, warnings: r.issues.length }, "[config] configuration validated");
   if (!r.ok && r.environment === "production") {
     throw new Error(`Refusing to start in production: ${r.errors.length} configuration error(s): ${r.errors.map((e) => e.key).join(", ")}. See docs/DEPLOYMENT.md.`);

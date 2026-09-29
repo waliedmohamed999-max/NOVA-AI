@@ -6,7 +6,7 @@ export function enforceStartupConfig(proc: "web" | "worker") {
   try {
     assertStartupConfig(logger);
   } catch (err) {
-    logger.fatal({ err: { message: err instanceof Error ? err.message : String(err) }, process: proc }, "startup aborted: invalid production configuration");
+    logger.fatal({ err: { message: err instanceof Error ? err.message : String(err) }, process: proc }, "startup aborted: configuration check failed");
     process.exit(1);
   }
 }
