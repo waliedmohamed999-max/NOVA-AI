@@ -6,6 +6,7 @@
 # Options (env):
 #   BACKUP_DIR          where dumps go (default ./backups)
 #   RETENTION_DAYS      delete dumps older than this (default 14)
+#   PG_DUMP_EXTRA       extra pg_dump flags, e.g. "--schema=public" on Supabase
 #   PG_DOCKER           run pg_dump inside this container instead of the host (local dev), e.g. nova-postgres
 #
 # Output: nova-<db>-<UTC timestamp>.dump + .sha256. Exit code != 0 on any failure (use it in cron/alerts).
@@ -26,9 +27,9 @@ echo "[backup] dumping $DB_NAME → $FILE"
 if [[ -n "${PG_DOCKER:-}" ]]; then
   # Inside the container the database is on localhost:5432.
   IN_URL="$(echo "$URL" | sed -E 's#@[^/]+/#@localhost:5432/#')"
-  docker exec "$PG_DOCKER" pg_dump --format=custom --no-owner --no-privileges --compress=6 "$IN_URL" > "$FILE"
+  docker exec "$PG_DOCKER" pg_dump --format=custom --no-owner --no-privileges --compress=6 ${PG_DUMP_EXTRA:-} "$IN_URL" > "$FILE"
 else
-  pg_dump --format=custom --no-owner --no-privileges --compress=6 "$URL" > "$FILE"
+  pg_dump --format=custom --no-owner --no-privileges --compress=6 ${PG_DUMP_EXTRA:-} "$URL" > "$FILE"
 fi
 
 SIZE="$(wc -c < "$FILE")"

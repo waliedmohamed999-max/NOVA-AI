@@ -83,6 +83,40 @@ See `.env.example`. At minimum:
 
 `AI_OFFLINE_MODE` must be `false`: the app refuses to make AI calls with it switched on in production.
 
+### Startup configuration check
+
+The web process (`src/instrumentation.ts`) and the worker validate the environment before serving (`src/server/config/validate.ts`). Values are never logged, only variable names.
+
+- **`APP_ENV=production` refuses to start (exit 1)** when any of these hold:
+  - `DATABASE_URL` is missing or points at localhost;
+  - `APP_URL` is not a public `https://` URL;
+  - `AUTH_SECRET` is shorter than 32 characters or a placeholder;
+  - `ENCRYPTION_KEY` is not 32 bytes of base64;
+  - no real email provider is configured, or `EMAIL_FROM` is on `.local`;
+  - `STORAGE_DRIVER=local` without `STORAGE_ALLOW_LOCAL_IN_PRODUCTION=true`, or S3 variables are incomplete;
+  - `AI_DEMO_MODE`, `BRAIN_FETCH_FIXTURES` or `WHATSAPP_FAKE_TRANSPORT` is on;
+  - Stripe is configured without `STRIPE_WEBHOOK_SECRET`.
+- **`APP_ENV=staging`** reports the same problems as warnings and still starts. Use it for a demo deployment that runs `AI_DEMO_MODE`.
+- **Development** only warns.
+
+## Health & readiness
+
+| Endpoint | Meaning | Used by |
+| --- | --- | --- |
+| `GET /api/health` | liveness: the process answers. No dependency checks. | container/PaaS restart probe |
+| `GET /api/ready` | readiness: database (critical), config (critical), storage (critical; one HEAD, cached 5 min), worker heartbeat (degraded only). `503` on a critical failure. | load balancer / uptime monitor |
+
+The public `/api/ready` returns statuses only. `Authorization: Bearer $READY_TOKEN` (or `CRON_SECRET`) adds the details. No paid API is ever called.
+
+## Worker reliability
+
+- **Heartbeat:** each worker upserts `worker_heartbeats` at most every 20 s. `/api/ready` reports `worker: degraded` after 2 minutes of silence.
+- **Timeouts:** every job has a time limit (`JOB_TIMEOUTS` in `src/server/jobs/runner.ts`, otherwise `JOB_TIMEOUT_MS`, default 5 min). A hung handler fails and goes through the normal retry → backoff → DEAD path.
+- **Graceful shutdown:** on SIGTERM the worker stops claiming and finishes in-flight jobs, then force-exits after `WORKER_SHUTDOWN_GRACE_MS` (default 30 s).
+- **Stale locks:** jobs whose lock expired are reclaimed by the queue. Claims use `FOR UPDATE SKIP LOCKED`, so several workers are safe.
+- **Reconciliation (`system.reconcile`, every 10 min):** a publication stuck in `PUBLISHING` for 30 min, or a WhatsApp campaign recipient stuck in `SENDING` for 10 min, is marked FAILED "outcome unknown". The team is notified and it is **never retried automatically**, because a blind retry could post or message twice.
+- **Request IDs:** every request carries `x-request-id`, which is echoed in the response and in logs and Sentry events for server actions and webhooks.
+
 ## Blockers
 
 - **Payments (Stripe): implemented, not live-validated.**
@@ -99,7 +133,7 @@ See `.env.example`. At minimum:
 ## Release checklist
 
 1. `npm ci` (runs `prisma generate`)
-2. `npm run typecheck && npm run lint && npm test && npm run test:e2e`
+2. `npm run typecheck && npm run lint && npm test && npm run test:e2e` (CI runs everything except E2E: `.github/workflows/ci.yml`)
 3. `npm run build`
 4. `npm run db:migrate`
 5. Deploy web and worker
@@ -113,10 +147,10 @@ See `.env.example`. At minimum:
 
 ## Operations
 
-- **Health:** the `/admin` overview (dead jobs, AI errors, integration issues), plus `/admin/incidents` and `/admin/providers`.
+- **Health:** `/api/health` and `/api/ready` for machines; for people, the `/admin` overview (dead jobs, AI errors, integration issues), plus `/admin/incidents` and `/admin/providers`.
 - **Logs:** structured JSON (pino), with the `service` field set to `web` or `worker`. Password, token, secret, cookie, authorization and code fields are redacted.
 - **Key rotation:**
   1. Add `ENCRYPTION_KEY_V2`.
   2. Bump `CURRENT_KEY_VERSION` in `src/server/crypto.ts`.
   3. Re-save credentials, either by reconnecting or with a re-encryption script.
-- **Backups:** use standard PostgreSQL backups. Stored files live outside the database, so also back up the storage volume or bucket (enable bucket versioning).
+- **Backups:** see docs/BACKUPS.md (daily `pg-backup.sh`, monthly restore drill with `pg-restore-verify.sh`, bucket versioning).

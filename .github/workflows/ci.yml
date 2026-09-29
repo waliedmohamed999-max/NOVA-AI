@@ -1,0 +1,74 @@
+# NOVA quality gate: typecheck → lint → unit + integration tests → production build.
+# Runs against a throwaway pgvector Postgres. No live provider is ever called: tests run with
+# AI_OFFLINE_MODE, dummy OAuth credentials (tests/support/env.ts) and mocked provider HTTP.
+# No secrets are needed — every value below is a CI-only dummy.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: nova
+          POSTGRES_PASSWORD: nova
+          POSTGRES_DB: nova
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nova"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://nova:nova@localhost:5432/nova?schema=public
+      TEST_DATABASE_URL: postgresql://nova:nova@localhost:5432/nova_test?schema=public
+      APP_ENV: development
+      APP_URL: http://localhost:3000
+      AUTH_SECRET: ci-only-auth-secret-not-used-anywhere-else-0123456789
+      ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      CRON_SECRET: ci-only-cron-secret
+      AI_OFFLINE_MODE: "true"
+      STORAGE_DRIVER: local
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (also runs prisma generate)
+        run: npm ci
+
+      - name: Create test database
+        run: PGPASSWORD=nova psql -h localhost -U nova -d nova -c "CREATE DATABASE nova_test;"
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit + integration tests
+        run: npm test
+
+      - name: Migrations apply cleanly on an empty database (with the destructive-SQL guard)
+        run: npm run db:migrate
+
+      - name: Production build
+        run: npx next build --webpack

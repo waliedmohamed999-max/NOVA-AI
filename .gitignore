@@ -50,3 +50,8 @@ next-env.d.ts
 !.env.staging.example
 !.env.production.example
 dev-server*.log
+
+# local database dumps (scripts/backup)
+/.backups/
+*.dump
+*.dump.sha256

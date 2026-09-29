@@ -13,11 +13,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "db:migrate": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "db:migrate": "node scripts/migrate-on-build.mjs",
+    "db:migrate:dev": "node scripts/guard-dev-db.mjs && prisma migrate dev",
+    "db:seed": "node scripts/guard-dev-db.mjs && tsx prisma/seed.ts",
+    "db:reset": "node scripts/guard-dev-db.mjs && prisma migrate reset --force",
+    "postinstall": "prisma generate",
+    "db:migrate:raw": "prisma migrate deploy"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

@@ -56,10 +56,32 @@ This script:
 
 Run it weekly. A backup that has never been restored is not a backup.
 
-**Last run in this repository:** 2026-09-28, against the local development database only (not production).
-- Dump size: 0.7 MB. Restore time: 3 s.
-- All 13 checked tables matched (organizations, users, workspaces, leads, content_items, social_posts, integrations, integration_credentials, subscriptions, invoices, file_objects, audit_logs, _prisma_migrations).
-- **A production restore drill is still pending.**
+**Last run in this repository:** 2026-09-30, against the local development database only (not production).
+- Dump size: 2.5 MB. Restore time: 12 s.
+- All 13 checked tables matched (organizations 415, users 448, leads 339, content_items 580, audit_logs 2668, _prisma_migrations 18, …).
+- **A production restore drill is still pending.** It needs a Supabase connection string that the operator runs from their own machine; see "Supabase" below.
+
+### Supabase (current production database)
+
+- **Point-in-time recovery.** Free projects have no PITR and only limited daily backups. Pro gives daily backups kept 7 days; PITR is a paid add-on. For a paying-customer launch, enable PITR or run `pg-backup.sh` daily from a machine or CI runner outside Hostinger.
+- **Use the session pooler or the direct connection for dumps** (port 5432), never the transaction pooler (6543). `pg_dump` needs session-level features.
+- **The `vector` extension** already exists on Supabase. `pg_restore` into a fresh Supabase project works after `CREATE EXTENSION IF NOT EXISTS vector;`.
+- **Supabase-managed schemas** (`auth`, `storage`, `realtime`) are not used by NOVA. Dump only `public`: `pg_dump --schema=public`. `pg-backup.sh` dumps the database named in the URL, so on Supabase set `PG_DUMP_EXTRA="--schema=public"`.
+- **Drill:** once a month, restore the latest dump into a *separate* Supabase project or a local docker Postgres with `pg-restore-verify.sh`. Never restore into the production project.
+
+### Encryption & access
+
+- Dumps contain every tenant's data. Encrypted provider tokens stay encrypted in the dump, but everything else is plaintext.
+- Store dumps only in a bucket with server-side encryption (SSE-S3 / R2 default encryption) and versioning or object lock.
+- Only the backup identity can read that bucket. The app's own storage key must not be able to list it or delete from it.
+- `.backups/` and `*.dump` are git-ignored. Never commit a dump.
+
+### Disaster-recovery targets (proposed)
+
+| | Target | How |
+| --- | --- | --- |
+| RPO (data you can lose) | ≤ 24 h without PITR, ≤ 5 min with PITR | daily `pg-backup.sh` / Supabase PITR |
+| RTO (time to recover) | ≤ 2 h | restore procedure above, rehearsed monthly |
 
 ### Verification checklist (manual, after a real restore)
 

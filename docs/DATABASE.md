@@ -48,4 +48,24 @@ npm run db:migrate
 npx prisma generate
 ```
 
-`prisma migrate dev` also works in an interactive terminal.
+`prisma migrate dev` also works in an interactive terminal, against a local database only: `npm run db:migrate:dev`, `db:reset` and `db:seed` refuse to run unless `DATABASE_URL` points at localhost and `APP_ENV` is not production or staging (`scripts/guard-dev-db.mjs`).
+
+## Automatic migrations & destructive changes
+
+`npm run build` and `npm run db:migrate` run `scripts/migrate-on-build.mjs`:
+1. read `_prisma_migrations` and list the pending migration folders;
+2. scan them for destructive SQL: `DROP TABLE/COLUMN/SCHEMA/TYPE/INDEX/VIEW`, `TRUNCATE`, `DELETE FROM`, `ALTER COLUMN … TYPE` (patterns in `scripts/migration-guard.mjs`, unit-tested);
+3. if any is found, **stop the build** and list them;
+4. otherwise `prisma migrate deploy` (Prisma holds an advisory lock, so two builds can't migrate at once). A failed migration fails the build.
+
+Migrations must be **additive and backward compatible**, because the previous release keeps serving while the new one builds. Use expand → migrate data → contract:
+- release N adds the new column/table and writes both;
+- release N+1 reads the new one;
+- release N+2 drops the old one. That is the destructive step.
+
+**Running a destructive migration**
+1. Take a backup and verify it: `scripts/backup/pg-backup.sh`, then `pg-restore-verify.sh` (docs/BACKUPS.md).
+2. Review the SQL. Make sure no running release still reads what is dropped.
+3. Set `ALLOW_DESTRUCTIVE_MIGRATIONS=true` for that one deploy, then remove it again.
+
+Never edit or delete a migration that has been applied anywhere. Fix forward with a new migration. `SKIP_DB_MIGRATE=true` builds without touching the database (CI, or a separate migration step).
