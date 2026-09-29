@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { hostname } from "node:os";
 import { db } from "../db/client";
 import { childLogger, logger } from "../logger";
 import { queue } from "./queue";
@@ -18,7 +19,31 @@ export const SYSTEM_SCHEDULES = [
   { key: "system:daily_brief", type: "reports.daily_briefs", intervalSeconds: 3600 },
   { key: "system:weekly_report", type: "reports.weekly_reports", intervalSeconds: 3 * 3600 },
   { key: "system:cleanup", type: "system.cleanup", intervalSeconds: 24 * 3600 },
+  { key: "system:reconcile", type: "system.reconcile", intervalSeconds: 10 * 60 },
 ] as const;
+
+/**
+ * Per-type time limits. A job that exceeds its limit fails (and retries with backoff); external actions are
+ * claim-protected, so a slow provider call that finishes late can't be performed twice. The stale-lock
+ * recovery (15 min) is longer than every limit here.
+ */
+export const JOB_TIMEOUTS: Record<string, number> = {
+  "ai.image.generate": 10 * 60_000,
+  "privacy.export": 12 * 60_000,
+  "privacy.delete_org": 12 * 60_000,
+  "brain.import": 8 * 60_000,
+  "knowledge.ingest": 8 * 60_000,
+  "reports.daily_briefs": 12 * 60_000,
+  "reports.weekly_reports": 12 * 60_000,
+};
+export const jobTimeoutMs = (type: string) => JOB_TIMEOUTS[type] ?? (Number(process.env.JOB_TIMEOUT_MS) || 5 * 60_000);
+
+export class JobTimeoutError extends Error {
+  constructor(type: string, ms: number) {
+    super(`Job ${type} exceeded its ${ms < 1000 ? `${ms}ms` : `${Math.round(ms / 1000)}s`} time limit`);
+    this.name = "JobTimeoutError";
+  }
+}
 
 export async function ensureSystemSchedules() {
   for (const s of SYSTEM_SCHEDULES) {
@@ -57,14 +82,39 @@ export async function runJob(job: Awaited<ReturnType<typeof queue.claim>>[number
     log.error("no handler for job type");
     return;
   }
+  const limit = jobTimeoutMs(job.type);
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const result = await handler(job.payload as Record<string, unknown>, { job, log });
+    const result = await Promise.race([
+      handler(job.payload as Record<string, unknown>, { job, log }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new JobTimeoutError(job.type, limit)), limit);
+      }),
+    ]);
+    clearTimeout(timer);
     await queue.complete(job, result ?? null, Date.now() - started);
     log.info({ durationMs: Date.now() - started }, "job completed");
   } catch (err) {
+    clearTimeout(timer);
     const outcome = await queue.fail(job, err, Date.now() - started);
     log.error({ err, outcome }, "job failed");
   }
+}
+
+// ── Worker liveness (read by /api/ready) ──
+let lastBeat = 0;
+let processedSinceStart = 0;
+export async function heartbeat(workerId: string, opts: { force?: boolean; processed?: number } = {}) {
+  processedSinceStart += opts.processed ?? 0;
+  if (!opts.force && Date.now() - lastBeat < 20_000) return;
+  lastBeat = Date.now();
+  await db.workerHeartbeat
+    .upsert({
+      where: { workerId },
+      create: { workerId, host: hostname().slice(0, 120), pid: process.pid, inline: process.env.NOVA_PROCESS !== "worker", processed: processedSinceStart },
+      update: { lastSeenAt: new Date(), processed: processedSinceStart },
+    })
+    .catch((err) => logger.warn({ err }, "worker heartbeat failed"));
 }
 
 /** Processes one batch; used by the worker loop and by the cron HTTP trigger. */
@@ -73,6 +123,7 @@ export async function drainOnce(workerId: string, concurrency = 4) {
   await tickScheduler();
   const jobs = await queue.claim(workerId, concurrency);
   await Promise.all(jobs.map(runJob));
+  await heartbeat(workerId, { processed: jobs.length });
   return jobs.length;
 }
 
@@ -90,11 +141,14 @@ export async function startWorker(opts: { concurrency?: number; idleMs?: number 
   logger.info({ workerId, concurrency }, "job worker started");
 
   let lastRecovery = 0;
+  // Graceful shutdown: stop claiming; the batch in flight finishes (bounded by job time limits).
   const stop = () => {
+    if (running) logger.info({ workerId }, "worker stopping: finishing the current batch");
     running = false;
   };
   process.once("SIGINT", stop);
   process.once("SIGTERM", stop);
+  await heartbeat(workerId, { force: true });
 
   while (running) {
     try {
@@ -110,5 +164,6 @@ export async function startWorker(opts: { concurrency?: number; idleMs?: number 
       await new Promise((r) => setTimeout(r, 5000));
     }
   }
+  await db.workerHeartbeat.delete({ where: { workerId } }).catch(() => undefined);
   logger.info({ workerId }, "job worker stopped");
 }

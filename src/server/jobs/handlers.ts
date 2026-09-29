@@ -100,6 +100,7 @@ export function registerAllJobs() {
   registerJob("privacy.export", async (p) => exportOrganization(String(p.organizationId), String(p.exportId)));
   registerJob("privacy.delete_org", async (p) => deleteOrganization(String(p.organizationId), String(p.actorId)));
 
+  registerJob("system.reconcile", async () => (await import("./reconcile")).reconcileStuck());
   registerJob("system.cleanup", async () => {
     const now = new Date();
     const [sessions, tokens, states, buckets, jobs] = await Promise.all([

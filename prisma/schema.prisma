@@ -2491,3 +2491,18 @@ model BrainRevision {
   @@index([organizationId, workspaceId, createdAt])
   @@map("brain_revisions")
 }
+
+/// Liveness of background workers (standalone `npm run worker` or the inline worker). Readiness checks
+/// that at least one worker was seen recently; nothing else reads it.
+model WorkerHeartbeat {
+  workerId   String   @id
+  host       String?
+  pid        Int?
+  inline     Boolean  @default(false)
+  processed  Int      @default(0)
+  startedAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([lastSeenAt])
+  @@map("worker_heartbeats")
+}

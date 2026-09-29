@@ -231,8 +231,8 @@ export async function resumeCampaign(scope: TenantScope, id: string, actor: Acto
   if (c.waState !== "PAUSED") throw new UserFacingError("invalid_transition");
   const t = tenantDb(scope);
   await t.campaign.update({ where: { id }, data: { waState: "SENDING", status: "ACTIVE", sendStartedAt: c.sendStartedAt ?? new Date() } });
-  // Recipients left mid-send by the pause go back to the queue.
-  await t.campaignRecipient.updateMany({ where: { campaignId: id, status: "SENDING" }, data: { status: "QUEUED" } });
+  // A recipient in SENDING may already have been delivered by the provider: it is never re-queued (that could
+  // message the customer twice). If it stays SENDING, reconciliation marks it "outcome_unknown".
   await enqueue("whatsapp.campaign_batch", { ...scope, campaignId: id }, { ...scope, dedupeKey: `whatsapp.campaign:${id}:${Date.now()}` });
   await audit({ ...scope, actorType: "USER", actorId: actor.userId, actorLabel: actor.label, action: "whatsapp.campaign_resumed", entityType: "Campaign", entityId: id, summary: `WhatsApp campaign "${c.name}" resumed` });
 }
