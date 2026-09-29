@@ -5,7 +5,9 @@ import { appEnvironment, isPublicHttps } from "../env";
  * provider-specific / development-only and checks the environment against it.
  *
  * - production: any `error` stops the server (and the worker) from starting.
- * - staging:    errors are reported loudly but the app starts (it is where configuration is completed).
+ * - staging:    the SECURITY FLOOR is enforced like production (database, HTTPS origin, secrets, no test doubles,
+ *               no live Stripe keys, signed webhooks); functional gaps (storage, email, demo AI) are reported
+ *               loudly but the app starts — it is where configuration is completed.
  * - development: only obvious mistakes are reported.
  *
  * Values are never logged or returned — only the variable name and what is wrong.
@@ -36,6 +38,9 @@ export const CONFIG_SPEC: { key: string; category: ConfigCategory; note: string 
   { key: "BRAIN_FETCH_FIXTURES / WHATSAPP_FAKE_TRANSPORT", category: "development-only", note: "E2E test doubles — refused in production" },
   { key: "STORAGE_ALLOW_LOCAL_IN_PRODUCTION", category: "development-only", note: "Escape hatch: local disk on ONE persistent server only" },
 ];
+
+/** Errors that stop staging too: weakening these would weaken security, not just leave a feature unset. */
+export const SECURITY_FLOOR = new Set(["DATABASE_URL", "APP_URL", "AUTH_SECRET", "ENCRYPTION_KEY", "BRAIN_FETCH_FIXTURES", "WHATSAPP_FAKE_TRANSPORT", "STRIPE_WEBHOOK_SECRET", "STRIPE_SECRET_KEY"]);
 
 const clean = (v: string | undefined) => v?.trim().replace(/^["']|["']$/g, "") ?? "";
 const LOCAL_HOST = /@(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|host\.docker\.internal)(:|\/)/i;
@@ -89,12 +94,12 @@ export function validateConfig(env: NodeJS.ProcessEnv = process.env) {
     else add("STORAGE_DRIVER", "required", "local disk storage outside development — set STORAGE_DRIVER=s3 (S3 or R2)");
   }
 
-  // ── development-only switches must never be on in production ──
-  if (environment === "production") {
-    if (v("AI_DEMO_MODE") === "true") add("AI_DEMO_MODE", "development-only", "demo AI is refused in production — add OPENAI_API_KEY / ANTHROPIC_API_KEY, or run this deployment as APP_ENV=staging");
-    if (v("BRAIN_FETCH_FIXTURES") === "true") add("BRAIN_FETCH_FIXTURES", "development-only", "test fixture fetcher must be off in production");
-    if (v("WHATSAPP_FAKE_TRANSPORT") === "true") add("WHATSAPP_FAKE_TRANSPORT", "development-only", "test transport must be off in production");
-  }
+  // ── development-only switches ──
+  if (environment === "production" && v("AI_DEMO_MODE") === "true") add("AI_DEMO_MODE", "development-only", "demo AI is refused in production — add OPENAI_API_KEY / ANTHROPIC_API_KEY, or run this deployment as APP_ENV=staging");
+  // Test doubles fake provider results (fetched pages, WhatsApp delivery) — never on a deployed instance.
+  if (deployed && v("BRAIN_FETCH_FIXTURES") === "true") add("BRAIN_FETCH_FIXTURES", "development-only", "test fixture fetcher must be off outside development");
+  if (deployed && v("WHATSAPP_FAKE_TRANSPORT") === "true") add("WHATSAPP_FAKE_TRANSPORT", "development-only", "test transport must be off outside development");
+  if (environment === "staging" && /^(sk|rk)_live_/.test(v("STRIPE_SECRET_KEY"))) add("STRIPE_SECRET_KEY", "provider", "staging must use Stripe TEST mode keys (sk_test_…) — never charge real cards from staging");
   if (deployed && v("AI_OFFLINE_MODE") === "true") add("AI_OFFLINE_MODE", "development-only", "is ignored outside development — remove it", "warning");
 
   // ── optional / provider sanity (warnings: the feature stays honestly 'not set up') ──
@@ -106,7 +111,8 @@ export function validateConfig(env: NodeJS.ProcessEnv = process.env) {
   if (environment === "production" && /^sk_test_/.test(v("STRIPE_SECRET_KEY"))) add("STRIPE_SECRET_KEY", "provider", "is a test-mode key in production", "warning");
 
   const errors = issues.filter((i) => i.level === "error");
-  return { environment, issues, errors, ok: errors.length === 0 };
+  const securityErrors = errors.filter((i) => SECURITY_FLOOR.has(i.key));
+  return { environment, issues, errors, securityErrors, ok: errors.length === 0 };
 }
 export type ConfigReport = ReturnType<typeof validateConfig>;
 
@@ -121,6 +127,9 @@ export function assertStartupConfig(log: { error: (o: object, m: string) => void
   if (r.ok) log.info({ environment: r.environment, warnings: r.issues.length }, "[config] configuration validated");
   if (!r.ok && r.environment === "production") {
     throw new Error(`Refusing to start in production: ${r.errors.length} configuration error(s): ${r.errors.map((e) => e.key).join(", ")}. See docs/DEPLOYMENT.md.`);
+  }
+  if (r.securityErrors.length && r.environment === "staging") {
+    throw new Error(`Refusing to start in staging: security settings invalid: ${r.securityErrors.map((e) => e.key).join(", ")}. See docs/DEPLOYMENT.md.`);
   }
   return r;
 }

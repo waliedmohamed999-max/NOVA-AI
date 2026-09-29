@@ -96,7 +96,13 @@ The web process (`src/instrumentation.ts`) and the worker validate the environme
   - `STORAGE_DRIVER=local` without `STORAGE_ALLOW_LOCAL_IN_PRODUCTION=true`, or S3 variables are incomplete;
   - `AI_DEMO_MODE`, `BRAIN_FETCH_FIXTURES` or `WHATSAPP_FAKE_TRANSPORT` is on;
   - Stripe is configured without `STRIPE_WEBHOOK_SECRET`.
-- **`APP_ENV=staging`** reports the same problems as warnings and still starts. Use it for a demo deployment that runs `AI_DEMO_MODE`.
+- **`APP_ENV=staging`** enforces the same **security floor** and refuses to start when it is broken:
+  - `DATABASE_URL`, `APP_URL`, `AUTH_SECRET` or `ENCRYPTION_KEY` is invalid;
+  - test doubles are on;
+  - a live Stripe key is set;
+  - Stripe has no webhook secret.
+
+  Functional gaps (storage, email, demo AI) are reported as warnings and the app starts. Use staging for the closed beta and demo deployments (docs/GO-LIVE.md).
 - **Development** only warns.
 
 ## Health & readiness

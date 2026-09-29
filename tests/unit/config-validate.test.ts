@@ -58,6 +58,22 @@ describe("startup configuration validation", () => {
     expect(r.issues.find((i) => i.key === "STORAGE_DRIVER")?.level).toBe("warning");
   });
 
+  it("staging keeps the security floor: secrets, HTTPS origin, hosted DB, no test doubles, no live Stripe", () => {
+    const st = { ...good, APP_ENV: "staging" };
+    const sec = (env: NodeJS.ProcessEnv) => validateConfig(env).securityErrors.map((e) => e.key);
+    expect(sec(st)).toEqual([]);
+    expect(sec({ ...st, AUTH_SECRET: "changeme" })).toContain("AUTH_SECRET");
+    expect(sec({ ...st, ENCRYPTION_KEY: "short" })).toContain("ENCRYPTION_KEY");
+    expect(sec({ ...st, APP_URL: "http://staging.example.com" })).toContain("APP_URL");
+    expect(sec({ ...st, DATABASE_URL: "postgresql://u:p@localhost:5432/nova" })).toContain("DATABASE_URL");
+    expect(sec({ ...st, WHATSAPP_FAKE_TRANSPORT: "true" })).toContain("WHATSAPP_FAKE_TRANSPORT");
+    expect(sec({ ...st, BRAIN_FETCH_FIXTURES: "true" })).toContain("BRAIN_FETCH_FIXTURES");
+    expect(sec({ ...st, STRIPE_SECRET_KEY: "sk_live_abc", STRIPE_WEBHOOK_SECRET: "whsec_x" })).toContain("STRIPE_SECRET_KEY");
+    expect(sec({ ...st, STRIPE_SECRET_KEY: "sk_test_abc" })).toContain("STRIPE_WEBHOOK_SECRET");
+    // Functional gaps are reported but are not part of the security floor.
+    expect(sec({ ...st, STORAGE_DRIVER: "local", SMTP_HOST: "mailpit", EMAIL_PROVIDER: "smtp" })).toEqual([]);
+  });
+
   it("staging allows demo AI; development tolerates missing secrets", () => {
     expect(keys({ ...good, APP_ENV: "staging", AI_DEMO_MODE: "true" })).not.toContain("AI_DEMO_MODE");
     expect(validateConfig({ NODE_ENV: "development", DATABASE_URL: "postgresql://u:p@localhost:5434/nova" }).ok).toBe(true);
@@ -67,7 +83,9 @@ describe("startup configuration validation", () => {
     const lines: string[] = [];
     const log = { error: (_o: object, m: string) => lines.push(m), warn: (_o: object, m: string) => lines.push(m), info: (_o: object, m: string) => lines.push(m) };
     expect(() => assertStartupConfig(log, { ...good, AUTH_SECRET: "" })).toThrow(/Refusing to start in production/);
-    expect(() => assertStartupConfig(log, { ...good, APP_ENV: "staging", AUTH_SECRET: "" })).not.toThrow();
+    // Staging starts with functional gaps (storage/email/demo AI) but not with a broken security floor.
+    expect(() => assertStartupConfig(log, { ...good, APP_ENV: "staging", STORAGE_DRIVER: "local", EMAIL_PROVIDER: "", RESEND_API_KEY: "", AI_DEMO_MODE: "true" })).not.toThrow();
+    expect(() => assertStartupConfig(log, { ...good, APP_ENV: "staging", AUTH_SECRET: "" })).toThrow(/Refusing to start in staging: .*AUTH_SECRET/);
     expect(lines.join("\n")).not.toContain(good.RESEND_API_KEY!);
     expect(lines.join("\n")).not.toContain(key32);
   });
