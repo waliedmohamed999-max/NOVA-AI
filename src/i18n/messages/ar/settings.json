@@ -753,6 +753,7 @@
       "liveIntro": "اتصالات حقيقية بمزوّدين حقيقيين، لا تعمل إلا بضغطك. كل نتيجة تُسجل في الجدول أعلاه. لا شيء هنا يعمل داخل الاختبارات الآلية.",
       "status": {
         "READY": "جاهز",
+        "READY_FOR_CLOSED_BETA": "جاهز للـ Closed Beta",
         "READY_FOR_STAGING": "جاهز للتجربة (Staging)",
         "WAITING_EXTERNAL_APPROVAL": "بانتظار موافقة خارجية",
         "BLOCKED": "متوقف"

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { signIn } from "./helpers";
 
-const STATUSES = ["READY", "READY_FOR_STAGING", "WAITING_EXTERNAL_APPROVAL", "BLOCKED"];
+const STATUSES = ["READY", "READY_FOR_CLOSED_BETA", "READY_FOR_STAGING", "WAITING_EXTERNAL_APPROVAL", "BLOCKED"];
 
 test("admin provider readiness: one honest status per provider, nothing READY without a live validation", async ({ page }) => {
   await signIn(page);
@@ -16,7 +16,7 @@ test("admin provider readiness: one honest status per provider, nothing READY wi
     const status = await row.locator("td[data-status]").getAttribute("data-status");
     expect(STATUSES).toContain(status);
     // READY requires a recorded live test, so the "Live tested" badge must say yes.
-    if (status === "READY") await expect(row.locator('[data-live-tested="yes"]')).toBeVisible();
+    if (status === "READY" || status === "READY_FOR_CLOSED_BETA") await expect(row.locator('[data-live-tested="yes"]')).toBeVisible();
   }
   // This environment has no AI keys: both AI providers are blocked, never "ready".
   await expect(page.locator('tr[data-provider="openai"] td[data-status]')).toHaveAttribute("data-status", "BLOCKED");

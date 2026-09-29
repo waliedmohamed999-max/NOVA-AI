@@ -753,6 +753,7 @@
       "liveIntro": "Real calls to real providers, triggered only by you. Each result is recorded above. Nothing here runs in automated tests.",
       "status": {
         "READY": "Ready",
+        "READY_FOR_CLOSED_BETA": "Ready for closed beta",
         "READY_FOR_STAGING": "Ready for staging",
         "WAITING_EXTERNAL_APPROVAL": "Waiting external approval",
         "BLOCKED": "Blocked"

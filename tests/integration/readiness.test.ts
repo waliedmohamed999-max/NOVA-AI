@@ -114,6 +114,31 @@ describe("provider readiness", () => {
     expect(rows.find((r) => r.provider === "anthropic")!.status).toBe("BLOCKED");
   });
 
+  it("a permission Meta hasn't granted yet is WAITING EXTERNAL APPROVAL; a real failure is BLOCKED", async () => {
+    env({ META_APP_ID: "1234567890123456", META_APP_SECRET: "0123456789abcdef0123456789abcdef" });
+    await recordValidation({ provider: "facebook", check: "credentials", ok: true, live: true, detail: "App token issued" });
+    await new Promise((r) => setTimeout(r, 5));
+    await recordValidation({ provider: "facebook", check: "pages_connection", ok: false, detail: "PENDING META PERMISSION", errorCode: "pages_permission_pending" });
+    expect((await providerReadiness()).find((r) => r.provider === "facebook")!.status).toBe("WAITING_EXTERNAL_APPROVAL");
+    await new Promise((r) => setTimeout(r, 5));
+    await recordValidation({ provider: "facebook", check: "connection", ok: false, detail: "Error validating access token", errorCode: "OAuthException", httpStatus: 400 });
+    expect((await providerReadiness()).find((r) => r.provider === "facebook")!.status).toBe("BLOCKED");
+  });
+
+  it("Stripe live-validated in test mode is READY FOR CLOSED BETA, never READY", async () => {
+    // Fixture keys are assembled at runtime so no key-shaped literal lives in the repository (push protection).
+    const fake = (prefix: string) => `${prefix}_${"FAKE0fixture0".repeat(2)}`;
+    env({ STRIPE_SECRET_KEY: fake("sk_test"), STRIPE_WEBHOOK_SECRET: fake("whsec"), APP_URL: "https://staging.nova.test", STRIPE_PRICE_STARTER: "price_1StarterAbc", STRIPE_PRICE_GROWTH: "price_1GrowthAbcd", STRIPE_PRICE_SCALE: "price_1ScaleAbcde", STRIPE_PUBLISHABLE_KEY: fake("pk_test") });
+    let row = (await providerReadiness()).find((r) => r.provider === "stripe")!;
+    expect(row.status).not.toBe("READY");
+    expect(row.status).not.toBe("READY_FOR_CLOSED_BETA");
+    await recordValidation({ provider: "stripe", check: "credentials", ok: true, live: true, detail: "ok" });
+    await recordValidation({ provider: "stripe", check: "webhook_received", ok: true, live: true, detail: "evt_test" });
+    row = (await providerReadiness()).find((r) => r.provider === "stripe")!;
+    expect(row.blockers).toEqual(["stripe_test_mode"]);
+    expect(row.status).toBe("READY_FOR_CLOSED_BETA");
+  });
+
   it("an unconfigured provider is recorded as not configured, without calling anyone", async () => {
     env({ STRIPE_SECRET_KEY: "", STRIPE_WEBHOOK_SECRET: "" });
     const fetchSpy = vi.fn();

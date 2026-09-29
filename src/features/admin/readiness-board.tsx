@@ -14,7 +14,7 @@ import { linkWhatsAppNumberAction, storageTestAction, validateProviderAction } f
 
 const NAMES: Record<string, string> = { openai: "OpenAI", anthropic: "Anthropic (Claude)", linkedin: "LinkedIn", instagram: "Instagram Direct", facebook: "Facebook Pages", tiktok: "TikTok", google: "Google", microsoft: "Microsoft", whatsapp: "WhatsApp Business", email: "Email", storage: "Storage", stripe: "Stripe" };
 
-const STATUS_TONE = { READY: "success", READY_FOR_STAGING: "info", WAITING_EXTERNAL_APPROVAL: "warning", BLOCKED: "danger" } as const;
+const STATUS_TONE = { READY: "success", READY_FOR_CLOSED_BETA: "accent", READY_FOR_STAGING: "info", WAITING_EXTERNAL_APPROVAL: "warning", BLOCKED: "danger" } as const;
 
 function YesNo({ v, yes, no, unknown }: { v: boolean | null; yes: string; no: string; unknown: string }) {
   if (v == null) return <span className="inline-flex items-center gap-1 text-ink-4"><CircleDashed className="size-3.5" /> {unknown}</span>;

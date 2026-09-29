@@ -184,16 +184,25 @@ export function productionBlockers(p: ReadinessProvider, r: { configured: boolea
  * - BLOCKED: missing/invalid credentials, a failed credential check, or the latest result is an error.
  * - WAITING_EXTERNAL_APPROVAL: works as far as we can test, but depends on a provider review/approval.
  * - READY: live-validated with no production blocker left.
+ * - READY_FOR_CLOSED_BETA: live-validated; the only thing left is a deliberate test-mode setting
+ *   (Stripe test keys) that stays until an explicit go-live decision.
  * - READY_FOR_STAGING: configured and valid, but not yet live-validated or still on test/dev settings
  *   (test keys, local disk, development mailbox, non-HTTPS callbacks).
  */
-export const READINESS_STATUSES = ["READY", "READY_FOR_STAGING", "WAITING_EXTERNAL_APPROVAL", "BLOCKED"] as const;
+export const READINESS_STATUSES = ["READY", "READY_FOR_CLOSED_BETA", "READY_FOR_STAGING", "WAITING_EXTERNAL_APPROVAL", "BLOCKED"] as const;
 export type ReadinessStatus = (typeof READINESS_STATUSES)[number];
 
-export function readinessStatus(r: { configured: boolean; formatProblems: string[]; credentialsValid: boolean | null; lastError: unknown; blockers: string[] }): ReadinessStatus {
-  if (!r.configured || r.formatProblems.length || r.credentialsValid === false || r.lastError) return "BLOCKED";
+const TEST_MODE_ONLY = new Set(["stripe_test_mode"]);
+/** Failures that mean "the provider hasn't granted this yet" (review/permission), not "broken". */
+export const PENDING_APPROVAL_ERRORS = new Set(["pages_permission_pending"]);
+
+export function readinessStatus(r: { configured: boolean; formatProblems: string[]; credentialsValid: boolean | null; lastError: { errorCode: string | null } | null; blockers: string[]; liveTested: boolean }): ReadinessStatus {
+  if (!r.configured || r.formatProblems.length || r.credentialsValid === false) return "BLOCKED";
+  if (r.lastError) return r.lastError.errorCode && PENDING_APPROVAL_ERRORS.has(r.lastError.errorCode) && r.blockers.includes("external_review") ? "WAITING_EXTERNAL_APPROVAL" : "BLOCKED";
   if (r.blockers.includes("external_review")) return "WAITING_EXTERNAL_APPROVAL";
-  return r.blockers.length === 0 ? "READY" : "READY_FOR_STAGING";
+  if (r.blockers.length === 0) return "READY";
+  if (r.liveTested && r.blockers.every((b) => TEST_MODE_ONLY.has(b))) return "READY_FOR_CLOSED_BETA";
+  return "READY_FOR_STAGING";
 }
 
 export type ReadinessRow = {
@@ -240,7 +249,7 @@ export async function providerReadiness(): Promise<ReadinessRow[]> {
     const blockers = productionBlockers(p, { configured, formatProblems: format, liveTested, callbacksOk: callbacks.ok });
     return {
       provider: p,
-      status: readinessStatus({ configured, formatProblems: format ?? [], credentialsValid, lastError, blockers }),
+      status: readinessStatus({ configured, formatProblems: format ?? [], credentialsValid, lastError, blockers, liveTested }),
       configured,
       formatValid: format === null ? null : format.length === 0,
       formatProblems: format ?? [],
