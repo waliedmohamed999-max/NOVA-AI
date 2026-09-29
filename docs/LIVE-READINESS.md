@@ -11,9 +11,10 @@ Each provider gets one status. It is computed only from configuration and record
 | Status | Meaning |
 | --- | --- |
 | **READY** | A real call succeeded (recorded live validation) and no production blocker is left. |
+| **READY FOR CLOSED BETA** | Live-validated; the only thing left is a deliberate test-mode setting (Stripe test keys) that stays until a separate go-live decision. |
 | **READY FOR STAGING** | Configured and valid, but not live-validated yet, or still on test/dev settings (Stripe test keys, local disk, development mailbox, non-HTTPS callbacks). |
 | **WAITING EXTERNAL APPROVAL** | Works as far as we can test, but depends on the provider's review or approval (Meta App Review, LinkedIn CMA, TikTok audit, Google verification, WhatsApp business verification and templates). |
-| **BLOCKED** | Missing or malformed credentials, a failed credential check, or the latest recorded result is an error. |
+| **BLOCKED** | Missing or malformed credentials, a failed credential check, or the latest recorded result is an error. A failure that only means a permission the provider hasn't granted yet (e.g. `pages_permission_pending`) counts as WAITING EXTERNAL APPROVAL instead. |
 
 ## Provider table (computed 2026-09-30, local environment)
 
@@ -25,8 +26,8 @@ Each provider gets one status. It is computed only from configuration and record
 | 1 | Storage (S3/R2) | READY FOR STAGING (local disk, dev only) | Private bucket + `S3_*`. Then: Storage test (upload → signed URL → delete) |
 | 1 | Stripe | BLOCKED | Test-mode keys, webhook secret, 3 price ids, HTTPS webhook endpoint. Then: checkout in test mode + a received webhook |
 | 1 | WhatsApp Cloud API | BLOCKED | Meta app + WABA + number, `WHATSAPP_*`, HTTPS webhook. Business verification + approved templates (external) |
-| 2 | LinkedIn | WAITING EXTERNAL APPROVAL | Member posting works. Needs an HTTPS callback, a publish test, and Community Management API for Company Pages |
-| 2 | Facebook Pages | WAITING EXTERNAL APPROVAL | Meta Page-management use case + App Review; an HTTPS callback |
+| 2 | LinkedIn | WAITING EXTERNAL APPROVAL | Re-checked 2026-09-30: client authenticated, connection valid, `w_member_social` granted. Needs an HTTPS callback, a publish test, and Community Management API for Company Pages |
+| 2 | Facebook Pages | WAITING EXTERNAL APPROVAL | App credentials valid (re-checked 2026-09-30). The connected token has only `public_profile`, no Pages. Needs the Meta Page-management use case + App Review and an HTTPS callback |
 | 2 | Instagram | BLOCKED | `INSTAGRAM_APP_ID/SECRET`; App Review (Advanced Access) |
 | 2 | Google | BLOCKED | OAuth client; verification for gmail.send / calendar scopes |
 | 2 | Microsoft | BLOCKED | App registration; publisher verification (recommended) |
