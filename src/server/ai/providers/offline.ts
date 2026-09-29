@@ -5,7 +5,8 @@ import { BaseProvider } from "./base";
 /**
  * Deterministic provider for local development and automated tests.
  *
- * - Enabled only when AI_OFFLINE_MODE=true and NODE_ENV !== "production".
+ * - Enabled when AI_OFFLINE_MODE=true outside production, or — deliberately, until a real key is
+ *   added — when AI_DEMO_MODE=true (any environment). The app labels it "Demo AI" everywhere.
  * - Never calls the network and costs nothing.
  * - Callers supply `offline()` builders that assemble output from the
  *   company's own stored data (templates, not invented metrics). Output is
@@ -16,7 +17,7 @@ export class OfflineProvider extends BaseProvider {
   readonly name = "offline" as const;
 
   isConfigured() {
-    return process.env.AI_OFFLINE_MODE === "true" && process.env.NODE_ENV !== "production";
+    return (process.env.AI_OFFLINE_MODE === "true" && process.env.NODE_ENV !== "production") || process.env.AI_DEMO_MODE === "true";
   }
 
   private estimate(req: GenerateRequest, out: string) {

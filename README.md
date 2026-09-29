@@ -127,7 +127,7 @@ Every variable is documented in [`.env.example`](.env.example). The main groups:
 | --- | --- | --- |
 | **Core** | `DATABASE_URL`, `TEST_DATABASE_URL`, `APP_URL`, `APP_ENV`, `AUTH_SECRET`, `ENCRYPTION_KEY`, `TRUST_PROXY` | `APP_ENV=staging` or `production` enforces public HTTPS callbacks. |
 | **Email** | `RESEND_API_KEY` / `POSTMARK_SERVER_TOKEN` / `SMTP_*`, `EMAIL_FROM` | Mailpit is for development only; production refuses it. |
-| **AI** | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_PRIMARY_PROVIDER`, `OPENAI_*` models and prices, `AI_OFFLINE_MODE` | With no real key, AI features say "not set up". They never fake output. |
+| **AI** | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_PRIMARY_PROVIDER`, `OPENAI_*` models and prices, `AI_OFFLINE_MODE`, `AI_DEMO_MODE` | With no real key, AI features say "not set up". `AI_DEMO_MODE="true"` turns on the template-based demo AI (also in production), clearly labelled "Demo AI", until a key is added. |
 | **Social** | `META_*`, `INSTAGRAM_*`, `LINKEDIN_*`, `TIKTOK_*` | Official OAuth only; tokens are encrypted at rest. |
 | **Google / Microsoft** | `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET/TENANT_ID` | Gmail/Outlook sending plus calendar. Scopes are requested progressively. |
 | **WhatsApp** | `WHATSAPP_*` | Official Cloud API only (no WhatsApp Web, no personal numbers). |
@@ -267,7 +267,7 @@ npm run test:e2e
 | "Unknown argument" / Prisma errors after pulling | Run `npm run db:migrate` and `npx prisma generate`, then restart the dev server. |
 | Background tasks never finish in development | `NOVA_INLINE_WORKER` isn't `true` and no `npm run worker` is running, or the database was down when the server started. Restart it. |
 | Database connection refused | Docker isn't running: start Docker Desktop, then `docker compose up -d`. |
-| AI features say "not set up" | Expected without `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`. In development you can set `AI_OFFLINE_MODE="true"`. |
+| AI features say "not set up" | Expected without `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`. In development set `AI_OFFLINE_MODE="true"`; on a deployed demo set `AI_DEMO_MODE="true"` until the key is added. |
 | Build fails on a host with `TurbopackInternalError … globals.css … node process exited before we could connect to it` | The host restricts child processes, which Turbopack uses to run PostCSS/Tailwind. `npm run build` uses webpack for this reason (PostCSS runs in-process). Make sure the host runs `npm run build`, not `next build` directly. |
 | "You're going a little fast" during E2E | The auth rate limits are real. The suite resets them at start; re-run the suite rather than single tests in a loop. |
 
