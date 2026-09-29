@@ -72,5 +72,20 @@
   "document_empty": "لم نجد نصًا مقروءًا في هذا المستند.",
   "requires_integration": "يتطلب ربطًا رسميًا بالمنصة — البيانات العامة وحدها لا تكفي.",
   "strategy_needs_answers": "أجب على بعض الأسئلة الاستراتيجية أولًا، أو ابنِ الاستراتيجية من بياناتك.",
-  "no_competitors": "أضف منافسًا واحدًا على الأقل أولًا."
+  "no_competitors": "أضف منافسًا واحدًا على الأقل أولًا.",
+  "whatsapp_invalid_phone": "هذا العميل ليس لديه رقم WhatsApp صالح.",
+  "whatsapp_opted_out": "هذا العميل ألغى الاشتراك في رسائل WhatsApp.",
+  "whatsapp_template_not_approved": "لا يمكن إرسال إلا القوالب المعتمدة من Meta.",
+  "whatsapp_template_missing_values": "بعض قيم القالب ناقصة لهذا العميل.",
+  "whatsapp_number_in_use": "هذا الرقم مربوط بمساحة عمل أخرى.",
+  "whatsapp_template_locked": "لا يمكن تعديل قالب قيد المراجعة أو معتمد — أنشئ نسخة جديدة.",
+  "whatsapp_template_exists": "يوجد قالب بنفس الاسم واللغة.",
+  "whatsapp_campaign_locked": "لم يعد تعديل هذه الحملة ممكنًا.",
+  "whatsapp_campaign_template_missing": "اختر قالبًا أولًا.",
+  "whatsapp_campaign_template_not_approved": "قالب الحملة غير معتمد من Meta بعد.",
+  "whatsapp_campaign_not_connected": "اربط رقم WhatsApp أولًا.",
+  "whatsapp_campaign_no_eligible_recipients": "لا يوجد عميل في هذا الجمهور يمكنه استلام رسائل WhatsApp.",
+  "whatsapp_nothing_to_answer": "لا توجد رسالة من العميل للرد عليها.",
+  "whatsapp_no_answer": "لم تجد NOVA إجابة في عقل شركتك.",
+  "whatsapp_opt_out_locked": "هذا العميل ألغى الاشتراك بنفسه — يمكنه العودة بإرسال START."
 }

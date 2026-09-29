@@ -71,6 +71,9 @@ export async function completeOnboarding(page: Page, company: string) {
   await page.getByTestId("setup-continue").click();
   await page.getByRole("checkbox", { name: "More leads" }).click();
   await page.getByTestId("setup-continue").click();
+  // Channels are optional (WhatsApp, social, email) — skip on to review.
+  await expect(page.getByRole("heading", { name: "Connect your channels" })).toBeVisible();
+  await page.getByTestId("setup-continue").click();
   await expect(page.getByRole("heading", { name: "Your team is ready" })).toBeVisible();
   await page.getByTestId("enter-nova").click();
   await expect(page.getByText("Preparing your team…").or(page.getByText("Your team is ready.")).first()).toBeVisible();

@@ -81,7 +81,12 @@ export async function loadCommandCenter(ctx: TenantContext) {
 
   const dealRows: RailRow[] = deals.map((d) => ({ id: d.id, kind: "deal", title: d.company ?? d.name, subtitle: d.nextAction ?? d.intent, href: `/leads/${d.id}`, tone: d.temperature === "HOT" ? "warning" : "info" }));
 
-  const messageRows: RailRow[] = unread.slice(0, 2).map((c) => ({ id: c.id, kind: "message", title: c.lead?.name ?? "—", subtitle: c.messages[0]?.body.slice(0, 90) ?? null, href: c.lead ? `/leads/${c.lead.id}` : "/inbox", tone: "danger" }));
+  const messageRows: RailRow[] = unread.slice(0, 2).map((c) => ({ id: c.id, kind: c.channel === "WHATSAPP" ? "whatsapp" : "message", title: c.lead?.name ?? "—", subtitle: c.messages[0]?.body.slice(0, 90) ?? null, href: c.channel === "WHATSAPP" ? `/whatsapp/inbox?c=${c.id}` : c.lead ? `/leads/${c.lead.id}` : "/inbox", tone: "danger" }));
+  // WhatsApp, counted from the conversation records the webhook maintains.
+  const [waUnread, waNeeds] = await Promise.all([
+    ctx.db.conversation.aggregate({ where: { channel: "WHATSAPP" }, _sum: { unreadCount: true } }),
+    ctx.db.conversation.count({ where: { channel: "WHATSAPP", needsHuman: true } }),
+  ]);
 
   const period = local.hour < 12 ? "morning" : local.hour < 18 ? "afternoon" : "evening";
   return {
@@ -91,7 +96,7 @@ export async function loadCommandCenter(ctx: TenantContext) {
     attention: { approvals: approvalsCount, critical, rows: attention },
     today: { rows: today },
     deals: { active: activeDeals, awaitingFollowUp, rows: dealRows },
-    messages: { unread: unread.length, needsHuman, rows: messageRows },
+    messages: { unread: unread.length, needsHuman, rows: messageRows, whatsapp: { unread: waUnread._sum.unreadCount ?? 0, needsHuman: waNeeds } },
     brief: brief ? { id: brief.id, narrative: brief.narrative, createdAt: brief.createdAt.toISOString(), offline: brief.generatedBy.includes("offline") } : null,
   };
 }

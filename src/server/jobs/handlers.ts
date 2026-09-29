@@ -26,6 +26,11 @@ export function registerAllJobs() {
   registerJob("knowledge.ingest", async (p) => ingestSource(scopeOf(p), String(p.sourceId)));
   registerJob("brain.import", async (p) => runImport(scopeOf(p), String(p.importId)));
 
+  // WhatsApp: reply policy per inbound message, inbound media download, campaign batches.
+  registerJob("whatsapp.reply", async (p) => (await import("../whatsapp/replies")).handleReply(scopeOf(p), String(p.messageId)));
+  registerJob("whatsapp.media", async (p) => (await import("../whatsapp/service")).storeInboundMedia(scopeOf(p), String(p.messageId), String(p.mediaId), p.filename ? String(p.filename) : null));
+  registerJob("whatsapp.campaign_batch", async (p) => (await import("../whatsapp/campaigns")).runCampaignBatch(scopeOf(p), String(p.campaignId)));
+
   // Social
   registerJob("social.publish_due", async () => publishDue());
   registerJob("social.sync_all", async () => syncAll());

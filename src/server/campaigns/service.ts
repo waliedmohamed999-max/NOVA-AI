@@ -11,6 +11,12 @@ export async function approveCampaign(scope: TenantScope, campaignId: string, ac
   const t = tenantDb(scope);
   const campaign = await t.campaign.findUnique({ where: { id: campaignId } });
   if (!campaign) throw new NotFoundError();
+  // WhatsApp campaigns: approval materializes recipients and starts the queued send.
+  if (campaign.channel === "whatsapp") {
+    const { approveWhatsAppCampaign } = await import("../whatsapp/campaigns");
+    await approveWhatsAppCampaign(scope, campaignId, { userId: actor.userId, label: actor.label ?? "A user" });
+    return;
+  }
   if (!["DRAFT", "PENDING_APPROVAL", "PAUSED"].includes(campaign.status)) throw new UserFacingError("invalid_transition");
   await t.campaign.update({ where: { id: campaignId }, data: { status: "ACTIVE" } });
   await t.approval.updateMany({
@@ -26,6 +32,10 @@ export async function setCampaignStatus(scope: TenantScope, campaignId: string, 
   const t = tenantDb(scope);
   const campaign = await t.campaign.findUnique({ where: { id: campaignId } });
   if (!campaign) throw new NotFoundError();
+  if (campaign.channel === "whatsapp" && status === "DRAFT") {
+    const { rejectWhatsAppCampaign } = await import("../whatsapp/campaigns");
+    return rejectWhatsAppCampaign(scope, campaignId, { userId: actor.userId, label: actor.label ?? "A user" });
+  }
   await t.campaign.update({ where: { id: campaignId }, data: { status } });
   if (status === "ARCHIVED" || status === "PAUSED") {
     await t.approval.updateMany({ where: { entityType: "Campaign", entityId: campaignId, status: "PENDING" }, data: { status: "REJECTED", decidedById: actor.userId, decidedAt: new Date() } });

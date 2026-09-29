@@ -17,7 +17,7 @@ export function ConnectStepFooter({ done, anyConnected }: { done: boolean; anyCo
   const next = () =>
     start(async () => {
       if (done) return router.push("/home");
-      const r = await setStepAction("review");
+      const r = await setStepAction("channels");
       if (!r.ok) return void toast.error(te(r.error as "unexpected"));
       router.push("/onboarding");
     });

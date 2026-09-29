@@ -10,6 +10,7 @@ import { BusinessStep } from "./step-business";
 import { AudienceStep } from "./step-audience";
 import { BrandStep } from "./step-brand";
 import { GoalsStep } from "./step-goals";
+import { ChannelsStep } from "./step-channels";
 import { ReviewStep } from "./step-review";
 
 type User = { name: string | null; email: string; isPlatformAdmin: boolean };
@@ -79,6 +80,7 @@ function CurrentStep() {
         {s.step === "audience" && <AudienceStep />}
         {s.step === "brand" && <BrandStep />}
         {s.step === "goals" && <GoalsStep />}
+        {s.step === "channels" && <ChannelsStep />}
         {s.step === "review" && <ReviewStep />}
       </motion.div>
     </AnimatePresence>

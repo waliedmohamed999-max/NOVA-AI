@@ -72,5 +72,20 @@
   "document_empty": "No readable text was found in this document.",
   "requires_integration": "This needs an official connection to the platform — public data only isn't enough.",
   "strategy_needs_answers": "Answer a few strategy questions first, or build the strategy from your data.",
-  "no_competitors": "Add at least one competitor first."
+  "no_competitors": "Add at least one competitor first.",
+  "whatsapp_invalid_phone": "This contact has no valid WhatsApp number.",
+  "whatsapp_opted_out": "This customer opted out of WhatsApp messages.",
+  "whatsapp_template_not_approved": "Only templates approved by Meta can be sent.",
+  "whatsapp_template_missing_values": "Some template values are missing for this customer.",
+  "whatsapp_number_in_use": "This number is already connected to another workspace.",
+  "whatsapp_template_locked": "Templates under review or approved can't be edited — create a new version.",
+  "whatsapp_template_exists": "A template with this name and language exists.",
+  "whatsapp_campaign_locked": "This campaign can no longer be edited.",
+  "whatsapp_campaign_template_missing": "Choose a template first.",
+  "whatsapp_campaign_template_not_approved": "The campaign's template isn't approved by Meta yet.",
+  "whatsapp_campaign_not_connected": "Connect a WhatsApp number first.",
+  "whatsapp_campaign_no_eligible_recipients": "No customer in this audience can receive WhatsApp messages.",
+  "whatsapp_nothing_to_answer": "There's no customer message to answer.",
+  "whatsapp_no_answer": "NOVA couldn't find an answer in your Company Brain.",
+  "whatsapp_opt_out_locked": "This customer opted out themselves — they can opt back in by sending START."
 }

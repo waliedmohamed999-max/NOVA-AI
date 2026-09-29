@@ -24,5 +24,6 @@ export const namespaces = [
   "analytics",
   "settings",
   "brain",
+  "whatsapp",
   "errors",
 ] as const;

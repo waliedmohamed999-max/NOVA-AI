@@ -62,7 +62,8 @@
     "dark": "داكن",
     "skipToContent": "انتقل إلى المحتوى",
     "mainNav": "التنقل الرئيسي",
-    "account": "الحساب"
+    "account": "الحساب",
+    "whatsapp": "WhatsApp"
   },
   "language": {
     "en": "English",
@@ -342,7 +343,15 @@
       "activityEmpty": "لا يوجد نشاط مسجل مع {name} بعد.",
       "noIntegrations": "لا توجد حسابات مربوطة بعد.",
       "integrationsStatus": "{connected} من {total} حسابات مربوطة تعمل.",
-      "greeting": "أهلًا! اسألني عن عملائك أو مبيعاتك أو محتواك أو شركتك — مثلًا:"
+      "greeting": "أهلًا! اسألني عن عملائك أو مبيعاتك أو محتواك أو شركتك — مثلًا:",
+      "waUnread": "{count} رسائل WhatsApp غير مقروءة · {needs} تحتاج تدخلك.",
+      "waNoUnread": "لا توجد رسائل WhatsApp غير مقروءة.",
+      "waNoCampaigns": "لا توجد حملات WhatsApp بعد.",
+      "waCampaignSummary": "{count} حملات WhatsApp.",
+      "waNotConnected": "اربط رقم WhatsApp Business أولًا.",
+      "waCampaignDrafted": "جهزت مسودة حملة: {eligible} من {total} عميل يمكنهم الاستلام. اختر قالبًا معتمدًا وأرسلها للاعتماد — لن يُرسل شيء قبل ذلك.",
+      "waFollowupsPrepared": "{drafted} مسودات متابعة جاهزة للمراجعة · {templateRequired} تحتاج قالبًا. لن يُرسل شيء بدون موافقتك.",
+      "waNoFollowupsDue": "لا توجد متابعات WhatsApp مستحقة."
     },
     "pages": {
       "open_hot_leads": "العملاء الساخنين",
@@ -365,7 +374,11 @@
       "open_settings": "الإعدادات",
       "open_knowledge": "عقل الشركة",
       "open_team": "فريقك الذكي",
-      "open_home": "الرئيسية"
+      "open_home": "الرئيسية",
+      "open_whatsapp": "WhatsApp",
+      "open_whatsapp_inbox": "محادثات WhatsApp",
+      "whatsapp_customers": "عملاء WhatsApp",
+      "whatsapp_templates": "قوالب WhatsApp"
     },
     "actions": {
       "openCustomers": "فتح العملاء",
@@ -402,7 +415,13 @@
       "openIntegrations": "الحسابات المرتبطة",
       "followupsToday": "من يحتاج متابعة اليوم؟",
       "ourServices": "ما خدماتنا؟",
-      "salesSummary": "لخص المبيعات"
+      "salesSummary": "لخص المبيعات",
+      "openWhatsappInbox": "فتح محادثات WhatsApp",
+      "createWhatsappCampaign": "حملة WhatsApp جديدة",
+      "openWhatsappCampaigns": "حملات WhatsApp",
+      "connectWhatsapp": "ربط WhatsApp",
+      "reviewCampaign": "مراجعة الحملة",
+      "reviewFollowups": "مراجعة المتابعات"
     },
     "commands": {
       "reviewOverdue": "راجع المتابعات المتأخرة",
@@ -436,7 +455,20 @@
       "approval_SALES": "المبيعات",
       "approval_PRICING": "التسعير",
       "weighted": "القيمة المرجحة",
-      "withValue": "لها قيمة"
+      "withValue": "لها قيمة",
+      "wa_unread": "غير مقروءة",
+      "wa_needs_human": "تحتاج تدخل",
+      "wa_targeted": "المستهدفون",
+      "wa_eligible": "قابل للإرسال",
+      "wa_excluded": "مستبعدون",
+      "wa_DRAFT": "مسودات",
+      "wa_NEEDS_APPROVAL": "بانتظار الاعتماد",
+      "wa_SCHEDULED": "مجدولة",
+      "wa_SENDING": "جارٍ الإرسال",
+      "wa_PAUSED": "متوقفة",
+      "wa_COMPLETED": "مكتملة",
+      "wa_FAILED": "فشلت",
+      "wa_CANCELLED": "ملغاة"
     },
     "badges": {
       "overdue": "متأخرة",

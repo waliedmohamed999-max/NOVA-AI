@@ -627,7 +627,7 @@ function navigate(h: HandlerInput): Outcome {
 export type Handler = (h: HandlerInput) => Promise<Outcome> | Outcome;
 
 /** Core handlers; Company Brain / no-AI lookups live in brain-handlers.ts (combined in service.ts). */
-export const HANDLERS: Record<Exclude<IntentKey, import("./brain-handlers").BrainHandlerKey>, Handler> = {
+export const HANDLERS: Record<Exclude<IntentKey, import("./brain-handlers").BrainHandlerKey | import("./whatsapp-handlers").WhatsAppHandlerKey>, Handler> = {
   greeting: () => ({ status: "completed", message: msg("greeting"), actions: [{ label: "followupsToday", command: "followupsToday" }, { label: "ourServices", command: "ourServices" }, { label: "salesSummary", command: "salesSummary" }] }),
   delete_anything: () => ({ status: "denied", message: msg("deleteNotAllowed"), reason: "forbidden" }),
   approve_all: approveAll,

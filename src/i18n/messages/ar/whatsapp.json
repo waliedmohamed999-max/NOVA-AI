@@ -1,0 +1,451 @@
+{
+  "title": "WhatsApp Business",
+  "subtitle": "كل محادثات العملاء وحملاتك ومتابعاتك في مكان واحد.",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "inbox": "المحادثات",
+    "customers": "العملاء",
+    "campaigns": "الحملات",
+    "templates": "القوالب",
+    "followups": "المتابعات",
+    "numbers": "الأرقام",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات"
+  },
+  "status": {
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "reconnect_needed": "يحتاج إعادة ربط",
+    "disconnected": "مفصول",
+    "notConfigured": "غير متاح بعد"
+  },
+  "connect": {
+    "title": "WhatsApp Business",
+    "body": "اربط رقم شركتك ليتمكن NOVA من استقبال العملاء ومتابعتهم.",
+    "cta": "ربط WhatsApp Business",
+    "short": "ربط WhatsApp",
+    "connecting": "جارٍ الربط…",
+    "done": "تم ربط WhatsApp",
+    "official": "عبر منصة WhatsApp Business الرسمية من Meta. لا يطلب NOVA كلمة مرورك أبدًا.",
+    "unavailable": "الربط الذاتي غير متاح بعد — يحتاج مسؤول المنصة لإكمال إعداد Meta.",
+    "cancelled": "أُغلقت نافذة الربط قبل الإكمال.",
+    "skip": "تخطي الآن"
+  },
+  "empty": {
+    "title": "ابدأ محادثاتك على WhatsApp",
+    "body": "اربط رقم WhatsApp Business لتستقبل العملاء وتدير المتابعات والحملات من NOVA.",
+    "waiting": "بانتظار أول محادثة."
+  },
+  "metrics": {
+    "conversationsToday": "محادثات اليوم",
+    "unread": "رسائل غير مقروءة",
+    "needsHuman": "تحتاج تدخل",
+    "newLeads": "عملاء جدد",
+    "activeCampaigns": "حملات نشطة",
+    "sent": "رسائل مرسلة",
+    "delivered": "تم تسليمها",
+    "replies": "ردود العملاء",
+    "hint": "اليوم، من سجلاتك الفعلية."
+  },
+  "checklist": {
+    "title": "جهّز WhatsApp",
+    "connected": "الرقم متصل",
+    "template": "إعداد أول قالب",
+    "contacts": "استيراد/ربط العملاء",
+    "campaign": "إنشاء أول حملة",
+    "safeReplies": "إعداد الردود الآمنة"
+  },
+  "inbox": {
+    "search": "ابحث بالاسم أو الرقم",
+    "filters": {
+      "all": "الكل",
+      "unread": "غير مقروءة",
+      "needs_human": "تحتاج تدخل",
+      "drafts": "مسودات NOVA"
+    },
+    "empty": "لا توجد محادثات هنا.",
+    "select": "اختر محادثة",
+    "loadMore": "تحميل المزيد",
+    "older": "رسائل أقدم",
+    "novaSuggests": "NOVA تقترح:",
+    "send": "إرسال",
+    "edit": "تعديل",
+    "reject": "رفض",
+    "prepare": "تجهيز بالذكاء",
+    "addFollowup": "إضافة متابعة",
+    "toOpportunity": "تحويل لفرصة",
+    "openProfile": "فتح ملف العميل",
+    "placeholder": "اكتب رسالة…",
+    "windowOpen": "نافذة المحادثة مفتوحة حتى {time}",
+    "windowClosed": "انتهت نافذة المحادثة. اختر قالبًا معتمدًا لإرسال رسالة.",
+    "template": "قالب",
+    "chooseTemplate": "اختر قالبًا معتمدًا",
+    "noApproved": "لا توجد قوالب معتمدة بعد.",
+    "manageTemplates": "إدارة القوالب",
+    "attach": "إرفاق",
+    "sendTemplate": "إرسال القالب",
+    "preview": "معاينة",
+    "aiAssisted": "بمساعدة NOVA",
+    "needsHuman": "تحتاج تدخل",
+    "draft": "مسودة",
+    "optedOut": "ألغى الاشتراك",
+    "you": "أنت",
+    "nova": "NOVA",
+    "campaign": "حملة",
+    "delivery": {
+      "accepted": "أُرسلت",
+      "sent": "أُرسلت",
+      "delivered": "وصلت",
+      "read": "قُرئت",
+      "failed": "فشلت"
+    },
+    "back": "رجوع",
+    "context": "العميل",
+    "uploading": "جارٍ الرفع…",
+    "followupAdded": "تم تجهيز متابعة — راجعها في المحادثة.",
+    "sent": "تم الإرسال"
+  },
+  "context": {
+    "company": "الشركة",
+    "stage": "مرحلة العميل",
+    "interest": "الاهتمام",
+    "lastContact": "آخر تواصل",
+    "opportunity": "الفرصة",
+    "owner": "المسؤول",
+    "tags": "الوسوم",
+    "source": "المصدر",
+    "none": "—",
+    "meeting": "الموعد القادم",
+    "quote": "آخر عرض سعر",
+    "optOut": "إيقاف رسائل WhatsApp",
+    "optIn": "السماح برسائل WhatsApp",
+    "actions": {
+      "createOpportunity": "إنشاء فرصة",
+      "scheduleFollowup": "جدولة متابعة",
+      "bookMeeting": "حجز موعد",
+      "createQuote": "إنشاء عرض سعر",
+      "markQualified": "تحديد كمؤهل"
+    }
+  },
+  "customers": {
+    "title": "عملاء WhatsApp",
+    "hint": "نفس سجلات العملاء في CRM — لا يُنسخ شيء.",
+    "name": "العميل",
+    "phone": "الرقم",
+    "stage": "المرحلة",
+    "last": "آخر رسالة",
+    "empty": "لا يوجد عملاء WhatsApp بعد.",
+    "optedOut": "ألغى الاشتراك",
+    "chat": "محادثة"
+  },
+  "campaigns": {
+    "title": "حملات WhatsApp",
+    "new": "حملة جديدة",
+    "empty": {
+      "title": "لا توجد حملات بعد",
+      "body": "أرسل قالبًا معتمدًا للعملاء المناسبين من CRM — مع اعتماد وطابور إرسال آمن."
+    },
+    "states": {
+      "DRAFT": "مسودة",
+      "NEEDS_APPROVAL": "بانتظار الاعتماد",
+      "SCHEDULED": "مجدولة",
+      "SENDING": "جارٍ الإرسال",
+      "PAUSED": "متوقفة مؤقتًا",
+      "COMPLETED": "مكتملة",
+      "FAILED": "فشلت",
+      "CANCELLED": "ملغاة"
+    },
+    "recipients": "المستهدفون",
+    "sent": "مرسلة",
+    "failed": "فشلت",
+    "objectives": {
+      "offer": "عرض",
+      "new_product": "منتج جديد",
+      "reengagement": "إعادة تفاعل",
+      "follow_up": "متابعة",
+      "appointment_reminder": "تذكير بموعد",
+      "event": "فعالية",
+      "lead_nurturing": "رعاية العملاء المحتملين"
+    },
+    "steps": {
+      "objective": "الهدف",
+      "audience": "الجمهور",
+      "template": "القالب",
+      "personalize": "التخصيص",
+      "schedule": "الجدولة",
+      "review": "المراجعة",
+      "approval": "الاعتماد"
+    },
+    "stepOf": "خطوة {n} من {total}",
+    "name": "اسم الحملة",
+    "namePlaceholder": "مثال: عرض رمضان",
+    "objectiveHint": "الهدف لتنظيم حملتك — قواعد WhatsApp واحدة لكل الأهداف.",
+    "filters": {
+      "title": "من يجب أن يستلمها؟",
+      "stages": "مرحلة العميل",
+      "temperatures": "درجة الاهتمام",
+      "tags": "الوسوم",
+      "interests": "الاهتمامات",
+      "sources": "المصدر",
+      "cities": "المدينة",
+      "countries": "الدولة",
+      "purchaseCategories": "فئة المشتريات",
+      "segment": "شريحة العملاء",
+      "anySegment": "أي شريحة",
+      "opportunity": "حالة الفرصة",
+      "any": "الكل",
+      "lastContactOlder": "لم يتم التواصل منذ (أيام)",
+      "noPurchase": "لم يشترِ منذ (أيام)",
+      "addValue": "إضافة",
+      "temp": {
+        "HOT": "ساخن",
+        "WARM": "دافئ",
+        "COLD": "بارد"
+      }
+    },
+    "preview": {
+      "targeted": "المستهدفون",
+      "eligible": "قابل للإرسال",
+      "excluded": "مستبعدون",
+      "reasons": {
+        "missing_phone": "بدون رقم",
+        "invalid_phone": "رقم غير صالح",
+        "opted_out": "ألغى الاشتراك",
+        "suppressed": "قائمة الحظر",
+        "duplicate": "رقم مكرر",
+        "no_consent": "بدون موافقة"
+      },
+      "refresh": "تحديث العدد",
+      "counting": "جارٍ العد…"
+    },
+    "template": {
+      "pick": "اختر قالبًا معتمدًا",
+      "none": "لا توجد قوالب معتمدة بعد — أنشئ قالبًا وأرسله لـMeta أولًا."
+    },
+    "personalize": {
+      "hint": "ما الذي يملأ كل متغير. المستلم الذي تنقصه قيمة يُستبعد ولا تُرسل له رسالة ناقصة.",
+      "noVars": "هذا القالب بدون متغيرات.",
+      "previewWith": "معاينة بعميل حقيقي"
+    },
+    "schedule": {
+      "now": "إرسال بعد الاعتماد",
+      "later": "جدولة",
+      "at": "موعد الإرسال"
+    },
+    "review": {
+      "title": "مراجعة قبل الاعتماد",
+      "note": "لا يُرسل شيء قبل اعتماد الحملة. الإرسال على دفعات صغيرة تحترم حدود Meta."
+    },
+    "submit": "إرسال للاعتماد",
+    "saveDraft": "حفظ كمسودة",
+    "submitted": "أُرسلت للاعتماد — اعتمدها من الموافقات.",
+    "approved": "تم الاعتماد — الإرسال على دفعات.",
+    "openApprovals": "فتح الموافقات",
+    "controls": {
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "cancel": "إلغاء الحملة"
+    },
+    "stats": {
+      "sent": "أُرسلت",
+      "delivered": "وصلت",
+      "read": "قُرئت",
+      "failed": "فشلت",
+      "replies": "ردود",
+      "optOuts": "إلغاء اشتراك",
+      "leads": "عملاء محتملون",
+      "opportunities": "فرص",
+      "won": "صفقات مغلقة",
+      "revenue": "الإيراد",
+      "queued": "في الطابور",
+      "skipped": "مستبعدة",
+      "noRevenue": "لا توجد قيم صفقات بعد"
+    },
+    "readNote": "إشعارات القراءة تظهر فقط إذا كانت مفعّلة لدى العميل.",
+    "attribution": "أثر الحملة على المبيعات"
+  },
+  "templates": {
+    "title": "قوالب WhatsApp",
+    "new": "قالب جديد",
+    "sync": "مزامنة مع Meta",
+    "synced": "تمت المزامنة",
+    "tabs": {
+      "APPROVED": "معتمدة",
+      "PENDING": "قيد المراجعة",
+      "REJECTED": "مرفوضة",
+      "DRAFT": "مسودة"
+    },
+    "empty": "لا توجد قوالب هنا.",
+    "draftNote": "المسودات لا تُرسل قبل اعتماد Meta.",
+    "rejectedReason": "السبب: {reason}",
+    "builder": {
+      "title": "منشئ القوالب",
+      "name": "الاسم (حروف إنجليزية صغيرة وأرقام و _)",
+      "language": "اللغة",
+      "category": "النوع",
+      "header": "العنوان (اختياري)",
+      "body": "نص الرسالة",
+      "bodyHint": "أدرج متغيرات مرقّمة للتفاصيل الشخصية بالأزرار بالأسفل.",
+      "footer": "التذييل (اختياري)",
+      "buttons": "الأزرار (حتى 3)",
+      "addButton": "إضافة زر",
+      "buttonText": "نص الزر",
+      "buttonUrl": "الرابط",
+      "quickReply": "رد سريع",
+      "urlButton": "رابط",
+      "variables": "المتغيرات",
+      "variableFor": "المتغير {n}",
+      "insertVar": "إدراج متغير",
+      "staticValue": "نص ثابت",
+      "preview": "معاينة",
+      "save": "حفظ كمسودة",
+      "submit": "إرسال لـMeta للمراجعة",
+      "submitNote": "Meta تراجع كل قالب. الإرسال نهائي لهذه النسخة.",
+      "aiHelp": "اكتب مع NOVA",
+      "objective": "ما هدف الرسالة؟",
+      "categories": {
+        "MARKETING": "تسويقي",
+        "UTILITY": "خدمي",
+        "AUTHENTICATION": "توثيق"
+      },
+      "sources": {
+        "customer_name": "اسم العميل",
+        "company": "الشركة",
+        "appointment": "الموعد",
+        "order": "الطلب",
+        "quote_amount": "قيمة العرض",
+        "agent_name": "اسم الموظف",
+        "static": "نص ثابت"
+      }
+    }
+  },
+  "followups": {
+    "title": "متابعات WhatsApp",
+    "prepareDue": "جهّز متابعات اليوم",
+    "prepared": "{drafted} مسودات جاهزة · {templateRequired} تحتاج قالبًا",
+    "drafts": "مسودات للمراجعة",
+    "due": "متابعات مستحقة",
+    "meetings": "مواعيد قادمة",
+    "approveSelected": "إرسال المحدد",
+    "approve": "إرسال",
+    "templateRequired": "يحتاج قالبًا",
+    "openChat": "فتح المحادثة",
+    "none": "لا شيء هنا الآن.",
+    "remind": "إرسال تذكير",
+    "noBulk": "NOVA لا ترسل المتابعات دفعة واحدة: راجع كل مسودة ثم أرسل."
+  },
+  "numbers": {
+    "title": "أرقام WhatsApp",
+    "refresh": "فحص الآن",
+    "disconnect": "فصل",
+    "quality": "الجودة",
+    "tier": "حد الرسائل",
+    "connectedAt": "تاريخ الربط",
+    "lastWebhook": "آخر حدث",
+    "lastSend": "آخر إرسال",
+    "via": {
+      "embedded_signup": "مربوط من حسابك",
+      "platform": "مربوط من NOVA"
+    },
+    "one": "خطتك تشمل رقمًا واحدًا.",
+    "never": "أبدًا"
+  },
+  "analytics": {
+    "title": "تحليلات WhatsApp",
+    "period": "آخر 30 يومًا",
+    "campaigns": "الحملات",
+    "noData": "لا توجد بيانات حملات بعد.",
+    "conversations": "المحادثات",
+    "inbound": "رسائل العملاء",
+    "outbound": "رسائلك"
+  },
+  "settings": {
+    "level": {
+      "title": "الردود التلقائية",
+      "OFF": {
+        "title": "إيقاف",
+        "desc": "بدون ذكاء. فريقك يرد."
+      },
+      "DRAFT": {
+        "title": "مسودات",
+        "desc": "NOVA تجهّز الرد فقط، وشخص يرسله."
+      },
+      "SAFE_AUTO": {
+        "title": "تلقائي آمن",
+        "desc": "NOVA ترد على الأسئلة الآمنة من عقل شركتك المعتمد فقط؛ والباقي مسودة."
+      },
+      "CUSTOM": {
+        "title": "مخصص",
+        "desc": "قواعد الاعتماد عندك تقرر (الإعدادات ← الموافقات)."
+      }
+    },
+    "safe": {
+      "title": "أسئلة يمكن لـNOVA الرد عليها تلقائيًا",
+      "greeting": "التحية",
+      "opening_hours": "مواعيد العمل",
+      "location": "الموقع",
+      "services_info": "الخدمات العامة",
+      "contact_details": "بيانات التواصل",
+      "booking_info": "طريقة الحجز"
+    },
+    "never": {
+      "title": "لا تُرسل أبدًا بدونك",
+      "items": "التفاوض على السعر · الخصومات · العقود · الشكاوى · الأمور القانونية · الاسترداد · عروض الأسعار الخاصة · الادعاءات الحساسة"
+    },
+    "optOut": {
+      "title": "كلمات إلغاء الاشتراك",
+      "hint": "STOP و«إلغاء» تعمل دائمًا. أضف كلماتك (الرسالة كاملة).",
+      "placeholder": "أضف كلمة"
+    },
+    "consent": {
+      "title": "الحملات فقط للعملاء الموافقين",
+      "desc": "فقط العملاء المسجل موافقتهم يستلمون الحملات."
+    },
+    "suppression": {
+      "title": "قائمة الحظر",
+      "hint": "هذه الأرقام لا تستلم حملات أبدًا.",
+      "add": "إضافة رقم",
+      "phone": "الرقم",
+      "note": "ملاحظة",
+      "remove": "إزالة",
+      "empty": "لا توجد أرقام.",
+      "reasons": {
+        "blocked": "محظور",
+        "invalid": "غير صالح",
+        "manual": "يدوي",
+        "opt_out": "ألغى الاشتراك"
+      }
+    },
+    "health": {
+      "title": "حالة الربط",
+      "connection": "الربط",
+      "webhook": "استقبال الرسائل",
+      "templates": "قوالب معتمدة",
+      "lastWebhook": "آخر حدث",
+      "lastSend": "آخر إرسال ناجح",
+      "ok": "يعمل",
+      "notReady": "غير جاهز",
+      "reconnect": "إعادة الربط",
+      "admin": "تشخيص تقني (للمسؤول)",
+      "missing": "ناقص: {vars}"
+    },
+    "save": "حفظ",
+    "saved": "تم الحفظ"
+  },
+  "prefs": {
+    "title": "ماذا تريد أن تفعل؟",
+    "receive": "استقبال العملاء",
+    "answer": "الرد على الأسئلة",
+    "followup": "متابعة المبيعات",
+    "campaigns": "إرسال حملات",
+    "all": "الكل",
+    "note": "تُحفظ كتفضيلات فقط — الإرسال التلقائي يبقى متوقفًا حتى تفعّله بنفسك."
+  },
+  "home": {
+    "unread": "{count} رسائل WhatsApp غير مقروءة",
+    "needs": "{count} تحتاج تدخلك"
+  },
+  "drawer": {
+    "followupWhatsapp": "متابعة عبر WhatsApp"
+  }
+}

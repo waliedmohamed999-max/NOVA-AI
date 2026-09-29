@@ -575,6 +575,10 @@ model WorkspaceSettings {
   /// Content studio defaults: "fast" | "quality"; "brand_template" | "ai_creative".
   imageQuality           String        @default("fast")
   imageMode              String        @default("brand_template")
+  /// WhatsApp auto-reply level: OFF | DRAFT | SAFE_AUTO | CUSTOM (see src/server/whatsapp/replies.ts).
+  whatsappAutoReply      String        @default("DRAFT")
+  /// WhatsApp preferences: { goals[], optOutKeywords[], requireConsent } - never credentials.
+  whatsappConfig         Json          @default("{}")
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
@@ -1029,6 +1033,19 @@ model Campaign {
   currency       String?
   status         CampaignStatus   @default(DRAFT)
   plan           Json? // { concept, message, creativeDirection, cta, kpis[], schedule[] }
+  /// "social" (content campaigns) | "whatsapp" (template sends to CRM contacts).
+  channel        String           @default("social")
+  /// WhatsApp send state: DRAFT | NEEDS_APPROVAL | SCHEDULED | SENDING | PAUSED | COMPLETED | FAILED | CANCELLED
+  waState        String?
+  waTemplateId   String?
+  waNumberId     String?
+  /// Audience filters over the CRM (never a copy of contacts).
+  waAudience     Json?
+  /// Template variable mapping: { "1": "lead.name", "2": "static:..." }
+  waVariables    Json?
+  scheduledAt    DateTime?
+  sendStartedAt  DateTime?
+  completedAt    DateTime?
   createdByAgent AgentKey?
   createdById    String?
   createdAt      DateTime         @default(now())
@@ -1348,6 +1365,13 @@ model Lead {
   totalSpendCents     Int?
   lastOrderAt         DateTime?
   purchaseCategories  String[]        @default([])
+  /// Phone as digits only (E.164 without "+"): the key WhatsApp contacts are matched on (no duplicates).
+  phoneDigits         String?
+  /// Opted out of WhatsApp messages (STOP or set by a human). Campaigns always exclude them.
+  whatsappOptOut      Boolean         @default(false)
+  whatsappOptOutAt    DateTime?
+  /// Explicit WhatsApp marketing opt-in: true / false / null = unknown.
+  whatsappConsent     Boolean?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
@@ -1362,6 +1386,7 @@ model Lead {
   @@index([organizationId, workspaceId, stage])
   @@index([workspaceId, temperature])
   @@index([workspaceId, email])
+  @@index([workspaceId, phoneDigits])
   @@map("leads")
 }
 
@@ -1449,6 +1474,12 @@ model Conversation {
   status           ConversationStatus @default(OPEN)
   externalThreadId String?
   summary          String?
+  /// WhatsApp: inbound messages not yet opened by a human; needsHuman when a reply needs a person.
+  unreadCount      Int                @default(0)
+  needsHuman       Boolean            @default(false)
+  whatsappNumberId String?
+  /// Last customer message: the WhatsApp 24h customer-service window is measured from here.
+  lastInboundAt    DateTime?
   lastMessageAt    DateTime           @default(now())
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
@@ -1493,11 +1524,23 @@ model Message {
   aiDrafted      Boolean          @default(false)
   externalId     String?
   sentAt         DateTime?
+  /// text | template | image | document | audio | video | sticker | location | interactive
+  messageType    String           @default("text")
+  templateName   String?
+  mediaFileId    String?
+  mediaMime      String?
+  campaignId     String?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  failedReason   String?
+  /// Local intent of an inbound message (opening_hours, pricing, ...): decides what may be answered automatically.
+  intent         String?
   createdAt      DateTime         @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+  @@index([organizationId, externalId])
   @@index([organizationId])
   @@map("messages")
 }
@@ -1987,6 +2030,15 @@ model WhatsAppNumber {
   displayPhone   String?
   verifiedName   String?
   isActive       Boolean   @default(true)
+  /// Embedded Signup: the Integration whose encrypted credential holds this business's token (null: platform token).
+  integrationId  String?
+  /// connected | reconnect_needed | disconnected
+  status         String    @default("connected")
+  qualityRating  String?
+  messagingLimit String?
+  connectedAt    DateTime  @default(now())
+  lastWebhookAt  DateTime?
+  lastSendAt     DateTime?
   lastCheckedAt  DateTime?
   lastError      String?
   createdAt      DateTime  @default(now())
@@ -1994,6 +2046,80 @@ model WhatsAppNumber {
 
   @@index([organizationId, workspaceId])
   @@map("whatsapp_numbers")
+}
+
+/// One CRM contact inside a WhatsApp campaign (the audience is resolved from Lead - contacts are not copied).
+/// QUEUED -> SENDING -> SENT -> DELIVERED -> READ, or FAILED / SKIPPED / CANCELLED. Provider-reported states only.
+model CampaignRecipient {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  campaignId     String
+  leadId         String
+  phone          String
+  status         String    @default("QUEUED")
+  variables      Json      @default("[]")
+  messageId      String?
+  externalId     String?
+  error          String?
+  attempts       Int       @default(0)
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  repliedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([campaignId, leadId])
+  @@index([campaignId, status])
+  @@index([organizationId, externalId])
+  @@map("campaign_recipients")
+}
+
+/// WhatsApp message templates: local drafts + the status Meta reports. Only APPROVED ones can be sent.
+model WhatsAppTemplate {
+  id             String    @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  name           String
+  language       String
+  /// MARKETING | UTILITY | AUTHENTICATION
+  category       String
+  /// DRAFT | PENDING | APPROVED | REJECTED | PAUSED | DISABLED
+  status         String    @default("DRAFT")
+  header         String?
+  body           String
+  footer         String?
+  buttons        Json      @default("[]")
+  /// { "1": "lead.name", ... } - what each {{n}} is filled with.
+  variables      Json      @default("{}")
+  externalId     String?
+  rejectedReason String?
+  lastSyncedAt   DateTime?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, name, language])
+  @@index([organizationId, workspaceId, status])
+  @@map("whatsapp_templates")
+}
+
+/// Workspace suppression list: these numbers never receive WhatsApp campaigns.
+model WhatsAppSuppression {
+  id             String   @id @default(cuid())
+  organizationId String
+  workspaceId    String
+  phone          String
+  /// opt_out | blocked | invalid | manual
+  reason         String
+  note           String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@unique([workspaceId, phone])
+  @@index([organizationId])
+  @@map("whatsapp_suppressions")
 }
 
 /// Failed or slow calls to external provider APIs (observability). URL path only — never query strings or bodies.

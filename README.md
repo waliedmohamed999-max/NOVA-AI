@@ -130,7 +130,7 @@ Every variable is documented in [`.env.example`](.env.example). The main groups:
 | **AI** | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `AI_PRIMARY_PROVIDER`, `OPENAI_*` models and prices, `AI_OFFLINE_MODE`, `AI_DEMO_MODE` | With no real key, AI features say "not set up". `AI_DEMO_MODE="true"` turns on the template-based demo AI (also in production), clearly labelled "Demo AI", until a key is added. |
 | **Social** | `META_*`, `INSTAGRAM_*`, `LINKEDIN_*`, `TIKTOK_*` | Official OAuth only; tokens are encrypted at rest. |
 | **Google / Microsoft** | `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET/TENANT_ID` | Gmail/Outlook sending plus calendar. Scopes are requested progressively. |
-| **WhatsApp** | `WHATSAPP_*` | Official Cloud API only (no WhatsApp Web, no personal numbers). |
+| **WhatsApp** | `WHATSAPP_*` | Official Cloud API only (no WhatsApp Web, no personal numbers). Customers connect with Meta Embedded Signup (`WHATSAPP_APP_ID`, `WHATSAPP_EMBEDDED_CONFIG_ID`, `WHATSAPP_APP_SECRET`); webhook: `{APP_URL}/api/webhooks/whatsapp`. See [docs/WHATSAPP.md](docs/WHATSAPP.md). |
 | **Billing** | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_*` | Payments stay off until key, webhook secret and prices are all set. Plans change only from the webhook. |
 | **Jobs** | `NOVA_INLINE_WORKER` | `true` in development only. In production run `npm run worker`. |
 | **Storage** | `STORAGE_DRIVER` (`local` / `s3`), `S3_*` | S3-compatible (AWS S3, Cloudflare R2, MinIO). The bucket must be private. |

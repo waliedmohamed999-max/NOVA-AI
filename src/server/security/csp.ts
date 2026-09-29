@@ -9,8 +9,11 @@
  * - connect-src: same origin only (server actions, AI streaming, polling).
  * - frame-ancestors: 'self' for the app; '*' only for the embeddable lead form.
  * - OAuth works because sign-in/connect are top-level navigations, which CSP does not restrict.
+ * - facebookSdk: only on the WhatsApp connect pages — Meta's Embedded Signup needs its SDK frames/API.
  */
-export function buildCsp(nonce: string, opts: { dev?: boolean; embed?: boolean; https?: boolean; extraImgSrc?: string[] } = {}) {
+const FACEBOOK = ["https://connect.facebook.net", "https://www.facebook.com", "https://web.facebook.com", "https://staticxx.facebook.com", "https://graph.facebook.com"];
+
+export function buildCsp(nonce: string, opts: { dev?: boolean; embed?: boolean; https?: boolean; extraImgSrc?: string[]; facebookSdk?: boolean } = {}) {
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(opts.dev ? ["'unsafe-eval'"] : [])],
@@ -18,8 +21,8 @@ export function buildCsp(nonce: string, opts: { dev?: boolean; embed?: boolean; 
     "img-src": ["'self'", "data:", "blob:", "https:", ...(opts.extraImgSrc ?? [])],
     "font-src": ["'self'", "data:"],
     "media-src": ["'self'", "blob:", "https:"],
-    "connect-src": ["'self'", ...(opts.dev ? ["ws:", "wss:"] : [])],
-    "frame-src": ["'self'"],
+    "connect-src": ["'self'", ...(opts.dev ? ["ws:", "wss:"] : []), ...(opts.facebookSdk ? FACEBOOK : [])],
+    "frame-src": ["'self'", ...(opts.facebookSdk ? FACEBOOK : [])],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
     "object-src": ["'none'"],

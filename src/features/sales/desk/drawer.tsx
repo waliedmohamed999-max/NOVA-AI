@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CalendarClock, FileText, Handshake, ListPlus, Mail, MessageSquare, Phone, Sparkles, Trophy, XCircle } from "lucide-react";
+import { CalendarClock, FileText, Handshake, ListPlus, Mail, MessageCircle, MessageSquare, Phone, Sparkles, Trophy, XCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Dialog, SheetContent } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/misc";
 import { toast } from "@/components/ui/toast";
 import type { leadDrawer } from "@/server/sales/desk";
 import { leadDrawerAction, moveStageAction } from "../desk-actions";
+import { prepareFollowupAction } from "@/features/whatsapp/actions";
 import { TempPill, useDesk, useMoney, useRelative } from "./shared";
 
 type DrawerData = NonNullable<Awaited<ReturnType<typeof leadDrawer>>>;
@@ -20,6 +21,7 @@ type DrawerData = NonNullable<Awaited<ReturnType<typeof leadDrawer>>>;
 export function CustomerDrawer({ id, onClose }: { id: string | null; onClose: () => void }) {
   const t = useTranslations("sales");
   const te = useTranslations("errors");
+  const tw = useTranslations("whatsapp");
   const desk = useDesk();
   const router = useRouter();
   const money = useMoney();
@@ -91,6 +93,24 @@ export function CustomerDrawer({ id, onClose }: { id: string | null; onClose: ()
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 <Link href={`/leads/${data.id}#conversation`} className={buttonClass("secondary", "sm")}><MessageSquare className="size-4" /> {t("drawer.sendMessage")}</Link>
                 <Button size="sm" variant="secondary" icon={<ListPlus className="size-4" />} onClick={() => desk.openFollowUp(data.id)}>{t("drawer.followUp")}</Button>
+                {data.phone && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    data-testid="followup-whatsapp"
+                    icon={<MessageCircle className="size-4 text-[#1fa855]" />}
+                    onClick={() =>
+                      start(async () => {
+                        // NOVA drafts with the customer's context; the draft waits in the WhatsApp inbox for approval.
+                        const r = await prepareFollowupAction({ leadId: data.id });
+                        if (!r.ok) return void toast.error(te.has(r.error as "unexpected") ? te(r.error as "unexpected") : te("unexpected"));
+                        router.push(`/whatsapp/inbox?c=${r.data.conversationId}`);
+                      })
+                    }
+                  >
+                    {tw("drawer.followupWhatsapp")}
+                  </Button>
+                )}
                 <Link href={`/leads/${data.id}#meetings`} className={buttonClass("secondary", "sm")}><CalendarClock className="size-4" /> {t("drawer.bookMeeting")}</Link>
                 <Button size="sm" variant="secondary" icon={<Handshake className="size-4" />} onClick={() => desk.openB2B(data.id)}>{t("drawer.createOpportunity")}</Button>
                 <Button size="sm" variant="secondary" icon={<FileText className="size-4" />} onClick={() => desk.openQuote(data.id, data.opportunities.find((o) => o.status === "OPEN")?.id)}>{t("drawer.createQuote")}</Button>

@@ -16,6 +16,7 @@ import {
   Megaphone,
   MessageSquareWarning,
   MessagesSquare,
+  MessageCircle,
   Plug,
   UserRound,
   UsersRound,
@@ -130,12 +131,20 @@ export async function DealsPanel({ data }: { data: CommandCenterData["deals"] })
 
 export async function MessagesPanel({ data }: { data: CommandCenterData["messages"] }) {
   const t = await getTranslations("app.home.rail");
+  const tw = await getTranslations("whatsapp");
   return (
     <RailCard title={t("messages.title")} icon={Mail} href="/inbox">
       <div className="mb-2 grid grid-cols-2 gap-2.5">
         <StatTile value={data.unread} label={t("messages.unread")} tone="blue" icon={MailOpen} href="/inbox" />
         <StatTile value={data.needsHuman} label={t("messages.needsHuman")} tone="red" icon={MessageSquareWarning} href="/approvals?tab=SALES" />
       </div>
+      {(data.whatsapp.unread > 0 || data.whatsapp.needsHuman > 0) && (
+        <Link href="/whatsapp/inbox" className="mb-2 flex items-center gap-2 rounded-[12px] bg-[#e7f8ee] px-3 py-2 text-[12.5px] font-semibold text-[#0e5f2f] transition hover:bg-[#d4f3e1]" data-testid="home-whatsapp">
+          <MessageCircle className="size-4" aria-hidden />
+          <span>{tw("home.unread", { count: data.whatsapp.unread })}</span>
+          {data.whatsapp.needsHuman > 0 && <span className="ms-auto text-[#b0390f]">{tw("home.needs", { count: data.whatsapp.needsHuman })}</span>}
+        </Link>
+      )}
       <RailList rows={data.rows} iconFor={() => MessagesSquare} empty={t("messages.empty")} />
     </RailCard>
   );

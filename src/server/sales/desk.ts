@@ -3,7 +3,8 @@ import type { Channel, LeadStage } from "@/generated/prisma/enums";
 import type { TenantContext } from "../context";
 import { db } from "../db/client";
 import { aiAvailability, contentAiConfigured } from "../ai";
-import { whatsappStatus } from "../whatsapp/cloud-api";
+import { embeddedSignupStatus, whatsappStatus } from "../whatsapp/cloud-api";
+import { whatsappConnected } from "../whatsapp/numbers";
 import { getMailer } from "../email/mailer";
 import { forecast, isOpen, leadSignals, leadValue, OPEN_STAGES, salesInsights, temperatureReasons, URGENCY, type Money, type Signal } from "./intelligence";
 
@@ -138,6 +139,7 @@ export async function channelStatus(ctx: TenantContext): Promise<ChannelRow[]> {
     ctx.db.whatsAppNumber.findFirst({ where: { isActive: true }, select: { displayPhone: true } }),
     ctx.db.agentRun.count({ where: { kind: { in: ["lead_qualify", "leads_followup", "sales_cycle"] }, status: { in: ["QUEUED", "RUNNING"] } } }).catch(() => 0),
   ]);
+  const waLive = await whatsappConnected({ organizationId: ctx.organization.id, workspaceId: ctx.workspace.id });
   const state = (p: string): ChannelState => {
     const r = ints.find((i) => i.provider === p);
     if (!r) return "not_connected";
@@ -148,7 +150,7 @@ export async function channelStatus(ctx: TenantContext): Promise<ChannelRow[]> {
   const rows: ChannelRow[] = [
     { key: "crm", kind: "crm", state: "connected" },
     { key: "email", kind: "channel", state: emailState, detail: mailbox ? (mailbox.provider === "GOOGLE" ? "Gmail" : "Outlook") : getMailer().configured ? "platform" : null, connectHref: "/settings/connected-accounts" },
-    { key: "whatsapp", kind: "channel", state: wa && whatsappStatus().configured ? "connected" : whatsappStatus().configured ? "not_connected" : "not_configured", detail: wa?.displayPhone ?? null, connectHref: "/settings/connected-accounts" },
+    { key: "whatsapp", kind: "channel", state: waLive ? "connected" : wa ? "reconnect" : whatsappStatus().configured || embeddedSignupStatus().available ? "not_connected" : "not_configured", detail: wa?.displayPhone ?? null, connectHref: "/whatsapp" },
   ];
   for (const p of ["LINKEDIN", "FACEBOOK", "INSTAGRAM"] as const) {
     const s = state(p);

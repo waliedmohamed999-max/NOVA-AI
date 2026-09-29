@@ -62,7 +62,8 @@
     "dark": "Dark",
     "skipToContent": "Skip to content",
     "mainNav": "Main navigation",
-    "account": "Account"
+    "account": "Account",
+    "whatsapp": "WhatsApp"
   },
   "language": {
     "en": "English",
@@ -342,7 +343,15 @@
       "activityEmpty": "No activity recorded with {name} yet.",
       "noIntegrations": "No accounts connected yet.",
       "integrationsStatus": "{connected} of {total} connected accounts are working.",
-      "greeting": "Hi! Ask me about your customers, sales, content or company — for example:"
+      "greeting": "Hi! Ask me about your customers, sales, content or company — for example:",
+      "waUnread": "{count} unread WhatsApp messages · {needs} need you.",
+      "waNoUnread": "No unread WhatsApp messages.",
+      "waNoCampaigns": "No WhatsApp campaigns yet.",
+      "waCampaignSummary": "{count} WhatsApp campaigns.",
+      "waNotConnected": "Connect a WhatsApp Business number first.",
+      "waCampaignDrafted": "Campaign draft ready: {eligible} of {total} customers can receive it. Pick an approved template and submit it for approval — nothing is sent before that.",
+      "waFollowupsPrepared": "{drafted} follow-up drafts ready for review · {templateRequired} need a template. Nothing is sent without your approval.",
+      "waNoFollowupsDue": "No WhatsApp follow-ups are due."
     },
     "pages": {
       "open_hot_leads": "hot customers",
@@ -365,7 +374,11 @@
       "open_settings": "settings",
       "open_knowledge": "Company Brain",
       "open_team": "your AI team",
-      "open_home": "home"
+      "open_home": "home",
+      "open_whatsapp": "WhatsApp",
+      "open_whatsapp_inbox": "WhatsApp conversations",
+      "whatsapp_customers": "WhatsApp customers",
+      "whatsapp_templates": "WhatsApp templates"
     },
     "actions": {
       "openCustomers": "Open customers",
@@ -402,7 +415,13 @@
       "openIntegrations": "Connected accounts",
       "followupsToday": "Who needs a follow-up today?",
       "ourServices": "What services do we offer?",
-      "salesSummary": "Summarize sales"
+      "salesSummary": "Summarize sales",
+      "openWhatsappInbox": "Open WhatsApp inbox",
+      "createWhatsappCampaign": "New WhatsApp campaign",
+      "openWhatsappCampaigns": "WhatsApp campaigns",
+      "connectWhatsapp": "Connect WhatsApp",
+      "reviewCampaign": "Review campaign",
+      "reviewFollowups": "Review follow-ups"
     },
     "commands": {
       "reviewOverdue": "Review overdue follow-ups",
@@ -436,7 +455,20 @@
       "approval_SALES": "Sales",
       "approval_PRICING": "Pricing",
       "weighted": "Weighted",
-      "withValue": "With a value"
+      "withValue": "With a value",
+      "wa_unread": "Unread",
+      "wa_needs_human": "Need you",
+      "wa_targeted": "Targeted",
+      "wa_eligible": "Can receive",
+      "wa_excluded": "Excluded",
+      "wa_DRAFT": "Drafts",
+      "wa_NEEDS_APPROVAL": "Awaiting approval",
+      "wa_SCHEDULED": "Scheduled",
+      "wa_SENDING": "Sending",
+      "wa_PAUSED": "Paused",
+      "wa_COMPLETED": "Completed",
+      "wa_FAILED": "Failed",
+      "wa_CANCELLED": "Cancelled"
     },
     "badges": {
       "overdue": "Overdue",

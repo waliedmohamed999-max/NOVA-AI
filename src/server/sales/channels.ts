@@ -2,8 +2,8 @@ import type { Channel } from "@/generated/prisma/enums";
 import type { TenantScope } from "../db/tenant";
 import { getMailer, renderEmail } from "../email/mailer";
 import { mailboxFor } from "../integrations/workspace";
-import { numberFor, sendWhatsApp } from "../whatsapp/service";
-import { whatsappStatus } from "../whatsapp/cloud-api";
+import { sendWhatsApp } from "../whatsapp/service";
+import { numberFor, sendingNumber } from "../whatsapp/numbers";
 
 /**
  * Outbound message channels for the unified inbox and the Sales Agent. Each adapter declares whether it is
@@ -49,10 +49,10 @@ class EmailChannel implements MessageChannel {
 class WhatsAppChannel implements MessageChannel {
   readonly channel = "WHATSAPP" as const;
   async isConfigured(scope: TenantScope) {
-    return whatsappStatus().configured && Boolean(await numberFor(scope));
+    return Boolean(await sendingNumber(scope));
   }
   async describe(scope: TenantScope) {
-    const n = whatsappStatus().configured ? await numberFor(scope) : null;
+    const n = (await sendingNumber(scope)) ? await numberFor(scope) : null;
     return n ? `WhatsApp ${n.displayPhone ?? ""}`.trim() : null;
   }
   async send(scope: TenantScope, to: Recipient, message: OutboundMessage) {

@@ -81,6 +81,20 @@ describe("command parser — local intents (no AI)", () => {
     ["اعمل بوست عن خدمات البرمجة", "prepare_week_content"],
     ["اعمل بوست عن تصميم المواقع", "prepare_week_content"], // "design" is the topic here, not an image request
     ["جهز رسالة متابعة لشركة Falcon", "draft_sales_message"],
+    // WhatsApp (local; a command never sends)
+    ["افتح واتساب", "open_whatsapp"],
+    ["واتساب", "open_whatsapp"],
+    ["افتح محادثات واتساب", "open_whatsapp_inbox"],
+    ["كم رسالة واتساب غير مقروءة؟", "whatsapp_unread"],
+    ["جهز حملة واتساب للعملاء الساخنين", "create_whatsapp_campaign"],
+    ["جهز حملة واتساب للعملاء اللي ما اشتروا من 60 يوم", "create_whatsapp_campaign"],
+    ["جهز متابعات واتساب اليوم", "prepare_whatsapp_followups"],
+    ["لخص حملات واتساب", "whatsapp_campaign_summary"],
+    ["افتح قوالب واتساب", "whatsapp_templates"],
+    ["افتح عملاء واتساب", "whatsapp_customers"],
+    ["Open WhatsApp", "open_whatsapp"],
+    ["How many unread WhatsApp messages?", "whatsapp_unread"],
+    ["Prepare a WhatsApp campaign for hot customers", "create_whatsapp_campaign"],
     // high-risk
     ["ابعت العرض", "send_quote"],
     ["انشر المحتوى", "publish_content"],
@@ -154,5 +168,15 @@ describe("command parser — entities", () => {
     expect(extractEntities("ابعت رسالة لـFalcon: نشكرك على وقتك", 1).body).toBe("نشكرك على وقتك");
     expect(extractEntities("علم صفقة Falcon إنها خسرناها", 1).stage).toBe("LOST");
     expect(extractEntities("أغلق صفقة Falcon", 1).stage).toBeNull();
+  });
+});
+
+describe("WhatsApp campaign audience from a command (local, no AI)", () => {
+  it("reads hot / no purchase in N days / not contacted", async () => {
+    const { audienceFromText } = await import("@/server/command/whatsapp-handlers");
+    expect(audienceFromText(normalize("جهز حملة واتساب للعملاء الساخنين"))).toEqual({ temperatures: ["HOT"] });
+    expect(audienceFromText(normalize("جهز حملة واتساب للعملاء اللي ما اشتروا من 60 يوم"))).toEqual({ noPurchaseDays: 60 });
+    expect(audienceFromText(normalize("WhatsApp campaign for customers who haven't bought in 90 days"))).toEqual({ noPurchaseDays: 90 });
+    expect(audienceFromText(normalize("حملة للعملاء اللي ما تواصلنا معهم من 30 يوم"))).toEqual({ lastContactOlderThanDays: 30 });
   });
 });

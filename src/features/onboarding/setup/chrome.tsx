@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { AlertCircle, Building2, Check, CheckCircle2, ChevronDown, Circle, FileText, Globe, Loader2, Tag, Target, Users } from "lucide-react";
+import { AlertCircle, Building2, Link2, Check, CheckCircle2, ChevronDown, Circle, FileText, Globe, Loader2, Tag, Target, Users } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/brand/logo";
 import { LocaleSwitch } from "@/components/shell/locale-switch";
@@ -13,7 +13,7 @@ import { SETUP_STEPS, type SetupStep } from "@/lib/onboarding-setup";
 import { useSetup } from "./state";
 import { PartnerCard, ProgressRing } from "./visuals";
 
-export const STEP_ICONS: Record<SetupStep, typeof Building2> = { business: Building2, audience: Users, brand: Tag, goals: Target, review: FileText };
+export const STEP_ICONS: Record<SetupStep, typeof Building2> = { business: Building2, audience: Users, brand: Tag, goals: Target, channels: Link2, review: FileText };
 
 /** A step is reachable once every step before it has its required answers. */
 export function useStepStatus() {

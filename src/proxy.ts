@@ -50,17 +50,18 @@ export function proxy(request: NextRequest) {
     url.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(url);
   }
-  return withCsp(request, pathname.startsWith("/embed/"));
+  return withCsp(request, pathname.startsWith("/embed/"), /^\/(whatsapp(\/numbers)?|onboarding)\/?$/.test(pathname));
 }
 
 /** Per-request nonce CSP (see src/server/security/csp.ts). Next.js applies the nonce to its scripts. */
-function withCsp(request: NextRequest, embed: boolean) {
+function withCsp(request: NextRequest, embed: boolean, facebookSdk = false) {
   const nonce = makeNonce();
   const csp = buildCsp(nonce, {
     dev: process.env.NODE_ENV === "development",
     embed,
     https: (process.env.APP_URL ?? "").startsWith("https://"),
     extraImgSrc: storageImgOrigin(),
+    facebookSdk,
   });
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);

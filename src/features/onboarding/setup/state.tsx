@@ -44,6 +44,15 @@ export type SetupInit = {
   websiteSource: string | null;
   brandPrefilled: boolean;
   aiConfigured: boolean;
+  channels: {
+    instagram: boolean;
+    facebook: boolean;
+    linkedin: boolean;
+    email: boolean;
+    whatsapp: { connected: boolean; display: string | null };
+    whatsappGoals: string[];
+    signup: import("@/features/whatsapp/connect-button").SignupConfig;
+  };
 };
 
 function applyPatch(a: SetupAnswers, section: Section, p: Patch): SetupAnswers {
@@ -258,6 +267,7 @@ function useSetupState(init: SetupInit) {
     logoUrl: init.logoUrl,
     websiteSource: init.websiteSource,
     brandPrefilled: init.brandPrefilled,
+    channels: init.channels,
     answers,
     companyName,
     hasOrg,

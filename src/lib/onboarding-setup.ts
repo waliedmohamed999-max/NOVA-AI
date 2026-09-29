@@ -10,7 +10,7 @@ export type Lang = "ar" | "en";
 type Opt = { ar: string; en: string };
 const o = (en: string, ar: string): Opt => ({ en, ar });
 
-export const SETUP_STEPS = ["business", "audience", "brand", "goals", "review"] as const;
+export const SETUP_STEPS = ["business", "audience", "brand", "goals", "channels", "review"] as const;
 export type SetupStep = (typeof SETUP_STEPS)[number];
 
 export const BUSINESS_TYPES = { PRODUCTS: o("Products", "منتجات"), SERVICES: o("Services", "خدمات"), BOTH: o("Both", "الاثنين") } as const;
@@ -260,21 +260,24 @@ export const goalsSchema = z
 
 // ── Progress: required answers (80%) + confirmed steps (20%) ──
 
-export const REQUIRED: Record<Exclude<SetupStep, "review">, (a: SetupAnswers, companyName: string) => boolean[]> = {
+export const REQUIRED: Record<Exclude<SetupStep, "review" | "channels">, (a: SetupAnswers, companyName: string) => boolean[]> = {
   business: (a, name) => [Boolean(name.trim()), Boolean(a.businessType), Boolean(a.industry?.trim()), Boolean(a.customerType)],
   audience: (a) => [Boolean(a.customers?.trim()), Boolean(a.audience?.locations?.trim() || a.markets?.trim())],
   brand: (a) => [Boolean(a.brand?.tones?.length)],
   goals: (a) => [Boolean(a.goalKeys?.length)],
 };
 
+/** Steps with required answers ("channels" and "review" never block). */
+const GATED = ["business", "audience", "brand", "goals"] as const;
+
 export function stepReady(step: SetupStep, a: SetupAnswers, companyName: string) {
-  return step === "review" ? true : REQUIRED[step](a, companyName).every(Boolean);
+  return step === "review" || step === "channels" ? true : REQUIRED[step](a, companyName).every(Boolean);
 }
 
 export function setupProgress(a: SetupAnswers, companyName: string) {
   const checks = (Object.keys(REQUIRED) as (keyof typeof REQUIRED)[]).flatMap((s) => REQUIRED[s](a, companyName));
-  const confirmed = (a.setup?.completed ?? []).filter((s) => s !== "review" && stepReady(s, a, companyName)).length;
-  const percent = Math.round((checks.filter(Boolean).length / checks.length) * 80 + (confirmed / 4) * 20);
+  const confirmed = (a.setup?.completed ?? []).filter((s) => (GATED as readonly string[]).includes(s) && stepReady(s, a, companyName)).length;
+  const percent = Math.round((checks.filter(Boolean).length / checks.length) * 80 + (confirmed / GATED.length) * 20);
   const done = SETUP_STEPS.filter((s) => s !== "review" && (a.setup?.completed ?? []).includes(s) && stepReady(s, a, companyName)).length;
   return { percent: Math.min(100, percent), doneSteps: done };
 }

@@ -1,0 +1,451 @@
+{
+  "title": "WhatsApp Business",
+  "subtitle": "Every customer conversation, campaign and follow-up in one place.",
+  "tabs": {
+    "overview": "Overview",
+    "inbox": "Conversations",
+    "customers": "Customers",
+    "campaigns": "Campaigns",
+    "templates": "Templates",
+    "followups": "Follow-ups",
+    "numbers": "Numbers",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "status": {
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "reconnect_needed": "Reconnect needed",
+    "disconnected": "Disconnected",
+    "notConfigured": "Not available yet"
+  },
+  "connect": {
+    "title": "WhatsApp Business",
+    "body": "Connect your company number so NOVA can receive customers and follow up with them.",
+    "cta": "Connect WhatsApp Business",
+    "short": "Connect WhatsApp",
+    "connecting": "Connecting…",
+    "done": "WhatsApp connected",
+    "official": "Official WhatsApp Business Platform through Meta. NOVA never asks for your password.",
+    "unavailable": "Self-service connection isn't available yet — the platform admin must finish the Meta setup.",
+    "cancelled": "The connection window was closed before finishing.",
+    "skip": "Skip for now"
+  },
+  "empty": {
+    "title": "Start your WhatsApp conversations",
+    "body": "Connect a WhatsApp Business number to receive customers and run follow-ups and campaigns from NOVA.",
+    "waiting": "Waiting for the first conversation."
+  },
+  "metrics": {
+    "conversationsToday": "Conversations today",
+    "unread": "Unread messages",
+    "needsHuman": "Need you",
+    "newLeads": "New customers",
+    "activeCampaigns": "Active campaigns",
+    "sent": "Messages sent",
+    "delivered": "Delivered",
+    "replies": "Customer replies",
+    "hint": "Today, from your real records."
+  },
+  "checklist": {
+    "title": "Get WhatsApp ready",
+    "connected": "Number connected",
+    "template": "Set up your first template",
+    "contacts": "Import or connect customers",
+    "campaign": "Create your first campaign",
+    "safeReplies": "Set up safe replies"
+  },
+  "inbox": {
+    "search": "Search name or number",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "needs_human": "Need you",
+      "drafts": "NOVA drafts"
+    },
+    "empty": "No conversations here.",
+    "select": "Choose a conversation",
+    "loadMore": "Load more",
+    "older": "Earlier messages",
+    "novaSuggests": "NOVA suggests:",
+    "send": "Send",
+    "edit": "Edit",
+    "reject": "Reject",
+    "prepare": "Draft with AI",
+    "addFollowup": "Add follow-up",
+    "toOpportunity": "Make opportunity",
+    "openProfile": "Open customer profile",
+    "placeholder": "Write a message…",
+    "windowOpen": "Conversation window open until {time}",
+    "windowClosed": "The conversation window has ended. Choose an approved template to send a message.",
+    "template": "Template",
+    "chooseTemplate": "Choose an approved template",
+    "noApproved": "No approved templates yet.",
+    "manageTemplates": "Manage templates",
+    "attach": "Attach",
+    "sendTemplate": "Send template",
+    "preview": "Preview",
+    "aiAssisted": "AI-assisted",
+    "needsHuman": "Needs you",
+    "draft": "Draft",
+    "optedOut": "Opted out",
+    "you": "You",
+    "nova": "NOVA",
+    "campaign": "Campaign",
+    "delivery": {
+      "accepted": "Sent",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed"
+    },
+    "back": "Back",
+    "context": "Customer",
+    "uploading": "Uploading…",
+    "followupAdded": "Follow-up drafted — review it in the conversation.",
+    "sent": "Sent"
+  },
+  "context": {
+    "company": "Company",
+    "stage": "Lead stage",
+    "interest": "Interest",
+    "lastContact": "Last contact",
+    "opportunity": "Opportunity",
+    "owner": "Owner",
+    "tags": "Tags",
+    "source": "Source",
+    "none": "—",
+    "meeting": "Next meeting",
+    "quote": "Latest quote",
+    "optOut": "Stop WhatsApp messages",
+    "optIn": "Allow WhatsApp messages",
+    "actions": {
+      "createOpportunity": "Create opportunity",
+      "scheduleFollowup": "Schedule follow-up",
+      "bookMeeting": "Book meeting",
+      "createQuote": "Create quote",
+      "markQualified": "Mark qualified"
+    }
+  },
+  "customers": {
+    "title": "WhatsApp customers",
+    "hint": "The same customer records as your CRM — nothing is copied.",
+    "name": "Customer",
+    "phone": "Number",
+    "stage": "Stage",
+    "last": "Last message",
+    "empty": "No WhatsApp customers yet.",
+    "optedOut": "Opted out",
+    "chat": "Chat"
+  },
+  "campaigns": {
+    "title": "WhatsApp campaigns",
+    "new": "New campaign",
+    "empty": {
+      "title": "No campaigns yet",
+      "body": "Send an approved template to the right customers from your CRM — with approval and a safe sending queue."
+    },
+    "states": {
+      "DRAFT": "Draft",
+      "NEEDS_APPROVAL": "Needs approval",
+      "SCHEDULED": "Scheduled",
+      "SENDING": "Sending",
+      "PAUSED": "Paused",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "recipients": "Recipients",
+    "sent": "Sent",
+    "failed": "Failed",
+    "objectives": {
+      "offer": "Offer",
+      "new_product": "New product",
+      "reengagement": "Re-engagement",
+      "follow_up": "Follow-up",
+      "appointment_reminder": "Appointment reminder",
+      "event": "Event",
+      "lead_nurturing": "Lead nurturing"
+    },
+    "steps": {
+      "objective": "Goal",
+      "audience": "Audience",
+      "template": "Template",
+      "personalize": "Personalization",
+      "schedule": "Schedule",
+      "review": "Review",
+      "approval": "Approval"
+    },
+    "stepOf": "Step {n} of {total}",
+    "name": "Campaign name",
+    "namePlaceholder": "e.g. Ramadan offer",
+    "objectiveHint": "The goal organizes your campaign — WhatsApp's rules stay the same for every goal.",
+    "filters": {
+      "title": "Who should receive it?",
+      "stages": "Lead stage",
+      "temperatures": "Interest level",
+      "tags": "Tags",
+      "interests": "Interests",
+      "sources": "Source",
+      "cities": "City",
+      "countries": "Country",
+      "purchaseCategories": "Purchase category",
+      "segment": "Customer segment",
+      "anySegment": "Any segment",
+      "opportunity": "Opportunity status",
+      "any": "Any",
+      "lastContactOlder": "Not contacted for (days)",
+      "noPurchase": "No purchase for (days)",
+      "addValue": "Add",
+      "temp": {
+        "HOT": "Hot",
+        "WARM": "Warm",
+        "COLD": "Cold"
+      }
+    },
+    "preview": {
+      "targeted": "Targeted",
+      "eligible": "Can receive",
+      "excluded": "Excluded",
+      "reasons": {
+        "missing_phone": "Missing phone",
+        "invalid_phone": "Invalid number",
+        "opted_out": "Opted out",
+        "suppressed": "Suppression list",
+        "duplicate": "Duplicate number",
+        "no_consent": "No consent"
+      },
+      "refresh": "Refresh count",
+      "counting": "Counting…"
+    },
+    "template": {
+      "pick": "Choose an approved template",
+      "none": "No approved templates yet — create one and submit it to Meta first."
+    },
+    "personalize": {
+      "hint": "What fills each variable. A recipient missing a value is skipped, not sent a broken message.",
+      "noVars": "This template has no variables.",
+      "previewWith": "Preview with a real customer"
+    },
+    "schedule": {
+      "now": "Send after approval",
+      "later": "Schedule",
+      "at": "Send at"
+    },
+    "review": {
+      "title": "Review before approval",
+      "note": "Nothing is sent until the campaign is approved. Sending runs in small batches that respect Meta's limits."
+    },
+    "submit": "Submit for approval",
+    "saveDraft": "Save draft",
+    "submitted": "Sent for approval — approve it from Approvals.",
+    "approved": "Approved — sending in batches.",
+    "openApprovals": "Open approvals",
+    "controls": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "cancel": "Cancel campaign"
+    },
+    "stats": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed",
+      "replies": "Replies",
+      "optOuts": "Opt-outs",
+      "leads": "Leads",
+      "opportunities": "Opportunities",
+      "won": "Won deals",
+      "revenue": "Revenue",
+      "queued": "In queue",
+      "skipped": "Skipped",
+      "noRevenue": "No deal values yet"
+    },
+    "readNote": "Read receipts appear only when customers have them enabled.",
+    "attribution": "Sales attribution"
+  },
+  "templates": {
+    "title": "WhatsApp templates",
+    "new": "New template",
+    "sync": "Sync with Meta",
+    "synced": "Synced",
+    "tabs": {
+      "APPROVED": "Approved",
+      "PENDING": "Pending",
+      "REJECTED": "Rejected",
+      "DRAFT": "Draft"
+    },
+    "empty": "No templates in this list.",
+    "draftNote": "Drafts can't be sent until Meta approves them.",
+    "rejectedReason": "Reason: {reason}",
+    "builder": {
+      "title": "Template builder",
+      "name": "Name (lowercase, digits, _)",
+      "language": "Language",
+      "category": "Type",
+      "header": "Header (optional)",
+      "body": "Message",
+      "bodyHint": "Insert numbered variables for personal details with the buttons below.",
+      "footer": "Footer (optional)",
+      "buttons": "Buttons (up to 3)",
+      "addButton": "Add button",
+      "buttonText": "Button text",
+      "buttonUrl": "Link",
+      "quickReply": "Quick reply",
+      "urlButton": "Link",
+      "variables": "Variables",
+      "variableFor": "Variable {n}",
+      "insertVar": "Insert variable",
+      "staticValue": "Fixed text",
+      "preview": "Preview",
+      "save": "Save draft",
+      "submit": "Submit to Meta",
+      "submitNote": "Meta reviews every template. Submitting is final for this version.",
+      "aiHelp": "Write with NOVA",
+      "objective": "What is the message for?",
+      "categories": {
+        "MARKETING": "Marketing",
+        "UTILITY": "Utility",
+        "AUTHENTICATION": "Authentication"
+      },
+      "sources": {
+        "customer_name": "Customer name",
+        "company": "Company",
+        "appointment": "Appointment",
+        "order": "Order",
+        "quote_amount": "Quote amount",
+        "agent_name": "Agent name",
+        "static": "Fixed text"
+      }
+    }
+  },
+  "followups": {
+    "title": "WhatsApp follow-ups",
+    "prepareDue": "Prepare today's follow-ups",
+    "prepared": "{drafted} drafts ready · {templateRequired} need a template",
+    "drafts": "Drafts to review",
+    "due": "Due follow-ups",
+    "meetings": "Upcoming appointments",
+    "approveSelected": "Send selected",
+    "approve": "Send",
+    "templateRequired": "Template required",
+    "openChat": "Open chat",
+    "none": "Nothing here right now.",
+    "remind": "Send reminder",
+    "noBulk": "NOVA never sends follow-ups in bulk: review each draft, then send."
+  },
+  "numbers": {
+    "title": "WhatsApp numbers",
+    "refresh": "Check now",
+    "disconnect": "Disconnect",
+    "quality": "Quality",
+    "tier": "Messaging limit",
+    "connectedAt": "Connected",
+    "lastWebhook": "Last event",
+    "lastSend": "Last send",
+    "via": {
+      "embedded_signup": "Connected by you",
+      "platform": "Linked by NOVA"
+    },
+    "one": "Your plan includes one number.",
+    "never": "Never"
+  },
+  "analytics": {
+    "title": "WhatsApp analytics",
+    "period": "Last 30 days",
+    "campaigns": "Campaigns",
+    "noData": "No campaign data yet.",
+    "conversations": "Conversations",
+    "inbound": "Customer messages",
+    "outbound": "Your messages"
+  },
+  "settings": {
+    "level": {
+      "title": "Automatic replies",
+      "OFF": {
+        "title": "Off",
+        "desc": "No AI. Your team replies."
+      },
+      "DRAFT": {
+        "title": "Drafts",
+        "desc": "NOVA prepares replies; a person sends them."
+      },
+      "SAFE_AUTO": {
+        "title": "Safe auto",
+        "desc": "NOVA answers safe questions from your approved Company Brain; everything else is a draft."
+      },
+      "CUSTOM": {
+        "title": "Custom",
+        "desc": "Your approval rules decide (Settings → Approvals)."
+      }
+    },
+    "safe": {
+      "title": "Questions NOVA may answer automatically",
+      "greeting": "Greetings",
+      "opening_hours": "Working hours",
+      "location": "Location",
+      "services_info": "General services",
+      "contact_details": "Contact details",
+      "booking_info": "How to book"
+    },
+    "never": {
+      "title": "Never sent without you",
+      "items": "Price negotiation · discounts · contracts · complaints · legal · refunds · custom quotes · sensitive claims"
+    },
+    "optOut": {
+      "title": "Unsubscribe words",
+      "hint": "STOP / إلغاء always work. Add your own (exact message).",
+      "placeholder": "Add a word"
+    },
+    "consent": {
+      "title": "Campaigns only to customers with consent",
+      "desc": "Only contacts marked as opted in receive campaigns."
+    },
+    "suppression": {
+      "title": "Suppression list",
+      "hint": "These numbers never receive campaigns.",
+      "add": "Add number",
+      "phone": "Number",
+      "note": "Note",
+      "remove": "Remove",
+      "empty": "No numbers.",
+      "reasons": {
+        "blocked": "Blocked",
+        "invalid": "Invalid",
+        "manual": "Manual",
+        "opt_out": "Opted out"
+      }
+    },
+    "health": {
+      "title": "Connection health",
+      "connection": "Connection",
+      "webhook": "Incoming messages",
+      "templates": "Approved templates",
+      "lastWebhook": "Last event",
+      "lastSend": "Last successful send",
+      "ok": "Working",
+      "notReady": "Not ready",
+      "reconnect": "Reconnect",
+      "admin": "Technical diagnostics (admin)",
+      "missing": "Missing: {vars}"
+    },
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "prefs": {
+    "title": "What should NOVA do on WhatsApp?",
+    "receive": "Receive customers",
+    "answer": "Answer questions",
+    "followup": "Sales follow-up",
+    "campaigns": "Send campaigns",
+    "all": "All",
+    "note": "Saved as preferences only — automatic sending stays off until you turn it on."
+  },
+  "home": {
+    "unread": "{count} unread WhatsApp",
+    "needs": "{count} need you"
+  },
+  "drawer": {
+    "followupWhatsapp": "Follow up on WhatsApp"
+  }
+}

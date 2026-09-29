@@ -124,7 +124,8 @@ export async function whatsappSendTest(actor: Actor, confirmation: string) {
   const template = { name: clean(process.env.WHATSAPP_TEST_TEMPLATE) || "hello_world", language: clean(process.env.WHATSAPP_TEST_TEMPLATE_LANG) || "en_US" };
   const started = Date.now();
   try {
-    const r = windowOpen ? await waSendText(phoneNumberId, to, "NOVA WhatsApp integration test.") : await waSendTemplate(phoneNumberId, to, template);
+    const token = clean(process.env.WHATSAPP_ACCESS_TOKEN);
+    const r = windowOpen ? await waSendText(phoneNumberId, to, "NOVA WhatsApp integration test.", token) : await waSendTemplate(phoneNumberId, to, template, token);
     await recordValidation({ provider: "whatsapp", check: "send_test", ok: Boolean(r.externalId), detail: `${windowOpen ? "free text (24h window open)" : `template ${template.name}/${template.language}`} → accepted ${r.externalId ?? "(no id)"}`, durationMs: Date.now() - started, meta: { messageId: r.externalId, to: `…${to.slice(-4)}`, mode: windowOpen ? "text" : "template" }, actorId: actor.userId, organizationId: actor.organizationId });
     await audit({ category: "SECURITY", actorType: "USER", actorId: actor.userId, action: "admin.whatsapp_test_sent", summary: `WhatsApp test sent to …${to.slice(-4)}` });
     return { messageId: r.externalId, mode: windowOpen ? "text" : "template" };

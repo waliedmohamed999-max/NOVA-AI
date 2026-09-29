@@ -14,6 +14,7 @@ import {
   Brain,
   Inbox,
   FileText,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/calendar", key: "calendar", icon: CalendarDays },
   { href: "/social", key: "social", icon: Share2 },
   { href: "/sales", key: "sales", icon: Handshake, badge: "leads" },
+  { href: "/whatsapp", key: "whatsapp", icon: MessageCircle },
   { href: "/analytics", key: "analytics", icon: BarChart3 },
 ];
 

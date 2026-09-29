@@ -50,6 +50,7 @@ const CREATE = /(^|\s)(اعمل|اعملي|انشي|انشئ|اضف|ضيف|ضف|
 const PREPARE = /(^|\s)(جهز|جهزلي|حضر|اكتب|اكتبلي|خطط|اعمل|اعملي|انشي|انشئ|ولد|صمم)(\s|$)|\b(prepare|draft|write|plan|create|make|generate)\b/;
 const SEND = /(^|\s)(ابعت|ابعث|ارسل|راسل)(\s|$)|\bsend\b/;
 const FOLLOW = /متابع|follow.?up|followup|تذكير|reminder/;
+const WA = /واتساب|واتس اب|وتساب|واتس|whats ?app/;
 
 const BRAIN_Q = /(^|\s)(ما|ماذا|ايه|اي|ايش|شو|وش|مين|هل|عرفني|قولي|اعرض)(\s|$)|نقدم|نقدمها|نبيع|بتاعتنا|بتاعنا|عندنا|لدينا|^(what|which|who|list|tell me|show)\b|\b(we offer|do we|our)\b/;
 
@@ -80,6 +81,16 @@ export const INTENTS = [
   d({ key: "send_message", kind: "high_risk", permission: "leads:manage", approval: "always", requires: ["lead", "body"], match: (n) => SEND.test(n) && /رساله|رسايل|واتساب|واتس|ايميل|بريد|message|whatsapp|email|text/.test(n) }),
   d({ key: "move_stage", kind: "action", permission: "leads:manage", approval: "policy", requires: ["lead"], data: ["lead"], match: (n) => /(^|\s)(انقل|حرك|حول)(\s|$)|\bmove\b/.test(n) && /مرحله|stage|تفاوض|مؤهل|عرض|تواصل|ناجح|مكسوب|خاسر|negotiat|proposal|qualified|contacted|won|lost/.test(n) }),
   d({ key: "close_deal", kind: "high_risk", permission: "leads:manage", approval: "policy", requires: ["lead"], match: (n) => /(^|\s)(اغلق|اقفل|قفل|سكر|علم)(\s|$)|\b(close|mark)\b/.test(n) && /صفقه|فرصه|deal|won|lost|كسب|خسر|مكسوب/.test(n) }),
+
+  // ── WhatsApp (local: navigation, counts, drafts — a command never sends) ──
+  d({ key: "prepare_whatsapp_followups", kind: "action", permission: "leads:manage", approval: "always", data: ["sales_activities", "leads", "conversations"], match: (n) => WA.test(n) && (PREPARE.test(n) || CREATE.test(n)) && FOLLOW.test(n) }),
+  d({ key: "create_whatsapp_campaign", kind: "action", permission: "campaign:manage", approval: "always", data: ["leads", "segments"], match: (n) => WA.test(n) && (PREPARE.test(n) || CREATE.test(n)) && /حمله|حملات|campaign/.test(n) }),
+  d({ key: "whatsapp_campaign_summary", kind: "read", permission: "leads:read", data: ["campaigns"], match: (n) => WA.test(n) && /حمله|حملات|campaign/.test(n) && (SUMMARY.test(n) || QUESTION.test(n)) }),
+  d({ key: "whatsapp_unread", kind: "read", permission: "leads:read", data: ["conversations"], match: (n) => WA.test(n) && /غير مقروء|مقروءه|unread|جديد|new|تحتاج|need/.test(n) && QUESTION.test(n) }),
+  d({ key: "whatsapp_templates", kind: "navigation", permission: "leads:read", route: "/whatsapp/templates", match: (n) => WA.test(n) && /قوالب|قالب|templates?/.test(n) }),
+  d({ key: "whatsapp_customers", kind: "navigation", permission: "leads:read", route: "/whatsapp/customers", match: (n) => WA.test(n) && /عملا|عميل|customers|contacts/.test(n) && NAV.test(n) }),
+  d({ key: "open_whatsapp_inbox", kind: "navigation", permission: "leads:read", route: "/whatsapp/inbox", match: (n) => WA.test(n) && /محادث|رسايل|رساله|inbox|conversations|messages|chats?/.test(n) }),
+  d({ key: "open_whatsapp", kind: "navigation", permission: "leads:read", route: "/whatsapp", match: (n) => WA.test(n) && (NAV.test(n) || n.split(" ").length <= 2) }),
 
   // ── Create / action ──
   d({ key: "import_leads", kind: "action", permission: "leads:manage", requires: ["file"], match: (n, files) => /(استخرج|استورد|import|extract)/.test(n) || (files && /(عملا|عميل|leads|customers|contacts)/.test(n)) }),
@@ -165,6 +176,7 @@ export type IntentKey =
   | "pipeline_value" | "calendar_lookup" | "lead_activity" | "integrations_status" | "stalled_deals" | "overdue_followups" | "followups_today" | "hot_leads" | "approvals_summary" | "sales_brief" | "best_content" | "lead_sources" | "campaign_summary" | "analytics_summary" | "sales_summary"
   | "open_hot_leads" | "open_overdue_followups" | "open_followups" | "open_content_pending" | "open_approvals" | "open_calendar" | "open_messages" | "open_pipeline" | "open_quotes" | "open_b2b" | "open_sales" | "open_customers"
   | "open_content" | "open_campaigns" | "open_analytics" | "open_reports" | "open_integrations" | "open_settings" | "open_knowledge" | "open_team" | "open_home" | "open_entity"
+  | "open_whatsapp" | "open_whatsapp_inbox" | "whatsapp_unread" | "create_whatsapp_campaign" | "whatsapp_campaign_summary" | "prepare_whatsapp_followups" | "whatsapp_customers" | "whatsapp_templates"
   | "ask_question";
 
 export const INTENT_KEYS = INTENTS.map((i) => i.key) as IntentKey[];

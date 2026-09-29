@@ -21,7 +21,7 @@ test.describe("guided company setup", () => {
   test("flow 1: company → audience → brand → goals (strategy draft) → review → enter NOVA", async ({ page }) => {
     await start(page, "Hala Owner");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Hala");
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("Step 1 of 6")).toBeVisible();
 
     await fillBusiness(page, "Hala Bakes");
     await page.getByLabel("Country").selectOption("SA");
@@ -33,7 +33,7 @@ test.describe("guided company setup", () => {
 
     // Required answers gate the step.
     await page.getByTestId("setup-continue").click();
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
     await page.getByTestId("setup-continue").click();
     await expect(page.getByText("Fill in the required fields to continue.")).toBeVisible();
 
@@ -69,13 +69,16 @@ test.describe("guided company setup", () => {
     await expect(preview).toContainText("Families ordering cakes for birthdays");
     await expect(page.getByTestId("setup-chips")).toContainText("Strategy draft ready");
     await page.getByTestId("setup-continue").click();
+    await expect(page.getByTestId("onb-whatsapp")).toContainText("WhatsApp Business"); // optional channels step
+    await page.getByTestId("setup-continue").click();
 
     // Review shows what's saved; edit jumps back; enter NOVA runs the real setup and lands on Home.
     await expect(page.getByRole("heading", { name: "Review & launch" })).toBeVisible();
     await expect(page.getByText("Hala Bakes").first()).toBeVisible();
     await expect(page.getByText("50 qualified leads in 90 days")).toBeVisible();
     await page.getByRole("button", { name: "Edit — Brand" }).click();
-    await expect(page.getByText("Step 3 of 5")).toBeVisible();
+    await expect(page.getByText("Step 3 of 6")).toBeVisible();
+    await page.getByTestId("setup-continue").click();
     await page.getByTestId("setup-continue").click();
     await page.getByTestId("setup-continue").click();
     await page.getByTestId("enter-nova").click();
@@ -124,7 +127,7 @@ test.describe("guided company setup", () => {
     await page.getByRole("radio", { name: /^Businesses/ }).click();
     await saved(page);
     await page.getByTestId("setup-continue").click();
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
   });
 
   test("flow 4: leaving and coming back resumes at the same step with the answers", async ({ page }) => {
@@ -137,7 +140,7 @@ test.describe("guided company setup", () => {
 
     await page.goto("/home"); // not finished → back to the setup
     await page.waitForURL(/\/onboarding/);
-    await expect(page.getByText("Step 2 of 5")).toBeVisible();
+    await expect(page.getByText("Step 2 of 6")).toBeVisible();
     await expect(page.getByRole("textbox", { name: "Who are your customers?" })).toHaveValue("Office managers buying coffee");
     await page.getByRole("button", { name: /^1\s*Business/ }).first().click();
     await expect(page.getByLabel("What's your company called?")).toHaveValue("Resume Roastery");
@@ -165,6 +168,7 @@ test.describe("guided company setup — no AI provider", () => {
     await page.getByRole("checkbox", { name: "Increase sales" }).click();
     await page.getByTestId("build-strategy").click();
     await expect(page.getByTestId("strategy-preview")).toContainText("Built from your answers only");
+    await page.getByTestId("setup-continue").click();
     await page.getByTestId("setup-continue").click();
     await page.getByTestId("enter-nova").click();
     await expect(page.getByText("AI isn't set up, so the profile was built from your answers only.")).toBeVisible();

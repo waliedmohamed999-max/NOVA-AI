@@ -17,8 +17,9 @@ import { extractEntities, normalize } from "./parse";
 import { aiRouterAvailable, routeWithAi } from "./ai-router";
 import { HANDLERS, localDay, type Handler, type HandlerInput, type Outcome } from "./handlers";
 import { BRAIN_HANDLERS } from "./brain-handlers";
+import { WHATSAPP_HANDLERS } from "./whatsapp-handlers";
 
-const ALL_HANDLERS: Record<IntentKey, Handler> = { ...HANDLERS, ...BRAIN_HANDLERS };
+const ALL_HANDLERS: Record<IntentKey, Handler> = { ...HANDLERS, ...BRAIN_HANDLERS, ...WHATSAPP_HANDLERS };
 import type { CommandResponse, CommandStatus, Params, Plan } from "./types";
 
 /**
