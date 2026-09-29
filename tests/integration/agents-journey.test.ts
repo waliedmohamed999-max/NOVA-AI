@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { db } from "@/server/db/client";
 import { makeTenant } from "../support/factory";
 import { queue, enqueue } from "@/server/jobs/queue";
@@ -154,6 +154,32 @@ describe("first user journey (offline AI)", () => {
     const campaign = await db.campaign.findFirstOrThrow({ where: t.scope });
     expect(campaign.status).toBe("PENDING_APPROVAL");
     expect(await db.contentItem.count({ where: { campaignId: campaign.id } })).toBeGreaterThanOrEqual(5);
+  });
+});
+
+describe("onboarding without an AI provider", () => {
+  it("completes from the owner's answers instead of blocking, and makes no AI call", async () => {
+    vi.stubEnv("AI_OFFLINE_MODE", "false");
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
+    vi.stubEnv("OPENAI_API_KEY", "");
+    try {
+      const t = await makeTenant("No AI Studio");
+      await db.organization.update({
+        where: { id: t.organization.id },
+        data: { onboardingData: { description: "Interior design studio for homes and offices.", offerings: ["Home design", "Office fit-out"], tone: ["Calm"], goals: ["Get more customers"] } },
+      });
+      const run = await startRun(t.scope, { kind: "onboarding_analysis", agent: "SOCIAL_MANAGER", steps: ONBOARDING_STEPS });
+      await executeRun(t.scope, run.id);
+      expect((await db.agentRun.findUniqueOrThrow({ where: { id: run.id } })).status).toBe("COMPLETED");
+      expect((await db.organization.findUniqueOrThrow({ where: { id: t.organization.id } })).onboardingStatus).toBe("COMPLETED");
+      const profile = await db.companyProfile.findFirstOrThrow({ where: t.scope });
+      expect(profile.summary).toContain("Interior design studio");
+      expect((profile.discoveries as { generatedBy?: string }).generatedBy).toBe("owner_answers");
+      expect((await db.offering.findMany({ where: t.scope })).map((o) => o.name).sort()).toEqual(["Home design", "Office fit-out"]);
+      expect(await db.aiRun.count({ where: { organizationId: t.organization.id } })).toBe(0);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

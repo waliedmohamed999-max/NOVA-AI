@@ -8,7 +8,6 @@ import { db } from "@/server/db/client";
 import { mapError, type ActionResult } from "@/server/action";
 import { UserFacingError } from "@/server/errors";
 import { enforceRateLimit } from "@/server/rate-limit";
-import { aiAvailability } from "@/server/ai";
 import { beginAnalysis, loadOnboarding, mergeAnswers, setWebsite, upsertCompany, type OnboardingSnapshot } from "@/server/onboarding/service";
 
 async function guard<T>(name: string, body: (userId: string) => Promise<T>): Promise<ActionResult<T>> {
@@ -88,8 +87,8 @@ export async function saveAnswers(patch: z.input<typeof patchSchema>): Promise<A
 }
 
 export async function startOnboardingAnalysis(): Promise<ActionResult<{ runId: string }>> {
+  // Runs with or without an AI provider: without one the workflow builds the profile from the owner's answers.
   return guard("onboarding.analyze", async (userId) => {
-    if (!aiAvailability().configured) throw new UserFacingError("ai_not_configured");
     return { runId: await beginAnalysis(await ownedOrg(userId), userId) };
   });
 }

@@ -1,6 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "../../db/client";
-import { aiStructured } from "../../ai";
+import { aiAvailability, aiStructured } from "../../ai";
 import { ingestSource, type WebsiteSignals } from "../../knowledge/service";
 import { brainMeta } from "../../knowledge/company-context";
 import { onboardingContext } from "../../knowledge/use-cases";
@@ -38,6 +38,11 @@ defineWorkflow("onboarding_analysis", {
 
     // 2–5. One structured analysis grounded in the answers + retrieved website text.
     const analysis = await ctx.step("analyzing_brand", async () => {
+      // No AI provider yet: finish onboarding from the owner's own answers (labelled as such) instead of blocking.
+      // The owner can refine the profile later from Company Brain once a provider is configured.
+      if (!aiAvailability().configured) {
+        return { data: offlineAnalysis(lang, { ...answers, companyName: org.name }, site), generatedBy: "owner_answers", offline: true };
+      }
       // The one use case that needs page text: the owner's own website, top-8 cleaned/deduped chunks within a fixed budget.
       const site8 = await onboardingContext(scope, [answers.sells, answers.description, answers.customers, org.name].filter(Boolean).join(" "));
       const prompt = [
