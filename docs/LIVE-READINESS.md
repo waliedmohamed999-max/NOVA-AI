@@ -1,23 +1,44 @@
 # Live readiness
 
-**Status (2026-09-28): NOT production-ready.** Every production blocker below must be closed first. The live, always-current version of this table is on `/admin/providers` → *Provider readiness*. In that view, "Live tested = YES" only appears after a recorded, successful call to the real provider.
+**Status (2026-09-30): NOT production-ready.** No Tier 1 provider has a recorded live validation yet.
+- The live, always-current version of this table is `/admin/providers` → *Provider readiness*.
+- `npx tsx scripts/provider-status.mts` prints the same statuses from the command line (names only, never values).
 
-## Provider table
+## Status definitions
 
-| Provider | Configured | Live validated | HTTPS validated | External review | Production blocker |
-| --- | --- | --- | --- | --- | --- |
-| OpenAI | NO | NO | N/A | NO | **YES**: no `OPENAI_API_KEY` |
-| Email | Dev only (Mailpit) | NO (dev mailbox isn't counted) | N/A | NO | **YES**: no real provider (Resend / Postmark / SMTP) |
-| Google (Gmail + Calendar) | NO | NO | NO | YES: OAuth verification for sensitive scopes | **YES** |
-| Microsoft (Outlook + Calendar) | NO | NO | NO | Recommended: publisher verification | **YES** |
-| Calendar (via Google/Microsoft) | NO | NO | NO | via Google/Microsoft | **YES** |
-| WhatsApp Cloud API | NO | NO | NO | YES: business verification, templates | **YES** |
-| Stripe | NO | NO | NO | NO | **YES**: no test keys; live mode later |
-| Storage (S3/R2) | Local disk only | NO | N/A | NO | **YES**: no bucket configured |
-| LinkedIn (member posting) | YES | Credentials + connection: YES. Publish test: pending your approval | NO (localhost) | Company Pages: Community Management API | **YES**: HTTPS callback, publish test |
-| Instagram Direct | NO | NO | NO | YES: App Review (Advanced Access) | **YES** |
-| Facebook Pages | YES (app) | App credentials + identity: YES. Pages: NO | NO (localhost) | YES: Page-management use case + App Review | **YES**: PENDING META PERMISSION |
-| TikTok | NO | NO | NO | YES: Content Posting audit | **YES** |
+Each provider gets one status. It is computed only from configuration and recorded validations (`readinessStatus()` in `src/server/admin/readiness.ts`); it is never set by hand.
+
+| Status | Meaning |
+| --- | --- |
+| **READY** | A real call succeeded (recorded live validation) and no production blocker is left. |
+| **READY FOR STAGING** | Configured and valid, but not live-validated yet, or still on test/dev settings (Stripe test keys, local disk, development mailbox, non-HTTPS callbacks). |
+| **WAITING EXTERNAL APPROVAL** | Works as far as we can test, but depends on the provider's review or approval (Meta App Review, LinkedIn CMA, TikTok audit, Google verification, WhatsApp business verification and templates). |
+| **BLOCKED** | Missing or malformed credentials, a failed credential check, or the latest recorded result is an error. |
+
+## Provider table (computed 2026-09-30, local environment)
+
+| Tier | Provider | Status | What's missing |
+| --- | --- | --- | --- |
+| 1 | OpenAI | BLOCKED | `OPENAI_API_KEY`. Then: Validate, then the text, image and edit tests on `/admin/providers` |
+| 1 | Anthropic (Claude) | BLOCKED | `ANTHROPIC_API_KEY`. Then: Validate (models.retrieve, no tokens), then the text test |
+| 1 | Email | BLOCKED | Real provider (Resend / Postmark / SMTP) + a verified `EMAIL_FROM` domain (SPF/DKIM). Then: Send test email |
+| 1 | Storage (S3/R2) | READY FOR STAGING (local disk, dev only) | Private bucket + `S3_*`. Then: Storage test (upload → signed URL → delete) |
+| 1 | Stripe | BLOCKED | Test-mode keys, webhook secret, 3 price ids, HTTPS webhook endpoint. Then: checkout in test mode + a received webhook |
+| 1 | WhatsApp Cloud API | BLOCKED | Meta app + WABA + number, `WHATSAPP_*`, HTTPS webhook. Business verification + approved templates (external) |
+| 2 | LinkedIn | WAITING EXTERNAL APPROVAL | Member posting works. Needs an HTTPS callback, a publish test, and Community Management API for Company Pages |
+| 2 | Facebook Pages | WAITING EXTERNAL APPROVAL | Meta Page-management use case + App Review; an HTTPS callback |
+| 2 | Instagram | BLOCKED | `INSTAGRAM_APP_ID/SECRET`; App Review (Advanced Access) |
+| 2 | Google | BLOCKED | OAuth client; verification for gmail.send / calendar scopes |
+| 2 | Microsoft | BLOCKED | App registration; publisher verification (recommended) |
+| 2 | TikTok | BLOCKED | Client key/secret; Content Posting API audit (posts stay private until then) |
+
+**What is validated without live credentials (automated, mocked HTTP only):**
+- signatures, replay window and duplicate handling for Stripe and WhatsApp webhooks, at route level;
+- OAuth state, PKCE, token exchange and refresh, and expired-token classification for each adapter;
+- the credential checks for every provider, including their error paths;
+- that secrets never appear in validation records.
+
+None of that counts as live readiness. Automated tests never call a real provider, publish, send or charge.
 
 ## Manual live tests performed (this environment)
 
@@ -55,7 +76,7 @@ All of these were read-only. Nothing was published, sent, charged or created.
 1. **Staging host.** Deploy to a staging URL with HTTPS (not production), with `APP_ENV=staging` and `APP_URL=https://<staging-domain>`. Fill `.env.staging.example`. At startup the callback audit logs anything that isn't public HTTPS.
 2. **Register every URL** from `/admin/providers` → *Callback & URL matrix* (also in `docs/STAGING.md`).
 3. **Add keys** (staging, test mode):
-   - `OPENAI_API_KEY` and models;
+   - `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` (at least one real AI provider);
    - `RESEND_API_KEY` (or Postmark/SMTP) with a verified sending domain;
    - `GOOGLE_CLIENT_ID/SECRET` and `MICROSOFT_CLIENT_ID/SECRET`;
    - WhatsApp: token, app secret, verify token, phone number id, WABA id, test recipient;
