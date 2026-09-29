@@ -24,8 +24,9 @@ describe("job queue", () => {
       calls++;
       throw new Error("boom");
     });
-    const a = await enqueue("test.flaky", {}, { dedupeKey: "flaky-1", maxAttempts: 2 });
-    const b = await enqueue("test.flaky", {}, { dedupeKey: "flaky-1", maxAttempts: 2 });
+    // Top priority: other test files enqueue agent runs (priority 10) in parallel on the same queue table.
+    const a = await enqueue("test.flaky", {}, { dedupeKey: "flaky-1", maxAttempts: 2, priority: 1000 });
+    const b = await enqueue("test.flaky", {}, { dedupeKey: "flaky-1", maxAttempts: 2, priority: 1000 });
     expect(b.id).toBe(a.id);
 
     const [claimed] = await queue.claim("w1", 50).then((js) => js.filter((j) => j.id === a.id));

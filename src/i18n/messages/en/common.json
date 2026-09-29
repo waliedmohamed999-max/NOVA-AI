@@ -341,7 +341,8 @@
       "activityFound": "Latest activity with {name}:",
       "activityEmpty": "No activity recorded with {name} yet.",
       "noIntegrations": "No accounts connected yet.",
-      "integrationsStatus": "{connected} of {total} connected accounts are working."
+      "integrationsStatus": "{connected} of {total} connected accounts are working.",
+      "greeting": "Hi! Ask me about your customers, sales, content or company — for example:"
     },
     "pages": {
       "open_hot_leads": "hot customers",
@@ -398,7 +399,10 @@
       "markWon": "Mark as won",
       "markLost": "Mark as lost",
       "openKnowledge": "Open Company Brain",
-      "openIntegrations": "Connected accounts"
+      "openIntegrations": "Connected accounts",
+      "followupsToday": "Who needs a follow-up today?",
+      "ourServices": "What services do we offer?",
+      "salesSummary": "Summarize sales"
     },
     "commands": {
       "reviewOverdue": "Review overdue follow-ups",

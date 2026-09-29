@@ -341,7 +341,8 @@
       "activityFound": "آخر نشاط مع {name}:",
       "activityEmpty": "لا يوجد نشاط مسجل مع {name} بعد.",
       "noIntegrations": "لا توجد حسابات مربوطة بعد.",
-      "integrationsStatus": "{connected} من {total} حسابات مربوطة تعمل."
+      "integrationsStatus": "{connected} من {total} حسابات مربوطة تعمل.",
+      "greeting": "أهلًا! اسألني عن عملائك أو مبيعاتك أو محتواك أو شركتك — مثلًا:"
     },
     "pages": {
       "open_hot_leads": "العملاء الساخنين",
@@ -398,7 +399,10 @@
       "markWon": "سجّل كناجحة",
       "markLost": "سجّل كخاسرة",
       "openKnowledge": "فتح عقل الشركة",
-      "openIntegrations": "الحسابات المرتبطة"
+      "openIntegrations": "الحسابات المرتبطة",
+      "followupsToday": "من يحتاج متابعة اليوم؟",
+      "ourServices": "ما خدماتنا؟",
+      "salesSummary": "لخص المبيعات"
     },
     "commands": {
       "reviewOverdue": "راجع المتابعات المتأخرة",

@@ -57,7 +57,12 @@ describe("command parser — local intents (no AI)", () => {
     ["Create a Ramadan campaign.", "create_campaign"],
     ["Prepare next week's Instagram posts.", "prepare_week_content"],
     ["Follow up with hot leads.", "prepare_followups"],
+    // greetings are answered locally (never "needs AI")
+    ["هلا", "greeting"],
+    ["السلام عليكم", "greeting"],
+    ["hello", "greeting"],
     // Company Brain facts (no AI)
+    ["ما هي الخدمات التي نقدمها", "brain_services"],
     ["ما الخدمات التي نقدمها؟", "brain_services"],
     ["اي الخدمات بتاعتنا", "brain_services"],
     ["ما المنتجات؟", "brain_products"],

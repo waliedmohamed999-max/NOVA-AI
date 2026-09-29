@@ -58,3 +58,32 @@ describe("E2E fixture fetcher is locked down", () => {
     }
   });
 });
+
+describe("offering names from a services section (real imported-site lines)", () => {
+  it("keeps real services, drops durations, sentences, CTAs, feature lists and headings", async () => {
+    const { offeringName } = await import("@/server/brain/extract");
+    const keep: [string, string][] = [
+      ["برمجة مواقع الويب", "برمجة مواقع الويب"],
+      ["التصميم الجرافيكي", "التصميم الجرافيكي"],
+      ["ادارة السوشيل ميديا", "ادارة السوشيل ميديا"],
+      ["⭐ باقة البداية", "باقة البداية"],
+      ["🚀 باقة الأعمال", "باقة الأعمال"],
+      ["Website development", "Website development"],
+    ];
+    for (const [line, name] of keep) expect(offeringName(line), line).toBe(name);
+    for (const junk of [
+      "7 أيام",
+      "15 يوم",
+      "التصنيفات",
+      "حسب الطلب",
+      "كتابة وصف احترافي للمنتجات.",
+      "تقــدم خـدمــات تكنــولوجيا المعــلومات والبرمجة",
+      "تساعد المنشآت في السعودية على بناء حضور رقمي احترافي (موقع/تطبيق الكتروني/متجر/ت",
+      "اقسام D M S لخدمات الأعمال",
+      "📦 خدمات إضافية متوفرة",
+      "(نموذج مبدئي – يمكن تخصيصه حسب رغبتك)",
+      "متجر بسيط بـ10 منتجات – تصميم جاهز – بوابة دفع واحدة",
+      "📞 اطلق متجرك الآن مع DMS",
+    ]) expect(offeringName(junk), junk).toBeNull();
+  });
+});

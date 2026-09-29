@@ -43,6 +43,25 @@ const CASE_HEAD = /(case stud|success stor|testimonial|clients say|قصص نجا
 const FAQ_HEAD = /(faq|frequently asked|questions|الأسئلة الشائعة|الاسئلة الشائعة|أسئلة|اسئلة)/i;
 const OBJECTION = /(too expensive|price is high|not now|no budget|already have|غالي|السعر مرتفع|مش دلوقتي|ليس الآن|لا توجد ميزانية|عندنا مزود)/i;
 
+const GENERIC_LINE =
+  /^(التصنيفات|الأقسام|الاقسام|اقسام|أقسام|قسم|حسب الطلب|اطلب|اطلق|تواصل|اتصل|احجز|سجل|اشترك|خدمات إضافية|خدمات اضافية|الباقات|باقاتنا|المزيد|اقرأ المزيد|categories|contact|call us|order|get started|learn more|read more|more|packages|pricing)(\s|$)/i;
+const SENTENCE_START = /^(تقدم|تساعد|نقدم|نساعد|نحن|نوفر|يوفر|توفر|نعمل|we |our |you |this |it )/i;
+const DURATION = /(^\d)|(\d+\s*(يوم|أيام|ايام|ساعة|ساعات|شهر|أشهر|اشهر|سنة|days?|weeks?|months?|hours?|years?)\b)/i;
+
+/** A line under a "services/products" heading that reads like an offering name (not a sentence, label or CTA). */
+export function offeringName(line: string): string | null {
+  const clean = line
+    .replace(/ـ/g, "")
+    .replace(/^[\p{Extended_Pictographic}️\s•\-–—*·]+/u, "")
+    .trim();
+  const words = clean.split(/\s+/).length;
+  if (clean.length < 3 || clean.length > 60 || words > 7) return null;
+  if (/[.:؛،!]$/.test(clean) || /^[([]|[)\]]$/.test(clean)) return null; // sentences, labels, notes
+  if (/ [–—-] /.test(clean) || / [–—] |–|—/.test(clean)) return null; // feature lists "store – design – payment"
+  if (DURATION.test(clean) || GENERIC_LINE.test(clean) || SENTENCE_START.test(clean)) return null;
+  return clean;
+}
+
 const isQuestion = (l: string) => /[?؟]\s*$/.test(l) && l.length >= 8 && l.length <= 220;
 
 /** Local rules over plain text (documents, crawled pages). */
@@ -92,7 +111,8 @@ export function extractLocal(text: string): Candidate[] {
     const price = l.match(PRICE);
     if (price && l.length <= 240) out.push(cand("pricing", { key: l.replace(PRICE, "").replace(/[:\-–—|]+\s*$/, "").trim().slice(0, 80) || "price", value: l.slice(0, 240) }, "local", l));
     if (OBJECTION.test(l) && l.length <= 240) out.push(cand("objection", { objection: l, response: "" }, "local", l));
-    if (section === "services" && l.length >= 3 && l.length <= 70 && !price) out.push(cand("offering", { name: l, type: "SERVICE" }, "local", sectionTitle));
+    const name = section === "services" && !price ? offeringName(l) : null;
+    if (name) out.push(cand("offering", { name, type: "SERVICE" }, "local", sectionTitle));
     else if (section === "policy" || section === "case") buffer.push(l);
   }
   flush();

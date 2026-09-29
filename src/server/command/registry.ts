@@ -68,6 +68,8 @@ const brainFact = (key: IntentKey, sections: BrainSection[], match: IntentDef["m
 
 /** Order matters: the most specific / riskiest intents are tested first. */
 export const INTENTS = [
+  // A greeting is answered locally with what NOVA can do — never "needs AI".
+  d({ key: "greeting", kind: "read", permission: "workspace:read", match: (n) => n.split(" ").length <= 4 && /^(هلا|هلو|اهلا|اهلين|مرحبا|مرحب|السلام عليكم|سلام|صباح الخير|مساء الخير|hi|hello|hey|good (morning|evening|afternoon))(\s|$)/.test(n) }),
   // ── High-risk ──
   d({ key: "delete_anything", kind: "high_risk", permission: "workspace:read", approval: "always", match: has(/(^|\s)(احذف|امسح|شيل|الغي)(\s|$)|\b(delete|remove|erase|wipe)\b/) }),
   d({ key: "approve_all", kind: "high_risk", permission: "workspace:read", approval: "always", match: (n) => /(^|\s)(وافق|اعتمد|اقبل)(\s|$)|\bapprove\b/.test(n) && /(^|\s)(الكل|كل|كله|جميع)(\s|$)|\b(all|everything)\b/.test(n) }),
@@ -157,7 +159,7 @@ export const INTENTS = [
 ] as const satisfies readonly IntentDef[];
 
 export type IntentKey =
-  | "delete_anything" | "approve_all" | "approve_item" | "publish_content" | "send_discount" | "send_quote" | "send_message" | "close_deal" | "move_stage"
+  | "greeting" | "delete_anything" | "approve_all" | "approve_item" | "publish_content" | "send_discount" | "send_quote" | "send_message" | "close_deal" | "move_stage"
   | "import_leads" | "create_campaign" | "draft_sales_message" | "prepare_followups" | "create_followup" | "create_b2b_opportunity" | "create_quote" | "create_lead" | "create_carousel" | "design_post" | "improve_content" | "prepare_week_content" | "run_sales_cycle"
   | "brain_about" | "brain_services" | "brain_products" | "brain_audience" | "brain_strengths" | "brain_pricing" | "brain_tone" | "brain_icp" | "brain_objections" | "brain_content_strategy" | "brain_top_products" | "brain_question"
   | "pipeline_value" | "calendar_lookup" | "lead_activity" | "integrations_status" | "stalled_deals" | "overdue_followups" | "followups_today" | "hot_leads" | "approvals_summary" | "sales_brief" | "best_content" | "lead_sources" | "campaign_summary" | "analytics_summary" | "sales_summary"
