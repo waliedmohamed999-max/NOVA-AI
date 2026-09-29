@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
-    "build:turbo": "next build",
+    "build": "node scripts/migrate-on-build.mjs && next build --webpack",
+    "build:turbo": "node scripts/migrate-on-build.mjs && next build",
     "start": "next start",
     "worker": "tsx src/worker/index.ts",
     "lint": "eslint",

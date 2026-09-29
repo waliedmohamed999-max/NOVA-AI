@@ -221,7 +221,7 @@ docs/                       architecture, security, deployment, integrations…
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Development server (http://localhost:3000). |
-| `npm run build` / `npm run start` | Production build (webpack) and server. |
+| `npm run build` / `npm run start` | Production build (webpack) and server. The build first applies pending database migrations (`prisma migrate deploy`, never destructive) when `DATABASE_URL` is set, so every deploy updates the schema by itself; set `SKIP_DB_MIGRATE=true` to skip. |
 | `npm run build:turbo` | Production build with Turbopack (faster locally; see Troubleshooting for hosting). |
 | `npm run worker` | Job worker + database-backed scheduler. |
 | `npm run lint` | ESLint. |
