@@ -20,6 +20,32 @@ Staging is **not** a way around security. It enforces the same **security floor*
 
 Staging only *reports* functional gaps (local storage, no real email, demo AI). Demo AI output is labelled "Demo AI" in the UI.
 
+## 1b. Hostinger staging (Blocker 1)
+
+**Baseline (2026-09-30).** `node scripts/staging-smoke.mjs` against the current site (`mediumseagreen-rail-823827.hostingersite.com`, serving `main` @ `a528622`) gives:
+- HTTPS, HSTS, clickjacking protection and fail-closed webhooks/cron: ✓
+- `/api/health`, `/api/ready`, request ids: 404, because this branch isn't deployed there.
+- **The app's CSP does not reach the browser.**
+
+**Finding: Hostinger replaces the app's Content-Security-Policy.**
+- The app sends `script-src 'self' 'nonce-…' 'strict-dynamic'` (verified on a local `next start` of the same build).
+- The browser receives only `content-security-policy: upgrade-insecure-requests`, from Hostinger's edge (`server: hcdn`).
+- Headers set in `next.config.ts` (X-Frame-Options, HSTS, nosniff) pass through; only the CSP is overwritten.
+- Result: the nonce-based XSS protection is **off** on Hostinger.
+- **Fix in the environment, not the app:** in hPanel, turn off the CDN/"security headers" option that injects `upgrade-insecure-requests` for this site (or bypass the CDN for it). Then re-run the smoke check. Weakening or duplicating the app's CSP is not the fix.
+
+**Minimal staging setup (no architecture change):**
+1. **A second Hostinger Node.js site** (or subdomain) that deploys from `feature/nova-production-readiness`. If the plan allows only one site, point the existing site at this branch and treat it as staging.
+2. Environment:
+   - `APP_ENV=staging` and `APP_URL=https://<that domain>`;
+   - a **separate Supabase project** as `DATABASE_URL` (ideally restored from a production dump, which is also the Blocker 9 drill);
+   - fresh `AUTH_SECRET`, `ENCRYPTION_KEY`, `CRON_SECRET`, `READY_TOKEN`.
+3. **Worker:** keep `NOVA_INLINE_WORKER=true` (Hostinger runs one Node process).
+   - If Hostinger idles or recycles the process, jobs pause. The worker heartbeat on `/api/ready` shows it.
+   - Backstop: add a Hostinger cron job, every minute, that runs `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/tick`.
+4. **Storage:** Cloudflare R2 (Blocker 2). Hostinger disk is not shared, and files are lost on redeploy.
+5. Deploy, then run `BASE_URL=https://<domain> READY_TOKEN=… node scripts/staging-smoke.mjs`. Every line must be ✓.
+
 ## 2. Environment audit
 
 "Current" = what is known about the Hostinger deployment from its build and runtime logs and settings screenshots (2026-09). Verify each row in hPanel. Values are never written here.
@@ -31,7 +57,7 @@ Staging only *reports* functional gaps (local storage, no real email, demo AI). 
 | `DATABASE_URL` | hosted, separate from prod | hosted (Supabase session pooler) | Supabase pooler | **High**: password was exposed in chat → rotate |
 | `AUTH_SECRET` | 32+ random | 32+ random | set; exposed in screenshots | **High**: rotate (signs everyone out) |
 | `ENCRYPTION_KEY` | 32 bytes base64 | 32 bytes base64 | set; exposed in screenshots | **High**: rotate (connected integrations must reconnect) |
-| `CRON_SECRET` / `READY_TOKEN` | 24+ random | 24+ random | unknown | Medium |
+| `CRON_SECRET` / `READY_TOKEN` | 24+ random | 24+ random | unknown | Medium: needed for the cron backstop and detailed readiness |
 | `NOVA_INLINE_WORKER` | `true` on single-process Hostinger | `false` + separate `npm run worker`, or `true` on one instance | `true` | Medium: one process. The heartbeat on `/api/ready` shows whether the worker is alive |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | at least one real key | at least one real key | none | **Blocker** for the beta |
 | `AI_PRIMARY_PROVIDER` | `anthropic` or `openai` | same | default (`anthropic`) | Low |
