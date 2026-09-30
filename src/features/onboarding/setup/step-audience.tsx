@@ -57,7 +57,7 @@ export function AudienceStep() {
         )}
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-nova-line p-4 sm:p-6">
+      <div className="space-y-5 rounded-3xl border border-line p-4 sm:p-6">
         <QuestionRow label={ta("who.q")} done={Boolean(a.customers?.trim())} required htmlFor={ids.who}>
           <textarea id={ids.who} rows={2} value={a.customers ?? ""} onChange={(e) => s.update("audience", { customers: e.target.value.slice(0, 1000) })} placeholder={ta("who.placeholder")} aria-required className={cn(inputClass, "h-auto min-h-[76px] resize-y py-3")} />
         </QuestionRow>
@@ -67,7 +67,7 @@ export function AudienceStep() {
       </div>
 
       {level >= 2 && (
-        <div className="space-y-5 rounded-3xl border border-nova-line p-4 animate-fade-up sm:p-6">
+        <div className="space-y-5 rounded-3xl border border-line p-4 animate-fade-up sm:p-6">
           {b2b && (
             <>
               <GroupLabel>{ta("b2b.title")}</GroupLabel>
@@ -120,7 +120,7 @@ export function AudienceStep() {
       )}
 
       {level >= 3 && (
-        <div className="space-y-5 rounded-3xl border border-nova-line p-4 animate-fade-up sm:p-6">
+        <div className="space-y-5 rounded-3xl border border-line p-4 animate-fade-up sm:p-6">
           <QuestionRow label={ta("pains.q")} done={Boolean(au.painPoints?.length)} htmlFor={ids.pains}>
             <TagInput id={ids.pains} values={au.painPoints ?? []} max={8} onChange={(v) => s.update("audience", { painPoints: v }, { immediate: true })} placeholder={ta("pains.placeholder")} addLabel={t("business.offerings.add")} removeLabel={(v) => t("business.offerings.remove", { name: v })} />
           </QuestionRow>

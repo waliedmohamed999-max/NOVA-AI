@@ -339,12 +339,9 @@
     animation: var(--animate-shimmer);
     border-radius: var(--radius-sm);
   }
-  /* A soft violet/blue aura used behind AI moments; never a loud gradient. */
-  .ai-aura {
-    background:
-      radial-gradient(60% 60% at 30% 20%, rgb(102 71 240 / 0.12), transparent 70%),
-      radial-gradient(50% 50% at 80% 70%, rgb(0 145 255 / 0.08), transparent 70%);
-  }
+  /* AI moments inside the product stay flat (reference: no decorative gradients on cards);
+     the aurora lives only on dark marketing panels (.aurora). */
+  .ai-aura { background: none; }
   /* Uppercase mono meta label (status, feature tags, section eyebrows). */
   .label-mono {
     font-family: var(--font-mono);
@@ -432,12 +429,5 @@
   }
 }
 
-/* ───────── NOVA orb (home) ───────── */
+/* Soft pulse used by the onboarding "ready" mark. */
 @keyframes nova-glow { 0%,100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }
-@keyframes nova-spin { to { transform: rotate(360deg); } }
-@keyframes nova-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes nova-twinkle { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
-.nova-orb { animation: nova-float 7s ease-in-out infinite; }
-.nova-orb-halo { animation: nova-glow 5s ease-in-out infinite; }
-.nova-orb-grid { animation: nova-spin 60s linear infinite; }
-.nova-orb-star { animation: nova-twinkle 3.2s ease-in-out infinite; }

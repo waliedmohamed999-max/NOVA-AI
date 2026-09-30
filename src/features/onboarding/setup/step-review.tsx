@@ -75,7 +75,7 @@ export function ReviewStep() {
             <p className="text-sm font-bold text-ink">{tr("connect.title")}</p>
             <p className="text-xs text-ink-3">{tr("connect.body")}</p>
           </div>
-          <Link href="/onboarding/connect" onClick={() => void s.flush()} className="inline-flex h-10 items-center rounded-2xl border border-nova-line bg-surface px-4 text-sm font-semibold text-ink hover:border-nova-blue-line">
+          <Link href="/onboarding/connect" onClick={() => void s.flush()} className="inline-flex h-10 items-center rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink hover:border-nova-blue-line">
             {tr("connect.cta")}
           </Link>
         </div>
@@ -84,7 +84,7 @@ export function ReviewStep() {
           <div className="absolute -end-10 -top-10 size-48 rounded-full bg-accent/25 blur-3xl" aria-hidden />
           <div className="relative space-y-4">
             <div className="flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-2xl bg-accent text-white shadow-[0_0_40px_var(--accent-glow)]">
+              <span className="flex size-11 items-center justify-center rounded-2xl bg-accent text-white">
                 <Sparkles className="size-5" />
               </span>
               <h3 className="text-xl font-bold">{tr("ready.title")}</h3>
@@ -123,7 +123,7 @@ function Section({ title, step, children, wide }: { title: string; step: SetupSt
   const s = useSetup();
   const empty = children === null || children === "" || children === undefined || children === false;
   return (
-    <div className={`rounded-2xl border border-nova-line bg-surface-2 p-4 ${wide ? "md:col-span-2" : ""}`}>
+    <div className={`rounded-2xl border border-line bg-surface-2 p-4 ${wide ? "md:col-span-2" : ""}`}>
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <h3 className="text-xs font-bold uppercase tracking-wide text-ink-3">{title}</h3>
         <button type="button" onClick={() => void s.goTo(step)} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-nova-blue hover:bg-nova-blue-soft" aria-label={`${tr("edit")} — ${title}`}>
@@ -150,7 +150,7 @@ function FinishOverlay({ runId, onRetry }: { runId: string; onRetry: () => void 
   }, [run?.status, router]);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-setup-bg/95 px-4 backdrop-blur" role="dialog" aria-modal="true" aria-labelledby="finish-title">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-nova-line bg-surface p-7 shadow-lg">
+      <div className="w-full max-w-md space-y-6 rounded-2xl border border-line bg-surface p-7 shadow-lg">
         <div className="space-y-2 text-center">
           <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-accent text-white shadow-[0_0_60px_var(--accent-glow)] motion-safe:animate-[nova-glow_2.4s_ease-in-out_infinite]">
             <Sparkles className="size-7" />

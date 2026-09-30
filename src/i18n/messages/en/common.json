@@ -63,7 +63,14 @@
     "skipToContent": "Skip to content",
     "mainNav": "Main navigation",
     "account": "Account",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "groups": {
+      "home": "Home",
+      "growth": "Growth",
+      "sales": "Sales",
+      "insights": "Insights",
+      "ai": "AI"
+    }
   },
   "language": {
     "en": "English",

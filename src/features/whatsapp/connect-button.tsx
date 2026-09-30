@@ -119,7 +119,7 @@ export function ConnectWhatsAppButton({ config, onConnected, size = "md" }: { co
         onClick={connect}
         disabled={pending || !usable}
         data-testid="wa-connect"
-        className={cn("inline-flex items-center gap-2.5 rounded-2xl bg-[#1fa855] font-semibold text-white shadow-[0_10px_24px_-12px_#1fa855] transition hover:bg-[#178a45] disabled:opacity-50", size === "lg" ? "h-12 px-6 text-[15px]" : "h-10 px-4 text-sm")}
+        className={cn("inline-flex items-center gap-2.5 rounded-2xl bg-[#1fa855] font-semibold text-white transition hover:bg-[#178a45] disabled:opacity-50", size === "lg" ? "h-12 px-6 text-[15px]" : "h-10 px-4 text-sm")}
       >
         {pending ? <Loader2 className="size-4 animate-spin" /> : <WhatsAppGlyph className="size-5" />}
         {pending ? t("connecting") : t("cta")}

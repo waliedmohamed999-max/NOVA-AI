@@ -32,7 +32,7 @@ export function GoalsStep() {
         </div>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-nova-line p-4 sm:p-6">
+      <div className="space-y-5 rounded-3xl border border-line p-4 sm:p-6">
         <QuestionRow label={tg("goal90.q")} hint={t("optional")} done={Boolean(a.goal90?.trim())} htmlFor={ids.g90}>
           <input id={ids.g90} value={a.goal90 ?? ""} onChange={(e) => s.update("goals", { goal90: e.target.value.slice(0, 300) })} placeholder={tg("goal90.placeholder")} className={inputClass} />
         </QuestionRow>
@@ -118,7 +118,7 @@ function StrategyPreviewPanel() {
             <button type="button" onClick={() => void s.goTo("review", "goals")} disabled={!s.ready("goals")} className="inline-flex h-10 items-center rounded-2xl bg-nova-blue px-4 text-sm font-semibold text-white disabled:opacity-40">
               {t("review")}
             </button>
-            <button type="button" onClick={() => toast(t("laterDone"))} className="inline-flex h-10 items-center rounded-2xl border border-nova-line bg-surface px-4 text-sm font-semibold text-ink">
+            <button type="button" onClick={() => toast(t("laterDone"))} className="inline-flex h-10 items-center rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink">
               {t("later")}
             </button>
           </div>
@@ -131,7 +131,7 @@ function StrategyPreviewPanel() {
 function Item({ title, value, empty, wide }: { title: string; value: string | string[] | null | undefined; empty: string; wide?: boolean }) {
   const has = Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
   return (
-    <div className={cn("rounded-2xl border border-nova-line bg-surface/80 p-3.5", wide && "sm:col-span-2")}>
+    <div className={cn("rounded-2xl border border-line bg-surface/80 p-3.5", wide && "sm:col-span-2")}>
       <dt className="text-xs font-bold uppercase tracking-wide text-ink-3">{title}</dt>
       <dd className={cn("mt-1 text-sm", has ? "text-ink" : "text-ink-4")}>
         {!has ? empty : Array.isArray(value) ? (

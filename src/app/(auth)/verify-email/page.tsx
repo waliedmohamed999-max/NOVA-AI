@@ -26,7 +26,7 @@ export default async function VerifyEmailPage(props: PageProps<"/verify-email">)
       <div className={`mx-auto flex size-14 items-center justify-center rounded-2xl ${ok ? "bg-success-soft text-success" : "bg-warning-soft text-warning"}`}>
         {ok ? <CheckCircle2 className="size-6" /> : <MailWarning className="size-6" />}
       </div>
-      <h1 className="text-2xl font-semibold tracking-tight">{ok ? t("success") : t("failed")}</h1>
+      <h1 className="text-[32px] font-bold leading-tight tracking-[-0.035em]">{ok ? t("success") : t("failed")}</h1>
       <Link href={session ? "/home" : "/sign-in"} className={buttonClass("primary", "lg", "w-full")}>
         {t("continue")}
       </Link>

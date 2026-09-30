@@ -34,7 +34,7 @@ export function StepFooter({ step }: { step: Exclude<SetupStep, "review"> }) {
     });
 
   return (
-    <div className="max-md:sticky max-md:bottom-0 max-md:-mx-5 max-md:-mb-5 max-md:rounded-b-[20px] max-md:border-t max-md:border-nova-line max-md:bg-surface/95 max-md:px-5 max-md:py-4 max-md:backdrop-blur">
+    <div className="max-md:sticky max-md:bottom-0 max-md:-mx-5 max-md:-mb-5 max-md:rounded-b-[20px] max-md:border-t max-md:border-line max-md:bg-surface/95 max-md:px-5 max-md:py-4 max-md:backdrop-blur">
       {tried && !ready && (
         <p role="alert" className="mb-3 text-sm font-medium text-danger">
           {t("nav.missing")}
@@ -47,7 +47,7 @@ export function StepFooter({ step }: { step: Exclude<SetupStep, "review"> }) {
           disabled={pending}
           data-testid="setup-continue"
           className={cn(
-            "inline-flex h-12 items-center gap-3 rounded-2xl bg-ink ps-6 pe-4 text-[15px] font-semibold text-ink-inverse shadow-[0_10px_30px_-10px_rgb(15_23_42/0.6)] transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nova-blue disabled:opacity-70",
+            "inline-flex h-12 items-center gap-3 rounded-2xl bg-ink ps-6 pe-4 text-[15px] font-semibold text-ink-inverse transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nova-blue disabled:opacity-70",
             !ready && "opacity-80",
           )}
         >
@@ -55,7 +55,7 @@ export function StepFooter({ step }: { step: Exclude<SetupStep, "review"> }) {
           <span className="flex size-7 items-center justify-center rounded-full bg-accent text-white">{pending ? <Loader2 className="size-4 animate-spin" /> : <ArrowLeft className="size-4 ltr:rotate-180" />}</span>
         </button>
         <span className="hidden text-sm text-ink-3 sm:inline">{t("nav.next", { step: t(`steps.${next}.title`) })}</span>
-        <button type="button" onClick={onDraft} disabled={pending} className="ms-auto inline-flex h-11 items-center gap-2 rounded-2xl border border-nova-line bg-surface px-4 text-sm font-semibold text-ink-2 transition hover:border-line-strong">
+        <button type="button" onClick={onDraft} disabled={pending} className="ms-auto inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink-2 transition hover:border-line-strong">
           <Bookmark className="size-4" /> {t("save.draft")}
         </button>
       </div>

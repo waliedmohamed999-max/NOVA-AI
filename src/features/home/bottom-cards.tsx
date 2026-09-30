@@ -40,9 +40,9 @@ export function DailyBriefCard({ brief }: { brief: { id: string; narrative: stri
   const t = useTranslations("app.home");
   const tc = useTranslations("common");
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-[var(--nova-line)] bg-surface p-5 shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
+    <section className="flex h-full flex-col rounded-xl border border-line bg-surface p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-3" dir="ltr">
+        <h2 className="label-mono flex items-center gap-2">
           <Sparkles className="size-[18px] text-[var(--orbit-orange)]" aria-hidden /> {t("brief.label")}
         </h2>
         <RefreshBriefButton />
@@ -78,17 +78,17 @@ export function QuickActionsCard() {
     { key: "ask", icon: Search, color: "text-[var(--orbit-blue)]", run: () => openCommand() },
   ];
   return (
-    <section className="h-full rounded-2xl border border-[var(--nova-line)] bg-surface p-5 lg:order-first shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
-      <h2 className="mb-3 text-[16px] font-bold text-ink">{t("title")}</h2>
+    <section className="h-full rounded-xl border border-line bg-surface p-5 lg:order-first">
+      <h2 className="mb-3 text-[15px] font-semibold text-ink">{t("title")}</h2>
       <div className="grid grid-cols-2 gap-2.5">
         {actions.map(({ key, icon: Icon, color, href, run }) => (
           <button
             key={key}
             type="button"
             onClick={() => (href ? router.push(href) : run?.())}
-            className="flex h-[46px] items-center gap-2 rounded-[14px] border border-[var(--nova-line)] bg-surface px-2.5 text-start text-[13px] font-medium text-ink-2 transition hover:border-nova-blue-line hover:bg-nova-blue-soft/40 hover:text-ink"
+            className="flex h-[46px] items-center gap-2.5 rounded-[10px] border border-line bg-surface px-2.5 text-start text-[13px] font-medium text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink"
           >
-            <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-2 ring-1 ring-[var(--nova-line)]", color)}>
+            <span className={cn("app-tile size-7 shrink-0 rounded-[8px]", color)}>
               <Icon className="size-4" strokeWidth={2} aria-hidden />
             </span>
             <span className="min-w-0 leading-tight">{t(key)}</span>

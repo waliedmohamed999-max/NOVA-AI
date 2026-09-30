@@ -32,7 +32,7 @@ export function TopBar({ user, unread }: { user: { name: string | null; email: s
   const s = useSetup();
   const n = SETUP_STEPS.indexOf(s.step) + 1;
   return (
-    <header className="sticky top-0 z-30 border-b border-nova-line/80 bg-surface/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-line/80 bg-surface/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1320px] items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
         <div className="mx-auto hidden w-full max-w-md items-center gap-3 md:flex">
@@ -61,7 +61,7 @@ function MobileProgress() {
   const s = useSetup();
   return (
     <Dialog>
-      <DialogTrigger className="inline-flex h-9 items-center gap-1.5 rounded-full border border-nova-line bg-surface px-3 text-xs font-bold text-ink shadow-xs xl:hidden" aria-label={t("openProgress")}>
+      <DialogTrigger className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-xs font-bold text-ink shadow-xs xl:hidden" aria-label={t("openProgress")}>
         <span dir="ltr">{s.progress.percent}%</span>
         <ChevronDown className="size-3.5 text-ink-3" />
       </DialogTrigger>
@@ -87,7 +87,7 @@ export function Stepper() {
     ol.scrollBy({ left: r.left + r.width / 2 - (box.left + box.width / 2), behavior: "smooth" });
   }, [s.step]);
   return (
-    <nav aria-label={t("sidebar.title")} className="rounded-2xl border border-nova-line bg-surface px-3 py-5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:px-6">
+    <nav aria-label={t("sidebar.title")} className="rounded-2xl border border-line bg-surface px-3 py-5 sm:px-6">
       <ol ref={list} className="-mx-1 flex snap-x items-start overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
         {SETUP_STEPS.map((step, i) => {
           const { state, reachable } = status(step);
@@ -107,7 +107,7 @@ export function Stepper() {
                     "relative z-10 flex size-12 items-center justify-center rounded-full border-2 bg-surface transition",
                     state === "active" && "border-accent text-accent shadow-[0_0_0_6px_var(--accent-soft)]",
                     state === "done" && "border-success bg-success text-white",
-                    state === "upcoming" && "border-nova-line text-ink-3 group-enabled:group-hover:border-nova-blue-line",
+                    state === "upcoming" && "border-line text-ink-3 group-enabled:group-hover:border-nova-blue-line",
                   )}
                 >
                   {state === "done" ? <Check className="size-5" strokeWidth={3} /> : <Icon className="size-5" />}
@@ -193,7 +193,7 @@ export function SidebarBody({ compact }: { compact?: boolean }) {
           );
         })}
       </ol>
-      <div className={cn("space-y-3 rounded-3xl border border-nova-line p-4", compact ? "" : "mx-4 mb-4")}>
+      <div className={cn("space-y-3 rounded-3xl border border-line p-4", compact ? "" : "mx-4 mb-4")}>
         <p className="text-sm font-bold text-ink">{t("sidebar.willDo")}</p>
         <ul className="space-y-3">
           {tasks.map(({ key, Icon, state }) => (
@@ -217,7 +217,7 @@ export function SidebarBody({ compact }: { compact?: boolean }) {
 export function Sidebar() {
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-[88px] overflow-hidden rounded-2xl border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
+      <div className="sticky top-[88px] overflow-hidden rounded-2xl border border-line bg-surface">
         <PartnerCard />
         <SidebarBody />
       </div>

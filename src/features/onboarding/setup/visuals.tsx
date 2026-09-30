@@ -49,7 +49,7 @@ export function HeroGraphic({ className }: { className?: string }) {
       {nodes.map((n) => (
         <span
           key={n.key}
-          className="absolute -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-full border border-nova-line bg-surface/90 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur"
+          className="absolute -translate-x-1/2 -translate-y-[130%] whitespace-nowrap rounded-full border border-line bg-surface/90 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur"
           style={{ left: `${n.x}%`, top: `${n.y}%` }}
         >
           {t(n.key)}

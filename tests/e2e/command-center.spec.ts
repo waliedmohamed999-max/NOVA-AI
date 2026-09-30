@@ -116,7 +116,8 @@ test.describe("Home command center (demo workspace)", () => {
   });
 
   test("keyboard: Ctrl+K focuses the input, Esc clears the result, ↑ recalls the last command", async () => {
-    await page.locator("body").click();
+    // Drop focus on a neutral element (the page centre can be a link in the Home layout).
+    await page.locator("#home-greeting").click();
     await page.keyboard.press("Control+k");
     await expect(page.getByLabel("Ask NOVA")).toBeFocused();
     await expect(page.getByRole("dialog")).toHaveCount(0); // Home keeps its own input; no dialog

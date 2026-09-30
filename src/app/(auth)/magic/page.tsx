@@ -16,7 +16,7 @@ export default async function MagicLinkPage(props: PageProps<"/magic">) {
     return (
       <div className="space-y-6 text-center">
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-warning-soft text-warning"><MailWarning className="size-6" /></div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("invalidTitle")}</h1>
+        <h1 className="text-[32px] font-bold leading-tight tracking-[-0.035em]">{t("invalidTitle")}</h1>
         <p className="text-sm text-ink-3">{t("invalidBody")}</p>
         <Link href="/sign-in" className={buttonClass("primary", "lg", "w-full")}>{t("back")}</Link>
       </div>
@@ -24,7 +24,7 @@ export default async function MagicLinkPage(props: PageProps<"/magic">) {
   return (
     <form method="post" action="/api/auth/magic" className="space-y-6 text-center">
       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-accent-soft text-accent-ink"><KeyRound className="size-6" /></div>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <h1 className="text-[32px] font-bold leading-tight tracking-[-0.035em]">{t("title")}</h1>
       <p className="text-sm text-ink-3" dir="ltr">{link.email}</p>
       <input type="hidden" name="token" value={token as string} />
       <button type="submit" className={buttonClass("primary", "lg", "w-full")}>{t("continue")}</button>

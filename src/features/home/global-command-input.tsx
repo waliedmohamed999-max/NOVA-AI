@@ -70,11 +70,10 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
         aria-busy={cc.pending}
         data-command-active={open || cc.pending ? "true" : undefined}
         className={cn(
-          "flex h-[64px] w-full items-center gap-3 rounded-2xl border border-[var(--nova-line)] bg-surface ps-3 pe-2 shadow-[0_10px_30px_-14px_rgba(30,70,140,.28)] transition focus-within:border-nova-blue-line focus-within:shadow-[0_0_0_4px_var(--nova-blue-soft)]",
-          cc.pending && "border-nova-blue-line",
+          "flex h-[60px] w-full items-center gap-3 rounded-xl bg-surface ps-3 pe-2 transition",
         )}
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-nova-blue-soft text-nova-blue" aria-hidden>
+        <span className="flex size-9 shrink-0 items-center justify-center text-accent" aria-hidden>
           {cc.pending ? <Spinner className="size-5" /> : <Sparkles className="size-5" />}
         </span>
         <input
@@ -119,7 +118,7 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
         <button
           type="submit"
           disabled={cc.pending}
-          className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-nova-navy text-white shadow-md transition hover:brightness-110 disabled:opacity-60"
+          className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-ink text-ink-inverse transition-colors duration-150 hover:bg-[#3a3a3a] disabled:opacity-60"
           aria-label={t("commandSend")}
         >
           {cc.pending ? <Spinner className="size-5" /> : <ArrowUp className="size-5" strokeWidth={2.4} />}
@@ -127,14 +126,14 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
       </form>
 
       {showPanel && (
-        <div id="home-command-panel" className="mt-2 grid gap-4 rounded-[18px] border border-[var(--nova-line)] bg-surface p-3 text-start shadow-sm sm:grid-cols-2">
+        <div id="home-command-panel" className="absolute inset-x-0 top-full z-20 mt-2 grid gap-4 rounded-xl border border-line bg-surface p-3 text-start shadow-lg sm:grid-cols-2">
           {suggestions.length > 0 && (
             <section>
-              <h3 className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-4">{tc("suggestions")}</h3>
+              <h3 className="label-mono mb-1 px-2">{tc("suggestions")}</h3>
               <ul>
                 {suggestions.map((s) => (
                   <li key={s}>
-                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => void run(s)} className="w-full rounded-xl px-2 py-2 text-start text-sm text-ink-2 transition hover:bg-sunken hover:text-ink">
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => void run(s)} className="w-full rounded-[8px] px-2 py-2 text-start text-sm text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
                       {s}
                     </button>
                   </li>
@@ -144,7 +143,7 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
           )}
           {history.length > 0 && (
             <section>
-              <h3 className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-4">{tc("history")}</h3>
+              <h3 className="label-mono mb-1 px-2">{tc("history")}</h3>
               <ul>
                 {history.slice(0, 6).map((h) => (
                   <li key={h}>
@@ -152,7 +151,7 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => void run(h)}
-                      className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-start text-sm text-ink-3 transition hover:bg-sunken hover:text-ink"
+                      className="flex w-full items-center gap-2 rounded-[8px] px-2 py-2 text-start text-sm text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
                       aria-label={`${tc("rerun")}: ${h}`}
                     >
                       <History className="size-3.5 shrink-0" aria-hidden />

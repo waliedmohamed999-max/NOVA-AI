@@ -28,7 +28,7 @@ export function BusinessStep() {
     <StepCard icon={<Building2 />} title={tb("title")} subtitle={tb("subtitle")} footer={<StepFooter step="business" />}>
       {!s.hasOrg && !s.companyName.trim() && <p className="rounded-2xl bg-nova-blue-soft px-4 py-3 text-sm text-nova-blue">{tb("needName")}</p>}
 
-      <div className="space-y-5 rounded-3xl border border-nova-line p-4 sm:p-6">
+      <div className="space-y-5 rounded-3xl border border-line p-4 sm:p-6">
         <QuestionRow label={tb("name.q")} hint={tb("name.hint")} done={Boolean(s.companyName.trim())} required htmlFor={ids.name}>
           <FieldIcon icon={<Building2 />}>
             <input
@@ -77,7 +77,7 @@ export function BusinessStep() {
                   onClick={() => void s.analyze(site)}
                   disabled={!site.trim() || siteInvalid || s.site.phase === "running" || (!s.hasOrg && !s.companyName.trim())}
                   data-testid="analyze-website"
-                  className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-nova-blue px-5 text-sm font-semibold text-white shadow-[0_10px_24px_-12px_var(--nova-blue)] transition hover:bg-nova-blue-strong disabled:opacity-40"
+                  className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-nova-blue px-5 text-sm font-semibold text-white transition hover:bg-nova-blue-strong disabled:opacity-40"
                 >
                   {s.site.phase === "running" ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
                   {tb("website.analyze")}
@@ -146,7 +146,7 @@ export function BusinessStep() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-4 rounded-3xl border border-nova-line bg-surface-2 p-4 sm:p-5">
+        <div className="space-y-4 rounded-3xl border border-line bg-surface-2 p-4 sm:p-5">
           <GroupLabel hint={tb("type.hint")}>{tb("type.q")}</GroupLabel>
           <div role="radiogroup" aria-label={tb("type.q")} className="grid grid-cols-3 gap-2.5">
             {(Object.keys(BUSINESS_TYPES) as BusinessType[]).map((k) => {
@@ -155,7 +155,7 @@ export function BusinessStep() {
             })}
           </div>
         </div>
-        <div className="space-y-4 rounded-3xl border border-nova-line bg-surface-2 p-4 sm:p-5">
+        <div className="space-y-4 rounded-3xl border border-line bg-surface-2 p-4 sm:p-5">
           <GroupLabel hint={tb("customerType.hint")}>{tb("customerType.q")}</GroupLabel>
           <div role="radiogroup" aria-label={tb("customerType.q")} className="grid grid-cols-3 gap-2.5">
             {(Object.keys(CUSTOMER_TYPES) as CustomerType[]).map((k) => {
@@ -265,7 +265,7 @@ function WebsitePanel({ onRetry }: { onRetry: () => void }) {
             {findings.offerings.map((o) => {
               const on = selected.includes(o.id);
               return (
-                <label key={o.id} className={cn("inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm font-medium transition", on ? "border-nova-blue bg-surface text-ink" : "border-nova-line bg-surface/60 text-ink-3")}>
+                <label key={o.id} className={cn("inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm font-medium transition", on ? "border-nova-blue bg-surface text-ink" : "border-line bg-surface/60 text-ink-3")}>
                   <input type="checkbox" className="size-4 accent-[var(--nova-blue)]" checked={on} onChange={() => setPicked(on ? selected.filter((x) => x !== o.id) : [...selected, o.id])} />
                   {o.name}
                 </label>

@@ -58,7 +58,7 @@ export function Segmented<T extends string>({
   size?: "sm" | "md";
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn("inline-flex max-w-full overflow-x-auto rounded-full border border-line bg-sunken/70 p-1 scrollbar-none", className)}>
+    <div role="radiogroup" aria-label={label} className={cn("inline-flex max-w-full gap-0.5 overflow-x-auto rounded-[9px] border border-line bg-surface p-0.5 scrollbar-none", className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -67,14 +67,14 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full font-medium transition-all duration-200",
+            "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[7px] font-medium transition-colors duration-150",
             size === "sm" ? "h-7 px-3 text-xs" : "h-8 px-3.5 text-[13px]",
-            value === o.value ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink",
+            value === o.value ? "bg-black/[0.06] font-semibold text-ink dark:bg-white/[0.1]" : "text-ink-3 hover:bg-black/[0.03] hover:text-ink",
           )}
         >
           {o.label}
           {o.count !== undefined && (
-            <span className={cn("tabular rounded-full px-1.5 text-[11px]", value === o.value ? "bg-accent-soft text-accent-ink" : "bg-line/70 text-ink-3")}>{o.count}</span>
+            <span className={cn("tabular rounded-[5px] px-1.5 text-[11px]", value === o.value ? "bg-accent text-white" : "bg-black/[0.05] text-ink-3")}>{o.count}</span>
           )}
         </button>
       ))}
@@ -93,7 +93,7 @@ export function TabsTrigger({ className, ...props }: ComponentPropsWithoutRef<ty
   return (
     <Tabs.Trigger
       className={cn(
-        "relative -mb-px inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-medium text-ink-3 transition-colors hover:text-ink data-[state=active]:border-ink data-[state=active]:text-ink",
+        "relative -mb-px inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-medium text-ink-3 transition-colors hover:text-ink data-[state=active]:border-accent data-[state=active]:font-semibold data-[state=active]:text-ink",
         className,
       )}
       {...props}

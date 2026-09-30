@@ -43,7 +43,7 @@ function ChannelCard({ name, hint, on, href, icon }: { name: string; hint: strin
   const t = useTranslations("onboarding.setup.channels");
   const s = useSetup();
   return (
-    <div className="flex flex-col rounded-2xl border border-nova-line bg-surface p-4">
+    <div className="flex flex-col rounded-2xl border border-line bg-surface p-4">
       <div className="flex items-center gap-2">
         {icon ?? <Link2 className="size-5 text-ink-3" />}
         <span className="text-sm font-bold">{name}</span>
@@ -52,7 +52,7 @@ function ChannelCard({ name, hint, on, href, icon }: { name: string; hint: strin
       {on ? (
         <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-success"><CheckCircle2 className="size-4" /> {t("connected")}</span>
       ) : (
-        <Link href={href} onClick={() => void s.flush()} className="mt-3 inline-flex h-9 items-center justify-center rounded-xl border border-nova-line text-sm font-semibold hover:bg-surface-2">
+        <Link href={href} onClick={() => void s.flush()} className="mt-3 inline-flex h-9 items-center justify-center rounded-xl border border-line text-sm font-semibold hover:bg-surface-2">
           {t("connect")}
         </Link>
       )}
@@ -95,7 +95,7 @@ function WhatsAppCard({ state, onConnected }: { state: { connected: boolean; dis
               <p className="text-sm font-semibold">{t("prefs.title")}</p>
               <div className="flex flex-wrap gap-2" role="group" aria-label={t("prefs.title")}>
                 {WA_GOALS.map((g) => (
-                  <button key={g} type="button" role="checkbox" aria-checked={goals.includes(g)} disabled={pending} onClick={() => toggle(g)} className={cn("rounded-full border px-3.5 py-2 text-sm font-semibold transition", goals.includes(g) ? "border-[#1fa855] bg-[#e7f8ee] text-[#0e5f2f]" : "border-nova-line bg-surface text-ink-2")}>
+                  <button key={g} type="button" role="checkbox" aria-checked={goals.includes(g)} disabled={pending} onClick={() => toggle(g)} className={cn("rounded-full border px-3.5 py-2 text-sm font-semibold transition", goals.includes(g) ? "border-[#1fa855] bg-[#e7f8ee] text-[#0e5f2f]" : "border-line bg-surface text-ink-2")}>
                     {t(`prefs.${g}`)}
                   </button>
                 ))}

@@ -9,7 +9,7 @@ import { useSetup } from "./state";
 /** White step card with an icon tile, title, subtitle and the live save state. */
 export function StepCard({ icon, title, subtitle, children, footer }: { icon: ReactNode; title: string; subtitle: string; children: ReactNode; footer?: ReactNode }) {
   return (
-    <section className="rounded-2xl border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
+    <section className="rounded-2xl border border-line bg-surface">
       <header className="flex items-start justify-between gap-4 px-5 pt-6 sm:px-8 sm:pt-7">
         <div className="flex items-start gap-3.5">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-nova-blue-soft text-nova-blue ring-1 ring-nova-blue-line [&_svg]:size-[22px]">{icon}</span>
@@ -21,7 +21,7 @@ export function StepCard({ icon, title, subtitle, children, footer }: { icon: Re
         <SaveBadge />
       </header>
       <div className="space-y-6 px-5 py-6 sm:px-8">{children}</div>
-      {footer && <footer className="border-t border-nova-line px-5 py-5 sm:px-8">{footer}</footer>}
+      {footer && <footer className="border-t border-line px-5 py-5 sm:px-8">{footer}</footer>}
     </section>
   );
 }
@@ -58,7 +58,7 @@ export function SaveBadge() {
 export function QuestionRow({ label, hint, done, required, children, htmlFor }: { label: string; hint?: string; done?: boolean; required?: boolean; children: ReactNode; htmlFor?: string }) {
   const t = useTranslations("onboarding.setup");
   return (
-    <div className="grid gap-3 border-b border-nova-line/70 pb-5 last:border-0 last:pb-0 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_1.75rem] md:items-center md:gap-5">
+    <div className="grid gap-3 border-b border-line/70 pb-5 last:border-0 last:pb-0 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_1.75rem] md:items-center md:gap-5">
       <div className="space-y-0.5">
         <label htmlFor={htmlFor} className="block text-[15px] font-semibold text-ink">
           {label}
@@ -75,7 +75,7 @@ export function QuestionRow({ label, hint, done, required, children, htmlFor }: 
 }
 
 export const inputClass =
-  "h-12 w-full rounded-2xl border border-nova-line bg-surface px-4 text-[15px] text-ink shadow-[0_1px_2px_rgb(15_23_42/0.04)] outline-none transition placeholder:text-ink-4 focus:border-nova-blue focus:ring-4 focus:ring-nova-blue/10 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger";
+  "h-12 w-full rounded-2xl border border-line bg-surface px-4 text-[15px] text-ink outline-none transition placeholder:text-ink-4 focus:border-nova-blue focus:ring-4 focus:ring-nova-blue/10 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger";
 
 /** Big selectable card (single or multi choice). */
 export function ChoiceCard({ selected, onClick, icon, title, desc, role = "radio", disabled }: { selected: boolean; onClick: () => void; icon: ReactNode; title: string; desc?: string; role?: "radio" | "checkbox"; disabled?: boolean }) {
@@ -88,7 +88,7 @@ export function ChoiceCard({ selected, onClick, icon, title, desc, role = "radio
       onClick={onClick}
       className={cn(
         "group relative flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border bg-surface px-3 py-4 text-center transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nova-blue disabled:cursor-not-allowed disabled:opacity-50",
-        selected ? "border-nova-blue bg-nova-blue-soft/60 shadow-[0_0_0_3px_var(--nova-blue-soft)]" : "border-nova-line hover:-translate-y-0.5 hover:border-nova-blue-line hover:shadow-sm",
+        selected ? "border-nova-blue bg-nova-blue-soft/60 shadow-[0_0_0_3px_var(--nova-blue-soft)]" : "border-line hover:-translate-y-0.5 hover:border-nova-blue-line hover:shadow-sm",
       )}
     >
       {selected && (
@@ -114,7 +114,7 @@ export function Pill({ selected, onClick, children, disabled }: { selected: bool
       onClick={onClick}
       className={cn(
         "inline-flex h-11 items-center gap-2 rounded-full border ps-4 pe-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nova-blue disabled:cursor-not-allowed disabled:opacity-50",
-        selected ? "border-accent/30 bg-accent-soft text-ink" : "border-nova-line bg-surface text-ink-2 hover:border-line-strong",
+        selected ? "border-accent/30 bg-accent-soft text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong",
       )}
     >
       <span>{children}</span>
@@ -164,7 +164,7 @@ export function TagInput({ values, onChange, placeholder, max = 12, addLabel, re
           className={cn(inputClass, "h-11")}
           maxLength={120}
         />
-        <button type="button" onClick={add} disabled={disabled || !draft.trim()} className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-2xl border border-nova-line bg-surface px-4 text-sm font-semibold text-ink transition hover:border-nova-blue-line disabled:opacity-40">
+        <button type="button" onClick={add} disabled={disabled || !draft.trim()} className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:border-nova-blue-line disabled:opacity-40">
           <Plus className="size-4" /> {addLabel}
         </button>
       </div>

@@ -28,7 +28,7 @@ function FormError({ code }: { code?: string }) {
 function Heading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-8 space-y-2">
-      <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em]">{title}</h1>
+      <h1 className="text-[40px] font-bold leading-[1.08] tracking-[-0.04em]">{title}</h1>
       {subtitle && <p className="text-[15px] text-ink-3">{subtitle}</p>}
     </div>
   );

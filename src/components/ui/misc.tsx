@@ -48,14 +48,13 @@ export function EmptyState({
     <div className={cn("flex flex-col items-center text-center", compact ? "gap-3 px-6 py-10" : "gap-4 px-6 py-16", className)}>
       {icon && (
         <div className="relative">
-          <div className="absolute inset-0 -m-3 rounded-full ai-aura blur-md" aria-hidden />
-          <div className="relative flex size-14 items-center justify-center rounded-2xl border border-line bg-surface text-accent shadow-sm [&_svg]:size-6">
+          <div className="app-tile relative size-14 rounded-[14px] text-accent [&_svg]:size-6">
             {icon}
           </div>
         </div>
       )}
       <div className="max-w-sm space-y-1.5">
-        <h3 className="text-lg font-semibold tracking-tight text-ink">{title}</h3>
+        <h3 className="text-[20px] font-semibold tracking-[-0.02em] text-ink">{title}</h3>
         {description && <p className="text-sm leading-relaxed text-ink-3 text-pretty">{description}</p>}
       </div>
       {action && <div className="mt-1 flex flex-wrap justify-center gap-2">{action}</div>}
@@ -82,7 +81,7 @@ export function Stat({ label, value, delta, hint }: { label: ReactNode; value: R
     <div className="space-y-1.5">
       <div className="text-[13px] text-ink-3">{label}</div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tracking-tight tabular">{value}</span>
+        <span className="text-[26px] font-bold leading-none tracking-[-0.03em] tabular">{value}</span>
         {delta && <span className={cn("text-xs font-semibold tabular", delta.positive ? "text-success" : "text-danger")}>{delta.value}</span>}
       </div>
       {hint && <div className="text-xs text-ink-4">{hint}</div>}

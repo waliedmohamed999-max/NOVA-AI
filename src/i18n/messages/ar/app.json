@@ -101,12 +101,12 @@
   "home": {
     "hero": {
       "greeting": {
-        "morning": "Good morning, {name}.",
-        "afternoon": "Good afternoon, {name}.",
-        "evening": "Good evening, {name}."
+        "morning": "صباح الخير، {name}.",
+        "afternoon": "مساء الخير، {name}.",
+        "evening": "مساء الخير، {name}."
       },
-      "calm": "Your AI team is active and everything's under control.",
-      "working": "{count, plural, one {Your AI team is working on # task right now.} other {Your AI team is working on # tasks right now.}}",
+      "calm": "فريقك الذكي يعمل، وكل شيء تحت السيطرة.",
+      "working": "{count, plural, one {فريقك الذكي يعمل الآن على مهمة واحدة.} two {فريقك الذكي يعمل الآن على مهمتين.} few {فريقك الذكي يعمل الآن على # مهام.} many {فريقك الذكي يعمل الآن على # مهمة.} other {فريقك الذكي يعمل الآن على # مهمة.}}",
       "headline": "نظامك الذكي المتكامل لإدارة النمو",
       "body": "يعمل فريقك الذكي على تنفيذ المهام، متابعة الصفقات، وخدمة العملاء تلقائيًا."
     },
@@ -123,14 +123,14 @@
     "commandSend": "أرسل إلى فريقك الذكي",
     "briefRefresh": "تحديث",
     "brief": {
-      "label": "AI DAILY BRIEF",
+      "label": "الموجز اليومي",
       "title": "موجزك اليومي جاهز صباحًا",
       "readyTitle": "موجزك اليومي جاهز",
       "body": "ستحصل على ملخص شامل لأداء فريقك، الصفقات، العملاء، والمهام المهمة مع التوصيات الذكية.",
       "open": "اقرأ موجز اليوم"
     },
     "actions": {
-      "title": "Quick actions",
+      "title": "إجراءات سريعة",
       "approvals": "مراجعة الموافقات",
       "deals": "فتح الصفقات",
       "leads": "متابعة العملاء",

@@ -54,12 +54,12 @@ export function BrandStep() {
         </div>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-nova-line p-4 sm:p-6">
+      <div className="space-y-5 rounded-3xl border border-line p-4 sm:p-6">
         <QuestionRow label={t("colors.q")} done={colors.length > 0}>
           <div className="flex flex-wrap items-center gap-2.5">
             {colors.map((c, i) => (
               <span key={i} className="group relative">
-                <label className="relative block size-12 cursor-pointer overflow-hidden rounded-2xl border border-nova-line shadow-xs" style={{ background: c }}>
+                <label className="relative block size-12 cursor-pointer overflow-hidden rounded-2xl border border-line shadow-xs" style={{ background: c }}>
                   <input type="color" value={c} onChange={(e) => s.update("brand", { colors: colors.map((x, j) => (j === i ? e.target.value : x)) })} className="absolute inset-0 cursor-pointer opacity-0" aria-label={t("colors.color", { n: i + 1 })} />
                 </label>
                 <button type="button" onClick={() => s.update("brand", { colors: colors.filter((_, j) => j !== i) }, { immediate: true })} className="absolute -end-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-ink text-ink-inverse opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100" aria-label={t("colors.remove")}>
@@ -79,7 +79,7 @@ export function BrandStep() {
           <div className="flex flex-wrap items-center gap-3">
             {logo && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} alt={t("logo.alt")} className="size-14 rounded-2xl border border-nova-line bg-surface object-contain p-1.5" />
+              <img src={logo} alt={t("logo.alt")} className="size-14 rounded-2xl border border-line bg-surface object-contain p-1.5" />
             )}
             <input
               ref={fileRef}
@@ -93,7 +93,7 @@ export function BrandStep() {
                 e.target.value = "";
               }}
             />
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="inline-flex h-11 items-center gap-2 rounded-2xl border border-nova-line bg-surface px-4 text-sm font-semibold text-ink transition hover:border-nova-blue-line disabled:opacity-60">
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:border-nova-blue-line disabled:opacity-60">
               {uploading ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
               {uploading ? t("logo.uploading") : logo ? t("logo.replace") : t("logo.upload")}
             </button>

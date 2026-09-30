@@ -129,7 +129,7 @@ function DeskBody({ summary, view, filters, pipelineValue, members, stages, sour
       <div className="space-y-7" data-testid="sales-desk">
         {/* ── Hero ── */}
         <header className="relative overflow-hidden rounded-2xl border border-line bg-surface px-5 py-6 shadow-xs sm:px-8 sm:py-8">
-          <div className="pointer-events-none absolute -top-24 end-[-6rem] size-72 rounded-full bg-[radial-gradient(circle,var(--nova-blue,#3b5bdb)_0%,transparent_65%)] opacity-[0.07]" aria-hidden />
+          
           <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-4">NOVA / SALES DESK</p>
@@ -221,14 +221,14 @@ function DeskBody({ summary, view, filters, pipelineValue, members, stages, sour
             </dl>
 
             {/* ── Workspace tabs (sticky) + filters ── */}
-            <div className="sticky top-[68px] z-20 -mx-4 space-y-2 border-b border-line bg-canvas/90 px-4 py-2 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:-mx-7 lg:px-7">
+            <div className="sticky top-[52px] z-20 -mx-4 space-y-2 border-b border-line bg-canvas/90 px-4 pb-2 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:top-0 lg:-mx-8 lg:px-8">
               <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]" aria-label={t("tabsLabel")}>
                 {TABS.map((v) => (
                   <Link
                     key={v}
                     href={href({ view: v === "overview" ? null : v, tab: null, page: null })}
                     aria-current={view === v ? "page" : undefined}
-                    className={cn("shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition", view === v ? "bg-ink text-ink-inverse" : "text-ink-3 hover:bg-sunken hover:text-ink")}
+                    className={cn("relative shrink-0 border-b-2 px-2.5 pb-2.5 pt-3 text-sm font-medium transition-colors duration-150", view === v ? "border-accent font-semibold text-ink" : "border-transparent text-ink-3 hover:text-ink")}
                   >
                     {t(`tabs.${v}`)}
                   </Link>

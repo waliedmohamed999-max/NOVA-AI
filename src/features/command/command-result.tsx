@@ -55,7 +55,7 @@ export function CommandResult({
   if (phase === "idle") return null;
   if (phase === "understanding" || phase === "executing") {
     return (
-      <div role="status" aria-live="polite" data-command-phase={phase} className="flex items-center gap-3 rounded-[18px] border border-[var(--nova-line)] bg-surface px-4 py-3.5 text-[15px] text-ink-2 shadow-sm">
+      <div role="status" aria-live="polite" data-command-phase={phase} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3.5 text-[15px] text-ink-2 shadow-sm">
         <Spinner className="size-4 text-accent" />
         <span>{t(phase)}</span>
       </div>
@@ -80,7 +80,7 @@ export function CommandResult({
 
   if (!result) {
     return (
-      <div role="alert" data-command-status="failed" className="rounded-[18px] border border-danger/25 bg-danger-soft px-4 py-3.5 text-[15px] text-danger">
+      <div role="alert" data-command-status="failed" className="rounded-xl border border-danger/25 bg-danger-soft px-4 py-3.5 text-[15px] text-danger">
         <p className="font-semibold">{t("cantDo")}</p>
         <p className="mt-0.5 text-sm">{reason(error)}</p>
       </div>
@@ -98,7 +98,7 @@ export function CommandResult({
       aria-live="polite"
       data-command-status={result.status}
       data-command-intent={result.intent ?? "unknown"}
-      className={cn("relative rounded-[18px] border bg-surface px-4 py-3.5 text-start shadow-sm", isError ? "border-danger/25" : "border-[var(--nova-line)]")}
+      className={cn("relative rounded-xl border bg-surface px-4 py-3.5 text-start shadow-sm", isError ? "border-danger/25" : "border-line")}
     >
       <button type="button" onClick={onDismiss} className="absolute end-2.5 top-2.5 rounded-full p-1.5 text-ink-4 transition hover:bg-sunken hover:text-ink" aria-label={t("dismiss")}>
         <X className="size-3.5" />

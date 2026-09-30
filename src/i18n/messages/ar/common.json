@@ -63,7 +63,14 @@
     "skipToContent": "انتقل إلى المحتوى",
     "mainNav": "التنقل الرئيسي",
     "account": "الحساب",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "groups": {
+      "home": "الرئيسية",
+      "growth": "النمو",
+      "sales": "المبيعات",
+      "insights": "الرؤى",
+      "ai": "الذكاء"
+    }
   },
   "language": {
     "en": "English",
