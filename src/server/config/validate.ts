@@ -28,6 +28,7 @@ export const CONFIG_SPEC: { key: string; category: ConfigCategory; note: string 
   { key: "CRON_SECRET", category: "optional", note: "Required when jobs run through /api/cron/tick (no long-running worker)" },
   { key: "NOVA_INLINE_WORKER / WORKER_CONCURRENCY", category: "optional", note: "Run the worker inside the web process (single-server hosts)" },
   { key: "SENTRY_DSN / SENTRY_ENVIRONMENT / SENTRY_RELEASE", category: "optional", note: "Error tracking (secrets are scrubbed)" },
+  { key: "DATABASE_POOL_MAX", category: "optional", note: "DB connections per process (default 4 in production). Keep processes × this under the pooler limit (Supabase session mode: 15)" },
   { key: "LOG_LEVEL", category: "optional", note: "info by default" },
   { key: "OPENAI_API_KEY / ANTHROPIC_API_KEY / OPENAI_*", category: "provider", note: "AI features stay 'not set up' without a key" },
   { key: "STRIPE_*", category: "provider", note: "Billing stays off until key + webhook secret + prices are set" },
