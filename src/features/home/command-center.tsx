@@ -97,16 +97,16 @@ export async function HomeCommandCenter({
       </div>
 
       {/* Small screens: orb + module grid */}
-      <div className="relative mt-4 flex flex-col items-center overflow-hidden md:hidden">
-        <NovaOrb size={170} subtitle="AI OPERATING SYSTEM" />
-        <div className="mt-2 grid w-full grid-cols-2 gap-2 [&_a]:min-w-0 [&_a]:pe-3">
+      <div className="relative mt-3 flex flex-col items-center md:hidden">
+        <NovaOrb size={150} subtitle="AI OPERATING SYSTEM" />
+        <div className="relative mt-1 grid w-full grid-cols-3 gap-2">
           {[...START, ...END].map((m) => (
-            <OrbitModule key={m.key} href={m.href} label={t(`orbit.${m.key}`)} icon={m.icon} color={m.color} className="w-full" />
+            <OrbitModule key={m.key} href={m.href} label={t(`orbit.${m.key}`)} icon={m.icon} color={m.color} compact />
           ))}
         </div>
       </div>
 
-      <div className="rainbow-border mt-6 rounded-[16px]">
+      <div className="rainbow-border mt-5 rounded-[16px] md:mt-6">
         <div className="rounded-[16px] bg-surface p-1">
           <GlobalCommandInput suggestions={suggestions.map((s) => tc(`commands.${s.key}`))} history={history} />
         </div>

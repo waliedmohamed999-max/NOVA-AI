@@ -214,7 +214,7 @@ export function AppShell({ data, children }: { data: ShellData; children: ReactN
           {MOBILE_TABS.slice(2).map((item) => (
             <MobileTab key={item.href} item={item} active={isActive(pathname, item.href)} count={countFor(item, data.counts)} />
           ))}
-          <button onClick={() => setMoreOpen(true)} className="flex flex-col items-center gap-1 text-[11px] font-medium text-ink-3" aria-haspopup="dialog">
+          <button onClick={() => setMoreOpen(true)} className="flex min-w-0 flex-col items-center gap-1 whitespace-nowrap text-[11px] font-medium text-ink-3" aria-haspopup="dialog">
             <MORE_ICON className="size-5" aria-hidden />
             {t("nav.more")}
           </button>
@@ -251,12 +251,16 @@ function MobileTab({ item, active, count }: { item: NavItem; active: boolean; co
   const t = useTranslations("common.nav");
   const Icon = item.icon;
   return (
-    <Link href={item.href} aria-current={active ? "page" : undefined} className={cn("relative flex flex-col items-center gap-1 text-[11px] font-medium", active ? "text-ink" : "text-ink-3")}>
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={cn("relative flex min-w-0 flex-col items-center gap-1 text-[11px] font-medium", active ? "text-ink" : "text-ink-3")}
+    >
       <span className="relative">
         <Icon className="size-5" strokeWidth={active ? 2.3 : 1.75} aria-hidden />
         {count ? <span className="absolute -end-2 -top-1.5 min-w-4 rounded-full bg-accent px-1 text-center text-[10px] font-semibold leading-4 text-white">{count > 9 ? "9+" : count}</span> : null}
       </span>
-      {t(item.key as "home")}
+      <span className="max-w-full truncate whitespace-nowrap">{t((item.short ?? item.key) as "home")}</span>
     </Link>
   );
 }

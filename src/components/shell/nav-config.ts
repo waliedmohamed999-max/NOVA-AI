@@ -19,7 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type NavItem = { href: string; key: string; icon: LucideIcon; badge?: "approvals" | "leads" };
+/** `short`: a translation key under common.nav used where space is tight (mobile tab bar). */
+export type NavItem = { href: string; key: string; icon: LucideIcon; badge?: "approvals" | "leads"; short?: string };
 
 /**
  * Reference app navigation: a black icon rail of hubs, and a light sidebar listing the active hub's pages.
@@ -84,7 +85,7 @@ export const FOOTER_NAV: NavItem[] = [
 export const MOBILE_TABS: NavItem[] = [
   { href: "/home", key: "home", icon: Home },
   { href: "/approvals", key: "approvals", icon: CheckCheck, badge: "approvals" },
-  { href: "/sales", key: "sales", icon: Handshake, badge: "leads" },
+  { href: "/sales", key: "sales", icon: Handshake, badge: "leads", short: "groups.sales" },
 ];
 
 export const MORE_ICON = LayoutGrid;

@@ -12,9 +12,43 @@ const COLOR: Record<OrbitColor, { icon: string; bg: string }> = {
   purple: { icon: "text-[var(--orbit-purple)]", bg: "bg-[color-mix(in_oklab,var(--orbit-purple)_12%,white)]" },
 };
 
-/** A white pill module orbiting the NOVA sphere; links to the real section. */
-export function OrbitModule({ href, label, icon: Icon, color, className, count }: { href: string; label: string; icon: LucideIcon; color: OrbitColor; className?: string; count?: number }) {
+/**
+ * A white pill module orbiting the NOVA sphere; links to the real section.
+ * `compact`: small-screen tile (icon above label) used in the mobile hub grid.
+ */
+export function OrbitModule({
+  href,
+  label,
+  icon: Icon,
+  color,
+  className,
+  count,
+  compact,
+}: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  color: OrbitColor;
+  className?: string;
+  count?: number;
+  compact?: boolean;
+}) {
   const c = COLOR[color];
+  if (compact)
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-[16px] border border-white/80 bg-surface/95 px-1.5 py-2.5 shadow-[0_8px_20px_-12px_rgba(30,70,140,.3)] ring-1 ring-[var(--nova-line)] transition active:scale-[.97]",
+          className,
+        )}
+      >
+        <span className={cn("flex size-9 items-center justify-center rounded-full", c.bg)}>
+          <Icon className={cn("size-[18px]", c.icon)} strokeWidth={2} aria-hidden />
+        </span>
+        <span className="max-w-full truncate text-[13px] font-semibold text-ink">{label}</span>
+      </Link>
+    );
   return (
     <Link
       href={href}
