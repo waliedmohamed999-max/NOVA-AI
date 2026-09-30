@@ -438,3 +438,44 @@
 .nova-orb-halo { animation: nova-glow 5s ease-in-out infinite; }
 .nova-orb-grid { animation: nova-spin 60s linear infinite; }
 .nova-orb-star { animation: nova-twinkle 3.2s ease-in-out infinite; }
+
+/* ───────── Landing hero orbit ───────── */
+/* The scene is authored at 640×470 and scaled as a whole (offset-path needs px coordinates). */
+.hero-orbit-frame { --s: .5; --label: 1.5; width: calc(640px * var(--s)); height: calc(470px * var(--s)); }
+.hero-orbit-scene { transform: scale(var(--s)); transform-origin: 0 0; }
+@media (min-width: 26rem) { .hero-orbit-frame { --s: .58; --label: 1.4; } }
+@media (min-width: 40rem) { .hero-orbit-frame { --s: .86; --label: 1; } }
+@media (min-width: 64rem) { .hero-orbit-frame { --s: .78; --label: 1.08; } }
+@media (min-width: 80rem) { .hero-orbit-frame { --s: .92; --label: 1; } }
+/* Labels are sized in em and boosted where the scene is scaled down, so they stay readable on phones. */
+.hero-orbit-label { font-size: calc(14.5px * var(--label)); }
+.hero-orbit-dots {
+  background-image: radial-gradient(rgba(90, 140, 220, .32) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 46%, #000 20%, transparent 72%);
+}
+/* A rider follows its ellipse upright; the lower half of the orbit is in front of the sphere, the upper half behind. */
+@keyframes hero-orbit-travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+@keyframes hero-orbit-depth {
+  0% { z-index: 30; scale: .94; opacity: .95; }
+  25% { z-index: 30; scale: 1.05; opacity: 1; }
+  49.9% { z-index: 30; scale: .94; opacity: .95; }
+  50% { z-index: 5; scale: .94; opacity: .95; }
+  75% { z-index: 5; scale: .8; opacity: .55; }
+  100% { z-index: 5; scale: .94; opacity: .95; }
+}
+@keyframes hero-orbit-card { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
+.hero-orbit-rider {
+  offset-rotate: 0deg;
+  offset-distance: var(--orbit-pos, 0%);
+  animation:
+    hero-orbit-travel var(--orbit-seconds, 48s) linear var(--orbit-delay, 0s) infinite,
+    hero-orbit-depth var(--orbit-seconds, 48s) linear var(--orbit-delay, 0s) infinite;
+}
+.hero-orbit-card { animation: hero-orbit-card 6.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  /* Stay evenly spread on the orbit instead of collapsing to its start. */
+  .hero-orbit-rider { animation: none !important; z-index: 30; }
+  .hero-orbit-pulse { display: none; }
+  .hero-orbit-card { animation: none !important; }
+}
