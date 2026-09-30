@@ -47,11 +47,11 @@ export function TemplatesView({ rows, canManage, connected, aiReady }: { rows: T
       </div>
       {tab === "DRAFT" && <p className="text-xs text-ink-3">{t("draftNote")}</p>}
       {shown.length === 0 ? (
-        <p className="rounded-[20px] border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
+        <p className="rounded-2xl border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-testid="wa-templates">
           {shown.map((r) => (
-            <li key={r.id} className="flex flex-col rounded-[20px] border border-line bg-surface p-4 shadow-xs">
+            <li key={r.id} className="flex flex-col rounded-2xl border border-line bg-surface p-4 shadow-xs">
               <div className="flex items-center gap-2">
                 <span className="truncate font-mono text-sm font-semibold" dir="ltr">{r.name}</span>
                 <span className="text-xs text-ink-4">{r.language}</span>

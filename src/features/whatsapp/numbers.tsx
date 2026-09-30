@@ -30,7 +30,7 @@ export function NumbersView({ health, signup, canManage }: { health: ConnectionH
       {active.length === 0 && canManage && <ConnectWhatsAppButton config={signup} size="lg" />}
       <ul className="grid gap-3 md:grid-cols-2">
         {health.numbers.map((n) => (
-          <li key={n.id} className="rounded-[20px] border border-line bg-surface p-5 shadow-xs" data-testid="wa-number">
+          <li key={n.id} className="rounded-2xl border border-line bg-surface p-5 shadow-xs" data-testid="wa-number">
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold" dir="ltr">{n.display ?? "—"}</span>
               <StateBadge state={n.status} label={ts(n.status as "connected")} />

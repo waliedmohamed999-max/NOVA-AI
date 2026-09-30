@@ -40,7 +40,7 @@ function Hero() {
   const name = s.userName.split(/\s+/)[0];
   const [before, after] = t("hero.title", { name: "\u0000" }).split("\u0000");
   return (
-    <section className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,var(--nova-hero-from)_0%,var(--nova-hero-to)_100%)] px-5 py-6 ring-1 ring-nova-line sm:px-8 sm:py-8">
+    <section className="relative overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--nova-hero-from)_0%,var(--nova-hero-to)_100%)] px-5 py-6 ring-1 ring-nova-line sm:px-8 sm:py-8">
       <div className="grid items-center gap-4 md:grid-cols-[minmax(0,1fr)_260px] lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="space-y-3">
           <h1 className="text-balance text-2xl font-extrabold leading-tight tracking-tight text-ink sm:text-[34px]">

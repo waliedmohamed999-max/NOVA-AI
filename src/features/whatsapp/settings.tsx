@@ -37,7 +37,7 @@ export function SettingsView({ initial, suppressions, health, canManage, isAdmin
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-5">
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
           <h2 className="mb-3 text-[15px] font-bold">{t("level.title")}</h2>
           <div role="radiogroup" aria-label={t("level.title")} className="grid gap-2 sm:grid-cols-2">
             {LEVELS.map((l) => (
@@ -53,7 +53,7 @@ export function SettingsView({ initial, suppressions, health, canManage, isAdmin
           </div>
         </section>
 
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
           <h2 className="mb-3 text-[15px] font-bold">{t("safe.title")}</h2>
           <div className="flex flex-wrap gap-2">
             {SAFE.map((i) => {
@@ -67,7 +67,7 @@ export function SettingsView({ initial, suppressions, health, canManage, isAdmin
           </div>
         </section>
 
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
           <h2 className="text-[15px] font-bold">{t("optOut.title")}</h2>
           <p className="mb-3 text-xs text-ink-3">{t("optOut.hint")}</p>
           <div className="flex flex-wrap gap-1.5">
@@ -93,7 +93,7 @@ export function SettingsView({ initial, suppressions, health, canManage, isAdmin
           </label>
         </section>
 
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs" data-testid="wa-suppression">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs" data-testid="wa-suppression">
           <h2 className="text-[15px] font-bold">{t("suppression.title")}</h2>
           <p className="mb-3 text-xs text-ink-3">{t("suppression.hint")}</p>
           {canManage && (
@@ -130,7 +130,7 @@ export function SettingsView({ initial, suppressions, health, canManage, isAdmin
       </div>
 
       <aside className="space-y-4">
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs" data-testid="wa-health">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs" data-testid="wa-health">
           <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold">{t("health.title")} {pending && <Loader2 className="size-4 animate-spin" />}</h2>
           <ul className="space-y-2.5 text-sm">
             <li className="flex items-center gap-2"><Status ok={n?.status === "connected"} /> {t("health.connection")} <span className="ms-auto text-ink-3" dir="ltr">{n?.display ?? "—"}</span></li>

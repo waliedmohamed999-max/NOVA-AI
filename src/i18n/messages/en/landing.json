@@ -1,5 +1,14 @@
 {
-  "nav": { "product": "Product", "team": "AI Team", "how": "How it Works", "pricing": "Pricing", "resources": "Resources", "signIn": "Sign in", "start": "Start free", "open": "Open workspace" },
+  "nav": {
+    "product": "Product",
+    "team": "AI Team",
+    "how": "How it Works",
+    "pricing": "Pricing",
+    "resources": "Resources",
+    "signIn": "Sign in",
+    "start": "Start free",
+    "open": "Open workspace"
+  },
   "hero": {
     "eyebrow": "Your AI Growth Team",
     "line1": "Your company.",
@@ -48,15 +57,41 @@
     "title": "Every interaction makes your team understand you better.",
     "body": "Your brand, offers, audience, results and conversations live in one private, secure brain. Every agent reads from it before acting and learns from what happens next.",
     "center": "Company Brain",
-    "items": ["Brand", "Services", "Products", "Audience", "Offers", "Pricing", "Content history", "Analytics", "Customers", "Leads", "Conversations", "FAQs", "Brand voice"]
+    "items": [
+      "Brand",
+      "Services",
+      "Products",
+      "Audience",
+      "Offers",
+      "Pricing",
+      "Content history",
+      "Analytics",
+      "Customers",
+      "Leads",
+      "Conversations",
+      "FAQs",
+      "Brand voice"
+    ]
   },
   "how": {
     "title": "Connect. Understand. Create. Grow.",
     "steps": {
-      "connect": { "title": "Connect", "body": "Tell us about your business and connect your accounts in minutes." },
-      "understand": { "title": "Understand", "body": "Your team learns your brand, audience and what already works." },
-      "create": { "title": "Create & approve", "body": "Plans, posts and replies arrive ready. You approve with one tap." },
-      "grow": { "title": "Measure & sell", "body": "Real results feed back in, and every lead gets a next step." }
+      "connect": {
+        "title": "Connect",
+        "body": "Tell us about your business and connect your accounts in minutes."
+      },
+      "understand": {
+        "title": "Understand",
+        "body": "Your team learns your brand, audience and what already works."
+      },
+      "create": {
+        "title": "Create & approve",
+        "body": "Plans, posts and replies arrive ready. You approve with one tap."
+      },
+      "grow": {
+        "title": "Measure & sell",
+        "body": "Real results feed back in, and every lead gets a next step."
+      }
     }
   },
   "pricing": {
@@ -64,11 +99,190 @@
     "body": "Start free for 14 days. Pricing is confirmed at checkout.",
     "cta": "Start free",
     "plans": {
-      "STARTER": { "name": "Starter", "tagline": "For one business getting consistent", "features": ["1 business", "2 social channels", "Social Manager, Strategist & Designer", "Basic analytics"] },
-      "GROWTH": { "name": "Growth", "tagline": "Content and sales working together", "features": ["5 social channels", "AI Sales Agent & Assistant", "Advanced analytics", "More AI usage"] },
-      "SCALE": { "name": "Scale", "tagline": "For teams and multiple brands", "features": ["Team seats & advanced permissions", "Higher limits", "Automation", "Multiple businesses"] }
+      "STARTER": {
+        "name": "Starter",
+        "tagline": "For one business getting consistent",
+        "features": [
+          "1 business",
+          "2 social channels",
+          "Social Manager, Strategist & Designer",
+          "Basic analytics"
+        ]
+      },
+      "GROWTH": {
+        "name": "Growth",
+        "tagline": "Content and sales working together",
+        "features": [
+          "5 social channels",
+          "AI Sales Agent & Assistant",
+          "Advanced analytics",
+          "More AI usage"
+        ]
+      },
+      "SCALE": {
+        "name": "Scale",
+        "tagline": "For teams and multiple brands",
+        "features": [
+          "Team seats & advanced permissions",
+          "Higher limits",
+          "Automation",
+          "Multiple businesses"
+        ]
+      }
     }
   },
-  "final": { "title": "Hire your AI Growth Team today.", "body": "Set up in minutes. See your first week of content before you finish your coffee." },
-  "footer": "Simple for you. Powerful under the hood."
+  "final": {
+    "title": "Hire your AI Growth Team today.",
+    "body": "Set up in minutes. See your first week of content before you finish your coffee."
+  },
+  "footer": "Simple for you. Powerful under the hood.",
+  "v2": {
+    "announce": {
+      "label": "NOVA Brain",
+      "text": "The AI that knows your business"
+    },
+    "nav": {
+      "login": "Log in",
+      "signup": "Sign up",
+      "demo": "How it works"
+    },
+    "hero": {
+      "title": "Your company, with an AI growth team",
+      "tail": "Plan. Publish. Sell. All in one place.",
+      "primary": "Get started. It's free",
+      "note1": "Free for 14 days.",
+      "note2": "Arabic & English."
+    },
+    "showcase": {
+      "label": "NOVA product",
+      "items": {
+        "home": "Home",
+        "content": "Content",
+        "calendar": "Calendar",
+        "sales": "Sales Desk",
+        "whatsapp": "WhatsApp",
+        "analytics": "Analytics",
+        "approvals": "Approvals"
+      },
+      "chip": {
+        "title": "NOVA Brain",
+        "status": "Drafting from your brand voice…"
+      }
+    },
+    "channels": {
+      "label": "Works with your channels"
+    },
+    "problem": {
+      "title": "Growth work is scattered",
+      "tail": "— and AI is lost without context",
+      "body": "Your posts, customers and conversations live in different tools. Generic AI can't see any of it.",
+      "cols": [
+        {
+          "title": "Scattered tools",
+          "body": "Posts in one app, leads in another, replies in a third — nothing talks to anything."
+        },
+        {
+          "title": "Generic AI",
+          "body": "Assistants that don't know your brand, your offers or your customers write generic content."
+        },
+        {
+          "title": "Missed follow-ups",
+          "body": "Leads go cold while the team switches tabs and copies context by hand."
+        }
+      ],
+      "bubbles": [
+        "Which post worked?",
+        "Who replied?",
+        "Is this on brand?"
+      ]
+    },
+    "grid": {
+      "title": "Content, customers and conversations,",
+      "tail": "in one AI workspace",
+      "body": "Everything a growth team needs, built around one Company Brain.",
+      "features": {
+        "plans": "Content plans",
+        "calendar": "Calendar",
+        "approvals": "Approvals",
+        "campaigns": "Campaigns",
+        "carousels": "Carousels",
+        "images": "Image studio",
+        "analytics": "Analytics",
+        "reports": "Reports",
+        "leads": "Leads",
+        "pipeline": "Pipeline",
+        "quotes": "Quotes",
+        "followups": "Follow-ups",
+        "meetings": "Meetings",
+        "inbox": "Inbox",
+        "forms": "Lead forms",
+        "brand": "Brand kit",
+        "roles": "Roles & permissions",
+        "audit": "Audit log",
+        "languages": "Arabic & English",
+        "templates": "Templates",
+        "insights": "Insights",
+        "notifications": "Notifications",
+        "billing": "Billing",
+        "security": "Security"
+      },
+      "highlights": {
+        "content": "Content Studio",
+        "sales": "Sales Desk",
+        "brain": "Company Brain",
+        "whatsapp": "WhatsApp Inbox"
+      }
+    },
+    "team": {
+      "title": "A new era of growth,",
+      "tail": "with your AI team",
+      "primary": "Build your AI team",
+      "secondary": "See how it works"
+    },
+    "dark": {
+      "brand": "NOVA Brain",
+      "title": "The best AI is",
+      "titleEm": "your AI",
+      "body": "Already plugged into your brand, your content and your customers.",
+      "langs": "Available in",
+      "cells": [
+        {
+          "label": "Context",
+          "body": "NOVA reads your brand, offers, audience and past results before it writes a single word."
+        },
+        {
+          "label": "Approvals",
+          "body": "Nothing is published, sent or quoted without a person approving it. Every action is logged."
+        },
+        {
+          "label": "Learning",
+          "body": "Real results and conversations flow back into the brain, so every week is sharper than the last."
+        }
+      ],
+      "vignette": {
+        "memory": "Brain updated",
+        "memoryKey": "Brand voice",
+        "memoryValue": "Warm, direct, expert",
+        "approval": "Waiting for approval",
+        "approvalItem": "Ramadan offer — 3 posts",
+        "learning": "Educational posts outperform your average"
+      },
+      "how": "Connect. Understand. Create. Grow."
+    },
+    "pricing": {
+      "popular": "Most popular"
+    },
+    "final": {
+      "title": "The only AI team that",
+      "tail": "actually knows your business",
+      "primary": "Get started with NOVA",
+      "secondary": "Log in"
+    },
+    "footer": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "rights": "All rights reserved."
+    }
+  }
 }

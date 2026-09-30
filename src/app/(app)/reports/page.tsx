@@ -19,14 +19,14 @@ export default async function ReportsPage() {
     <>
       <PageHeader title={t("title")} description={t("description")} actions={<GenerateReportButton />} />
       {reports.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState icon={<FileText />} title={t("empty.title")} description={t("empty.body")} action={<GenerateReportButton />} />
         </div>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {reports.map((r) => (
             <li key={r.id}>
-              <Link href={`/reports/${r.id}`} className="block rounded-[20px] border border-line bg-surface p-5 transition hover:shadow-md">
+              <Link href={`/reports/${r.id}`} className="block rounded-2xl border border-line bg-surface p-5 transition hover:shadow-md">
                 <div className="flex items-center justify-between gap-2">
                   <Badge tone={r.kind === "WEEKLY_REPORT" ? "accent" : "neutral"}>{t(`kinds.${r.kind}`)}</Badge>
                   <span className="text-xs text-ink-3">{format.dateTime(r.periodStart, { dateStyle: "medium" })}</span>

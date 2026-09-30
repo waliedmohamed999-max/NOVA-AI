@@ -24,7 +24,7 @@ export default async function WhatsAppCampaigns() {
         </div>
       )}
       {rows.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2 p-10 text-center">
           <p className="font-bold">{t("empty.title")}</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-ink-3">{t("empty.body")}</p>
         </div>
@@ -32,7 +32,7 @@ export default async function WhatsAppCampaigns() {
         <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {rows.map((c) => (
             <li key={c.id}>
-              <Link href={c.state === "DRAFT" ? `/whatsapp/campaigns/new?id=${c.id}` : `/whatsapp/campaigns/${c.id}`} className="flex h-full flex-col rounded-[20px] border border-line bg-surface p-5 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
+              <Link href={c.state === "DRAFT" ? `/whatsapp/campaigns/new?id=${c.id}` : `/whatsapp/campaigns/${c.id}`} className="flex h-full flex-col rounded-2xl border border-line bg-surface p-5 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex items-center justify-between gap-2">
                   <StateBadge state={c.state} label={t(`states.${c.state}` as "states.DRAFT")} />
                   <span className="text-xs text-ink-4">{t(`objectives.${c.objective}` as "objectives.offer")}</span>

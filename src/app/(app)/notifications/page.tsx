@@ -20,11 +20,11 @@ export default async function NotificationsPage() {
     <>
       <PageHeader title={t("title")} description={t("description")} actions={items.some((i) => !i.readAt) ? <MarkAllRead /> : undefined} />
       {items.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState icon={<Bell />} title={t("empty")} />
         </div>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
+        <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {items.map((n) => (
             <li key={n.id}>
               <Link href={n.link ?? "/home"} className={cn("flex gap-4 px-5 py-4 transition hover:bg-surface-2", !n.readAt && "bg-accent-soft/30")}>

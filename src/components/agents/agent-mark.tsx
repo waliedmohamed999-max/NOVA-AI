@@ -23,8 +23,13 @@ export function AgentMark({ agent, size = 40, className, working }: { agent: Age
   const Icon = ICONS[meta.icon];
   const a = ACCENT[meta.accent];
   return (
-    <span className={cn("relative inline-flex shrink-0 items-center justify-center rounded-2xl ring-1", a.bg, a.text, a.ring, className)} style={{ width: size, height: size }} aria-hidden>
-      <Icon style={{ width: size * 0.45, height: size * 0.45 }} strokeWidth={1.9} />
+    // Reference "floating app icon": a white tile, a hairline ring, a soft stacked shadow and a coloured glyph.
+    <span
+      className={cn("relative inline-flex shrink-0 items-center justify-center bg-surface shadow-float ring-1 ring-black/[0.06] dark:ring-white/10", a.text, className)}
+      style={{ width: size, height: size, borderRadius: Math.max(8, Math.round(size * 0.28)) }}
+      aria-hidden
+    >
+      <Icon style={{ width: size * 0.46, height: size * 0.46 }} strokeWidth={2} />
       {working && <span className={cn("absolute -end-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-surface animate-pulse-soft", a.dot)} />}
     </span>
   );

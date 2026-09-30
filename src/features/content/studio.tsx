@@ -143,7 +143,7 @@ export function ContentStudio({
       )}
 
       {items.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState
             icon={<PenSquare />}
             title={t(`empty.${view}.title`)}
@@ -162,7 +162,7 @@ export function ContentStudio({
       ) : view === "approval" ? (
         <ul className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {items.map((i) => (
-            <li key={i.id} className={cn("flex flex-col overflow-hidden rounded-[20px] border bg-surface shadow-xs transition", selected.includes(i.id) ? "border-ink ring-1 ring-ink" : "border-line")}>
+            <li key={i.id} className={cn("flex flex-col overflow-hidden rounded-2xl border bg-surface shadow-xs transition", selected.includes(i.id) ? "border-ink ring-1 ring-ink" : "border-line")}>
               <div className="flex items-center gap-3 border-b border-line px-4 py-3">
                 {canApprove && <Checkbox label={i.title} checked={selected.includes(i.id)} onChange={(v) => setSelected(v ? [...selected, i.id] : selected.filter((x) => x !== i.id))} />}
                 <PlatformDot platform={i.platform} />
@@ -213,7 +213,7 @@ export function ContentStudio({
           ))}
         </ul>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
+        <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {items.map((i) => (
             <li key={i.id}>
               <Link href={`/content/${i.id}`} className="flex items-center gap-4 px-5 py-4 transition hover:bg-surface-2">

@@ -72,7 +72,7 @@ export default async function AdminIncidentsPage() {
       {items.length === 0 ? (
         <p className="rounded-2xl border border-line bg-surface px-5 py-8 text-center text-sm text-ink-3">{t("noIncidents")}</p>
       ) : (
-        <ul className="divide-y divide-line rounded-[20px] border border-line bg-surface">
+        <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
           {items.map((i) => (
             <li key={`${i.kind}-${i.id}`} className="flex items-start gap-3 px-5 py-3 text-sm">
               <Badge tone={i.kind === "job" ? "danger" : i.kind === "integration" ? "warning" : "info"}>{t(`kinds.${i.kind}` as "kinds.job")}</Badge>

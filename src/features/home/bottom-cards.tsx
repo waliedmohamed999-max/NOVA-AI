@@ -40,7 +40,7 @@ export function DailyBriefCard({ brief }: { brief: { id: string; narrative: stri
   const t = useTranslations("app.home");
   const tc = useTranslations("common");
   return (
-    <section className="flex h-full flex-col rounded-[20px] border border-[var(--nova-line)] bg-surface p-5 shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
+    <section className="flex h-full flex-col rounded-2xl border border-[var(--nova-line)] bg-surface p-5 shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
       <div className="flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-3" dir="ltr">
           <Sparkles className="size-[18px] text-[var(--orbit-orange)]" aria-hidden /> {t("brief.label")}
@@ -78,7 +78,7 @@ export function QuickActionsCard() {
     { key: "ask", icon: Search, color: "text-[var(--orbit-blue)]", run: () => openCommand() },
   ];
   return (
-    <section className="h-full rounded-[20px] border border-[var(--nova-line)] bg-surface p-5 lg:order-first shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
+    <section className="h-full rounded-2xl border border-[var(--nova-line)] bg-surface p-5 lg:order-first shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
       <h2 className="mb-3 text-[16px] font-bold text-ink">{t("title")}</h2>
       <div className="grid grid-cols-2 gap-2.5">
         {actions.map(({ key, icon: Icon, color, href, run }) => (

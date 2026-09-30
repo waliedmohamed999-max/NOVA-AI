@@ -87,7 +87,7 @@ export function Stepper() {
     ol.scrollBy({ left: r.left + r.width / 2 - (box.left + box.width / 2), behavior: "smooth" });
   }, [s.step]);
   return (
-    <nav aria-label={t("sidebar.title")} className="rounded-[20px] border border-nova-line bg-surface px-3 py-5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:px-6">
+    <nav aria-label={t("sidebar.title")} className="rounded-2xl border border-nova-line bg-surface px-3 py-5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:px-6">
       <ol ref={list} className="-mx-1 flex snap-x items-start overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
         {SETUP_STEPS.map((step, i) => {
           const { state, reachable } = status(step);
@@ -217,7 +217,7 @@ export function SidebarBody({ compact }: { compact?: boolean }) {
 export function Sidebar() {
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-[88px] overflow-hidden rounded-[20px] border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
+      <div className="sticky top-[88px] overflow-hidden rounded-2xl border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
         <PartnerCard />
         <SidebarBody />
       </div>

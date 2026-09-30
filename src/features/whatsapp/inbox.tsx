@@ -72,7 +72,7 @@ export function WhatsAppInbox({ initial, initialSelected, templates, canSend }: 
   const current = list.items.find((i) => i.id === selected) ?? null;
 
   return (
-    <div className="grid h-[calc(100dvh-230px)] min-h-[520px] max-lg:h-[calc(100dvh-340px)] max-lg:min-h-[440px] overflow-hidden rounded-[20px] border border-line bg-surface shadow-xs lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_300px]">
+    <div className="grid h-[calc(100dvh-230px)] min-h-[520px] max-lg:h-[calc(100dvh-340px)] max-lg:min-h-[440px] overflow-hidden rounded-2xl border border-line bg-surface shadow-xs lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_300px]">
       {/* Conversation list */}
       <aside className={cn("flex min-h-0 flex-col border-line lg:border-e", mobileView === "chat" && "max-lg:hidden")} aria-label={t("select")}>
         <div className="space-y-2 border-b border-line p-3">

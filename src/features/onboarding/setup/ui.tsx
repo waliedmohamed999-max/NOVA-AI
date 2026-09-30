@@ -9,7 +9,7 @@ import { useSetup } from "./state";
 /** White step card with an icon tile, title, subtitle and the live save state. */
 export function StepCard({ icon, title, subtitle, children, footer }: { icon: ReactNode; title: string; subtitle: string; children: ReactNode; footer?: ReactNode }) {
   return (
-    <section className="rounded-[20px] border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
+    <section className="rounded-2xl border border-nova-line bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_18px_50px_-24px_rgb(15_23_42/0.18)]">
       <header className="flex items-start justify-between gap-4 px-5 pt-6 sm:px-8 sm:pt-7">
         <div className="flex items-start gap-3.5">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-nova-blue-soft text-nova-blue ring-1 ring-nova-blue-line [&_svg]:size-[22px]">{icon}</span>

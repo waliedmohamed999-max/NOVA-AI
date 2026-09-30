@@ -30,7 +30,7 @@ export default async function ActivityPage(props: PageProps<"/activity">) {
           </div>
         }
       />
-      <ol className="space-y-1 rounded-[20px] border border-line bg-surface p-3">
+      <ol className="space-y-1 rounded-2xl border border-line bg-surface p-3">
         {logs.map((l) => {
           const Icon = ICON[l.actorType];
           return (

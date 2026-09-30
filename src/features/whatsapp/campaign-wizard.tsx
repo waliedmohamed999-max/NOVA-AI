@@ -103,7 +103,7 @@ export function CampaignWizard({ init, templates, segments, connected }: { init:
         ))}
       </ol>
 
-      <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs sm:p-7">
+      <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs sm:p-7">
         <p className="mb-1 text-xs font-semibold text-ink-4">{t("stepOf", { n: step + 1, total: STEPS.length })}</p>
         <h2 className="mb-5 text-xl font-bold">{t(`steps.${STEPS[step]}`)}</h2>
 

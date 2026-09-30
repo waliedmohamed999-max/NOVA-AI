@@ -33,7 +33,7 @@ export function FollowupsView({ data, canSend }: { data: FollowupCenter; canSend
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-line bg-surface p-4 shadow-xs">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-4 shadow-xs">
         <p className="flex-1 text-sm text-ink-3">{t("noBulk")}</p>
         {canSend && (
           <button
@@ -95,7 +95,7 @@ export function FollowupsView({ data, canSend }: { data: FollowupCenter; canSend
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-[20px] border border-line bg-surface p-4 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-4 shadow-xs">
           <h2 className="mb-3 text-[15px] font-bold">{t("due")}</h2>
           {data.due.length === 0 ? (
             <p className="text-sm text-ink-3">{t("none")}</p>
@@ -114,7 +114,7 @@ export function FollowupsView({ data, canSend }: { data: FollowupCenter; canSend
             </ul>
           )}
         </section>
-        <section className="rounded-[20px] border border-line bg-surface p-4 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-4 shadow-xs">
           <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold"><CalendarClock className="size-4 text-nova-blue" /> {t("meetings")}</h2>
           {data.meetings.length === 0 ? (
             <p className="text-sm text-ink-3">{t("none")}</p>

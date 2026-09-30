@@ -25,9 +25,9 @@ export default async function WhatsAppCustomers(props: PageProps<"/whatsapp/cust
     <section className="space-y-3">
       <p className="text-sm text-ink-3">{t("hint")}</p>
       {page.length === 0 ? (
-        <p className="rounded-[20px] border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
+        <p className="rounded-2xl border border-dashed border-line-strong bg-surface-2 p-10 text-center text-sm text-ink-3">{t("empty")}</p>
       ) : (
-        <div className="overflow-x-auto rounded-[20px] border border-line bg-surface">
+        <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
           <table className="w-full min-w-[560px] text-sm">
             <thead className="border-b border-line text-start text-xs text-ink-3">
               <tr>

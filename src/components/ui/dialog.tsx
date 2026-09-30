@@ -31,7 +31,7 @@ export function DialogContent({ title, description, children, footer, className,
       <D.Content
         className={cn(
           "fixed z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden border border-line bg-surface shadow-lg focus:outline-none",
-          "inset-x-0 bottom-0 rounded-t-[20px] sm:inset-auto sm:start-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:rounded-[20px] ltr:sm:-translate-x-1/2 rtl:sm:translate-x-1/2",
+          "inset-x-0 bottom-0 rounded-t-[20px] sm:inset-auto sm:start-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:rounded-2xl ltr:sm:-translate-x-1/2 rtl:sm:translate-x-1/2",
           "data-[state=open]:animate-[fade-up_.28s_var(--ease-out-soft)]",
           widths[size],
           className,

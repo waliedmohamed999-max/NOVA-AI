@@ -70,7 +70,7 @@ export function GlobalCommandInput({ suggestions = [], history: initialHistory =
         aria-busy={cc.pending}
         data-command-active={open || cc.pending ? "true" : undefined}
         className={cn(
-          "flex h-[64px] w-full items-center gap-3 rounded-[20px] border border-[var(--nova-line)] bg-surface ps-3 pe-2 shadow-[0_10px_30px_-14px_rgba(30,70,140,.28)] transition focus-within:border-nova-blue-line focus-within:shadow-[0_0_0_4px_var(--nova-blue-soft)]",
+          "flex h-[64px] w-full items-center gap-3 rounded-2xl border border-[var(--nova-line)] bg-surface ps-3 pe-2 shadow-[0_10px_30px_-14px_rgba(30,70,140,.28)] transition focus-within:border-nova-blue-line focus-within:shadow-[0_0_0_4px_var(--nova-blue-soft)]",
           cc.pending && "border-nova-blue-line",
         )}
       >

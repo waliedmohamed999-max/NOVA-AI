@@ -34,7 +34,7 @@ export default async function TeamPage() {
           <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {g.items.map((a) => (
               <li key={a.id}>
-                <Link href={`/team/${a.key.toLowerCase()}`} className={cn("group flex h-full flex-col rounded-[20px] border border-line bg-surface p-6 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md", !a.enabled && "opacity-60")}>
+                <Link href={`/team/${a.key.toLowerCase()}`} className={cn("group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md", !a.enabled && "opacity-60")}>
                   <div className="flex items-start justify-between">
                     <AgentMark agent={a.key} size={48} working={a.status === "WORKING"} />
                     <span className="inline-flex items-center gap-2 text-xs font-medium text-ink-2">

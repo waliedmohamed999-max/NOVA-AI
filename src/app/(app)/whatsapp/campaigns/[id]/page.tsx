@@ -39,7 +39,7 @@ export default async function WhatsAppCampaignDetail(props: PageProps<"/whatsapp
         <Metric label={t("stats.replies")} value={s.replies} tone={s.replies ? "good" : undefined} />
       </div>
       <p className="text-xs text-ink-4">{t("readNote")}</p>
-      <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs">
+      <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
         <h3 className="mb-3 text-[15px] font-bold">{t("attribution")}</h3>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <Metric label={t("stats.optOuts")} value={s.optOuts} />

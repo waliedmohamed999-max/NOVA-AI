@@ -27,7 +27,7 @@ export default async function WhatsAppAnalytics() {
         <Metric label={t("campaigns.stats.failed")} value={failed} tone={failed ? "attention" : undefined} />
       </div>
       <p className="text-xs text-ink-4">{t("campaigns.readNote")}</p>
-      <section className="rounded-[20px] border border-line bg-surface shadow-xs">
+      <section className="rounded-2xl border border-line bg-surface shadow-xs">
         <h2 className="border-b border-line px-5 py-3 text-[15px] font-bold">{t("analytics.campaigns")}</h2>
         {stats.length === 0 ? (
           <p className="p-8 text-center text-sm text-ink-3">{t("analytics.noData")}</p>

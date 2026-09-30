@@ -30,7 +30,7 @@ const DOT = { danger: "bg-[#ef4444]", warning: "bg-[var(--orbit-orange)]", info:
 
 function RailCard({ title, icon: Icon, href, children }: { title: string; icon: LucideIcon; href: string; children: ReactNode }) {
   return (
-    <section className="rounded-[20px] border border-[var(--nova-line)] bg-surface px-5 pb-4 pt-4 shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
+    <section className="rounded-2xl border border-[var(--nova-line)] bg-surface px-5 pb-4 pt-4 shadow-[0_6px_24px_-16px_rgba(30,70,140,.25)]">
       <header className="mb-3 flex items-center gap-2.5">
         <Icon className="size-[20px] text-ink-2" strokeWidth={1.9} aria-hidden />
         <h2 className="flex-1 text-[16px] font-bold text-ink">{title}</h2>

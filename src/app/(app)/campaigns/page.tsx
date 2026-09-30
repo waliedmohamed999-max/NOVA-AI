@@ -20,14 +20,14 @@ export default async function CampaignsPage() {
     <>
       <PageHeader title={t("title")} description={t("description")} actions={ctx.can("campaign:manage") && <NewCampaignButton />} />
       {campaigns.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState icon={<Megaphone />} title={t("empty.title")} description={t("empty.body")} action={ctx.can("campaign:manage") && <NewCampaignButton />} />
         </div>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {campaigns.map((c) => (
             <li key={c.id}>
-              <Link href={`/campaigns/${c.id}`} className="flex h-full flex-col rounded-[20px] border border-line bg-surface p-6 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
+              <Link href={`/campaigns/${c.id}`} className="flex h-full flex-col rounded-2xl border border-line bg-surface p-6 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex items-center justify-between gap-2">
                   <Badge tone={c.status === "ACTIVE" ? "success" : c.status === "PENDING_APPROVAL" ? "accent" : "neutral"}>{t(`status.${c.status}` as "status.ACTIVE")}</Badge>
                   <span className="text-xs text-ink-3">{c.channels.map((ch) => tc(`platforms.${ch}` as "platforms.INSTAGRAM")).join(" · ")}</span>

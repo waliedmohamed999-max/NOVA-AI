@@ -36,11 +36,11 @@ export default async function InboxPage() {
         })}
       </div>
       {conversations.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState icon={<Inbox />} title={t("empty.title")} description={t("empty.body")} />
         </div>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
+        <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {conversations.map((c) => {
             const last = c.messages[0];
             const needsReply = last?.direction === "INBOUND";

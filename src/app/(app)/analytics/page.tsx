@@ -30,7 +30,7 @@ export default async function AnalyticsPage() {
     return (
       <>
         <PageHeader title={t("title")} description={t("description")} />
-        <div className="rounded-[20px] border border-dashed border-line-strong bg-surface-2">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2">
           <EmptyState
             icon={<BarChart3 />}
             title={t("empty.title")}

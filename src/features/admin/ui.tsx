@@ -30,7 +30,7 @@ export function AdminSearch({ placeholder }: { placeholder: string }) {
 
 export function AdminTable({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-[20px] border border-line bg-surface">
+    <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
       <table className="w-full min-w-[720px] text-sm">
         <thead className="border-b border-line bg-surface-2 text-xs uppercase tracking-wider text-ink-3">
           <tr>{head.map((h) => <th key={h} scope="col" className="px-4 py-3 text-start font-semibold">{h}</th>)}</tr>

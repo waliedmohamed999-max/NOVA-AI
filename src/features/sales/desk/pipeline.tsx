@@ -69,7 +69,7 @@ export function PipelineBoard({ columns: initial }: { columns: PipelineColumn[] 
         setDrag(null);
         if (id) move(id, col.stage);
       }}
-      className={cn("flex flex-col rounded-[20px] border bg-surface-2 transition", mobile ? "w-full" : "w-[272px] shrink-0 snap-start", over === col.stage ? "border-ink bg-sunken" : "border-line")}
+      className={cn("flex flex-col rounded-2xl border bg-surface-2 transition", mobile ? "w-full" : "w-[272px] shrink-0 snap-start", over === col.stage ? "border-ink bg-sunken" : "border-line")}
     >
       <header className="flex items-start justify-between gap-2 px-3.5 pb-2 pt-3">
         <div className="min-w-0">

@@ -29,7 +29,7 @@ export function HeroWorkspace() {
   return (
     <div className="relative animate-fade-up [animation-delay:150ms]">
       <div className="absolute -inset-6 rounded-[44px] ai-aura blur-2xl" aria-hidden />
-      <div className="relative overflow-hidden rounded-[20px] border border-line bg-surface shadow-lg" role="img" aria-label={t("label")}>
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-surface shadow-lg" role="img" aria-label={t("label")}>
         <div className="flex items-center gap-2 border-b border-line px-5 py-3.5">
           <span className="size-2.5 rounded-full bg-line-strong" />
           <span className="size-2.5 rounded-full bg-line-strong" />

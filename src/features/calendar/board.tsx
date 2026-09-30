@@ -99,7 +99,7 @@ export function CalendarBoard({ items, anchor, brandName, canEdit }: { items: Ca
     });
 
   const renderAgenda = (className?: string) => (
-    <div className={cn("overflow-hidden rounded-[20px] border border-line bg-surface", className)}>
+    <div className={cn("overflow-hidden rounded-2xl border border-line bg-surface", className)}>
             {[...byDay.entries()]
               .filter(([, list]) => new Date(list[0].at) >= addDays(new Date(), -1))
               .sort((a, b) => a[1][0].at.localeCompare(b[1][0].at))
@@ -178,7 +178,7 @@ export function CalendarBoard({ items, anchor, brandName, canEdit }: { items: Ca
         <>
         {/* Phones get the agenda list; the month/week grid needs more width. */}
         {renderAgenda("sm:hidden")}
-        <div className="hidden overflow-x-auto rounded-[20px] border border-line bg-line sm:block">
+        <div className="hidden overflow-x-auto rounded-2xl border border-line bg-line sm:block">
           <div className={cn("grid min-w-[720px] grid-cols-7 gap-px")}>
             {days.slice(0, 7).map((d) => (
               <div key={`h-${d.toISOString()}`} className="bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-ink-3">{format.dateTime(d, { weekday: "short" })}</div>

@@ -17,7 +17,7 @@ export function FollowUpList({ items }: { items: Item[] }) {
   const [pending, start] = useTransition();
   if (!items.length) return <p className="rounded-2xl border border-line bg-surface px-5 py-6 text-sm text-ink-3">{t("sales.noFollowUps")}</p>;
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
+    <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
       {items.map((f) => {
         const overdue = f.dueAt && new Date(f.dueAt) < new Date();
         const Icon = f.type === "MEETING" ? CalendarCheck : TimerReset;

@@ -140,7 +140,7 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm data-[state=open]:animate-[fade-up_.2s_ease-out]" />
         <D.Content
-          className="fixed inset-x-0 bottom-0 top-auto z-50 flex max-h-[94dvh] flex-col rounded-t-[20px] border border-line bg-canvas shadow-lg focus:outline-none sm:inset-x-auto sm:start-1/2 sm:top-[8vh] sm:bottom-auto sm:w-[min(760px,92vw)] sm:rounded-[20px] ltr:sm:-translate-x-1/2 rtl:sm:translate-x-1/2 data-[state=open]:animate-[fade-up_.3s_var(--ease-out-soft)]"
+          className="fixed inset-x-0 bottom-0 top-auto z-50 flex max-h-[94dvh] flex-col rounded-t-[20px] border border-line bg-canvas shadow-lg focus:outline-none sm:inset-x-auto sm:start-1/2 sm:top-[8vh] sm:bottom-auto sm:w-[min(760px,92vw)] sm:rounded-2xl ltr:sm:-translate-x-1/2 rtl:sm:translate-x-1/2 data-[state=open]:animate-[fade-up_.3s_var(--ease-out-soft)]"
           aria-describedby={undefined}
         >
           <D.Title className="sr-only">{t("dialogTitle")}</D.Title>
@@ -156,7 +156,7 @@ export function CommandBar({ controller }: { controller: ReturnType<typeof useCo
               e.preventDefault();
               void upload(e.dataTransfer.files);
             }}
-            className="m-3 rounded-[20px] border border-line bg-surface shadow-sm transition focus-within:border-accent/60 focus-within:shadow-[var(--ring)]"
+            className="m-3 rounded-2xl border border-line bg-surface shadow-sm transition focus-within:border-accent/60 focus-within:shadow-[var(--ring)]"
           >
             <div className="flex items-start gap-3 px-4 pt-4">
               <Sparkles className="mt-1 size-5 shrink-0 text-accent" aria-hidden />

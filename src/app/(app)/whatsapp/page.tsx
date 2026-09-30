@@ -20,7 +20,7 @@ export default async function WhatsAppOverview() {
 
   if (!number) {
     return (
-      <section className="flex flex-col items-center gap-5 rounded-[20px] border border-dashed border-line-strong bg-surface-2 px-6 py-16 text-center" data-testid="wa-empty">
+      <section className="flex flex-col items-center gap-5 rounded-2xl border border-dashed border-line-strong bg-surface-2 px-6 py-16 text-center" data-testid="wa-empty">
         <span className="flex size-16 items-center justify-center rounded-3xl bg-[#e7f8ee] text-[#1fa855]">
           <WhatsAppGlyph className="size-8" />
         </span>
@@ -51,7 +51,7 @@ export default async function WhatsAppOverview() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[15px] font-bold">{t("tabs.inbox")}</h2>
             <Link href="/whatsapp/inbox" className="inline-flex items-center gap-1 text-sm font-medium text-nova-blue hover:underline">
@@ -81,7 +81,7 @@ export default async function WhatsAppOverview() {
           )}
         </section>
 
-        <section className="rounded-[20px] border border-line bg-surface p-5 shadow-xs" data-testid="wa-checklist">
+        <section className="rounded-2xl border border-line bg-surface p-5 shadow-xs" data-testid="wa-checklist">
           <h2 className="text-[15px] font-bold">{t("checklist.title")}</h2>
           <p className="mb-3 text-xs text-ink-3" dir="ltr">
             {done}/{checklist.length}

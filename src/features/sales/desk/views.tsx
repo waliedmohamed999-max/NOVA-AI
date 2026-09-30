@@ -161,7 +161,7 @@ export function HotLeads({ leads, n = "02" }: { leads: HotLead[]; n?: string }) 
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" data-testid="hot-leads">
           {leads.map((l) => (
             <li key={l.id}>
-              <button onClick={() => desk.openLead(l.id)} className="flex h-full w-full flex-col gap-2 rounded-[20px] border border-line bg-surface p-4 text-start shadow-xs transition hover:border-line-strong">
+              <button onClick={() => desk.openLead(l.id)} className="flex h-full w-full flex-col gap-2 rounded-2xl border border-line bg-surface p-4 text-start shadow-xs transition hover:border-line-strong">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate font-semibold" dir="auto">{l.name}</p>
@@ -246,7 +246,7 @@ export function B2BList({ items }: { items: B2BItem[] }) {
         <ul className="grid gap-3 lg:grid-cols-2" data-testid="b2b-list">
           {items.map((o) => (
             <li key={o.id}>
-              <button onClick={() => desk.openLead(o.lead.id)} className="flex h-full w-full flex-col gap-3 rounded-[20px] border border-line bg-surface p-4 text-start shadow-xs hover:border-line-strong">
+              <button onClick={() => desk.openLead(o.lead.id)} className="flex h-full w-full flex-col gap-3 rounded-2xl border border-line bg-surface p-4 text-start shadow-xs hover:border-line-strong">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-semibold" dir="auto">{o.lead.company ?? o.lead.name}</p>
@@ -398,7 +398,7 @@ export function Insights({ items }: { items: Insight[] }) {
           {items.map((i) => {
             const params = i.key === "high_value_slower" ? { ...i.params, threshold: money({ cents: Number(i.params.threshold) * 100, currency: String(i.params.currency) }) } : i.params;
             return (
-              <li key={i.key} className="flex gap-3 rounded-[20px] border border-line bg-surface p-4">
+              <li key={i.key} className="flex gap-3 rounded-2xl border border-line bg-surface p-4">
                 <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" />
                 <div className="min-w-0 space-y-1">
                   <p className="font-medium" dir="auto">{t(`${i.key}.finding`, params)}</p>

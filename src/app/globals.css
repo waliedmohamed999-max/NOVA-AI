@@ -65,11 +65,18 @@
   --ch-youtube: #e02a2a;
   --ch-pinterest: #c8232c;
 
-  /* elevation: hairlines first; shadows stay whisper-light */
+  /* elevation is negative space: surfaces are separated by 1px Bone hairlines and background shifts.
+     Shadows exist only for things that float (menus, dialogs, floating chips, product shots). */
   --shadow-xs: 0 0 0 0 transparent;
-  --shadow-sm: rgb(13 21 48 / 0.04) 0 4px 4px 0;
-  --shadow-md: rgb(18 43 165 / 0.04) 0 1px 1px -0.5px, rgb(18 43 165 / 0.04) 0 3px 3px -1.5px, rgb(18 43 165 / 0.05) 0 12px 24px -8px;
-  --shadow-lg: rgb(0 0 0 / 0.1) 0 1px 3px 0, rgb(13 21 48 / 0.12) 0 24px 60px -20px;
+  --shadow-sm: 0 0 0 0 transparent;
+  --shadow-md: rgb(0 0 0 / 0.08) 0 1px 3px 0, rgb(0 0 0 / 0.06) 0 1px 2px -1px;
+  --shadow-lg: rgb(9 12 29 / 0.06) 0 0 0 1px, rgb(9 12 29 / 0.14) 0 16px 40px -12px;
+  --shadow-float: rgb(18 43 165 / 0.04) 0 1px 1px, rgb(18 43 165 / 0.04) 0 3px 3px, rgb(18 43 165 / 0.04) 0 6px 6px, rgb(18 43 165 / 0.04) 0 12px 12px;
+  --shadow-product: rgb(9 12 29 / 0.08) 0 0 0 1px, rgb(9 12 29 / 0.12) -8px 24px 60px -24px;
+
+  /* surfaces from the reference: section band, dark panel */
+  --band: #e9ebf0;
+  --panel-dark: #111111;
   --ring: 0 0 0 3px rgb(0 145 255 / 0.22);
 
   /* command-center (home + shell navigation): Signal Blue */
@@ -121,8 +128,12 @@
   --warning: #e0a23c;
   --danger: #fb7185;
   --info: #4fb9fa;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 0 0 0 transparent;
   --shadow-md: 0 10px 30px -8px rgb(0 0 0 / 0.55);
+  --shadow-float: 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --shadow-product: 0 0 0 1px rgb(255 255 255 / 0.06), -8px 24px 60px -24px rgb(0 0 0 / 0.8);
+  --band: #141417;
+  --panel-dark: #0a0a0c;
   --shadow-lg: 0 28px 70px -18px rgb(0 0 0 / 0.7);
   --ring: 0 0 0 3px rgb(79 185 250 / 0.3);
   --nova-blue: #4fb9fa;
@@ -182,14 +193,20 @@
   --font-mono: var(--font-sometype), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --color-onyx: var(--onyx);
+  --color-band: var(--band);
+  --color-panel-dark: var(--panel-dark);
+  --shadow-float: var(--shadow-float);
+  --shadow-product: var(--shadow-product);
 
-  /* radii: inputs 9, cards 12, images 16, large cards 20, pills 9999 */
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 9px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  /* radii (reference): chips 4-6, controls 8-9, cards 12, images 16, pills 9999.
+     rounded-2xl is a card (12), rounded-3xl an image / large panel (16). */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
 
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
@@ -199,15 +216,28 @@
   --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --text-display: clamp(2.75rem, 1.6rem + 4.6vw, 5.25rem);
-  --text-display--line-height: 1.02;
+  /* type scale (Minor Third from 14px): display 80 / h1 60 / h2 48 / h3 34 / sub 20 */
+  --text-display: clamp(2.75rem, 1.4rem + 4.4vw, 5rem);
+  --text-display--line-height: 1.04;
   --text-display--letter-spacing: -0.04em;
+  --text-h1: clamp(2.5rem, 1.5rem + 3.2vw, 3.75rem);
+  --text-h1--line-height: 1.08;
+  --text-h1--letter-spacing: -0.035em;
+  --text-h2: clamp(2.125rem, 1.4rem + 2.4vw, 3rem);
+  --text-h2--line-height: 1.12;
+  --text-h2--letter-spacing: -0.035em;
+  --text-h3: clamp(1.625rem, 1.3rem + 1vw, 2.125rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.023em;
+  --text-sub: 1.25rem;
+  --text-sub--line-height: 1.5;
 
   --animate-fade-up: fade-up 0.6s var(--ease-out-soft) both;
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-orbit: orbit 18s linear infinite;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-conic: conic-spin 3.2s linear infinite;
 
   --breakpoint-xs: 26rem;
 }
@@ -227,6 +257,14 @@
 @keyframes orbit {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+@property --conic-angle {
+  syntax: "<angle>";
+  initial-value: 90deg;
+  inherits: false;
+}
+@keyframes conic-spin {
+  to { --conic-angle: 450deg; }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -272,6 +310,12 @@
   button:disabled { cursor: not-allowed; }
 
   .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Line icons: thin 1.75 stroke like the reference's product grid. */
+  svg.lucide { stroke-width: 1.75; }
+
+  /* Every interactive element settles with the reference's slow-out curve. */
+  a, button, [role="button"], input, select, textarea { transition-timing-function: var(--ease-out-soft); }
 
   /* Grids default to one shrinkable column (instead of an implicit max-content
      column) so long text truncates on small screens. Any grid-cols-* utility wins. */
@@ -321,7 +365,8 @@
     z-index: -1;
     border-radius: inherit;
     padding: 2px;
-    background: var(--gradient-rainbow);
+    background: conic-gradient(from var(--conic-angle), #7d5be7, #bc3fda, #fa24ce, #fb49a5, #fc6d7b, #fd8461, #fd9a46, #f687c6, #a3a0e0, #4fb9fa, #0091ff, #7d5be7);
+    animation: var(--animate-conic);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -335,6 +380,44 @@
   .dot-grid {
     background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
     background-size: 22px 22px;
+  }
+  /* Two-tone headline (reference): the claim in ink, the tail in slate. */
+  .tone-tail { color: var(--ink-3); }
+  :where([data-theme="dark"]) .tone-tail, .on-dark .tone-tail { color: #8a8a8f; }
+  /* Silver headline on dark panels. */
+  .text-silver {
+    background: linear-gradient(180deg, #ffffff 35%, #9d9da3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Aurora glow that rises from the bottom of dark panels. */
+  .aurora {
+    background:
+      radial-gradient(40% 55% at 30% 100%, rgb(118 18 250 / 0.55), transparent 70%),
+      radial-gradient(35% 50% at 55% 100%, rgb(250 18 227 / 0.35), transparent 70%),
+      radial-gradient(40% 60% at 78% 100%, rgb(0 145 255 / 0.55), transparent 70%);
+    filter: saturate(1.1);
+  }
+  /* Hairline grid of cells (feature grids, dark 3-column cells). */
+  .cells { border-top: 1px solid var(--line); border-inline-start: 1px solid var(--line); }
+  .cells > * { border-bottom: 1px solid var(--line); border-inline-end: 1px solid var(--line); }
+  .on-dark .cells, .cells.dark { border-color: rgb(255 255 255 / 0.12); }
+  .on-dark .cells > *, .cells.dark > * { border-color: rgb(255 255 255 / 0.12); }
+  /* Edge fades for grids and strips that bleed off the page. */
+  .fade-x { mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .fade-y { mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); }
+  /* Scroll reveal (see components/ui/reveal.tsx). */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.7s var(--ease-out-soft), transform 0.7s var(--ease-out-soft); }
+  .reveal[data-in="true"] { opacity: 1; transform: none; }
+  /* White app tile that floats a colorful product/channel icon (reference: floating app icons). */
+  .app-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-float), 0 0 0 1px rgb(9 12 29 / 0.06);
   }
   /* Direction-aware icon flip for arrows/chevrons in RTL. */
   [dir="rtl"] .flip-rtl { transform: scaleX(-1); }

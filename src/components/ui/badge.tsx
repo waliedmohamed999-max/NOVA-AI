@@ -16,7 +16,29 @@ const tones: Record<Tone, string> = {
 export function Badge({ tone = "neutral", className, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
   return (
     <span
-      className={cn("inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-xs font-medium", tones[tone], className)}
+      className={cn("inline-flex h-[22px] items-center gap-1.5 whitespace-nowrap rounded-[6px] px-2 text-xs font-medium", tones[tone], className)}
+      {...props}
+    />
+  );
+}
+
+/**
+ * Workflow status pill (reference: "OPEN" / "IN PROGRESS"): uppercase, bold, compact; filled for active
+ * states, outlined for idle ones.
+ */
+const statusTones: Record<Tone, string> = {
+  neutral: "border border-line-strong text-ink-3",
+  outline: "border border-line-strong text-ink-3",
+  accent: "bg-accent text-white",
+  info: "bg-nova-blue text-white",
+  success: "bg-[#6ee7b7] text-[#064e3b]",
+  warning: "bg-[#fde68a] text-[#78350f]",
+  danger: "bg-[#fb7185] text-white",
+};
+export function StatusPill({ tone = "neutral", className, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+  return (
+    <span
+      className={cn("inline-flex h-[22px] items-center gap-1 whitespace-nowrap rounded-[5px] px-2 text-[11px] font-semibold uppercase tracking-[0.02em]", statusTones[tone], className)}
       {...props}
     />
   );
