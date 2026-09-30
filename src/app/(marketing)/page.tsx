@@ -23,7 +23,7 @@ export default async function LandingPage() {
     <div className="overflow-x-clip">
       <SiteNav signedIn={signedIn} />
 
-      <section className="mx-auto grid max-w-[1200px] items-center gap-x-6 gap-y-10 px-5 pb-14 pt-12 sm:pt-16 lg:grid-cols-[minmax(0,1fr)_auto] lg:pt-20">
+      <section className="mx-auto grid max-w-[1200px] items-center gap-x-6 gap-y-6 px-5 pb-14 pt-6 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:pt-20">
         <div className="min-w-0">
           <a
             href="#how"
@@ -47,7 +47,8 @@ export default async function LandingPage() {
             </p>
           </div>
         </div>
-        <HeroOrbit className="animate-fade-up [animation-delay:160ms]" />
+        {/* Phones/tablets: the sphere leads, the headline follows. */}
+        <HeroOrbit className="animate-fade-up order-first lg:order-none lg:[animation-delay:160ms]" />
       </section>
 
       <ProductShowcase />
