@@ -3,6 +3,7 @@ import type { TokenPurpose } from "@/generated/prisma/enums";
 import { db } from "../db/client";
 import { hashToken, randomToken } from "../crypto";
 import { audit } from "../audit";
+import { logger } from "../logger";
 import { getMailer, renderEmail } from "../email/mailer";
 import { hashPassword, verifyAgainstDummy, verifyPassword } from "./password";
 import { brand } from "@/config/brand";
@@ -89,7 +90,13 @@ export async function signUp(input: z.input<typeof signUpSchema>) {
   const user = await db.user.create({
     data: { email: data.email, name: data.name, locale: data.locale, passwordHash: await hashPassword(data.password) },
   });
-  await sendVerificationEmail(user);
+  // The account exists at this point: a verification email that can't go out (no provider yet, provider
+  // outage) must not turn a successful sign-up into an error. Verification can be re-sent later.
+  try {
+    await sendVerificationEmail(user);
+  } catch (err) {
+    logger.warn({ err: { message: err instanceof Error ? err.message : String(err) }, userId: user.id }, "verification email not sent at sign-up");
+  }
   await audit({ category: "SECURITY", actorType: "USER", actorId: user.id, action: "auth.sign_up", summary: `${user.email} created an account` });
   return user;
 }
