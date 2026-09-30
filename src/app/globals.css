@@ -429,5 +429,12 @@
   }
 }
 
-/* Soft pulse used by the onboarding "ready" mark. */
+/* ───────── NOVA orb (home) ───────── */
 @keyframes nova-glow { 0%,100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }
+@keyframes nova-spin { to { transform: rotate(360deg); } }
+@keyframes nova-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes nova-twinkle { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+.nova-orb { animation: nova-float 7s ease-in-out infinite; }
+.nova-orb-halo { animation: nova-glow 5s ease-in-out infinite; }
+.nova-orb-grid { animation: nova-spin 60s linear infinite; }
+.nova-orb-star { animation: nova-twinkle 3.2s ease-in-out infinite; }
