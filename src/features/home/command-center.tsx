@@ -1,22 +1,35 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { BarChart3, CalendarDays, CircleCheck, FileText, Megaphone, Users, type LucideIcon } from "lucide-react";
+import { BarChart3, CalendarDays, CircleCheck, FileText, Megaphone, Users } from "lucide-react";
+import { NovaOrb } from "./nova-orb";
+import { OrbitDot, OrbitModule, type OrbitColor } from "./orbit-module";
 import { GlobalCommandInput, type CommandHistoryItem } from "./global-command-input";
 
-type Module = { key: string; href: string; icon: LucideIcon; color: string };
+type Module = { key: string; href: string; icon: typeof CalendarDays; color: OrbitColor; dot: OrbitColor };
 
-const MODULES: Module[] = [
-  { key: "content", href: "/content", icon: FileText, color: "text-[#0091ff]" },
-  { key: "calendar", href: "/calendar", icon: CalendarDays, color: "text-[#16c0a4]" },
-  { key: "leads", href: "/leads", icon: Users, color: "text-[#f59a3a]" },
-  { key: "campaigns", href: "/campaigns", icon: Megaphone, color: "text-[#6647f0]" },
-  { key: "approvals", href: "/approvals", icon: CircleCheck, color: "text-[#00c07a]" },
-  { key: "analytics", href: "/analytics", icon: BarChart3, color: "text-[#fa24ce]" },
+// "start" side = next to the sidebar (right in Arabic), mirrored in English.
+const START: Module[] = [
+  { key: "calendar", href: "/calendar", icon: CalendarDays, color: "green", dot: "cyan" },
+  { key: "leads", href: "/leads", icon: Users, color: "orange", dot: "purple" },
+  { key: "approvals", href: "/approvals", icon: CircleCheck, color: "green", dot: "green" },
+];
+const END: Module[] = [
+  { key: "content", href: "/content", icon: FileText, color: "blue", dot: "blue" },
+  { key: "campaigns", href: "/campaigns", icon: Megaphone, color: "purple", dot: "orange" },
+  { key: "analytics", href: "/analytics", icon: BarChart3, color: "blue", dot: "blue" },
 ];
 
+// Vertical positions (%) and horizontal inset (%) of the three modules on each side.
+const ROWS = [
+  { top: 16, inset: 9 },
+  { top: 50, inset: 1.5 },
+  { top: 84, inset: 9 },
+];
+// Where each connector meets its module (percent of the orbit area width, measured from the side's edge).
+const DOT_X = [32, 26, 32];
+
 /**
- * Home header in the reference language: a left-aligned two-tone greeting, the AI command box as the page's
- * one rainbow-bordered element, and the six hubs as app tiles in a hairline grid.
+ * Home header: left-aligned two-tone greeting, the NOVA orb with the six hubs orbiting it, and the AI
+ * command box (the page's single rainbow-bordered element).
  */
 export async function HomeCommandCenter({
   name,
@@ -43,26 +56,62 @@ export async function HomeCommandCenter({
         </span>
       </h1>
 
-      <div className="rainbow-border mt-7 rounded-[16px]">
+      {/* Orbit system (md+) */}
+      <div className="relative mx-auto mt-4 hidden h-[300px] max-w-[860px] md:block">
+        <div className="pointer-events-none absolute inset-x-0 top-[10%] h-[80%] bg-[radial-gradient(ellipse_at_center,rgba(120,180,255,.22),transparent_65%)]" aria-hidden />
+        <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="absolute inset-0 size-full" aria-hidden>
+          <g fill="none" stroke="rgba(100,150,225,.5)" strokeWidth="1" vectorEffect="non-scaling-stroke">
+            <ellipse cx="500" cy="150" rx="330" ry="118" vectorEffect="non-scaling-stroke" />
+            <ellipse cx="500" cy="150" rx="250" ry="86" vectorEffect="non-scaling-stroke" opacity=".7" />
+            {[0, 1, 2].map((i) => {
+              const y = (ROWS[i].top / 100) * 300;
+              const x = DOT_X[i] * 10;
+              return (
+                <g key={i}>
+                  <path d={`M ${x} ${y} C ${x + 70} ${y} ${380} ${150 + (y - 150) * 0.35} 400 ${150 + (y - 150) * 0.3}`} vectorEffect="non-scaling-stroke" />
+                  <path d={`M ${1000 - x} ${y} C ${1000 - x - 70} ${y} ${620} ${150 + (y - 150) * 0.35} 600 ${150 + (y - 150) * 0.3}`} vectorEffect="non-scaling-stroke" />
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+        {[0, 1, 2].map((i) => (
+          <span key={`d${i}`}>
+            <OrbitDot color={END[i].dot} style={{ left: `${DOT_X[i]}%`, top: `${ROWS[i].top}%` }} />
+            <OrbitDot color={START[i].dot} style={{ left: `${100 - DOT_X[i]}%`, top: `${ROWS[i].top}%` }} />
+          </span>
+        ))}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[52%]">
+          <NovaOrb size={236} subtitle="AI OPERATING SYSTEM" />
+        </div>
+        {START.map((m, i) => (
+          <div key={m.key} className="absolute -translate-y-1/2" style={{ top: `${ROWS[i].top}%`, insetInlineStart: `${ROWS[i].inset}%` }}>
+            <OrbitModule href={m.href} label={t(`orbit.${m.key}`)} icon={m.icon} color={m.color} />
+          </div>
+        ))}
+        {END.map((m, i) => (
+          <div key={m.key} className="absolute -translate-y-1/2" style={{ top: `${ROWS[i].top}%`, insetInlineEnd: `${ROWS[i].inset}%` }}>
+            <OrbitModule href={m.href} label={t(`orbit.${m.key}`)} icon={m.icon} color={m.color} />
+          </div>
+        ))}
+      </div>
+
+      {/* Small screens: orb + module grid */}
+      <div className="relative mt-4 flex flex-col items-center overflow-hidden md:hidden">
+        <NovaOrb size={170} subtitle="AI OPERATING SYSTEM" />
+        <div className="mt-2 grid w-full grid-cols-2 gap-2 [&_a]:min-w-0 [&_a]:pe-3">
+          {[...START, ...END].map((m) => (
+            <OrbitModule key={m.key} href={m.href} label={t(`orbit.${m.key}`)} icon={m.icon} color={m.color} className="w-full" />
+          ))}
+        </div>
+      </div>
+
+      <div className="rainbow-border mt-6 rounded-[16px]">
         <div className="rounded-[16px] bg-surface p-1">
           <GlobalCommandInput suggestions={suggestions.map((s) => tc(`commands.${s.key}`))} history={history} />
         </div>
       </div>
       <p className="mt-3 text-[14px] text-ink-3">{t("hero.body")}</p>
-
-      <nav aria-label={t("hero.headline")} className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-6">
-        {MODULES.map((m) => {
-          const Icon = m.icon;
-          return (
-            <Link key={m.key} href={m.href} className="group flex flex-col items-center gap-2.5 bg-surface px-2 py-4 text-center transition-colors duration-150 hover:bg-surface-2">
-              <span className="app-tile size-10 transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-0.5">
-                <Icon className={`size-5 ${m.color}`} strokeWidth={2} aria-hidden />
-              </span>
-              <span className="text-[13.5px] font-medium text-ink-2 group-hover:text-ink">{t(`orbit.${m.key}`)}</span>
-            </Link>
-          );
-        })}
-      </nav>
     </section>
   );
 }
