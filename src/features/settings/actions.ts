@@ -20,6 +20,7 @@ import { endSession } from "@/server/auth/session";
 import { deleteUserAccount } from "@/server/privacy/service";
 import { requestPlanChange } from "@/server/billing/service";
 import { assertWithinLimit } from "@/server/billing/entitlements";
+import { retrySetup } from "@/server/onboarding/service";
 
 const ROLES = ["OWNER", "ADMIN", "MANAGER", "MEMBER", "VIEWER"] as const;
 const who = (ctx: { user: { id: string; name: string | null; email: string } }) => ({ actorType: "USER" as const, actorId: ctx.user.id, actorLabel: ctx.user.name ?? ctx.user.email });
@@ -41,6 +42,11 @@ export const saveOrganization = tenantAction(
     return { ok: true };
   },
 );
+
+/** Re-runs the team setup steps that didn't finish during onboarding; returns the run to follow. */
+export const completeSetup = tenantAction({ name: "settings.complete_setup", permission: "settings:manage", rateLimit: 6 }, z.object({}), async (_input, ctx) => {
+  return { runId: await retrySetup(ctx.organization.id, ctx.user.id) };
+});
 
 export const saveProfile = tenantAction({ name: "settings.profile" }, z.object({ name: z.string().trim().min(1).max(120), locale: z.enum(["en", "ar"]) }), async (input, ctx) => {
   await db.user.update({ where: { id: ctx.user.id }, data: input });

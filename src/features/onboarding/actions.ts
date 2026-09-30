@@ -8,7 +8,7 @@ import { db } from "@/server/db/client";
 import { mapError, type ActionResult } from "@/server/action";
 import { UserFacingError } from "@/server/errors";
 import { enforceRateLimit } from "@/server/rate-limit";
-import { upsertCompany } from "@/server/onboarding/service";
+import { skipSetup, upsertCompany } from "@/server/onboarding/service";
 import {
   analyzeWebsite,
   applyWebsite,
@@ -127,4 +127,12 @@ export async function buildStrategyAction(): Promise<ActionResult<StrategyPrevie
 /** Runs the team setup (with or without an AI provider) and returns the run to follow. */
 export async function finishSetupAction(): Promise<ActionResult<{ runId: string }>> {
   return guard("onboarding.finish", async (userId) => finishSetup(await ownedOrg(userId), { userId }), 10);
+}
+
+/** The setup run failed outright: enter NOVA anyway; unfinished steps are listed in Settings to complete later. */
+export async function skipSetupAction(): Promise<ActionResult<{ skipped: true }>> {
+  return guard("onboarding.skip", async (userId) => {
+    await skipSetup(await ownedOrg(userId));
+    return { skipped: true as const };
+  }, 10);
 }

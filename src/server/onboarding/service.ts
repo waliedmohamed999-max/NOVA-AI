@@ -77,6 +77,37 @@ export async function beginAnalysis(organizationId: string, userId: string) {
   return run.id;
 }
 
+/** Steps of the team setup that failed and were skipped so the owner could enter NOVA (shown in Settings). */
+export function setupIncomplete(onboardingData: unknown): string[] {
+  const v = (onboardingData as { setupIncomplete?: unknown } | null)?.setupIncomplete;
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && ONBOARDING_STEPS.includes(x)) : [];
+}
+
+/** Re-runs the team setup from Settings. The workspace stays usable (status is not reset to ANALYZING). */
+export async function retrySetup(organizationId: string, userId: string) {
+  const scope = await scopeFor(organizationId);
+  const run = await startRun(scope, { kind: "onboarding_analysis", agent: "SOCIAL_MANAGER", steps: ONBOARDING_STEPS, requestedById: userId });
+  await mergeAnswers(organizationId, { runId: run.id });
+  return run.id;
+}
+
+/**
+ * Escape hatch when the setup run itself failed (not just a step): let the owner in and record every step that
+ * didn't finish as incomplete, to be completed from Settings.
+ */
+export async function skipSetup(organizationId: string) {
+  const org = await db.organization.findUniqueOrThrow({ where: { id: organizationId } });
+  if (org.onboardingStatus === "COMPLETED") return;
+  const runId = (org.onboardingData as { runId?: string } | null)?.runId;
+  const run = runId ? await db.agentRun.findFirst({ where: { id: runId, organizationId } }) : null;
+  const done = new Set(((run?.steps ?? []) as { key: string; status: string }[]).filter((s) => s.status === "done").map((s) => s.key));
+  const incomplete = ONBOARDING_STEPS.filter((k) => k !== "preparing_team" && !done.has(k));
+  await db.organization.update({
+    where: { id: organizationId },
+    data: { onboardingStatus: "COMPLETED", onboardingData: { ...((org.onboardingData ?? {}) as object), setupIncomplete: incomplete } as Prisma.InputJsonValue },
+  });
+}
+
 export async function loadDiscoveries(organizationId: string) {
   const scope = await scopeFor(organizationId);
   const [profile, kit, offerings] = await Promise.all([

@@ -58,10 +58,11 @@ export function RunSteps({ run, className }: { run: RunDTO | null; className?: s
               s.status === "done" && "border-success/30 bg-success-soft text-success",
               s.status === "running" && "border-accent/30 bg-accent-soft text-accent",
               s.status === "failed" && "border-danger/30 bg-danger-soft text-danger",
+              s.status === "incomplete" && "border-warning/30 bg-warning-soft text-warning",
               s.status === "pending" && "border-line bg-surface text-ink-4",
             )}
           >
-            {s.status === "done" ? <Check className="size-3.5" strokeWidth={3} /> : s.status === "running" ? <Spinner className="size-3.5" /> : s.status === "failed" ? <CircleAlert className="size-3.5" /> : <span className="size-1.5 rounded-full bg-current" />}
+            {s.status === "done" ? <Check className="size-3.5" strokeWidth={3} /> : s.status === "running" ? <Spinner className="size-3.5" /> : s.status === "failed" || s.status === "incomplete" ? <CircleAlert className="size-3.5" /> : <span className="size-1.5 rounded-full bg-current" />}
           </span>
           <span className={cn(s.status === "running" ? "font-medium text-ink" : "text-ink-2")}>{t.has(s.key) ? t(s.key as "understanding_goal") : s.key}</span>
         </motion.li>

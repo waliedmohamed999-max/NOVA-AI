@@ -7,7 +7,8 @@ import { logger } from "../logger";
 import { AiError } from "../ai";
 import type { AiCallContext } from "../ai";
 
-export type StepState = "pending" | "running" | "done" | "skipped" | "failed";
+/** `incomplete`: the step failed but the workflow chose to carry on without it (it can be completed later). */
+export type StepState = "pending" | "running" | "done" | "skipped" | "failed" | "incomplete";
 export type RunStep = { key: string; status: StepState };
 
 /**
@@ -34,6 +35,8 @@ export type RunContext = {
   params: Record<string, unknown>;
   step<T>(key: string, fn: () => Promise<T>): Promise<T>;
   skip(key: string): Promise<void>;
+  /** Marks a failed step as incomplete-but-not-blocking (the workflow continues with a fallback). */
+  incomplete(key: string): Promise<void>;
   /** Replaces the remaining visible plan (used when a command is routed to a specific workflow). */
   plan(keys: string[]): Promise<void>;
   task(agentKey: AgentKey, title: string, entity?: { type: string; id: string }): Promise<void>;
@@ -123,6 +126,11 @@ export async function executeRun(scope: TenantScope, runId: string) {
     async skip(key) {
       const s = steps.find((x) => x.key === key);
       if (s) s.status = "skipped";
+      await setSteps(run.id, steps);
+    },
+    async incomplete(key) {
+      const s = steps.find((x) => x.key === key);
+      if (s) s.status = "incomplete";
       await setSteps(run.id, steps);
     },
     async plan(keys) {

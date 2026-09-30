@@ -1024,5 +1024,14 @@
       },
       "note": "Questions about prices, proposals, complaints or anything unclear always wait for a human."
     }
+  },
+  "setupIncomplete": {
+    "title": "Your team setup isn't finished",
+    "description": "We skipped these steps during setup so you could enter NOVA. Your team currently works from your answers only; completing them improves results.",
+    "cta": "Complete now",
+    "running": "Completing setup…",
+    "done": "Your team setup is complete",
+    "stillIncomplete": "Some steps still didn't finish. Check that AI is set up, then try again.",
+    "viewOnly": "Ask a workspace owner or admin to complete the setup."
   }
 }

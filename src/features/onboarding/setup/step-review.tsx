@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, FileText, Link2, Loader2, Pencil, RotateCcw, Sparkles } from "lucide-react";
 import { useRun, RunSteps } from "@/features/agents/run-view";
 import { BUSINESS_TYPES, CUSTOMER_TYPES, GOALS, SETUP_STEPS, TONES, VISUAL_STYLES, countryName, label, type SetupStep } from "@/lib/onboarding-setup";
-import { finishSetupAction } from "../actions";
+import { finishSetupAction, skipSetupAction } from "../actions";
 import { useSetup } from "./state";
 import { StepCard } from "./ui";
 
@@ -143,11 +143,19 @@ function FinishOverlay({ runId, onRetry }: { runId: string; onRetry: () => void 
   const s = useSetup();
   const router = useRouter();
   const run = useRun(runId);
+  const [skipping, startSkip] = useTransition();
+  const partial = run?.steps.some((x) => x.status === "incomplete") ?? false;
   useEffect(() => {
     if (run?.status !== "COMPLETED") return;
-    const id = setTimeout(() => router.push("/home"), 900);
+    // A little longer when something was skipped, so the note can be read.
+    const id = setTimeout(() => router.push("/home"), partial ? 2600 : 900);
     return () => clearTimeout(id);
-  }, [run?.status, router]);
+  }, [run?.status, partial, router]);
+  const skip = () =>
+    startSkip(async () => {
+      const r = await skipSetupAction();
+      if (r.ok) router.push("/home");
+    });
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-setup-bg/95 px-4 backdrop-blur" role="dialog" aria-modal="true" aria-labelledby="finish-title">
       <div className="w-full max-w-md space-y-6 rounded-2xl border border-line bg-surface p-7 shadow-lg">
@@ -162,12 +170,20 @@ function FinishOverlay({ runId, onRetry }: { runId: string; onRetry: () => void 
         </div>
         <RunSteps run={run} />
         {!s.aiConfigured && <p className="rounded-2xl bg-sunken px-4 py-3 text-xs text-ink-3">{t("noAi")}</p>}
+        {partial && run?.status !== "FAILED" && <p className="rounded-2xl bg-warning-soft px-4 py-3 text-xs text-warning">{t("partial")}</p>}
         {run?.status === "FAILED" && (
           <div className="space-y-3 text-center">
             <p className="text-sm text-danger">{te((run.error ?? "ai_failed") as "ai_failed")}</p>
-            <button type="button" onClick={onRetry} className="inline-flex h-10 items-center rounded-2xl border border-line px-4 text-sm font-semibold">
-              {tc("actions.retry")}
-            </button>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button type="button" onClick={onRetry} disabled={skipping} className="inline-flex h-10 items-center rounded-2xl border border-line px-4 text-sm font-semibold">
+                {tc("actions.retry")}
+              </button>
+              <button type="button" onClick={skip} disabled={skipping} data-testid="skip-setup" className="inline-flex h-10 items-center gap-2 rounded-2xl bg-ink px-4 text-sm font-semibold text-ink-inverse disabled:opacity-60">
+                {skipping && <Loader2 className="size-4 animate-spin" />}
+                {t("skip")}
+              </button>
+            </div>
+            <p className="text-xs text-ink-3">{t("skipHint")}</p>
           </div>
         )}
       </div>

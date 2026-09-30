@@ -339,7 +339,10 @@
       "title": "Preparing your team…",
       "subtitle": "Building your company profile and strategy from your answers.",
       "done": "Your team is ready.",
-      "noAi": "AI isn't set up, so the profile was built from your answers only. You can add AI later in Settings."
+      "noAi": "AI isn't set up, so the profile was built from your answers only. You can add AI later in Settings.",
+      "partial": "Some steps didn't finish, so we skipped them to let you in. You can complete them later in Settings.",
+      "skip": "Skip and finish later",
+      "skipHint": "You'll enter NOVA now; the unfinished steps will be waiting in Settings."
     },
     "channels": {
       "title": "Connect your channels",

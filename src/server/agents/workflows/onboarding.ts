@@ -6,6 +6,7 @@ import { brainMeta } from "../../knowledge/company-context";
 import { onboardingContext } from "../../knowledge/use-cases";
 import { notify } from "../../notifications/service";
 import { audit } from "../../audit";
+import { logger } from "../../logger";
 import { defineWorkflow } from "../runtime";
 import { companyAnalysisSchema } from "../schemas";
 import { offlineAnalysis, type OnboardingAnswers } from "../offline-content";
@@ -28,21 +29,34 @@ defineWorkflow("onboarding_analysis", {
     const answers = (org.onboardingData ?? {}) as OnboardingAnswers;
     const lang = org.locale === "ar" ? "ar" : "en";
 
+    // Setup must never trap the owner outside NOVA: a step that fails is marked incomplete, the run carries on
+    // with a fallback, and Settings lists what still needs completing (see SetupIncompleteCard).
+    const incomplete: string[] = [];
+    const soft = async <T>(key: string, fn: () => Promise<T>, fallback: () => T): Promise<T> => {
+      try {
+        return await ctx.step(key, fn);
+      } catch (err) {
+        logger.warn({ err: { message: err instanceof Error ? err.message : String(err) }, runId: ctx.runId, step: key }, "onboarding step incomplete, continuing");
+        incomplete.push(key);
+        await ctx.incomplete(key);
+        return fallback();
+      }
+    };
+    const fromAnswers = (signals: WebsiteSignals | null) => ({ data: offlineAnalysis(lang, { ...answers, companyName: org.name }, signals), generatedBy: "owner_answers", offline: true });
+
     // 1. Understand the business: make sure the website has been read.
-    const site = await ctx.step("understanding_business", async () => {
+    const site = await soft("understanding_business", async () => {
       const source = await db.knowledgeSource.findFirst({ where: { ...scope, type: "WEBSITE" }, orderBy: { createdAt: "desc" } });
       if (source && (source.status === "PENDING" || source.status === "PROCESSING")) await ingestSource(scope, source.id);
       const fresh = source ? await db.knowledgeSource.findUnique({ where: { id: source.id } }) : null;
       return ((fresh?.metadata as { signals?: WebsiteSignals } | null)?.signals ?? null) as WebsiteSignals | null;
-    });
+    }, () => null);
 
     // 2–5. One structured analysis grounded in the answers + retrieved website text.
-    const analysis = await ctx.step("analyzing_brand", async () => {
+    const analysis = await soft("analyzing_brand", async () => {
       // No AI provider yet: finish onboarding from the owner's own answers (labelled as such) instead of blocking.
       // The owner can refine the profile later from Company Brain once a provider is configured.
-      if (!aiAvailability().configured) {
-        return { data: offlineAnalysis(lang, { ...answers, companyName: org.name }, site), generatedBy: "owner_answers", offline: true };
-      }
+      if (!aiAvailability().configured) return fromAnswers(site);
       // The one use case that needs page text: the owner's own website, top-8 cleaned/deduped chunks within a fixed budget.
       const site8 = await onboardingContext(scope, [answers.sells, answers.description, answers.customers, org.name].filter(Boolean).join(" "));
       const prompt = [
@@ -77,10 +91,10 @@ defineWorkflow("onboarding_analysis", {
         prompt,
         offline: () => offlineAnalysis(lang, { ...answers, companyName: org.name }, site),
       });
-    });
+    }, () => fromAnswers(site));
     const a = analysis.data;
 
-    await ctx.step("building_audience", async () => {
+    await soft("building_audience", async () => {
       // The owner's own audience (saved during setup) stays first; the analysis only adds to it.
       const current = await db.companyProfile.findFirst({ where: scope, select: { audience: true } });
       const owner = ((current?.audience ?? []) as { source?: string }[]).filter((x) => x.source === "owner");
@@ -88,18 +102,18 @@ defineWorkflow("onboarding_analysis", {
         where: scope,
         data: { audience: [...owner, ...a.audience].slice(0, 5) as Prisma.InputJsonValue, markets: answers.markets ? [answers.markets] : [] },
       });
-    });
+    }, () => undefined);
 
-    await ctx.step("reviewing_services", async () => {
+    await soft("reviewing_services", async () => {
       const existing = await db.offering.count({ where: scope });
       if (existing === 0 && a.offerings.length) {
         await db.offering.createMany({
           data: a.offerings.map((o) => ({ ...scope, name: o.name.slice(0, 120), type: o.type, description: o.description || null })),
         });
       }
-    });
+    }, () => undefined);
 
-    await ctx.step("creating_strategy", async () => {
+    await soft("creating_strategy", async () => {
       const kit = await db.brandKit.findFirst({ where: scope });
       const current = await db.companyProfile.findFirst({ where: scope, select: { industry: true, description: true } });
       await db.brandKit.updateMany({
@@ -147,14 +161,28 @@ defineWorkflow("onboarding_analysis", {
         const { addKnowledgeSource } = await import("../../knowledge/service");
         await addKnowledgeSource(scope, { type: "MANUAL", title: "Onboarding answers", rawText: lines.join("\n") });
       }
-    });
+    }, () => undefined);
 
     await ctx.step("preparing_team", async () => {
-      await db.agent.updateMany({ where: { ...scope, enabled: true }, data: { status: "MONITORING", lastActiveAt: new Date() } });
-      await db.organization.update({ where: { id: scope.organizationId }, data: { onboardingStatus: "COMPLETED" } });
-      await ctx.task("SOCIAL_MANAGER", lang === "ar" ? "حلّل الشركة وبنى الاستراتيجية الأولى" : "Analyzed the company and built the first strategy");
-      await notify({ ...scope, type: "AI_RECOMMENDATION", title: lang === "ar" ? "فريق النمو الذكي جاهز" : "Your AI Growth Team is ready", link: "/home" });
-      await audit({ ...scope, actorType: "AGENT", actorLabel: "AI Social Manager", action: "brain.onboarding_analysis", summary: `AI analyzed ${org.name} and prepared the initial strategy` });
+      // The one thing that must happen: the owner gets in. What was skipped is recorded for Settings.
+      const latest = await db.organization.findUniqueOrThrow({ where: { id: scope.organizationId }, select: { onboardingData: true } });
+      await db.organization.update({
+        where: { id: scope.organizationId },
+        data: { onboardingStatus: "COMPLETED", onboardingData: { ...((latest.onboardingData ?? {}) as object), setupIncomplete: incomplete } as Prisma.InputJsonValue },
+      });
+      const extras: [string, () => Promise<unknown>][] = [
+        ["agents", () => db.agent.updateMany({ where: { ...scope, enabled: true }, data: { status: "MONITORING", lastActiveAt: new Date() } })],
+        ["task", () => ctx.task("SOCIAL_MANAGER", lang === "ar" ? "حلّل الشركة وبنى الاستراتيجية الأولى" : "Analyzed the company and built the first strategy")],
+        ["notify", () => notify({ ...scope, type: "AI_RECOMMENDATION", title: lang === "ar" ? "فريق النمو الذكي جاهز" : "Your AI Growth Team is ready", link: "/home" })],
+        [
+          "notify_incomplete",
+          async () => {
+            if (incomplete.length) await notify({ ...scope, type: "AI_RECOMMENDATION", title: lang === "ar" ? "بعض خطوات الإعداد لم تكتمل. أكملها من الإعدادات" : "Some setup steps didn't finish. Complete them in Settings", link: "/settings" });
+          },
+        ],
+        ["audit", () => audit({ ...scope, actorType: "AGENT", actorLabel: "AI Social Manager", action: "brain.onboarding_analysis", summary: `AI analyzed ${org.name} and prepared the initial strategy${incomplete.length ? ` (incomplete: ${incomplete.join(", ")})` : ""}` })],
+      ];
+      for (const [part, fn] of extras) await fn().catch((err) => logger.warn({ err: { message: err instanceof Error ? err.message : String(err) }, runId: ctx.runId, part }, "onboarding finishing touch failed"));
     });
 
     return {
