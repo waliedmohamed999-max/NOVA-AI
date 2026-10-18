@@ -4,7 +4,13 @@
     "empty": "You're all caught up.",
     "viewAll": "View all notifications",
     "title": "Notifications",
-    "description": "Everything your AI team wants you to know."
+    "description": "Everything your AI team wants you to know.",
+    "filterLabel": "Filter notifications",
+    "filters": {
+      "all": "All",
+      "unread": "Unread"
+    },
+    "unread": "Unread"
   },
   "run": {
     "working": "Your AI team is working on it…"

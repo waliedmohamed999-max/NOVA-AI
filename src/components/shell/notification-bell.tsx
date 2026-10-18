@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/misc";
 import { cn } from "@/lib/cn";
 import { listNotifications, markNotificationsRead, type NotificationDTO } from "@/features/notifications/actions";
+import { NotificationLink } from "@/features/notifications/notification-link";
 import { NotificationIcon } from "@/features/notifications/icon";
 
 export function NotificationBell({ unread }: { unread: number }) {
@@ -62,18 +63,20 @@ export function NotificationBell({ unread }: { unread: number }) {
             <p className="px-4 py-10 text-center text-sm text-ink-3">{t("empty")}</p>
           ) : (
             items.map((n) => (
-              <Link
+              <NotificationLink
                 key={n.id}
+                id={n.id}
+                unread={!n.readAt}
                 href={n.link ?? "/notifications"}
                 className={cn("flex gap-3 rounded-xl px-3 py-2.5 transition hover:bg-sunken", !n.readAt && "bg-accent-soft/40")}
               >
                 <NotificationIcon type={n.type} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-medium leading-snug text-ink">{n.title}</p>
-                  {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-ink-3">{n.body}</p>}
+                  <p className="text-[13px] font-medium leading-snug text-ink" dir="auto">{n.title}</p>
+                  {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-ink-3" dir="auto">{n.body}</p>}
                   <p className="mt-1 text-[11px] text-ink-4">{format.relativeTime(new Date(n.createdAt))}</p>
                 </div>
-              </Link>
+              </NotificationLink>
             ))
           )}
         </div>
