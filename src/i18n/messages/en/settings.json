@@ -118,7 +118,18 @@
     "contentApprovalHint": "Recommended. Nothing is posted without a human OK.",
     "weeklyPlan": "Plan next week automatically",
     "weeklyPlanHint": "Every week the Content Strategist prepares drafts for your review.",
-    "briefHour": "Daily brief time"
+    "briefHour": "Daily brief time",
+    "reportDay": "Weekly report day",
+    "reportDayHint": "Sent at the daily brief time.",
+    "weekdays": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
   },
   "approvals": {
     "title": "Approval rules",
@@ -534,7 +545,13 @@
     "awaiting": "Awaiting approval",
     "upcoming": "Upcoming posts",
     "hotLeads": "Hot leads",
-    "dataNote": "Every number in this report comes from your stored data."
+    "dataNote": "Every number in this report comes from your stored data.",
+    "filterLabel": "Filter reports",
+    "filterAll": "All",
+    "loadMore": "Load older reports",
+    "bySource": "New leads by source",
+    "unknownSource": "Unknown",
+    "print": "Print / save as PDF"
   },
   "activity": {
     "title": "Activity log",

@@ -137,6 +137,8 @@ export const saveAiSettings = tenantAction(
     requireContentApproval: z.boolean(),
     weeklyAutoPlan: z.boolean(),
     dailyBriefHour: z.number().int().min(0).max(23),
+    /** 0 = Sunday … 6 = Saturday, in the workspace's time zone. */
+    weeklyReportDay: z.number().int().min(0).max(6),
   }),
   async ({ weeklyAutoPlan, ...input }, ctx) => {
     // The simple switch maps onto the content policy: on = always ask; off = auto-publish every type.

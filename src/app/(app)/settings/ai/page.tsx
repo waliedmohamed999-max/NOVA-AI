@@ -33,6 +33,7 @@ export default async function AiSettingsPage() {
           requireContentApproval: s?.requireContentApproval ?? true,
           weeklyAutoPlan: weekly?.enabled ?? false,
           dailyBriefHour: s?.dailyBriefHour ?? 8,
+          weeklyReportDay: s?.weeklyReportDay ?? 1,
         }}
       />
       <ContentAiSettings

@@ -28,7 +28,7 @@ import {
 
 /* ───────── AI Team ───────── */
 
-type AiSettings = { salesAutonomy: "ASSIST" | "COPILOT" | "AUTOPILOT"; autopilotAllowedTasks: string[]; requireContentApproval: boolean; weeklyAutoPlan: boolean; dailyBriefHour: number };
+type AiSettings = { salesAutonomy: "ASSIST" | "COPILOT" | "AUTOPILOT"; autopilotAllowedTasks: string[]; requireContentApproval: boolean; weeklyAutoPlan: boolean; dailyBriefHour: number; weeklyReportDay: number };
 const AUTOPILOT_TASKS = ["send_follow_up", "send_first_reply", "schedule_reminder"] as const;
 
 export function AiTeamSettings({ initial, canEdit, provider }: { initial: AiSettings; canEdit: boolean; provider: { configured: boolean; offline: boolean; names: string[] } }) {
@@ -97,13 +97,22 @@ export function AiTeamSettings({ initial, canEdit, provider }: { initial: AiSett
           </div>
           <Switch label={t("weeklyPlan")} checked={s.weeklyAutoPlan} disabled={!canEdit} onChange={(v) => setS({ ...s, weeklyAutoPlan: v })} />
         </div>
-        <Field label={t("briefHour")}>
-          {(p) => (
-            <Select {...p} className="w-40" value={s.dailyBriefHour} disabled={!canEdit} onChange={(e) => setS({ ...s, dailyBriefHour: Number(e.target.value) })}>
-              {Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
-            </Select>
-          )}
-        </Field>
+        <div className="flex flex-wrap gap-4">
+          <Field label={t("briefHour")}>
+            {(p) => (
+              <Select {...p} className="w-40" value={s.dailyBriefHour} disabled={!canEdit} onChange={(e) => setS({ ...s, dailyBriefHour: Number(e.target.value) })}>
+                {Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
+              </Select>
+            )}
+          </Field>
+          <Field label={t("reportDay")} hint={t("reportDayHint")}>
+            {(p) => (
+              <Select {...p} className="w-44" value={s.weeklyReportDay} disabled={!canEdit} onChange={(e) => setS({ ...s, weeklyReportDay: Number(e.target.value) })}>
+                {[0, 1, 2, 3, 4, 5, 6].map((d) => <option key={d} value={d}>{t(`weekdays.${d}`)}</option>)}
+              </Select>
+            )}
+          </Field>
+        </div>
       </Section>
     </div>
   );

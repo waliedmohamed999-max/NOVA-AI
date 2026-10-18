@@ -7,6 +7,8 @@ import { requireTenant } from "@/server/context";
 import { Card } from "@/components/ui/card";
 import { Stat } from "@/components/ui/misc";
 import type { BriefData, WeeklyData } from "@/server/reports/service";
+import { AnalyticsCharts } from "@/features/analytics/charts";
+import { PrintButton } from "@/features/reports/print-button";
 
 export const metadata: Metadata = { title: "Report" };
 
@@ -23,10 +25,13 @@ export default async function ReportPage(props: PageProps<"/reports/[id]">) {
   const brief = r.kind === "DAILY_BRIEF" ? (r.data as unknown as BriefData) : null;
 
   return (
-    <article className="mx-auto max-w-4xl space-y-8">
-      <Link href="/reports" className="inline-flex items-center gap-1.5 text-sm text-ink-3 hover:text-ink">
-        <ArrowLeft className="size-4 flip-rtl" /> {t("title")}
-      </Link>
+    <article className="mx-auto max-w-4xl space-y-8" data-print-root>
+      <div className="flex items-center justify-between gap-3 print:hidden">
+        <Link href="/reports" className="inline-flex items-center gap-1.5 text-sm text-ink-3 hover:text-ink">
+          <ArrowLeft className="size-4 flip-rtl" /> {t("title")}
+        </Link>
+        <PrintButton />
+      </div>
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-accent-ink">{t(`kinds.${r.kind}`)}</p>
         <h1 className="text-4xl font-semibold tracking-[-0.03em]">
@@ -52,12 +57,24 @@ export default async function ReportPage(props: PageProps<"/reports/[id]">) {
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="p-6">
               <h2 className="mb-2 text-sm font-semibold text-ink-3">{t("best")}</h2>
-              <p className="text-sm" dir="auto">{weekly.best?.caption ?? "—"}</p>
+              {weekly.best ? (
+                <Link href={`/analytics/posts/${weekly.best.id}`} className="text-sm hover:underline" dir="auto">
+                  {weekly.best.caption ?? "—"}
+                </Link>
+              ) : (
+                <p className="text-sm">—</p>
+              )}
               {weekly.best && <p className="mt-2 text-xs font-semibold text-success">{pct(weekly.best.engagementRate)}</p>}
             </Card>
             <Card className="p-6">
               <h2 className="mb-2 text-sm font-semibold text-ink-3">{t("worst")}</h2>
-              <p className="text-sm" dir="auto">{weekly.worst?.caption ?? "—"}</p>
+              {weekly.worst ? (
+                <Link href={`/analytics/posts/${weekly.worst.id}`} className="text-sm hover:underline" dir="auto">
+                  {weekly.worst.caption ?? "—"}
+                </Link>
+              ) : (
+                <p className="text-sm">—</p>
+              )}
               {weekly.worst && <p className="mt-2 text-xs font-semibold text-danger">{pct(weekly.worst.engagementRate)}</p>}
             </Card>
           </div>
@@ -67,6 +84,16 @@ export default async function ReportPage(props: PageProps<"/reports/[id]">) {
             <Stat label={t("won")} value={weekly.leads.won} />
             <Stat label={t("wonValue")} value={format.number(weekly.leads.wonValueCents / 100, { maximumFractionDigits: 0 })} />
           </Card>
+          {weekly.leads.bySource.length > 0 && (
+            <Card className="p-6">
+              <h2 className="mb-5 text-sm font-semibold text-ink-3">{t("bySource")}</h2>
+              <AnalyticsCharts
+                kind="bars"
+                integer
+                rows={[...weekly.leads.bySource].sort((a, b) => b.count - a.count).map((s, i) => ({ key: s.source, label: s.source === "—" ? t("unknownSource") : s.source, value: s.count, highlight: i === 0 }))}
+              />
+            </Card>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="p-6">
               <h2 className="mb-3 text-sm font-semibold text-ink-3">{t("learned")}</h2>
