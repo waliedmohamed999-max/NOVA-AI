@@ -286,6 +286,47 @@
     "empty": {
       "title": "Launch your first campaign.",
       "body": "Tell your AI team what you want to promote — they'll plan the concept, content, schedule and KPIs."
-    }
+    },
+    "complete": "Mark complete",
+    "completedToast": "Campaign marked complete",
+    "whatsappTools": "Open in WhatsApp",
+    "dates": "Dates",
+    "budget": "Budget",
+    "offer": "Offer",
+    "performance": {
+      "title": "Performance",
+      "reach": "Reach per week",
+      "leads": "Leads per week",
+      "weekly": "From published posts and leads linked to this campaign",
+      "empty": "Results appear once posts are published or leads come in."
+    },
+    "tabs": {
+      "label": "Filter campaigns",
+      "live": "Live",
+      "review": "Needs review",
+      "paused": "Paused",
+      "completed": "Completed",
+      "archived": "Archived",
+      "all": "All",
+      "empty": "No campaigns here."
+    },
+    "edit": {
+      "open": "Edit",
+      "title": "Edit campaign",
+      "description": "Change the brief. Content and schedule stay as they are.",
+      "name": "Name",
+      "objective": "Objective",
+      "audience": "Audience",
+      "offer": "Offer",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "budget": "Budget",
+      "currency": "Currency",
+      "saved": "Campaign updated",
+      "endBeforeStart": "The end date must be after the start date."
+    },
+    "from": "From {date}",
+    "until": "Until {date}",
+    "noContent": "No content in this campaign yet."
   }
 }

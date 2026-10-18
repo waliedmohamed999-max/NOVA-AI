@@ -45,6 +45,16 @@ export async function publishOne(publicationId: string): Promise<PublishOutcome>
     return "failed" as const;
   };
 
+  // A paused or archived campaign holds its posts: hand the row back untouched until it's resumed.
+  if (item.campaignId) {
+    const campaign = await db.campaign.findUnique({ where: { id: item.campaignId }, select: { status: true } });
+    if (campaign && (campaign.status === "PAUSED" || campaign.status === "ARCHIVED")) {
+      await db.socialPublication.update({ where: { id: pub.id }, data: { status: "PENDING", attempts: { decrement: 1 } } });
+      await db.contentItem.update({ where: { id: item.id }, data: { status: item.status } });
+      return "skipped";
+    }
+  }
+
   // Approval is mandatory before anything goes out.
   if (!["SCHEDULED", "APPROVED", "PUBLISHING"].includes(item.status) && item.status !== "FAILED") return fail("requires_approval");
 
@@ -128,7 +138,17 @@ export function publishErrorMessage(code: string, ar: boolean) {
 
 /** Scheduler job: publish everything that is due. */
 export async function publishDue(limit = 25) {
-  const due = await db.socialPublication.findMany({ where: { status: "PENDING", scheduledFor: { lte: new Date() } }, orderBy: { scheduledFor: "asc" }, take: limit, select: { id: true } });
+  const due = await db.socialPublication.findMany({
+    where: {
+      status: "PENDING",
+      scheduledFor: { lte: new Date() },
+      // Posts of a paused / archived campaign wait until it's resumed.
+      contentItem: { OR: [{ campaignId: null }, { campaign: { status: { notIn: ["PAUSED", "ARCHIVED"] } } }] },
+    },
+    orderBy: { scheduledFor: "asc" },
+    take: limit,
+    select: { id: true },
+  });
   const results: Record<PublishOutcome, number> = { published: 0, failed: 0, skipped: 0 };
   for (const p of due) results[await publishOne(p.id)]++;
   return results;
