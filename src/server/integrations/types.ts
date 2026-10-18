@@ -75,6 +75,10 @@ export type CapabilityKey =
   | "organization_publishing";
 export type Capability = { key: CapabilityKey; available: boolean; /** Why it is unavailable (i18n key suffix), e.g. "permission_missing", "requires_approval". */ reason?: string };
 
+/** A comment on a published post, with its direct replies (oldest first). */
+export type RemoteCommentReply = { id: string; text: string; author: string | null; at: Date };
+export type RemoteComment = RemoteCommentReply & { replies: RemoteCommentReply[] };
+
 export type ProviderProfile = { id: string; name: string; email?: string | null; avatarUrl?: string | null };
 export type ConnectionCheck = { valid: boolean; expiresAt?: Date | null; scopes: string[]; profile?: ProviderProfile | null; detail?: string };
 
@@ -103,6 +107,10 @@ export interface SocialProvider {
   getPosts(account: AccountRef, token: TokenSet, opts: { since?: Date; limit?: number }): Promise<RemotePost[]>;
   getMetrics(account: AccountRef, token: TokenSet, externalId: string): Promise<NormalizedMetrics | null>;
   getAccountMetrics(account: AccountRef, token: TokenSet): Promise<AccountMetrics | null>;
+  /** Comments on one of the account's posts (needs the "comments" capability). */
+  listComments?(account: AccountRef, token: TokenSet, postExternalId: string, opts?: { limit?: number }): Promise<RemoteComment[]>;
+  /** Public reply under a comment, posted as the account. */
+  replyToComment?(account: AccountRef, token: TokenSet, commentId: string, message: string): Promise<{ id: string }>;
 
   // ── Optional capabilities: providers implement what their platform supports ──
   /** The permissions the user actually granted (may be fewer than requested). */

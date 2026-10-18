@@ -10,6 +10,7 @@ import {
   type NormalizedMetrics,
   type ProviderProfile,
   type PublishInput,
+  type RemoteComment,
   type RemotePost,
   type SocialProvider,
   type TokenSet,
@@ -233,6 +234,23 @@ export class InstagramProvider implements SocialProvider {
       if (err instanceof ProviderError && err.kind === "permission") return null;
       throw err;
     }
+  }
+
+  // ── Comments (instagram_business_manage_comments) ──
+
+  async listComments(_account: AccountRef, token: TokenSet, postExternalId: string, opts: { limit?: number } = {}): Promise<RemoteComment[]> {
+    type C = { id: string; text?: string; username?: string; timestamp?: string };
+    const res = await get<{ data: (C & { replies?: { data: C[] } })[] }>(`/${postExternalId}/comments`, token.accessToken, {
+      fields: "id,text,username,timestamp,replies{id,text,username,timestamp}",
+      limit: String(opts.limit ?? 25),
+    });
+    const one = (c: C) => ({ id: c.id, text: c.text ?? "", author: c.username ? `@${c.username}` : null, at: new Date(c.timestamp ?? Date.now()) });
+    return res.data.map((c) => ({ ...one(c), replies: (c.replies?.data ?? []).map(one).sort((a, b) => a.at.getTime() - b.at.getTime()) }));
+  }
+
+  async replyToComment(_account: AccountRef, token: TokenSet, commentId: string, message: string) {
+    const r = await post<{ id: string }>(`/${commentId}/replies`, token.accessToken, { message });
+    return { id: r.id };
   }
 
   /**

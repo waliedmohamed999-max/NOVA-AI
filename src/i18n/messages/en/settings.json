@@ -338,7 +338,35 @@
     },
     "queueNote": "Only approved posts enter the queue.",
     "recent": "Recent posts",
-    "recentEmpty": "Posts appear here once published or synced."
+    "recentEmpty": "Posts appear here once published or synced.",
+    "comments": {
+      "nav": "Comments",
+      "back": "Social",
+      "title": "Comments",
+      "description": "Comments on your recent Instagram and Facebook posts, newest first. Replies are posted publicly as your account.",
+      "accounts": "Accounts",
+      "status": {
+        "ok": "reading comments",
+        "permission": "needs comment permission",
+        "expired": "reconnect needed",
+        "error": "couldn't load"
+      },
+      "noAccounts": "No Instagram or Facebook account connected",
+      "noAccountsBody": "Connect an account to read and answer comments here.",
+      "connect": "Connected accounts",
+      "noAccess": "Comment access isn't enabled yet",
+      "noAccessBody": "Your connected accounts don't grant comment permissions yet (Instagram: manage comments; Facebook: read user content + manage engagement). Reconnect after the permission is approved.",
+      "empty": "No comments yet",
+      "emptyBody": "Comments on your recent posts will appear here.",
+      "post": "Post",
+      "openPost": "Open the post",
+      "unanswered": "Not answered",
+      "someone": "Someone",
+      "reply": "Reply",
+      "replyPlaceholder": "Write a public reply… (Ctrl+Enter to send)",
+      "send": "Send reply",
+      "replied": "Reply posted"
+    }
   },
   "knowledge": {
     "title": "Company Brain",

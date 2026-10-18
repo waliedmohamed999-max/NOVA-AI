@@ -1,6 +1,6 @@
 import { form, providerFetch } from "../http";
 import { metaScopeConfig, upgradeScopes } from "./meta-scopes";
-import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemotePost, type SocialProvider, type TokenSet } from "../types";
+import { emptyMetrics, ProviderError, type AccountMetrics, type AccountRef, type Capability, type ConnectedAccount, type ConnectionCheck, type NormalizedMetrics, type ProviderProfile, type PublishInput, type RemoteComment, type RemotePost, type SocialProvider, type TokenSet } from "../types";
 
 /**
  * Meta Graph API: Facebook Pages + Instagram professional accounts linked to
@@ -112,6 +112,7 @@ export class MetaProvider implements SocialProvider {
         cap("instagram_publishing", has("instagram_basic", "instagram_content_publish")),
         cap("metrics", has("instagram_basic", "instagram_manage_insights")),
         cap("messages", has("instagram_manage_messages"), "requires_approval"),
+        cap("comments", has("instagram_basic", "instagram_manage_comments"), "requires_approval"),
       ];
     }
     const tasks = Array.isArray(account.metadata?.tasks) ? (account.metadata.tasks as string[]) : null;
@@ -123,7 +124,31 @@ export class MetaProvider implements SocialProvider {
       cap("page_management", has("pages_manage_metadata") && task("MANAGE"), "requires_approval"),
       cap("messages", has("pages_messaging") && task("MESSAGING"), "requires_approval"),
       cap("leads", has("leads_retrieval"), "requires_approval"),
+      cap("comments", has("pages_read_user_content", "pages_manage_engagement") && task("MODERATE"), "requires_approval"),
     ];
+  }
+
+  // ── Comments ──
+  // Facebook Page posts: pages_read_user_content (read) + pages_manage_engagement (reply).
+  // Instagram business accounts via Facebook Login: instagram_manage_comments.
+
+  async listComments(account: AccountRef, token: TokenSet, postExternalId: string, opts: { limit?: number } = {}): Promise<RemoteComment[]> {
+    const limit = String(opts.limit ?? 25);
+    if (isInstagram(account)) {
+      type C = { id: string; text?: string; username?: string; timestamp?: string };
+      const res = await get<{ data: (C & { replies?: { data: C[] } })[] }>(`/${postExternalId}/comments`, token.accessToken, { fields: "id,text,username,timestamp,replies{id,text,username,timestamp}", limit });
+      const one = (c: C) => ({ id: c.id, text: c.text ?? "", author: c.username ? `@${c.username}` : null, at: new Date(c.timestamp ?? Date.now()) });
+      return res.data.map((c) => ({ ...one(c), replies: (c.replies?.data ?? []).map(one).sort((a, b) => a.at.getTime() - b.at.getTime()) }));
+    }
+    type F = { id: string; message?: string; from?: { name?: string }; created_time?: string };
+    const res = await get<{ data: (F & { comments?: { data: F[] } })[] }>(`/${postExternalId}/comments`, token.accessToken, { fields: "id,message,from{name},created_time,comments{id,message,from{name},created_time}", limit, order: "reverse_chronological" });
+    const one = (c: F) => ({ id: c.id, text: c.message ?? "", author: c.from?.name ?? null, at: new Date(c.created_time ?? Date.now()) });
+    return res.data.map((c) => ({ ...one(c), replies: (c.comments?.data ?? []).map(one).sort((a, b) => a.at.getTime() - b.at.getTime()) }));
+  }
+
+  async replyToComment(account: AccountRef, token: TokenSet, commentId: string, message: string) {
+    const r = isInstagram(account) ? await post<{ id: string }>(`/${commentId}/replies`, token.accessToken, { message }) : await post<{ id: string }>(`/${commentId}/comments`, token.accessToken, { message });
+    return { id: r.id };
   }
 
   async getProfile(token: TokenSet): Promise<ProviderProfile> {

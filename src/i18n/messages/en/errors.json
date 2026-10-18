@@ -87,5 +87,6 @@
   "whatsapp_campaign_no_eligible_recipients": "No customer in this audience can receive WhatsApp messages.",
   "whatsapp_nothing_to_answer": "There's no customer message to answer.",
   "whatsapp_no_answer": "NOVA couldn't find an answer in your Company Brain.",
-  "whatsapp_opt_out_locked": "This customer opted out themselves — they can opt back in by sending START."
+  "whatsapp_opt_out_locked": "This customer opted out themselves — they can opt back in by sending START.",
+  "permission_required": "NOVA needs an additional permission for this. Open Settings → Connected accounts to grant it."
 }

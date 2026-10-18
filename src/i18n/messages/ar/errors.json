@@ -87,5 +87,6 @@
   "whatsapp_campaign_no_eligible_recipients": "لا يوجد عميل في هذا الجمهور يمكنه استلام رسائل WhatsApp.",
   "whatsapp_nothing_to_answer": "لا توجد رسالة من العميل للرد عليها.",
   "whatsapp_no_answer": "لم تجد NOVA إجابة في عقل شركتك.",
-  "whatsapp_opt_out_locked": "هذا العميل ألغى الاشتراك بنفسه — يمكنه العودة بإرسال START."
+  "whatsapp_opt_out_locked": "هذا العميل ألغى الاشتراك بنفسه — يمكنه العودة بإرسال START.",
+  "permission_required": "تحتاج NOVA صلاحية إضافية لهذا. افتح الإعدادات ← الحسابات المرتبطة لمنحها."
 }

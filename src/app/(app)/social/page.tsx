@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Plug, Share2 } from "lucide-react";
+import { MessageSquare, Plug, Share2 } from "lucide-react";
 import { requireTenant } from "@/server/context";
 import { Card, PageHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,12 @@ export default async function SocialPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title={t("title")} description={t("description")} actions={<Link href="/settings/connected-accounts" className={buttonClass("secondary", "md")}><Plug className="size-4" />{tc("nav.integrations")}</Link>} />
+      <PageHeader title={t("title")} description={t("description")} actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/social/comments" className={buttonClass("primary", "md")}><MessageSquare className="size-4" />{t("comments.nav")}</Link>
+            <Link href="/settings/connected-accounts" className={buttonClass("secondary", "md")}><Plug className="size-4" />{tc("nav.integrations")}</Link>
+          </div>
+        } />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("accounts")}</h2>
