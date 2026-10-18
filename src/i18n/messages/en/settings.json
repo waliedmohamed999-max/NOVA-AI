@@ -415,7 +415,7 @@
   },
   "inbox": {
     "title": "Inbox",
-    "description": "Every conversation with potential customers, in one place.",
+    "description": "Every conversation with customers, on every channel, in one place. Reply right here.",
     "channels": {
       "WEBSITE": "Website",
       "EMAIL": "Email",
@@ -433,7 +433,51 @@
       "body": "Messages from your website form and connected channels will appear here."
     },
     "unknown": "Unknown contact",
-    "needsReply": "Needs reply"
+    "needsReply": "Needs reply",
+    "search": "Search name, company, email or message…",
+    "channelFilter": "Channel",
+    "allChannels": "All channels",
+    "filters": {
+      "label": "Filter conversations",
+      "all": "Open",
+      "needs_reply": "Needs reply",
+      "unread": "Unread",
+      "closed": "Closed"
+    },
+    "noMatches": "No matching conversations",
+    "noMatchesBody": "Try another filter or search term.",
+    "you": "You",
+    "unreadCount": "{count} new",
+    "closedBadge": "Closed",
+    "loadMore": "Load more",
+    "thread": "Conversation",
+    "pick": {
+      "title": "Pick a conversation",
+      "body": "Choose a conversation on the left to read it and reply."
+    },
+    "back": "Back to conversations",
+    "openLead": "Customer",
+    "whatsappTools": "WhatsApp tools",
+    "noMessages": "No messages yet.",
+    "aiDrafted": "Drafted by AI",
+    "msg": {
+      "pendingApproval": "awaiting approval",
+      "draft": "draft",
+      "failed": "not delivered"
+    },
+    "replyPlaceholder": "Write a reply… (Ctrl+Enter to send)",
+    "send": "Send reply",
+    "via": "Sends via {via}",
+    "readOnly": "You can read this conversation but not reply.",
+    "blocked": {
+      "integration_not_configured": "This channel isn't connected for sending yet. Connect it in Settings → Connected accounts, or reply from the customer's page.",
+      "no_recipient": "This customer has no address for this channel, so a reply can't be sent from here.",
+      "whatsapp_window_closed": "The WhatsApp 24-hour window is closed. Use an approved template from WhatsApp tools."
+    },
+    "close": "Mark done",
+    "reopen": "Reopen",
+    "closedToast": "Conversation closed",
+    "reopened": "Conversation reopened"
   },
   "reports": {
     "title": "Reports",

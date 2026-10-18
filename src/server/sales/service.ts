@@ -107,6 +107,9 @@ export async function createLead(scope: TenantScope, input: NewLead, actor: Acto
         leadId: lead.id,
         channel: input.channel ?? "MANUAL",
         subject: input.source ?? null,
+        // The customer spoke first: the unified inbox lists this as unread / needs reply.
+        lastInboundAt: new Date(),
+        unreadCount: 1,
         participants: { create: { organizationId: scope.organizationId, kind: "USER", name: lead.name, handle: email ?? lead.phone } },
       },
     });
