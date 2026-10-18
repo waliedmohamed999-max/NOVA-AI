@@ -547,7 +547,22 @@
       "SYSTEM": "System"
     },
     "empty": "No activity yet.",
-    "immutable": "This log can't be edited or deleted."
+    "immutable": "This log can't be edited or deleted.",
+    "business": "Business",
+    "search": "Search actions, people or details…",
+    "categoryLabel": "Category",
+    "from": "From",
+    "to": "To",
+    "clear": "Clear filters",
+    "actorLabel": "Who did it",
+    "actorFilter": {
+      "all": "Everyone",
+      "USER": "People",
+      "AGENT": "AI team",
+      "SYSTEM": "System"
+    },
+    "noMatches": "Nothing matches these filters.",
+    "loadMore": "Load older activity"
   },
   "help": {
     "title": "Help",
