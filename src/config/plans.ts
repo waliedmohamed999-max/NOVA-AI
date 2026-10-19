@@ -10,7 +10,10 @@ export type PlanEntitlements = {
   socialChannels: number;
   seats: number;
   agents: readonly string[];
+  /** Internal cost tracking (micro-USD); not a customer-facing limit. */
   aiMonthlyAllowanceMicro: bigint;
+  /** AI tokens (input + output) included every month. Running out pauses AI until next month or a top-up. */
+  aiMonthlyTokens: bigint;
   /** AI image generations + edits per month (drafts, variants and edits all count). */
   imageGenerationsPerMonth: number;
   analytics: "basic" | "advanced";
@@ -27,6 +30,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     seats: 2,
     agents: ["SOCIAL_MANAGER", "CONTENT_STRATEGIST", "DESIGNER", "PERFORMANCE_ANALYST"],
     aiMonthlyAllowanceMicro: 20_000_000n,
+    aiMonthlyTokens: 2_000_000n,
     imageGenerationsPerMonth: 30,
     analytics: "basic",
     automation: false,
@@ -47,6 +51,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       "SALES_ASSISTANT",
     ],
     aiMonthlyAllowanceMicro: 75_000_000n,
+    aiMonthlyTokens: 7_500_000n,
     imageGenerationsPerMonth: 150,
     analytics: "advanced",
     automation: false,
@@ -67,6 +72,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       "SALES_ASSISTANT",
     ],
     aiMonthlyAllowanceMicro: 250_000_000n,
+    aiMonthlyTokens: 25_000_000n,
     imageGenerationsPerMonth: 600,
     analytics: "advanced",
     automation: true,
@@ -76,3 +82,12 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
 };
 
 export const PLAN_ORDER: PlanTier[] = ["STARTER", "GROWTH", "SCALE"];
+
+/**
+ * Extra AI tokens sold as one-time packs (Stripe price STRIPE_PRICE_AI_TOPUP, one pack = AI_TOPUP_TOKENS tokens).
+ * Purchased tokens never expire and are used only after the monthly allowance runs out.
+ */
+export function topUpPack() {
+  const tokens = Number(process.env.AI_TOPUP_TOKENS ?? 1_000_000);
+  return { tokens: BigInt(Number.isInteger(tokens) && tokens > 0 ? tokens : 1_000_000), maxPacks: 20 };
+}

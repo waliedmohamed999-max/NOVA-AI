@@ -32,6 +32,7 @@ export const CONFIG_SPEC: { key: string; category: ConfigCategory; note: string 
   { key: "LOG_LEVEL", category: "optional", note: "info by default" },
   { key: "OPENAI_API_KEY / ANTHROPIC_API_KEY / OPENAI_*", category: "provider", note: "AI features stay 'not set up' without a key" },
   { key: "STRIPE_*", category: "provider", note: "Billing stays off until key + webhook secret + prices are set" },
+  { key: "STRIPE_PRICE_AI_TOPUP / AI_TOPUP_TOKENS", category: "provider", note: "Extra AI token packs (one-time price); purchases are hidden until set" },
   { key: "WHATSAPP_*", category: "provider", note: "WhatsApp Cloud API + Embedded Signup" },
   { key: "META_* / INSTAGRAM_* / LINKEDIN_* / TIKTOK_* / GOOGLE_* / MICROSOFT_*", category: "provider", note: "Social / mailbox / calendar connections" },
   { key: "AI_OFFLINE_MODE", category: "development-only", note: "Deterministic local AI for development/tests (ignored in production)" },

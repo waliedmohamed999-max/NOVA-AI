@@ -625,16 +625,42 @@ model UsageRecord {
 model AiBudget {
   id                    String   @id @default(cuid())
   organizationId        String   @unique
+  /// Cost tracking only (shown to platform admins); the customer-facing limit is in tokens.
   monthlyAllowanceMicro BigInt   @default(20000000) // micro-USD (default $20)
+  /// Tokens (input + output) included every month by the plan; set by applyPlan, adjustable per organization.
+  monthlyTokens         BigInt   @default(2000000)
+  /// Purchased / granted tokens still available. Never expire; used only after the monthly tokens run out.
+  extraTokens           BigInt   @default(0)
   softLimitPercent      Int      @default(80)
   hardLimitEnabled      Boolean  @default(true)
   softLimitNotifiedFor  String? // "YYYY-MM" of last soft-limit notification
+  /// "YYYY-MM" of the last "tokens used up" notification.
+  exhaustedNotifiedFor  String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("ai_budgets")
+}
+
+/// Every addition to an organization's extra AI tokens: a purchase (Stripe Checkout) or a platform admin grant.
+/// externalId (the Checkout session) makes crediting a payment idempotent.
+model AiTokenGrant {
+  id             String   @id @default(cuid())
+  organizationId String
+  tokens         BigInt
+  /// "stripe" | "admin"
+  source         String
+  externalId     String?  @unique
+  amountCents    Int?
+  currency       String?
+  createdById    String?
+  note           String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("ai_token_grants")
 }
 
 // ───────────────────────────── Company Brain ─────────────────────────────

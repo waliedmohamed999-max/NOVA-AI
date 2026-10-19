@@ -187,11 +187,20 @@ export const saveNotificationPref = tenantAction({ name: "settings.notif" }, z.o
   return { ok: true };
 });
 
-export const saveAiBudget = tenantAction({ name: "settings.budget", permission: "billing:manage" }, z.object({ monthlyAllowanceUsd: z.number().min(1).max(100_000), softLimitPercent: z.number().int().min(10).max(100), hardLimitEnabled: z.boolean() }), async (input, ctx) => {
-  await ctx.db.aiBudget.update({ where: { organizationId: ctx.organization.id }, data: { monthlyAllowanceMicro: BigInt(Math.round(input.monthlyAllowanceUsd * 1_000_000)), softLimitPercent: input.softLimitPercent, hardLimitEnabled: input.hardLimitEnabled } });
-  await audit({ ...scopeOf(ctx), ...who(ctx), action: "billing.ai_budget", summary: `AI allowance set to $${input.monthlyAllowanceUsd}` });
+/**
+ * Customers choose only when to be warned. The monthly tokens come from the plan and can't be raised here —
+ * more tokens are bought (buyAiTokens) or granted by the platform.
+ */
+export const saveAiBudget = tenantAction({ name: "settings.budget", permission: "billing:manage" }, z.object({ softLimitPercent: z.number().int().min(10).max(100) }), async (input, ctx) => {
+  await ctx.db.aiBudget.update({ where: { organizationId: ctx.organization.id }, data: { softLimitPercent: input.softLimitPercent } });
+  await audit({ ...scopeOf(ctx), ...who(ctx), action: "billing.ai_budget", summary: `AI usage warning set to ${input.softLimitPercent}%` });
   revalidatePath("/settings/billing");
   return { ok: true };
+});
+
+export const buyAiTokens = tenantAction({ name: "billing.ai_tokens", permission: "billing:manage", rateLimit: 10 }, z.object({ packs: z.number().int().min(1).max(20) }), async ({ packs }, ctx) => {
+  const { requestTokenTopUp } = await import("@/server/billing/service");
+  return requestTokenTopUp({ organizationId: ctx.organization.id, packs, email: ctx.user.email, actorId: ctx.user.id });
 });
 
 export const openBillingPortal = tenantAction({ name: "billing.portal", permission: "billing:manage", rateLimit: 10 }, z.object({}), async (_, ctx) => {

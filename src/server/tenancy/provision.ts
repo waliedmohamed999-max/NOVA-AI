@@ -99,7 +99,7 @@ export async function provisionOrganization(input: ProvisionInput) {
     await tx.subscription.create({
       data: { organizationId, plan: plan.tier, status: "TRIALING", trialEndsAt: new Date(Date.now() + 14 * 86_400_000) },
     });
-    await tx.aiBudget.create({ data: { organizationId, monthlyAllowanceMicro: plan.aiMonthlyAllowanceMicro } });
+    await tx.aiBudget.create({ data: { organizationId, monthlyAllowanceMicro: plan.aiMonthlyAllowanceMicro, monthlyTokens: plan.aiMonthlyTokens } });
 
     await tx.agent.createMany({
       data: AGENTS.map((a) => ({

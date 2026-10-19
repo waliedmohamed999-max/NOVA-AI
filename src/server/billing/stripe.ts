@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import type { PlanTier, SubscriptionStatus } from "@/generated/prisma/enums";
 import { db } from "../db/client";
+import { grantTokens } from "./tokens";
 import { audit } from "../audit";
 import { safeEqual } from "../crypto";
 import { logger } from "../logger";
@@ -64,6 +65,10 @@ async function stripe<T>(method: "GET" | "POST" | "DELETE", path: string, body?:
 
 export function priceFor(plan: PlanTier) {
   return clean(process.env[`STRIPE_PRICE_${plan}`]) || null;
+}
+/** One-time price for an extra AI token pack (not a plan price). */
+export function topUpPrice() {
+  return clean(process.env.STRIPE_PRICE_AI_TOPUP) || null;
 }
 export function planForPrice(priceId: string | null | undefined): PlanTier | null {
   if (!priceId) return null;
@@ -169,6 +174,30 @@ export class StripePaymentProvider implements PaymentProvider {
     return s.url;
   }
 
+  /** Checkout for extra AI tokens (mode: payment). Tokens are credited by the webhook, never on redirect. */
+  async tokenTopUpUrl({ organizationId, email, packs, tokensPerPack }: { organizationId: string; email: string; packs: number; tokensPerPack: bigint }) {
+    const price = topUpPrice();
+    if (!price) throw new StripeError("No Stripe price configured for AI tokens", 400, "price_missing");
+    const customer = await this.ensureCustomer(organizationId, email);
+    const metadata = { organizationId, kind: "ai_topup", packs: String(packs), tokens: String(tokensPerPack * BigInt(packs)) };
+    const session = await stripe<{ url: string }>(
+      "POST",
+      "/checkout/sessions",
+      {
+        mode: "payment",
+        customer,
+        client_reference_id: organizationId,
+        line_items: [{ price, quantity: packs }],
+        success_url: `${appUrl()}/settings/billing?tokens=success`,
+        cancel_url: `${appUrl()}/settings/billing?tokens=cancelled`,
+        metadata,
+        payment_intent_data: { metadata },
+      },
+      `topup:${organizationId}:${packs}:${Date.now()}`,
+    );
+    return session.url;
+  }
+
   /** Authoritative sync from Stripe (used by webhooks — handles out-of-order events). */
   async syncSubscription(subscriptionId: string) {
     const s = await stripe<StripeSubscription>("GET", `/subscriptions/${encodeURIComponent(subscriptionId)}`);
@@ -247,10 +276,20 @@ export async function handleStripeEvent(event: StripeEvent, provider = new Strip
     const obj = event.data.object;
     let organizationId: string | null = null;
     switch (event.type) {
-      case "checkout.session.completed": {
+      case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded": {
         const customer = String(obj.customer ?? "");
-        const org = String((obj.metadata as Record<string, string> | undefined)?.organizationId ?? obj.client_reference_id ?? "");
+        const meta = (obj.metadata as Record<string, string> | undefined) ?? {};
+        const org = String(meta.organizationId ?? obj.client_reference_id ?? "");
+        // Only a session for the organization's own Stripe customer counts (metadata alone is never trusted).
         const sub = await db.subscription.findFirst({ where: { organizationId: org, providerCustomerId: customer } });
+        if (meta.kind === "ai_topup") {
+          if (sub && obj.payment_status === "paid") {
+            organizationId = org;
+            await grantTokens(org, BigInt(meta.tokens ?? "0"), { source: "stripe", externalId: String(obj.id), amountCents: typeof obj.amount_total === "number" ? obj.amount_total : null, currency: typeof obj.currency === "string" ? obj.currency.toUpperCase() : null });
+          }
+          break;
+        }
         if (sub && obj.subscription) organizationId = (await provider.syncSubscription(String(obj.subscription)))?.organizationId ?? null;
         break;
       }

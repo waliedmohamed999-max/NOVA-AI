@@ -3,7 +3,8 @@ import { audit } from "../audit";
 import { UserFacingError } from "../errors";
 import { applyPlan, canMoveTo, getUsage } from "./entitlements";
 import { UnconfiguredPayments, type PaymentProvider } from "./provider";
-import { StripePaymentProvider } from "./stripe";
+import { StripePaymentProvider, topUpPrice } from "./stripe";
+import { topUpPack } from "@/config/plans";
 
 let override: PaymentProvider | null = null;
 
@@ -40,6 +41,23 @@ export async function requestPlanChange(input: { organizationId: string; plan: P
 export async function confirmPlanChange(organizationId: string, plan: PlanTier) {
   await applyPlan(organizationId, plan);
   await audit({ organizationId, actorType: "SYSTEM", action: "billing.plan_changed", summary: `Plan changed to ${plan}` });
+}
+
+/** Starts a purchase of extra AI tokens. Without a configured payment provider + token price, refused honestly. */
+export async function requestTokenTopUp(input: { organizationId: string; packs: number; email: string; actorId: string }) {
+  const { tokens, maxPacks } = topUpPack();
+  if (!Number.isInteger(input.packs) || input.packs < 1 || input.packs > maxPacks) throw new UserFacingError("validation");
+  const provider = paymentProvider();
+  if (!provider.isConfigured() || !provider.tokenTopUpUrl || !tokenPurchasesAvailable()) throw new UserFacingError("billing_not_configured");
+  const url = await provider.tokenTopUpUrl({ organizationId: input.organizationId, email: input.email, packs: input.packs, tokensPerPack: tokens });
+  await audit({ organizationId: input.organizationId, actorType: "USER", actorId: input.actorId, action: "billing.ai_tokens_checkout", summary: `Checkout started for ${input.packs} AI token pack(s)` });
+  return { url };
+}
+
+/** Whether extra tokens can be bought (payments configured and a token price set). */
+export function tokenPurchasesAvailable() {
+  const p = paymentProvider();
+  return p.isConfigured() && Boolean(p.tokenTopUpUrl) && (override ? true : Boolean(topUpPrice()));
 }
 
 export async function billingPortalUrl(organizationId: string) {

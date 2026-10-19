@@ -15,7 +15,7 @@
   "password_too_short": "Use at least 10 characters.",
   "password_too_weak": "Include at least one letter and one number.",
   "ai_not_configured": "Your AI team needs an AI provider. An admin can add one under Settings → AI Team.",
-  "ai_budget_exceeded": "Your AI allowance for this month is used up. Upgrade your plan or raise the limit in Settings → Billing.",
+  "ai_budget_exceeded": "Your AI tokens are used up. Buy extra tokens in Settings → Billing, or wait for next month.",
   "ai_failed": "Your AI team couldn't finish this request. Please try again.",
   "integration_not_configured": "This connection isn't available yet. We'll let you know as soon as it is.",
   "integration_expired": "Your connection expired. Reconnect it to continue publishing.",

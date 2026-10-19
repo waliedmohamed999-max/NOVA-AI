@@ -14,6 +14,8 @@ export interface PaymentProvider {
   portalUrl?(organizationId: string): Promise<string>;
   /** Cancel at the end of the paid period. */
   cancel?(organizationId: string): Promise<void>;
+  /** One-time purchase of extra AI tokens (packs). Credited only when the provider confirms payment. */
+  tokenTopUpUrl?(input: { organizationId: string; email: string; packs: number; tokensPerPack: bigint }): Promise<string>;
 }
 
 export class UnconfiguredPayments implements PaymentProvider {

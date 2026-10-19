@@ -66,7 +66,7 @@ export async function canMoveTo(organizationId: string, target: PlanTier) {
 export async function applyPlan(organizationId: string, plan: PlanTier) {
   const e = PLANS[plan];
   await db.subscription.update({ where: { organizationId }, data: { plan } });
-  await db.aiBudget.update({ where: { organizationId }, data: { monthlyAllowanceMicro: e.aiMonthlyAllowanceMicro } });
+  await db.aiBudget.update({ where: { organizationId }, data: { monthlyAllowanceMicro: e.aiMonthlyAllowanceMicro, monthlyTokens: e.aiMonthlyTokens } });
   await db.agent.updateMany({ where: { organizationId, key: { in: e.agents as never[] } }, data: { enabled: true } });
   await db.agent.updateMany({ where: { organizationId, key: { notIn: e.agents as never[] } }, data: { enabled: false, status: "PAUSED" } });
 }

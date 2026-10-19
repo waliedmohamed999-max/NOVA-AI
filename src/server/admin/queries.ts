@@ -19,12 +19,15 @@ export async function adminOverview() {
 export async function adminOrganizations(q: string) {
   const orgs = await db.organization.findMany({
     where: q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : {},
-    include: { subscription: true, _count: { select: { members: true } } },
+    include: { subscription: true, aiBudget: { select: { monthlyTokens: true, extraTokens: true } }, _count: { select: { members: true } } },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
-  const usage = await db.aiUsage.groupBy({ by: ["organizationId"], where: { period: currentPeriod(), organizationId: { in: orgs.map((o) => o.id) } }, _sum: { costMicro: true } });
-  return orgs.map((o) => ({ ...o, aiCostMicro: usage.find((u) => u.organizationId === o.id)?._sum.costMicro ?? 0n }));
+  const usage = await db.aiUsage.groupBy({ by: ["organizationId"], where: { period: currentPeriod(), organizationId: { in: orgs.map((o) => o.id) } }, _sum: { costMicro: true, inputTokens: true, outputTokens: true } });
+  return orgs.map((o) => {
+    const u = usage.find((x) => x.organizationId === o.id)?._sum;
+    return { ...o, aiCostMicro: u?.costMicro ?? 0n, aiTokensUsed: (u?.inputTokens ?? 0n) + (u?.outputTokens ?? 0n) };
+  });
 }
 
 export function adminUsers(q: string) {

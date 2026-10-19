@@ -254,3 +254,20 @@ export async function whatsappTestAction(input: { kind: "connection" | "send"; c
     return mapError(err, "admin.whatsapp_test");
   }
 }
+
+/** Adds extra AI tokens to an organization (support, offline deals). Platform admins only; audited as security. */
+export async function grantTokensAction(input: { organizationId: string; tokens: number; note?: string }): Promise<ActionResult<{ result: "granted" | "duplicate" }>> {
+  const session = await getSession();
+  if (!session?.user.isPlatformAdmin) return { ok: false, error: "forbidden" };
+  try {
+    await enforceRateLimit(`admin:grant_tokens:${session.userId}`, 30, 60);
+    const v = z.object({ organizationId: z.string().min(1).max(40), tokens: z.number().int().min(1_000).max(1_000_000_000), note: z.string().trim().max(300).optional() }).parse(input);
+    if (!(await db.organization.findUnique({ where: { id: v.organizationId }, select: { id: true } }))) return { ok: false, error: "item_not_found" };
+    const { grantTokens } = await import("@/server/billing/tokens");
+    const result = await grantTokens(v.organizationId, BigInt(v.tokens), { source: "admin", createdById: session.userId, note: v.note ?? null });
+    revalidatePath("/admin/organizations");
+    return { ok: true, data: { result } };
+  } catch (err) {
+    return mapError(err, "admin.grant_tokens");
+  }
+}

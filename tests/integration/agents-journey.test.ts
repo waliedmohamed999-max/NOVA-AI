@@ -184,11 +184,11 @@ describe("onboarding without an AI provider", () => {
 });
 
 describe("AI cost control", () => {
-  it("blocks AI calls when the hard limit is reached", async () => {
+  it("blocks AI calls when the plan's tokens are used up", async () => {
     const t = await makeTenant();
-    await db.aiBudget.update({ where: { organizationId: t.organization.id }, data: { monthlyAllowanceMicro: 100n } });
+    await db.aiBudget.update({ where: { organizationId: t.organization.id }, data: { monthlyTokens: 100n, extraTokens: 0n } });
     const period = (await getBudgetStatus(t.organization.id)).period;
-    await db.aiUsage.create({ data: { organizationId: t.organization.id, period, agentKey: "none", costMicro: 200n } });
+    await db.aiUsage.create({ data: { organizationId: t.organization.id, period, agentKey: "none", inputTokens: 80n, outputTokens: 30n } });
     expect((await getBudgetStatus(t.organization.id)).state).toBe("exhausted");
     await expect(aiStructured({ organizationId: t.organization.id }, { task: "SUMMARIZATION", schema: z.object({ a: z.string() }), schemaName: "x", prompt: "hi" })).rejects.toBeInstanceOf(AiError);
     const blocked = await db.aiRun.findFirst({ where: { organizationId: t.organization.id, status: "BLOCKED" } });

@@ -17,6 +17,7 @@ import {
   requestExport,
   revokeSession,
   saveAiBudget,
+  buyAiTokens,
   saveAiSettings,
   saveApprovalPolicy,
   openBillingPortal,
@@ -188,8 +189,10 @@ type BillingProps = {
   trialEndsAt: string | null;
   seats: { used: number; limit: number };
   channels: { used: number; limit: number };
-  ai: { spentUsd: number; allowanceUsd: number; percent: number; softLimitPercent: number; hardLimitEnabled: boolean };
-  byAgent: { agent: string; requests: number; costUsd: number }[];
+  ai: { usedTokens: number; monthlyTokens: number; extraTokens: number; availableTokens: number; percent: number; softLimitPercent: number; state: "ok" | "soft" | "extra" | "exhausted" };
+  topUp: { available: boolean; tokensPerPack: number; maxPacks: number };
+  grants: { id: string; tokens: number; source: string; date: string }[];
+  byAgent: { agent: string; requests: number; tokens: number }[];
   paymentsConfigured: boolean;
   hasSubscription: boolean;
   cancelAtPeriodEnd: boolean;
@@ -203,8 +206,9 @@ export function BillingSettings(b: BillingProps) {
   const tc = useTranslations("common");
   const format = useFormatter();
   const { act, pending } = useAct();
-  const [budget, setBudget] = useState({ monthlyAllowanceUsd: b.ai.allowanceUsd, softLimitPercent: b.ai.softLimitPercent, hardLimitEnabled: b.ai.hardLimitEnabled });
-  const money = (v: number) => format.number(v, { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+  const [softLimitPercent, setSoftLimitPercent] = useState(b.ai.softLimitPercent);
+  const [packs, setPacks] = useState(1);
+  const tokens = (v: number) => format.number(v, { notation: v >= 100_000 ? "compact" : "standard", maximumFractionDigits: 1 });
   return (
     <div className="space-y-6">
       <Section title={t("plan")} description={b.paymentsConfigured ? t("planHint") : t("paymentsOff")}>
@@ -249,32 +253,83 @@ export function BillingSettings(b: BillingProps) {
 
       <Section
         title={t("ai")}
-        description={t("aiHint")}
-        footer={b.canManage && <Button loading={pending} onClick={() => act(() => saveAiBudget(budget), t("saved"))}>{tc("actions.save")}</Button>}
+        description={t("aiHint", { plan: t(`plans.${b.plan}`) })}
+        footer={b.canManage && <Button loading={pending} onClick={() => act(() => saveAiBudget({ softLimitPercent }), t("saved"))}>{tc("actions.save")}</Button>}
       >
+        {b.ai.state === "exhausted" && <p role="alert" className="rounded-[10px] bg-danger-soft px-4 py-3 text-sm font-medium text-danger">{t("tokensExhausted")}</p>}
+        {b.ai.state === "extra" && <p className="rounded-[10px] bg-warning-soft px-4 py-3 text-sm text-warning">{t("usingExtra")}</p>}
         <div className="space-y-1.5">
-          <div className="flex justify-between text-sm"><span className="text-ink-3">{t("thisMonth")}</span><span className="tabular font-medium">{money(b.ai.spentUsd)} / {money(b.ai.allowanceUsd)}</span></div>
-          <Progress value={b.ai.percent} label={t("ai")} tone={b.ai.percent >= 100 ? "danger" : b.ai.percent >= b.ai.softLimitPercent ? "warning" : "accent"} />
+          <div className="flex justify-between gap-3 text-sm">
+            <span className="text-ink-3">{t("thisMonth")}</span>
+            <span className="tabular font-medium">{t("tokensUsed", { used: tokens(b.ai.usedTokens), total: tokens(b.ai.monthlyTokens) })}</span>
+          </div>
+          <Progress value={Math.min(100, b.ai.percent)} label={t("ai")} tone={b.ai.percent >= 100 ? "danger" : b.ai.percent >= b.ai.softLimitPercent ? "warning" : "accent"} />
+          <p className="text-xs text-ink-4">{t("resetsMonthly")}</p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label={t("allowance")}>{(p) => <Input {...p} type="number" min={1} step="1" value={budget.monthlyAllowanceUsd} disabled={!b.canManage} onChange={(e) => setBudget({ ...budget, monthlyAllowanceUsd: Number(e.target.value) })} />}</Field>
-          <Field label={t("softLimit")}>{(p) => <Input {...p} type="number" min={10} max={100} value={budget.softLimitPercent} disabled={!b.canManage} onChange={(e) => setBudget({ ...budget, softLimitPercent: Number(e.target.value) })} />}</Field>
-          <div className="flex items-end justify-between gap-3 pb-2">
-            <span className="text-sm">{t("hardLimit")}</span>
-            <Switch label={t("hardLimit")} checked={budget.hardLimitEnabled} disabled={!b.canManage} onChange={(v) => setBudget({ ...budget, hardLimitEnabled: v })} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-[10px] border border-line px-4 py-3">
+            <div className="text-xs text-ink-3">{t("extraTokens")}</div>
+            <div className="mt-1 text-xl font-semibold tabular">{tokens(b.ai.extraTokens)}</div>
+            <div className="text-xs text-ink-4">{t("extraHint")}</div>
+          </div>
+          <div className="rounded-[10px] border border-line px-4 py-3">
+            <div className="text-xs text-ink-3">{t("available")}</div>
+            <div className={cn("mt-1 text-xl font-semibold tabular", b.ai.availableTokens <= 0 && "text-danger")}>{tokens(b.ai.availableTokens)}</div>
+            <div className="text-xs text-ink-4">{t("availableHint")}</div>
           </div>
         </div>
+        {b.canManage && (
+          <div className="flex flex-wrap items-end gap-3 rounded-[10px] bg-surface-2 p-4">
+            <Field label={t("buyTokens")} hint={t("packHint", { tokens: tokens(b.topUp.tokensPerPack) })}>
+              {(p) => (
+                <Select {...p} className="w-56" value={packs} disabled={!b.topUp.available} onChange={(e) => setPacks(Number(e.target.value))}>
+                  {[1, 2, 3, 5, 10, 20].filter((n) => n <= b.topUp.maxPacks).map((n) => (
+                    <option key={n} value={n}>{t("packs", { count: n, tokens: tokens(n * b.topUp.tokensPerPack) })}</option>
+                  ))}
+                </Select>
+              )}
+            </Field>
+            <Button
+              loading={pending}
+              disabled={!b.topUp.available}
+              onClick={() =>
+                act(async () => {
+                  const r = await buyAiTokens({ packs });
+                  if (r.ok) window.location.href = r.data.url;
+                  return r;
+                })
+              }
+            >
+              {t("buy")}
+            </Button>
+            {!b.topUp.available && <p className="w-full text-xs text-ink-4">{t("buyUnavailable")}</p>}
+          </div>
+        )}
+        <Field label={t("softLimit")} hint={t("softLimitHint")}>{(p) => <Input {...p} className="w-32" type="number" min={10} max={100} value={softLimitPercent} disabled={!b.canManage} onChange={(e) => setSoftLimitPercent(Number(e.target.value))} />}</Field>
+        {b.grants.length > 0 && (
+          <div className="text-sm">
+            <div className="mb-1 font-medium text-ink-2">{t("grants")}</div>
+            <ul className="divide-y divide-line">
+              {b.grants.map((g) => (
+                <li key={g.id} className="flex justify-between gap-3 py-1.5">
+                  <span className="text-ink-3">{g.date} · {t(`grantSource.${g.source === "admin" ? "admin" : "purchase"}`)}</span>
+                  <span className="tabular font-medium">+{tokens(g.tokens)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {b.byAgent.length > 0 && (
           <details className="text-sm">
             <summary className="cursor-pointer font-medium text-ink-2">{t("advanced")}</summary>
             <table className="mt-3 w-full text-start text-sm">
-              <thead className="text-xs text-ink-3"><tr><th className="py-1 text-start font-medium">{t("agent")}</th><th className="text-end font-medium">{t("requests")}</th><th className="text-end font-medium">{t("cost")}</th></tr></thead>
+              <thead className="text-xs text-ink-3"><tr><th className="py-1 text-start font-medium">{t("agent")}</th><th className="text-end font-medium">{t("requests")}</th><th className="text-end font-medium">{t("tokensCol")}</th></tr></thead>
               <tbody>
                 {b.byAgent.map((r) => (
                   <tr key={r.agent} className="border-t border-line">
                     <td className="py-1.5">{r.agent === "none" ? t("system") : tc(`agents.${r.agent}.name` as "agents.DESIGNER.name")}</td>
                     <td className="text-end tabular">{r.requests}</td>
-                    <td className="text-end tabular">{money(r.costUsd)}</td>
+                    <td className="text-end tabular">{tokens(r.tokens)}</td>
                   </tr>
                 ))}
               </tbody>

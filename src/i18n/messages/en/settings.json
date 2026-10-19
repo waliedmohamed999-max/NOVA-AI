@@ -214,8 +214,8 @@
     "seats": "Team seats",
     "channels": "Social channels",
     "switchTo": "Switch to {plan}",
-    "ai": "AI usage",
-    "aiHint": "Your monthly AI allowance keeps costs predictable.",
+    "ai": "AI tokens",
+    "aiHint": "Your {plan} plan includes a monthly amount of AI tokens shared by your whole team. Tokens measure how much text the AI reads and writes.",
     "saved": "Budget saved",
     "thisMonth": "This month",
     "allowance": "Monthly allowance (USD)",
@@ -233,7 +233,27 @@
     "cancel": "Cancel plan",
     "cancelConfirm": "Cancel at the end of the current billing period? You keep access until then.",
     "cancelRequested": "Cancellation requested. It takes effect at the end of the period.",
-    "cancelsOn": "Your plan ends on {date}."
+    "cancelsOn": "Your plan ends on {date}.",
+    "tokensUsed": "{used} of {total} tokens",
+    "resetsMonthly": "Monthly tokens reset on the 1st of every month.",
+    "extraTokens": "Extra tokens",
+    "extraHint": "Purchased tokens don't expire; they're used after the monthly tokens.",
+    "available": "Available now",
+    "availableHint": "Monthly tokens left + extra tokens.",
+    "tokensExhausted": "Your AI tokens are used up, so AI tasks are paused. Buy extra tokens to continue now, or wait for next month.",
+    "usingExtra": "This month's tokens are used up — AI is now using your extra tokens.",
+    "buyTokens": "Buy extra tokens",
+    "packHint": "One pack = {tokens} tokens.",
+    "packs": "{count, plural, one {# pack} other {# packs}} · {tokens} tokens",
+    "buy": "Buy tokens",
+    "buyUnavailable": "Online payment isn't set up yet. Contact us to add tokens.",
+    "softLimitHint": "Owners and admins get a notification when this share of the monthly tokens is used.",
+    "grants": "Recent token additions",
+    "grantSource": {
+      "purchase": "Purchase",
+      "admin": "Added by NOVA"
+    },
+    "tokensCol": "Tokens"
   },
   "security": {
     "sessions": "Active sessions",
@@ -660,7 +680,8 @@
       "org": "Organization",
       "type": "Type",
       "attempts": "Attempts",
-      "error": "Last error"
+      "error": "Last error",
+      "aiTokens": "AI tokens (month)"
     },
     "aiWindow": "Last 30 days, all organizations.",
     "all": "All",
@@ -946,6 +967,12 @@
         "ai": "AI",
         "brain_ai": "Brain + AI"
       }
+    },
+    "tokens": {
+      "grant": "Add tokens",
+      "grantPlaceholder": "Tokens",
+      "granted": "Tokens added",
+      "extra": "extra"
     }
   },
   "connect": {

@@ -66,8 +66,9 @@ async function execute<T>(
   offline?: () => unknown,
 ): Promise<{ value: T; meta: AiMeta }> {
   const budget = await getBudgetStatus(ctx.organizationId);
-  if (budget.state === "exhausted" && budget.hardLimitEnabled) {
-    await logRun(ctx, o.task, "none", "none", { inputTokens: 0, outputTokens: 0 }, 0n, 0, "BLOCKED", false, "budget exhausted", o.promptRef);
+  // The plan's tokens (and any purchased extra tokens) are used up: always enforced.
+  if (budget.state === "exhausted") {
+    await logRun(ctx, o.task, "none", "none", { inputTokens: 0, outputTokens: 0 }, 0n, 0, "BLOCKED", false, "tokens exhausted", o.promptRef);
     throw new AiError("ai_budget_exceeded");
   }
 
@@ -201,6 +202,8 @@ export async function aiClassify<L extends string>(ctx: AiCallContext, o: Common
 export async function aiEmbed(ctx: AiCallContext, texts: string[]) {
   const provider = getProvider("openai");
   if (!provider.isConfigured() || !provider.embed || texts.length === 0) return null;
+  // Tokens used up: callers fall back to keyword search instead of spending more.
+  if ((await getBudgetStatus(ctx.organizationId)).state === "exhausted") return null;
   const started = Date.now();
   const res = await provider.embed(texts);
   const cost = BigInt(Math.ceil((res.usage.inputTokens * 20_000) / 1_000_000)); // ~$0.02 / 1M tokens
